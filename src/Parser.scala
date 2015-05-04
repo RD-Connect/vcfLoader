@@ -43,7 +43,7 @@ def parser(line : String): Variant=
    
 }
 
-def parser_functional(raw_line:String):Array[Effect]=
+def functional_parser(raw_line:String):Array[Effect]=
 {
   val items=raw_line.split(",")
   items.map(item => {
@@ -70,7 +70,7 @@ val variants = file.map(line => parser(line)).toDF()
 variants.registerTempTable("variants")
 val some_variants = sqlContext.sql("SELECT * FROM variants limit 10")
 some_variants.collect().foreach(println)
-variants.saveAsTable("variants_prova")
+//variants.saveAsTable("variants_prova")
 
 variants.saveAsParquetFile("variants_prova.parquet")
 
@@ -79,8 +79,37 @@ variants.saveAsParquetFile("variants_prova.parquet")
 (7).split("EFF=")(1)
 
 val effects = parser_functional(res(0).split("\t")(7).split("EFF=")(1))
+def prediction_parser(info :String)={
+  val null_option=""
+  val result = info.split(";").map(_ split "=") collect { case Array(k, v) => (k, v) } toMap
+  val sift_pred = result.getOrElse("SIFT_pred",null_option)
+  val sift_score = result.getOrElse("SIFT_score",null_option)
+  val Polyphen2_HVAR_pred = result.getOrElse("Polyphen2_HVAR_pred",null_option)
+  val pp2 = result.getOrElse("pp2",null_option)
+  val Polyphen2_HVAR_score = result.getOrElse("Polyphen2_HVAR_score",null_option)
+  val MutationTaster_pred = result.getOrElse("MutationTaster_pred",null_option)
+  val mt = result.getOrElse("mt",null_option)
+  val phyloP46way_placental = result.getOrElse("phyloP46way_placental",null_option)
+  val GERP = result.getOrElse("GERP",null_option)
+  val SiPhy_29way_pi = result.getOrElse("SiPhy_29way_pi",null_option)
+  val CADD_phred = result.getOrElse("CADD_phred",null_option)
+  (sift_pred,sift_score,Polyphen2_HVAR_pred,pp2,Polyphen2_HVAR_score,MutationTaster_pred,mt,phyloP46way_placental,GERP,SiPhy_29way_pi,CADD_phred)
+}
 
 
-
-
-
+def global_parser(line :String)={
+  //if eff is not present it will crash
+  val fields=line.split("\t")
+  val chrom = fields(0)
+  val pos = fields(1).toInt
+  val ref = fields(3)
+  val alt=  fields(4).split(",")
+  val indel= ref.length!=alt.length  
+  val effects = parser_functional(fields(7).split("EFF=")(1))
+  println("fields 2 is "+fields(2))
+  val predictions = prediction_parser(fields(2))
+  (chrom,pos,ref,alt,indel,effects,predictions)
+   
+}
+val res = file.map(line => global_parser(line)).take(10)
+//val filtered = file.filter(line => line.split("\t")(4).contains(",")).filter(line=> line.split("\t")(2).contains("SIFT_pred")).take(1)

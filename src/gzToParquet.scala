@@ -4,7 +4,7 @@ def file_to_parquet(origin_path: String, destination : String, partition : Strin
 {      //remove header
        val file = sc.textFile(origin_path).filter(line => !line.startsWith("#"))
        val raw_file = file.map(_.split("\t")).map(p => rawTable(p(0),p(1).trim.toInt,p(2),p(3),p(4),p(5),p(6),p(7),p(8),p(9))).toDF()
-       raw_file.save(destination+"/sample="+partition)
+       raw_file.save(destination+"/sampleID="+partition)
 
 }
 

@@ -12,13 +12,14 @@ val rawData = sqlContext.load("/user/dpiscia/test/trio")
 
 
 case class Variant(chrom: String, 
-                  pos : Int, 
+                  pos : Int,
                   ref: String, 
                   alt: String,
                   rs : String,
                   indel : Boolean)
 case class Sample(chrom: String, 
                   pos : Int, 
+                  end_pos: Int,
                   ref: String, 
                   alt: String,
                   rs : String,
@@ -41,6 +42,7 @@ def toMap(raw :Any):Map[String,String]={
 def formatCase(format : Any, sample : String):(String,Int,Double,String,String)={
   val sA = sample.split(":")
   //gt,dp,gq,pl,ad
+  //gq should be min ,also dp for bands
   format match {
     case "GT:DP:GQ:MIN_DP:PL" => (sA(0),sA(1).trim.toInt,sA(2).trim.toDouble,sA(4),"")
     case "GT:GQ:PL:SB" => (sA(0),0,sA(1).trim.toDouble,sA(2),"") 
@@ -72,13 +74,22 @@ def altMultiallelic(ref:String,alt:String,gt:String):String={
 }
 }
 
+def endPos(alt:String,info:String,pos:Int):Int={
+  alt match {
+    case "<NON_REF>" => {toMap(info).getOrElse("END",0).toString.toInt}
+    case _ => pos
+  }
+}
+
 def sampleParser(chrom:Any, pos:Any,ID:Any, ref:Any, alt:Any, info: Any, format: Any,  sampleline : Any, sampleID : Any): Sample={
   val IDmap= toMap(ID)
   val rs = IDmap.getOrElse("RS","")
   val (gt,dp,gq,pl,ad) = formatCase(format,sampleline.toString)
   val altSplitted = altMultiallelic(ref.toString,alt.toString,gt)
   val indel = ref.toString.length != alt.toString.length //wrong if alt is not handled correctly
-  Sample(chrom.toString,pos.toString.toInt,ref.toString,altSplitted,rs,indel,gt,dp,gq,pl,ad,sampleID.toString
+  val posOK = pos.toString.toInt
+  val endOK = endPos(altSplitted,info.toString,posOK)
+  Sample(chrom.toString,posOK,endOK,ref.toString,altSplitted,rs,indel,gt,dp,gq,pl,ad,sampleID.toString
        )  
   
 }

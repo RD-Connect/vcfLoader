@@ -3,6 +3,9 @@
  * [3/6], [3/7], [2/2], [2/3], [2/4], [2/5], [2/6], [2/7], [7/7], 
  * [1/1], [1/2], [1/3], [1/4], [1/5], [1/6], [1/7], [6/7]
 */
+
+//TODO
+// pick up predictive annotation and populations
 val rawData = sqlContext.load("/user/dpiscia/test/trio")
 
 //get a multi-allelic position
@@ -23,10 +26,10 @@ def toMap(raw :Any):Map[String,String]={
 }
 
 
-
 def formatCase(format : Any, sample : String):(String,Int,Double,String,String)={
   val sA = sample.split(":")
   //gt,dp,gq,pl,ad
+  //ad should be handled for multiallelic positions
   format match {
     case "GT:DP:GQ:MIN_DP:PL" => (sA(0),sA(1).trim.toInt,sA(2).trim.toDouble,sA(4),"")
     case "GT:GQ:PL:SB" => (sA(0),0,sA(1).trim.toDouble,sA(2),"") 

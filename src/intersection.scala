@@ -1,4 +1,7 @@
-val rawSample = sqlContext.load("/user/dpiscia/test/rawsample")
+val rawSample = sqlContext.load("/user/dpiscia/rawsample13052015")
+val chromBands = List(20000000,40000000,60000000,80000000,100000000,120000000,140000000,160000000,180000000,200000000,220000000,240000000)
+val due = chromBands.map(x=> (x-20000000,x))
+due.foreach(banda =>{
 
 val variants = rawSample.select("chrom","pos","ref","alt","rs","gq","dp")
 //    .where(rawSample("sampleId")!=="E000010")
@@ -6,68 +9,42 @@ val variants = rawSample.select("chrom","pos","ref","alt","rs","gq","dp")
     .where(rawSample("chrom")===1)
     .where(rawSample("gq") > 19)
     .where(rawSample("dp") !== 0)
+    .where(rawSample("pos") >=banda._1)
+    .where(rawSample("pos") <=banda._2)
     .select("chrom","pos","ref","alt")
-//    .distinct
+    .distinct
     .orderBy(rawSample("chrom"),rawSample("pos"))
     
-val bands = rawSample.select("chrom","pos","end_pos","ref","alt","rs","sampleId","gq","dp")
+val bands = rawSample.select("chrom","pos","end_pos","ref","alt","sampleId","gq","dp")
 //    .where(rawSample("sampleId")==="E000010")
-    .where(rawSample("alt")==="<NON_REF>")
+   .where(rawSample("alt")==="<NON_REF>")
     .where(rawSample("chrom")===1)
     .where(rawSample("gq") > 19)
     .where(rawSample("dp") !== 0)
+    .where(rawSample("pos") >=banda._1)
+    .where(rawSample("pos") <=banda._2)  
     .orderBy(rawSample("chrom"),rawSample("pos"))
-    
-val varianti = variants.take(10000)
+   
 
+    //bands.flatMap(banda=> Range(banda(2).toString.toInt,banda(3).toString.toInt).map(a=>(banda(0),a))
+    val bandsexp = bands.flatMap(banda =>Range(banda(1).toString.toInt,banda(2).toString.toInt+1)
+                        .map(a=>(banda(0).toString,
+                                      a,
+                                      a,
+                                      banda(5).toString,
+                                      banda(6).toString.toDouble,
+                                      banda(7).toString.toInt
+                                      ))   ).toDF
 
-val bande = bands.take(10000)
-
-bande.filter( banda=> varianti.flatmap(variante=> if (variante(1).toString.toInt>banda(2).toString.toInt)  && variante(1).toString.toInt < banda(3).toString.toInt)) true else false)) 
-
-def comp(value:Any,minvalue:Any,maxvalue:Any):Boolean={
-  if (value.toString.toInt > minvalue.toString.toInt && value.toString.toInt < maxvalue.toString.toInt) true
-  else false
-}
-
-bande.flatMap(banda=> varianti.map(variante=> if comp(variante(1),banda(1),banda(2)) banda   ))
-
-def getVariant(chrom:Int)={
- 
-  rawSample.select("chrom","pos","ref","alt","rs","gq","dp")
-    .where(rawSample("alt")!=="<NON_REF>")
-    .where(rawSample("chrom")===chrom)
-    .where(rawSample("gq") > 19)
-    .where(rawSample("dp") !== 0)
-    .select("chrom","pos","ref","alt")
-    .orderBy(rawSample("chrom"),rawSample("pos")).collect.toIterator
-}
-
-val varianti = List(1,2,3,4,5,6,7,8,9,10,11)
-val bande = List(9,10,11,12)
-val variantiiter = varianti.iterator
-val bandeiter = bande.iterator
-var variante = variantiiter.next 
-var banda = bandeiter.next
-  
-while (variantiiter.hasNext && bandeiter.hasNext) { 
-  
-  if (variante < banda) {
-      println("piu piccolo")
-      println("variante is "+variante+" banda is :"+banda)
-      variante=variantiiter.next
-    }
-  else if (variante == bande) {
-       println("ugual")
-             println("value1 is "+variante+" value2 is :"+banda)
-
-      variante=bandeiter.next
-      banda=variantiiter.next
-    }
-  else {       println("piu grande")
-             println("value1 is "+variante+" value2 is :"+banda)
-
-      banda=bandeiter.next    
-    
-  }
-  }
+                                      
+    variants.join(bandsexp,variants("pos")===bandsexp("_2"),"inner")
+                                                  .map(a=>(a(0).toString,
+                                                           a(1).toString,
+                                                           a(2).toString,
+                                                           a(3).toString,
+                                                           a(7).toString,
+                                                           a(8).toString,
+                                                           a(9).toString                                                          
+                                                  )).toDF.save("/user/dpiscia/ranges12052015/chrom=1/band="+banda._2.toString)
+ })                                                 
+// val gro = ranges.groupBy(ranges("_1"),ranges("_2"),ranges("_3"),ranges("_4")).agg(array(ranges("_5"))).take(2)

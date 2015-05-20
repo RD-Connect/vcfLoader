@@ -128,6 +128,7 @@ def sampleParser( pos:Any,ID:Any, ref:Any, alt:Any, info: Any, format: Any,  sam
   val IDmap= toMap(ID)
   val rs = IDmap.getOrElse("RS","")
   val (gt,dp,gq,pl,ad) = formatCase(format,sampleline.toString)
+  //ad should be extracted by multi-allelic position
   val altSplitted = altMultiallelic(ref.toString,alt.toString,gt)
   val indel = ref.toString.length != alt.toString.length //wrong if alt is not handled correctly
   val posOK = pos.toString.toInt
@@ -139,6 +140,12 @@ def sampleParser( pos:Any,ID:Any, ref:Any, alt:Any, info: Any, format: Any,  sam
 //flatmap
 // Should we use a partition to gain performance improvement,yes
 //create function to write to partitions given a bands List
-
+def main(sc :org.apache.spark.SparkContext, rawData:org.apache.spark.sql.DataFrame, chromList : String, destination : String)={
+   val sqlContext = new org.apache.spark.sql.SQLContext(sc)
+// this is used to implicitly convert an RDD to a DataFrame.
+   import sqlContext.implicits._  
+   rawData.filter(rawData("chrom")===chromList).flatMap(a=> sampleParser(a(0),a(1),a(2),a(3),a(6),a(7),a(8),a(9),a(10))).toDF.save(destination+"/chrom="+chromList)
+   
+}
 
 }

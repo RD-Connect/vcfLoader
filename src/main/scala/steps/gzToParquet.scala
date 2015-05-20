@@ -32,9 +32,9 @@ import sqlContext.implicits._
        raw_file.save(destination+"/sampleID="+partition+"/chrom="+chrom)
 }
 
-def main(sc:org.apache.spark.SparkContext,files:scala.collection.immutable.IndexedSeq[String],chromList : List[String])={
+def main(sc:org.apache.spark.SparkContext,files:scala.collection.immutable.IndexedSeq[String],chromList : List[String], destination : String)={
 for { file <- files;
-       chrom <- chromList} yield file_to_parquet(sc,"/user/dpiscia/ALL/"+file+"."+chrom+".annot.snpEff.p.g.vcf.gz","/user/dpiscia/LOAD13052015",file,chrom)  
+       chrom <- chromList} yield file_to_parquet(sc,"/user/dpiscia/ALL/"+file+"."+chrom+".annot.snpEff.p.g.vcf.gz",destination,file,chrom)  
   
 }      
        

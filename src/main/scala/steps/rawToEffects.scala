@@ -7,6 +7,13 @@ package steps
 //TODO
 // pick up predictive annotation and populations
 
+import org.apache.spark.SparkContext
+import org.apache.spark.SparkContext._
+import org.apache.spark.SparkConf
+import org.apache.spark.sql.GroupedData
+import org.apache.spark.sql.functions.first
+//import sqlContext.implicits._
+import steps._
 
 object toEffects{
 
@@ -85,19 +92,99 @@ def functional_parser(raw_line:String):Array[FunctionalEffect]=
 }
 
 
-def effsParser(chrom:Any, pos:Any,ID:Any, ref:Any, alt:Any, info: Any, format: Any,  sampleline : Any, sampleID : Any)={
-  
-  val infoMap = toMap(info)
-  val (gt,dp,gq,pl,ad) = formatCase(format,sampleline.toString)  
-  val effString = infoMap.getOrElse("EFF","")
-  val functionalEffs = functional_parser(effString).filter(effect => gt.split("/").map(_.toInt) contains effect.geno_type_number)
-  val altSplitted = altMultiallelic(ref.toString,alt.toString,gt)
-  (chrom.toString,pos.toString.toInt,ref.toString,altSplitted,functionalEffs)
-       
+
+def functionalMap_parser(raw_line:String)=
+{ 
+  if (raw_line == "") List[FunctionalEffect]()
+  val items=raw_line.split(",")
+  items.map(item => {
+    Map("effect"->item.split("\\(")(0),
+        "effect_impact"->   item.split("\\(")(1),
+        "functional_class" ->  item.split("\\|")(1),
+        "codon_change " ->  item.split("\\|")(2),
+         "amino_acid_change"->  item.split("\\|")(3),
+          "amino_acid_length"-> item.split("\\|")(4),
+          "gene_name"-> item.split("\\|")(5),
+          "transcript_biotype"-> item.split("\\|")(6),
+          "gene_coding"-> item.split("\\|")(7),
+          "transcript_id"-> item.split("\\|")(8),
+          "exon_rank" -> item.split("\\|")(9),
+            "geno_type_number"->item.split("\\|")(10).replace(")",""))       
+           
+    
+  })
+}
+case class  pred(SIFT_pred:String,SIFT_score:String,Polyphen2_HVAR_pred:String
+    ,pp2:String,Polyphen2_HVAR_score:String,MutationTaster_pred:String
+    ,mt:String,phyloP46way_placental:String,GERP_RS:String,SiPhy_29way_pi:String,CADD_phred:String)
+    
+case class pop(esp5400_all:String,esp5400_ea:String,esp5400_aa:String,Gp1_AFR_AF:String,Gp1_ASN_AF:String,Gp1_EUR_AF:String)
+def annotation_parser(idMap : Map[String,String])={
+val SIFT_pred= idMap.getOrElse("SIFT_pred","")
+val SIFT_score= idMap.getOrElse("SIFT_score","")
+val Polyphen2_HVAR_pred= idMap.getOrElse("Polyphen2_HVAR_pred","")
+val pp2= idMap.getOrElse("pp2","")
+val Polyphen2_HVAR_score= idMap.getOrElse("Polyphen2_HVAR_score","")
+val MutationTaster_pred= idMap.getOrElse("MutationTaster_pred","")
+val mt= idMap.getOrElse("mt","")
+val phyloP46way_placental= idMap.getOrElse("phyloP46way_placental","")
+val GERP_RS= idMap.getOrElse("GERP++_RS","")
+val SiPhy_29way_pi= idMap.getOrElse("SiPhy_29way_pi","")
+val CADD_phred= idMap.getOrElse("CADD_phred","")
+val esp5400_all= idMap.getOrElse("esp5400_all","")
+val esp5400_ea= idMap.getOrElse("esp5400_ea","")
+val esp5400_aa= idMap.getOrElse("esp5400_aa","")
+val Gp1_AFR_AF= idMap.getOrElse("1000Gp1_AFR_AF","")
+val Gp1_ASN_AF= idMap.getOrElse("1000Gp1_ASN_AF","")
+val Gp1_EUR_AF= idMap.getOrElse("1000Gp1_EUR_AF","")
+(Map("SIFT_pred"->SIFT_pred,
+    "SIFT_score" -> SIFT_score,
+    "Polyphen2_HVAR_pred,pp2" -> Polyphen2_HVAR_pred,
+    "Polyphen2_HVAR_score" -> Polyphen2_HVAR_score,
+    "MutationTaster_pred" -> MutationTaster_pred,
+    "mt" ->mt,
+    "phyloP46way_placental" -> phyloP46way_placental,
+    "GERP_RS" -> GERP_RS,
+    "SiPhy_29way_pi" -> SiPhy_29way_pi,
+    "CADD_phred" -> CADD_phred),
+    Map("esp5400_all" -> esp5400_all,
+        "esp5400_ea" -> esp5400_ea,
+        "esp5400_aa" -> esp5400_aa,
+        "Gp1_AFR_AF"-> Gp1_AFR_AF,
+        "Gp1_ASN_AF" -> Gp1_ASN_AF,
+        "Gp1_EUR_AF" -> Gp1_EUR_AF))
   
 }
 
-//val effs = rawData.filter(rawData("alt")!=="<NON_REF>").map(line=> effsParser(rawData("chrom"),rawData("pos"),rawData("ID"),rawData("ref"),rawData("alt"),rawData("info"),rawData("format"),rawData("Sample"),rawData("sampleID"))).take(1).toDF()
+case class eff2( pos:Int,ref:String,alt:String,effects:Array[Map[String,String]],populations:Array[Map[String,String]],prediction:Array[Map[String,String]])
+def effsParser(pos:Any,ID:Any, ref:Any, alt:Any, info: Any, format: Any,  sampleline : Any, sampleID : Any,chrom:Any)={
+  
+  val infoMap = toMap(info)
+  val idMap = toMap(ID)
+  val (gt,dp,gq,pl,ad) = formatCase(format,sampleline.toString)  
+  val effString = infoMap.getOrElse("EFF","")
+  val functionalEffs = functionalMap_parser(effString).filter(effect => gt.split("/").map(_.toInt) contains effect.getOrElse("geno_type_number",1).toString.toInt)
+ // if gt.split("/") different than 0 or 1 not give pop and predictions values, wrong
+  val (prediction,population) :(Map[String,String],Map[String,String])=annotation_parser(idMap)
+  val altSplitted = altMultiallelic(ref.toString,alt.toString,gt)
+  //create a array of map and then group by/distinct and first
+  eff2(pos.toString.toInt,ref.toString,altSplitted,functionalEffs.toArray,Array(population),Array(prediction))
+       
+  
+}
+def main(sqlContext :org.apache.spark.sql.SQLContext, rawData:org.apache.spark.sql.DataFrame,  destination : String, chromList : String, banda : (Int,Int))={
+// this is used to implicitly convert an RDD to a DataFrame.
+   import sqlContext.implicits._  
+   val s = rawData
+                 .where(rawData("chrom")===chromList.toInt)
+                 .where(rawData("pos") >=banda._1)
+                 .where(rawData("pos") < banda._2)
+                 .filter(rawData("alt")!=="<NON_REF>").map(a=> effsParser(a(0),a(1),a(2),a(3),a(6),a(7),a(8),a(9),a(10))).toDF()
+s.groupBy("pos","alt","ref").agg(s("pos"),s("ref"),s("alt"),first("effects"),first("populations"),first("prediction"))
+.save(destination+"/chrom="+chromList+"/band="+banda._2.toString)
+}
+//val effs= rawData.filter(rawData("alt")!=="<NON_REF>").map(a=> effsParser(a(0),a(1),a(2),a(3),a(6),a(7),a(8),a(9),a(10))).toDF()
+//val effs = rawData.filter(rawData("alt")!=="<NON_REF>").map(line=> effsParser(rawData("pos"),rawData("ID"),rawData("ref"),rawData("alt"),rawData("info"),rawData("format"),rawData("Sample"),rawData("sampleID"),rawData("chrom"))).take(1).toDF()
 
 
 }

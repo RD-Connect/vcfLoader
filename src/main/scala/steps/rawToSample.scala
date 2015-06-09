@@ -87,8 +87,8 @@ def altMultiallelic(ref:String,alt:String,gt:String):String={
       val altList =  alt.split(",")      
       val gtList =  gt.split("/")
       gtList(0) match {
-        case "0" => altList(gtList(1).toInt-1)
-        case _ =>       altList(gtList(0).toInt -1)+","+altList(gtList(1).toInt -1)
+        case _ => altList(gtList(1).toInt-1)
+       // case _ =>       altList(gtList(0).toInt -1)+","+altList(gtList(1).toInt -1)
       }
           }
     }
@@ -115,7 +115,14 @@ def split(chrom:String,pos:Int,endPos:Int,ref:String,alt:String,rs:String,indel:
   case _ => res}    
 }
 
-
+def ADsplit(ad:String,gt:String)={
+  if (ad=="") ad
+  else{
+  val adArray= ad.split(",")
+  val total=adArray.map(_.toInt).reduce(_+_)
+  val altAD=adArray(gt.split("/")(1).toInt).toInt/total.toDouble
+  altAD.toString}
+}
 
 def endPos(alt:String,info:String,pos:Int):Int={
   alt match {
@@ -130,11 +137,11 @@ def sampleParser( pos:Any,ID:Any, ref:Any, alt:Any, info: Any, format: Any,  sam
   val (gt,dp,gq,pl,ad) = formatCase(format,sampleline.toString)
   //ad should be extracted by multi-allelic position
   val altSplitted = altMultiallelic(ref.toString,alt.toString,gt)
-  val indel = ref.toString.length != alt.toString.length //wrong if alt is not handled correctly
+  val indel = ref.toString.length != alt.toString.length //maybe something ref legnth != 1 or pos !=1//wrong if alt is not handled correctly
   val posOK = pos.toString.toInt
   val endOK = endPos(altSplitted,info.toString,posOK)
   //check if it's  band,if not return List(Sample)
-  val res= split(chrom.toString,posOK,endOK,ref.toString,altSplitted,rs,indel,gt,dp,gq,pl,ad,sampleID.toString,chromBands)
+  val res= split(chrom.toString,posOK,endOK,ref.toString,altSplitted,rs,indel,gt,dp,gq,pl,ADsplit(ad,gt),sampleID.toString,chromBands)
   res
 }
 //flatmap

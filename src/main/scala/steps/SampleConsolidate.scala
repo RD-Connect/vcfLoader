@@ -26,8 +26,7 @@ united.registerTempTable("variants_tbl")
 // 'gt',gt,'dp',dp,'gq',gq,'sample',file_name )
 val s=sqlContext.sql("select pos,ref,alt,rs,indel, collect( map('sample',sampleId,'gt',gt,'dp',dp,'gq',gq,'ad',ad)) from variants_tbl group by pos,ref,alt,rs,indel")
     .map(x=>
-      (chromList,
-          x(0).toString.toInt,
+      (   x(0).toString.toInt,
           x(1).toString,
           x(2).toString,
           x(3).toString,
@@ -41,7 +40,13 @@ s.toDF.save(destination+"/chrom="+chromList+"/band="+banda._2.toString)
     
 //collect followt toSet to eliminate 
 
-  
+  /*
+   * sqlContext.udf.register("heto", (s: scala.collection.mutable.ArrayBuffer[Map[String,String]]) => if (s.filter(x=> x.getOrElse("gt","0/0")=="1/1").length!=0) true else false)
+   * sqlContext.udf.register("homo", (s: scala.collection.mutable.ArrayBuffer[Map[String,String]]) => if (s.filter(x=> x.getOrElse("gt","0/0")=="0/1").length!=0) true else false)
+   * sqlContext.udf.register("de", (s: scala.collection.mutable.ArrayBuffer[Map[String,String]]) => if (s.filter(x=> x.getOrElse("gt","0/0")=="1/2").length!=0) true else false) 
+   * sqlContext.udf.register("dif", (s: scala.collection.mutable.ArrayBuffer[Map[String,String]]) => if (s.forall(x=> (x.getOrElse("gt","0/0")!="0/1" && x.getOrElse("gt","0/0")!="1/1")).length!=0) true else false)
+ */
+   
 /*val rawData = sqlContext.load("/user/dpiscia/LOAD13052015")
 val rangeData = sqlContext.load("/user/dpiscia/ranges12052015")
 

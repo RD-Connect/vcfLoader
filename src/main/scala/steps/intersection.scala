@@ -20,7 +20,6 @@ val variants = rawSample.select("chrom","pos","ref","indel","alt","rs","gq","dp"
     .where(rawSample("pos") < banda._2)
     .select("chrom","pos","ref","alt","rs","indel") //add indel,rs field here
     .distinct
-    .orderBy(rawSample("chrom"),rawSample("pos"))
     
 val bands = rawSample.select("chrom","pos","end_pos","ref","alt","sampleId","gq","dp","ad")
 //    .where(rawSample("sampleId")==="E000010")
@@ -30,7 +29,6 @@ val bands = rawSample.select("chrom","pos","end_pos","ref","alt","sampleId","gq"
     .where(rawSample("dp") !== 0)
     .where(rawSample("pos") >=banda._1)
     .where(rawSample("pos") < banda._2)  
-    .orderBy(rawSample("chrom"),rawSample("pos"))
    
 
     //bands.flatMap(banda=> Range(banda(2).toString.toInt,banda(3).toString.toInt).map(a=>(banda(0),a))

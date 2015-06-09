@@ -61,8 +61,8 @@ def altMultiallelic(ref:String,alt:String,gt:String):String={
       val altList =  alt.split(",")      
       val gtList =  gt.split("/")
       gtList(0) match {
-        case "0" => altList(gtList(1).toInt-1)
-        case _ =>       altList(gtList(0).toInt -1)+","+altList(gtList(1).toInt -1)
+        case _ => altList(gtList(1).toInt-1)
+   //     case _ =>       altList(gtList(0).toInt -1)+","+altList(gtList(1).toInt -1)
       }
           }
     }
@@ -99,7 +99,7 @@ def functionalMap_parser(raw_line:String)=
   val items=raw_line.split(",")
   items.map(item => {
     Map("effect"->item.split("\\(")(0),
-        "effect_impact"->   item.split("\\(")(1),
+        "effect_impact"->   item.split("\\(")(1).split("\\|")(0),
         "functional_class" ->  item.split("\\|")(1),
         "codon_change " ->  item.split("\\|")(2),
          "amino_acid_change"->  item.split("\\|")(3),
@@ -109,7 +109,7 @@ def functionalMap_parser(raw_line:String)=
           "gene_coding"-> item.split("\\|")(7),
           "transcript_id"-> item.split("\\|")(8),
           "exon_rank" -> item.split("\\|")(9),
-            "geno_type_number"->item.split("\\|")(10).replace(")",""))       
+          "geno_type_number"->item.split("\\|")(10).replace(")",""))       
            
     
   })
@@ -131,28 +131,40 @@ val phyloP46way_placental= idMap.getOrElse("phyloP46way_placental","")
 val GERP_RS= idMap.getOrElse("GERP++_RS","")
 val SiPhy_29way_pi= idMap.getOrElse("SiPhy_29way_pi","")
 val CADD_phred= idMap.getOrElse("CADD_phred","")
-val esp5400_all= idMap.getOrElse("esp5400_all","")
-val esp5400_ea= idMap.getOrElse("esp5400_ea","")
-val esp5400_aa= idMap.getOrElse("esp5400_aa","")
+val esp6500_ea= idMap.getOrElse("ESP6500_EA_AF","")
+val esp6500_aa= idMap.getOrElse("ESP6500_AA_AF","")
+val exac= idMap.getOrElse("ExAC_AF","")
 val Gp1_AFR_AF= idMap.getOrElse("1000Gp1_AFR_AF","")
 val Gp1_ASN_AF= idMap.getOrElse("1000Gp1_ASN_AF","")
 val Gp1_EUR_AF= idMap.getOrElse("1000Gp1_EUR_AF","")
+val Gp1_AF= idMap.getOrElse("1000Gp1_AF","")
+
+
+def removedot(value:String)={
+  value match{
+    case "." => ""
+    case _ => value
+  }
+}
+
 (Map("SIFT_pred"->SIFT_pred,
     "SIFT_score" -> SIFT_score,
-    "Polyphen2_HVAR_pred,pp2" -> Polyphen2_HVAR_pred,
-    "Polyphen2_HVAR_score" -> Polyphen2_HVAR_score,
+    "pp2" ->pp2,
+    "polyphen2_hvar_pred" -> Polyphen2_HVAR_pred,
+    "polyphen2_hvar_score" -> Polyphen2_HVAR_score,
     "MutationTaster_pred" -> MutationTaster_pred,
     "mt" ->mt,
     "phyloP46way_placental" -> phyloP46way_placental,
     "GERP_RS" -> GERP_RS,
     "SiPhy_29way_pi" -> SiPhy_29way_pi,
-    "CADD_phred" -> CADD_phred),
-    Map("esp5400_all" -> esp5400_all,
-        "esp5400_ea" -> esp5400_ea,
-        "esp5400_aa" -> esp5400_aa,
-        "Gp1_AFR_AF"-> Gp1_AFR_AF,
-        "Gp1_ASN_AF" -> Gp1_ASN_AF,
-        "Gp1_EUR_AF" -> Gp1_EUR_AF))
+    "CADD_phred" -> removedot(CADD_phred)),
+    Map("esp6500_ea" -> removedot(esp6500_ea),
+        "esp6500_aa" -> removedot(esp6500_aa),
+        "gp1_afr_af"-> removedot(Gp1_AFR_AF),
+        "gp1_asn_af" -> removedot(Gp1_ASN_AF),
+        "gp1_eur_af" -> removedot(Gp1_EUR_AF),
+        "gp1_af" -> removedot(Gp1_AF),        
+        "exac"-> exac))
   
 }
 
@@ -179,9 +191,12 @@ def main(sqlContext :org.apache.spark.sql.SQLContext, rawData:org.apache.spark.s
                  .where(rawData("chrom")===chromList.toInt)
                  .where(rawData("pos") >=banda._1)
                  .where(rawData("pos") < banda._2)
-                 .filter(rawData("alt")!=="<NON_REF>").map(a=> effsParser(a(0),a(1),a(2),a(3),a(6),a(7),a(8),a(9),a(10))).toDF()
+                 .filter(rawData("alt")!=="<NON_REF>").map(a=> steps.toEffects.effsParser(a(0),a(1),a(2),a(3),a(6),a(7),a(8),a(9),a(10))).toDF()
 s.groupBy("pos","alt","ref").agg(s("pos"),s("ref"),s("alt"),first("effects"),first("populations"),first("prediction"))
-.save(destination+"/chrom="+chromList+"/band="+banda._2.toString)
+.map(x=>(x(0).toString.toInt,x(1).toString,x(2).toString,
+    x(3).asInstanceOf[collection.mutable.ArrayBuffer[Map[String,String]]].toSet.toArray,
+    x(4).asInstanceOf[collection.mutable.ArrayBuffer[Map[String,String]]].toSet.toArray,
+    x(5).asInstanceOf[collection.mutable.ArrayBuffer[Map[String,String]]].toSet.toArray)).toDF.save(destination+"/chrom="+chromList+"/band="+banda._2.toString)
 }
 //val effs= rawData.filter(rawData("alt")!=="<NON_REF>").map(a=> effsParser(a(0),a(1),a(2),a(3),a(6),a(7),a(8),a(9),a(10))).toDF()
 //val effs = rawData.filter(rawData("alt")!=="<NON_REF>").map(line=> effsParser(rawData("pos"),rawData("ID"),rawData("ref"),rawData("alt"),rawData("info"),rawData("format"),rawData("Sample"),rawData("sampleID"),rawData("chrom"))).take(1).toDF()

@@ -44,7 +44,8 @@ s.toDF.save(destination+"/chrom="+chromList+"/band="+banda._2.toString)
    * sqlContext.udf.register("heto", (s: scala.collection.mutable.ArrayBuffer[Map[String,String]]) => if (s.filter(x=> x.getOrElse("gt","0/0")=="1/1").length!=0) true else false)
    * sqlContext.udf.register("homo", (s: scala.collection.mutable.ArrayBuffer[Map[String,String]]) => if (s.filter(x=> x.getOrElse("gt","0/0")=="0/1").length!=0) true else false)
    * sqlContext.udf.register("de", (s: scala.collection.mutable.ArrayBuffer[Map[String,String]]) => if (s.filter(x=> x.getOrElse("gt","0/0")=="1/2").length!=0) true else false) 
-   * sqlContext.udf.register("dif", (s: scala.collection.mutable.ArrayBuffer[Map[String,String]]) => if (s.forall(x=> (x.getOrElse("gt","0/0")!="0/1" && x.getOrElse("gt","0/0")!="1/1")).length!=0) true else false)
+   * sqlContext.udf.register("pop", (s: scala.collection.mutable.ArrayBuffer[Map[String,String]]) => {var map2 = Map.empty[String,String]; s.map(  line=> line foreach (x => {var temp=x._2;  if (x._2=="") temp="0"; map +=x._1 -> temp}));  map2})
+   *sqlContext.udf.register("dif", (s: scala.collection.mutable.ArrayBuffer[Map[String,String]]) => if (s.forall(x=> (x.getOrElse("gt","0/0")!="0/1" && x.getOrElse("gt","0/0")!="1/1")).length!=0) true else false)
  */
    
 /*val rawData = sqlContext.load("/user/dpiscia/LOAD13052015")

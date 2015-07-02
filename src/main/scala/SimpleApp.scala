@@ -37,15 +37,20 @@ object SimpleApp {
         val destination = s"/user/dpiscia/$version"
         //step 1
     //    steps.gztoParquet.main(sc,files,chromList,destination+"/rawData")
-val chromBands = List(20000000,40000000,60000000,80000000,100000000,120000000,140000000,160000000,180000000,200000000,220000000,240000000,260000000)
+
+        
+        val chromBands = List(20000000,40000000,60000000,80000000,100000000,120000000,140000000,160000000,180000000,200000000,220000000,240000000,260000000)
 //val chromBands = List(260000000)
 //val due = chromBands.map(x=> (x-260000000,x))
 //val chromList=List("12")
 //steps.gztoParquet.main(sc,files,chromList,"/user/dpiscia/LOAD13052015")
-val due = chromBands.map(x=> (x-20000000,x))
+//val due = chromBands.map(x=> (x-20000000,x))
+        //val rawData = sqlContext.load("/user/dpiscia/LOAD13052015")        
 
-
-val rawData = sqlContext.load("/user/dpiscia/LOAD13052015")        
+//for chrom x,y,mt
+val due =List((0,260000000))
+val chromList=List("23","24","25")                             
+val rawData = sqlContext.load(destination+"/rawData")
 /*
 for (ch <-chromList) yield {
           steps.toSample.main(sc,rawData,ch,destination+"/rawSamples")

@@ -13,7 +13,13 @@ import org.apache.spark.sql.SQLContext
 object gztoParquet {
 case class rawTable(pos:Int, ID : String, ref :String ,alt : String, qual:String,filter:String,info : String, format:String,Sample : String)
     
-
+def chromStrToInt(chrom:String)={
+  chrom match {
+    case "MT" =>23
+    case "X" => 24
+    case "Y" => 25
+  }
+}
 
 
 //val files = List("E000001")
@@ -29,7 +35,7 @@ val sqlContext = new org.apache.spark.sql.SQLContext(sc)
 import sqlContext.implicits._
        val file = sc.textFile(origin_path).filter(line => !line.startsWith("#"))
        val raw_file = file.map(_.split("\t")).map(p => rawTable(p(1).trim.toInt,p(2),p(3),p(4),p(5),p(6),p(7),p(8),p(9))).toDF
-       raw_file.save(destination+"/sampleID="+partition+"/chrom="+chrom)
+       raw_file.save(destination+"/sampleID="+partition+"/chrom="+chromStrToInt(chrom))
 }
 
 def main(sc:org.apache.spark.SparkContext,files:scala.collection.immutable.IndexedSeq[String],chromList : List[String], destination : String)={

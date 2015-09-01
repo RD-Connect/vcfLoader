@@ -30,8 +30,8 @@ object SimpleApp {
 
        
         //LOAd chromosome 2
-        //val chromList= "X" ::"Y" ::"MT" ::Range(1,23).map(_.toString).toList
-        val chromList=Range(14,23).map(_.toString).toList
+        var chromList= "X" ::"Y" ::"MT" ::Range(1,23).map(_.toString).toList
+        //val chromList=Range(14,23).map(_.toString).toList
       //  val files=nameCreator(0,367)
         val version = "V3.1.2"
         val destination = s"/user/dpiscia/$version"
@@ -43,14 +43,14 @@ object SimpleApp {
 //val chromBands = List(260000000)
 //val due = chromBands.map(x=> (x-260000000,x))
 //val chromList=List("12")
-//steps.gztoParquet.main(sc,files,chromList,"/user/dpiscia/LOAD13052015")
+val files=scala.collection.immutable.IndexedSeq("NA12878")
+chromList=List("1")
+steps.gztoParquet.main(sc,"/Users/dpiscia/RD-repositories/GenPipe/data/NA12878/",chromList,"/tmp/attemp2")
 //val due = chromBands.map(x=> (x-20000000,x))
         //val rawData = sqlContext.load("/user/dpiscia/LOAD13052015")        
 
 //for chrom x,y,mt
-val due =List((0,260000000))
-val chromList=List("23","24","25")                             
-val rawData = sqlContext.load(destination+"/rawData")
+//val rawData = sqlContext.load(destination+"/rawData")
 /*
 for (ch <-chromList) yield {
           steps.toSample.main(sc,rawData,ch,destination+"/rawSamples")
@@ -69,7 +69,7 @@ for (ch <- chromList; band <-due) yield{
         steps.toSampleGrouped.main(sqlContext,rawSamples,rawRange,destination+"/samples",ch.toString,band)
 }       
   */      //from raw to effect
-for (ch <- chromList; band <-due) yield{ 
+/*for (ch <- chromList; band <-due) yield{ 
 steps.toEffects.main(sqlContext,rawData,destination+"/rawEffects",ch.toString,band)
 }
 val Effects=sqlContext.load(destination+"/rawEffects")
@@ -81,7 +81,7 @@ for (ch <- chromList2; band <-due) yield{
 //        }
         val variants=sqlContext.load(destination+"/variants")
      //   steps.toElastic.main(sqlContext,variants)      
-
+*/
 
   }
 

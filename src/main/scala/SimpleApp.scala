@@ -30,27 +30,30 @@ object SimpleApp {
 
        
         //LOAd chromosome 2
-        var chromList= "X" ::"Y" ::"MT" ::Range(1,23).map(_.toString).toList
+        //var chromList= "X" ::"Y" ::"MT" ::Range(1,23).map(_.toString).toList
         //val chromList=Range(14,23).map(_.toString).toList
       //  val files=nameCreator(0,367)
-        val version = "V3.1.2"
+        val version = "V4.0"
         val destination = s"/user/dpiscia/$version"
+    val origin="/user/dpiscia/ALL/"
         //step 1
-    //    steps.gztoParquet.main(sc,files,chromList,destination+"/rawData")
+    //    steps.gzToParquet.main(sc,files,chromList,destination+"/rawData")
 
         
-        val chromBands = List(20000000,40000000,60000000,80000000,100000000,120000000,140000000,160000000,180000000,200000000,220000000,240000000,260000000)
 //val chromBands = List(260000000)
 //val due = chromBands.map(x=> (x-260000000,x))
 //val chromList=List("12")
-val files=scala.collection.immutable.IndexedSeq("NA12878")
-chromList=List("1")
-steps.gztoParquet.main(sc,"/Users/dpiscia/RD-repositories/GenPipe/data/NA12878/",chromList,"/tmp/attemp2")
+val files=nameCreator(0,367).toList
+val chromList=List("1")
+steps.gzToParquet.main(sc,origin,chromList,files,destination+"/loaded")
 //val due = chromBands.map(x=> (x-20000000,x))
         //val rawData = sqlContext.load("/user/dpiscia/LOAD13052015")        
-
+val chromBands = 20000000 until 260000000 by 20000000 toList
 //for chrom x,y,mt
-//val rawData = sqlContext.load(destination+"/rawData")
+val rawData = sqlContext.load("/Users/dpiscia/testing/attemp2")
+          steps.toSample.main(sc,rawData,"1","/Users/dpiscia/testing/rawSamples",chromBands)
+
+val rawSample=sqlContext.load("/Users/dpiscia/testing/rawSamples")
 /*
 for (ch <-chromList) yield {
           steps.toSample.main(sc,rawData,ch,destination+"/rawSamples")

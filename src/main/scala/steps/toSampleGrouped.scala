@@ -32,7 +32,7 @@ val s=sqlContext.sql("select pos,ref,alt,rs,indel, collect( map('sample',sampleI
           x(3).toString,
           x(4).toString.toBoolean,
           x(5).asInstanceOf[collection.mutable.ArrayBuffer[Map[String,String]]].toSet.toArray))
-s.toDF.save(destination+"/chrom="+chromList+"/band="+banda._2.toString)
+s.toDF().save(destination+"/chrom="+chromList+"/band="+banda._2.toString)
   }
   
   

@@ -26,18 +26,18 @@ val effects = Effects.select("chrom","_1","_2","_3","_4","_5","_6","band")
     .where(Effects("chrom")===chromList.toInt)
     .where(Effects("band") === banda._2)  
  
-   val joined= effects.join(samples,effects("_1")===samples("_1") &&effects("_2")===samples("_2")&&effects("_3")===samples("_3") ,"right")
-   .map(a=>Variant(a(8).toString.toInt,
+   val joined= effects.join(samples, effects("_1") === samples("_1") && effects("_2") === samples("_2") && effects("_3") === samples("_3"), "right")
+     .map(a => Variant(a(8).toString.toInt,
        a(9).toString,
        a(10).toString,
        a(11).toString,
        a(12).toString.toBoolean,
-       a(13).asInstanceOf[collection.mutable.ArrayBuffer[Map[String,String]]],
-       a(4).asInstanceOf[collection.mutable.ArrayBuffer[Map[String,String]]],
-       a(5).asInstanceOf[collection.mutable.ArrayBuffer[Map[String,String]]],
-       a(6).asInstanceOf[collection.mutable.ArrayBuffer[Map[String,String]]])
-       )
-       .toDF.save(destination+"/chrom="+chromList+"/band="+banda._2.toString)
+       a(13).asInstanceOf[collection.mutable.ArrayBuffer[Map[String, String]]],
+       a(4).asInstanceOf[collection.mutable.ArrayBuffer[Map[String, String]]],
+       a(5).asInstanceOf[collection.mutable.ArrayBuffer[Map[String, String]]],
+       a(6).asInstanceOf[collection.mutable.ArrayBuffer[Map[String, String]]])
+     )
+     .toDF().save(destination+"/chrom="+chromList+"/band="+banda._2.toString)
 
 }
 }

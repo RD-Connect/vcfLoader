@@ -6,19 +6,19 @@ object toSampleGrouped{
    def main(sqlContext :org.apache.spark.sql.SQLContext, rawSample:org.apache.spark.sql.DataFrame,rawRange:org.apache.spark.sql.DataFrame,destination :String, chromList:String, banda:(Int,Int))={
 // this is used to implicitly convert an RDD to a DataFrame.
    import sqlContext.implicits._    
-   sqlContext.sql("CREATE TEMPORaRY function collect AS 'brickhouse.udf.collect.CollectUDAF'")
+   sqlContext.sql("""CREATE TEMPORaRY function collect AS 'brickhouse.udf.collect.CollectUDAF'""")
    rawRange.registerTempTable("rawRange")
-   val ranges= rawRange.select("chrom","_1","_2","_3","_6","_7","_8","_9","_10","_4","_5","band") //add rs,indel
+   val ranges= rawRange.select("chrom","pos","ref","alt","sampleId","gq","dp","gt","ad","rs","indel") //add rs,indel
     .where(rawRange("chrom")===chromList.toInt)
-    .where(rawRange("band") === banda._2)
+   // .where(rawRange("band") === banda._2)
 
     val variants=rawSample.select("chrom","pos","ref","alt","sampleId","gq","dp","gt","ad","rs","indel")  //add rs,indel
     .where(rawSample("alt")!=="<NON_REF>")
     .where(rawSample("chrom")===chromList.toInt)
     .where(rawSample("gq") > 19)
     .where(rawSample("dp") !== 0)
-    .where(rawSample("pos") >= banda._1)
-    .where(rawSample("pos") < banda._2)
+ //   .where(rawSample("pos") >= banda._1)
+ //   .where(rawSample("pos") < banda._2)
   
     case class Sample(chrom:String,pos:Int,ref:String,alt:String,rs:String,indel:Boolean,samples:Array[Map[String,String]]) //add rs,indel
     val united = variants.unionAll(ranges)
@@ -32,7 +32,7 @@ val s=sqlContext.sql("select pos,ref,alt,rs,indel, collect( map('sample',sampleI
           x(3).toString,
           x(4).toString.toBoolean,
           x(5).asInstanceOf[collection.mutable.ArrayBuffer[Map[String,String]]].toSet.toArray))
-s.toDF().save(destination+"/chrom="+chromList+"/band="+banda._2.toString)
+s.toDF().save(destination+"/chrom="+chromList)//+"/band="+banda._2.toString)
   }
   
   

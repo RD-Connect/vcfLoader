@@ -192,11 +192,11 @@ def main(sqlContext :org.apache.spark.sql.SQLContext, rawData:org.apache.spark.s
                  .where(rawData("pos") >=banda._1)
                  .where(rawData("pos") < banda._2)
                  .filter(rawData("alt")!=="<NON_REF>").map(a=> steps.toEffects.effsParser(a(0),a(1),a(2),a(3),a(6),a(7),a(8),a(9),a(10))).toDF()
-s.groupBy("pos", "alt", "ref").agg(s("pos"), s("ref"), s("alt"), first("effects"), first("populations"), first("prediction"))
+s.groupBy("pos", "ref", "alt").agg(s("pos"), s("ref"), s("alt"), first("effects"), first("populations"), first("prediction"))
   .map(x => (x(0).toString.toInt, x(1).toString, x(2).toString,
-  x(3).asInstanceOf[collection.mutable.ArrayBuffer[Map[String, String]]].toSet.toArray,
-  x(4).asInstanceOf[collection.mutable.ArrayBuffer[Map[String, String]]].toSet.toArray,
-  x(5).asInstanceOf[collection.mutable.ArrayBuffer[Map[String, String]]].toSet.toArray)).toDF().save(destination+"/chrom="+chromList+"/band="+banda._2.toString)
+  x(6).asInstanceOf[collection.mutable.ArrayBuffer[Map[String, String]]].toSet.toArray,
+  x(7).asInstanceOf[collection.mutable.ArrayBuffer[Map[String, String]]].toSet.toArray,
+  x(8).asInstanceOf[collection.mutable.ArrayBuffer[Map[String, String]]].toSet.toArray)).repartition(30).toDF().save(destination+"/chrom="+chromList+"/band="+banda._2.toString)
 }
 //val effs= rawData.filter(rawData("alt")!=="<NON_REF>").map(a=> effsParser(a(0),a(1),a(2),a(3),a(6),a(7),a(8),a(9),a(10))).toDF()
 //val effs = rawData.filter(rawData("alt")!=="<NON_REF>").map(line=> effsParser(rawData("pos"),rawData("ID"),rawData("ref"),rawData("alt"),rawData("info"),rawData("format"),rawData("Sample"),rawData("sampleID"),rawData("chrom"))).take(1).toDF()

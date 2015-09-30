@@ -93,24 +93,7 @@ def altMultiallelic(ref:String,alt:String,gt:String):String={
 }
 
 
-def split(pos:Int,endPos:Int,ref:String,alt:String,rs:String,indel:Boolean,gt:String,dp:Int,gq:Double,pl:String,ad:String,sampleId:String, bands:List[Int]):List[(Int,Sample)]={
-  //this operation should be moved to the loader step, aka first step
-  val res = alt match {
-    case "<NON_REF>" =>
-      //it should be rewritten ,no need to iterate over all bands,no?
-      bands.flatMap(band=>  {
-        if (band > pos && band < endPos) {
 
-                      (pos,Sample(pos,band,ref,alt,rs,indel,gt,dp,gq,pl,ad,sampleId)) ::
-                      (band,Sample(band,endPos,ref,alt,rs,indel,gt,dp,gq,pl,ad,sampleId))   :: List()
-                      }
-      else List()
-           })
-    case _ => List()
-}
-  res match { case x if x.isEmpty => List((pos,Sample(pos,endPos,ref,alt,rs,indel,gt,dp,gq,pl,ad,sampleId)))
-  case _ => res}    
-}
 
 def ADsplit(ad:String,gt:String)={
   if (ad=="") ad
@@ -128,7 +111,7 @@ def endPos(alt:String,info:String,pos:Int):Int={
   }
 }
 val chromBands = List(20000000,40000000,60000000,80000000,100000000,120000000,140000000,160000000,180000000,200000000,220000000,240000000)
-def sampleParser( pos:Any,ID:Any, ref:Any, alt:Any, info: Any, format: Any,  sampleline : Any, sampleID : Any,chrom : String,bands:List[Int])  ={
+def sampleParser( pos:Any,ID:Any, ref:Any, alt:Any, info: Any, format: Any,  sampleline : Any, sampleID : Any,chrom : String)  ={
   val IDmap= toMap(ID)
   val rs = IDmap.getOrElse("RS","")
   val (gt,dp,gq,pl,ad) = formatCase(format,sampleline.toString)
@@ -138,7 +121,7 @@ def sampleParser( pos:Any,ID:Any, ref:Any, alt:Any, info: Any, format: Any,  sam
   val posOK = pos.toString.toInt
   val endOK = endPos(altSplitted,info.toString,posOK)
   //check if it's  band,if not return List(Sample)
-  val res= split(posOK,endOK,ref.toString,altSplitted,rs,indel,gt,dp,gq,pl,ADsplit(ad,gt),sampleID.toString,bands)
+  val res= List(Sample(posOK,endOK,ref.toString,altSplitted,rs,indel,gt,dp,gq,pl,ADsplit(ad,gt),sampleID.toString))
   res
 }
 
@@ -180,12 +163,14 @@ class DomainNamePartitioner(numParts: Int, bands:List[Int]) extends Partitioner 
 //flatmap
 // Should we use a partition to gain performance improvement,yes
 //create function to write to partitions given a bands List
-def main(sc :org.apache.spark.SparkContext, rawData:org.apache.spark.sql.DataFrame, chrom : String, destination : String,bands:List[Int])={
+def main(sc :org.apache.spark.SparkContext, rawData:org.apache.spark.sql.DataFrame, chrom : String, destination : String)={
    val sqlContext = new org.apache.spark.sql.SQLContext(sc)
 // this is used to implicitly convert an RDD to a DataFrame.
-   import sqlContext.implicits._  
-   val i=rawData.filter(rawData("chrom")===chrom).flatMap(a=> sampleParser(a(0),a(1),a(2),a(3),a(6),a(7),a(8),a(9),chrom,bands))
-   .repartitionAndSortWithinPartitions(new DomainNamePartitioner(bands.length+1,bands))
+
+   import sqlContext.implicits._
+
+   val i=rawData.filter(rawData("chrom")===chrom).flatMap(a=> sampleParser(a(0),a(1),a(2),a(3),a(6),a(7),a(8),a(9),chrom))
+
    i.toDF().save(destination+"/chrom="+chrom,SaveMode.Overwrite)
    
 }

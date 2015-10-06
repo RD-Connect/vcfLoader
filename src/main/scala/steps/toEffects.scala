@@ -12,6 +12,9 @@ import org.apache.spark.SparkContext._
 import org.apache.spark.SparkConf
 import org.apache.spark.sql.GroupedData
 import org.apache.spark.sql.functions.first
+
+import scala.language.postfixOps
+
 //import sqlContext.implicits._
 import steps._
 
@@ -53,21 +56,18 @@ def formatCase(format : Any, sample : String):(String,Int,Double,String,String)=
 def altMultiallelic(ref:String,alt:String,gt:String):String={
   alt match {
     case "<NON_REF>" => alt
-    case _ => {
+    case _ =>
       gt match {
         case "0/0" => ref
         case _ =>
-          {
-      val altList =  alt.split(",")      
-      val gtList =  gt.split("/")
-      gtList(0) match {
-        case _ => altList(gtList(1).toInt-1)
-   //     case _ =>       altList(gtList(0).toInt -1)+","+altList(gtList(1).toInt -1)
-      }
+          val altList =  alt.split(",")
+          val gtList =  gt.split("/")
+          gtList(0) match {
+            case _ => altList(gtList(1).toInt-1)
+       //     case _ =>       altList(gtList(0).toInt -1)+","+altList(gtList(1).toInt -1)
           }
-    }
+      }
   }
-}
 }
 def functional_parser(raw_line:String):Array[FunctionalEffect]=
 { 
@@ -184,7 +184,7 @@ def effsParser(pos:Any,ID:Any, ref:Any, alt:Any, info: Any, format: Any,  sample
        
   
 }
-def main(sqlContext :org.apache.spark.sql.SQLContext, rawData:org.apache.spark.sql.DataFrame,  destination : String, chromList : String, banda : (Int,Int))={
+def main(sqlContext :org.apache.spark.sql.SQLContext, rawData:org.apache.spark.sql.DataFrame,  destination : String, chromList : String, banda : (Int,Int), repartitions:Int)={
 // this is used to implicitly convert an RDD to a DataFrame.
    import sqlContext.implicits._  
    val s = rawData
@@ -192,11 +192,11 @@ def main(sqlContext :org.apache.spark.sql.SQLContext, rawData:org.apache.spark.s
                  .where(rawData("pos") >=banda._1)
                  .where(rawData("pos") < banda._2)
                  .filter(rawData("alt")!=="<NON_REF>").map(a=> steps.toEffects.effsParser(a(0),a(1),a(2),a(3),a(6),a(7),a(8),a(9),a(10))).toDF()
-s.groupBy("pos","alt","ref").agg(s("pos"),s("ref"),s("alt"),first("effects"),first("populations"),first("prediction"))
-.map(x=>(x(0).toString.toInt,x(1).toString,x(2).toString,
-    x(3).asInstanceOf[collection.mutable.ArrayBuffer[Map[String,String]]].toSet.toArray,
-    x(4).asInstanceOf[collection.mutable.ArrayBuffer[Map[String,String]]].toSet.toArray,
-    x(5).asInstanceOf[collection.mutable.ArrayBuffer[Map[String,String]]].toSet.toArray)).toDF.save(destination+"/chrom="+chromList+"/band="+banda._2.toString)
+s.groupBy("pos", "ref", "alt").agg(s("pos"), s("ref"), s("alt"), first("effects"), first("populations"), first("prediction"))
+  .map(x => (x(0).toString.toInt, x(1).toString, x(2).toString,
+  x(6).asInstanceOf[collection.mutable.ArrayBuffer[Map[String, String]]].toSet.toArray,
+  x(7).asInstanceOf[collection.mutable.ArrayBuffer[Map[String, String]]].toSet.toArray,
+  x(8).asInstanceOf[collection.mutable.ArrayBuffer[Map[String, String]]].toSet.toArray)).repartition(repartitions).toDF().save(destination+"/chrom="+chromList+"/band="+banda._2.toString)
 }
 //val effs= rawData.filter(rawData("alt")!=="<NON_REF>").map(a=> effsParser(a(0),a(1),a(2),a(3),a(6),a(7),a(8),a(9),a(10))).toDF()
 //val effs = rawData.filter(rawData("alt")!=="<NON_REF>").map(line=> effsParser(rawData("pos"),rawData("ID"),rawData("ref"),rawData("alt"),rawData("info"),rawData("format"),rawData("Sample"),rawData("sampleID"),rawData("chrom"))).take(1).toDF()

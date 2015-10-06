@@ -3,7 +3,7 @@ package steps
 import org.apache.spark.rdd.RDD._
 import org.bdgenomics.adam.models.VariantContext
 import org.bdgenomics.adam.rdd.ADAMContext._
-import org.bdgenomics.formats.avro.{Variant, Genotype}
+import org.bdgenomics.formats.avro.{Variant, Genotype, DatabaseVariantAnnotation}
 import org.apache.spark.SparkContext._
 import org.bdgenomics.adam.models.{ ReferenceRegion, SequenceDictionary, SequenceRecord }
 import org.bdgenomics.formats.avro.{ AlignmentRecord, Contig }
@@ -14,7 +14,7 @@ object toRange {
   case  class RangeData(pos:Long,ref:String,alt:String,rs:String, Indel:Boolean, sampleId:String,gq:Double,dp:Long,gt:String,ad:String)
 
 
-  def main(sc :org.apache.spark.SparkContext, rawSample:org.apache.spark.sql.DataFrame, chromList : String, destination: String, banda : (Int,Int))={
+  def main(sc :org.apache.spark.SparkContext, rawSample:org.apache.spark.sql.DataFrame, chromList : String, destination: String, banda : (Int,Int),repartitions:Int)={
 
 
 val sqlContext = new org.apache.spark.sql.SQLContext(sc)
@@ -48,12 +48,15 @@ val bands = rawSample
 
 
 
-  var VariantsAdam= variants.map(x=> {Variant.newBuilder()
+  var VariantsAdam= variants.map(x=> {DatabaseVariantAnnotation.newBuilder()
+    .setVariant(Variant.newBuilder()
     .setStart(x.getAs[Int]("pos"))
     .setEnd(x.getAs[Int]("pos")+1)
-    .setAlternateAllele("A")
-    .setReferenceAllele("T")
+    .setAlternateAllele(x.getAs[String]("alt"))
+    .setReferenceAllele(x.getAs[String]("ref"))
     .setContig(Contig.newBuilder.setContigName("chr1").build)
+    .build())
+    .setSiftPred(x.getAs[String]("rs")) //attention dbsnib here
     .build()}
   )
 
@@ -66,19 +69,20 @@ val bands = rawSample
     .setContig(Contig.newBuilder.setContigName("chr1").build)
     .build())
     .setSampleId(x.getAs[String]("sampleId"))
+    .setGenotypeQuality(x.getAs[Double]("gq").toInt)
     .setReadDepth(x.getAs[Int]("dp")).build()}
   )
 
-  val baseRdd= VariantsAdam.keyBy(x=> ReferenceRegion.apply(x.getContig.getContigName,x.getStart,x.getEnd))
+  val baseRdd= VariantsAdam.keyBy(x=> ReferenceRegion.apply(x.variant.getContig.getContigName,x.variant.getStart,x.variant.getEnd))
   val recordsRdd=BandsAdam.keyBy(x=> ReferenceRegion.apply(x.variant.getContig.getContigName,x.variant.getStart,x.variant.getEnd))
 
     val res=BroadcastRegionJoin
-      .partitionAndJoin[Variant, Genotype](
+      .partitionAndJoin[DatabaseVariantAnnotation, Genotype](
         baseRdd,
         recordsRdd
       ).distinct.persist(MEMORY_AND_DISK)
 
-    res.map(x=>RangeData(x._1.start,x._1.referenceAllele,x._1.alternateAllele,"dbsnib",false,x._2.sampleId,2.0,2,"0/0","l")).repartition(30)
+    res.map(x=>RangeData(x._1.variant.start,x._1.variant.referenceAllele,x._1.variant.alternateAllele,x._1.getSiftPred,x._1.variant.alternateAllele.length!=1,x._2.sampleId,x._2.genotypeQuality.toDouble,x._2.readDepth.toLong,"0/0","0")).repartition(repartitions)
       .toDF.save(destination+"/chrom="+chromList+"/band="+banda._2.toString)
 // val gro = ranges.groupBy(ranges("_1"),ranges("_2"),ranges("_3"),ranges("_4")).agg(array(ranges("_5"))).take(2)
 }

@@ -33,22 +33,25 @@ object SimpleApp {
         //var chromList= "X" ::"Y" ::"MT" ::Range(1,23).map(_.toString).toList
         //val chromList=Range(14,23).map(_.toString).toList
       //  val files=nameCreator(0,367)
-        val version = "V4.1"
-        val destination = s"/user/dpiscia/$version"
-    val origin="/user/dpiscia/ALL/"
+        val version = "V4.2"
+        var destination = s"/user/dpiscia/Trio/$version"
+        //destination = s"/Users/dpiscia/spark/$version"
+    //val origin="/Users/dpiscia/RD-repositories/GenPipe/data/NA12878/"
+    var origin="/user/dpiscia/platinumTrio/"
+    origin="/user/dpiscia/ALL/"
     val sizePartition= 30000000
     val chromBands = sizePartition until 270000000 by sizePartition toList
     val chromList=List("1")
     val due = chromBands.map(x=> (x-sizePartition,x))
-
+val repartitions=30
     //step 1
-     steps.gzToParquet.main(sc,files,chromList,destination+"/rawData")
 
         
 //val chromBands = List(260000000)
 //val due = chromBands.map(x=> (x-260000000,x))
 //val chromList=List("12")
-   val files=nameCreator(0,367).toList
+    val files=nameCreator(0,367).toList
+    //val files=List("NA12892","NA12891","NA12878")
    steps.gzToParquet.main(sc,origin,chromList,files,destination+"/loaded")
     val rawData = sqlContext.load(destination+"/loaded")
 
@@ -68,22 +71,22 @@ for (ch <- chromList; band <-due) yield{
         //step 2
         
         //step2.1 intersect ranges against point
-        steps.toRange.main(sc,rawSample,ch.toString,destination+"/ranges",band)
+        steps.toRange.main(sc,rawSample,ch.toString,destination+"/ranges",band,repartitions)
 }    
      //step 2.2 join variants to range position and group by chrom,pos,ref,alt
 val rawRange = sqlContext.load(destination+"/ranges")
 for (ch <- chromList) yield{
         steps.toSampleGrouped.main(sqlContext,rawSample,rawRange,destination+"/samples",ch.toString,(0,0))
-}       
+}
         //from raw to effect
 for (ch <- chromList; band <-due) yield{
-steps.toEffects.main(sqlContext,rawData,destination+"/rawEffects",ch.toString,band)
+steps.toEffects.main(sqlContext,rawData,destination+"/rawEffects",ch.toString,band,repartitions)
 }
       /*  steps.toVariant.main(sc,Samples,Effects,destination+"/variants",ch.toString,band)*/
 
 val Effects=sqlContext.load(destination+"/rawEffects")
 val Samples=sqlContext.load(destination+"/samples")
-for (ch <- chromList2) yield{
+for (ch <- chromList) yield{
         steps.toVariant.main(sc,Samples,Effects,destination+"/variants",ch.toString,(0,0))
 }
 //        }

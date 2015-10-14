@@ -16,7 +16,7 @@ object toSampleGrouped{
     .where(rawSample("alt")!=="<NON_REF>")
     .where(rawSample("chrom")===chromList.toInt)
     .where(rawSample("gq") > 19)
-    .where(rawSample("dp") !== 0)
+    .where(rawSample("dp") > 4)
  //   .where(rawSample("pos") >= banda._1)
  //   .where(rawSample("pos") < banda._2)
   

@@ -28,7 +28,7 @@ val variants = rawSample
     .where(rawSample("alt")!=="<NON_REF>")
     .where(rawSample("chrom")===chromList)
     .where(rawSample("gq") > 19)
-    .where(rawSample("dp") !== 0)     //add indel,rs field here
+    .where(rawSample("dp") > 4)     //add indel,rs field here
     .where(rawSample("pos") >=banda._1)
     .where(rawSample("pos") < banda._2)
   .select("chrom","pos","ref","alt","rs","indel","sampleId")
@@ -38,7 +38,7 @@ val bands = rawSample
     .where(rawSample("alt")==="<NON_REF>")
     .where(rawSample("chrom")===chromList)
     .where(rawSample("gq") > 19)
-    .where(rawSample("dp") !== 0)
+    .where(rawSample("dp") > 4)
       .where(rawSample("end_pos") !== 0)
       .where(rawSample("pos") >=banda._1)
       .where(rawSample("pos") < banda._2)

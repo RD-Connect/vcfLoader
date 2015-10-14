@@ -1,10 +1,10 @@
 package steps
 
     case class VariantModel(pos:Int,ref:String,alt:String,rs:String,indel:Boolean,
-         samples: collection.mutable.ArrayBuffer[Map[String,String]],      
-        effs: collection.mutable.ArrayBuffer[Map[String,String]],
-        populations:collection.mutable.ArrayBuffer[Map[String,String]],
-        predictions:collection.mutable.ArrayBuffer[Map[String,String]])  
+         samples: collection.mutable.WrappedArray[Map[String,String]],
+        effs: collection.mutable.WrappedArray[Map[String,String]],
+        populations:collection.mutable.WrappedArray[Map[String,String]],
+        predictions:collection.mutable.WrappedArray[Map[String,String]])
         
         object toVariant {
 def main(sc :org.apache.spark.SparkContext, Samples:org.apache.spark.sql.DataFrame, Effects:org.apache.spark.sql.DataFrame, 
@@ -32,10 +32,10 @@ val effects = Effects.select("chrom","_1","_2","_3","_4","_5","_6","band")
        a(10).toString,
        a(11).toString,
        a(12).toString.toBoolean,
-       a(13).asInstanceOf[collection.mutable.ArrayBuffer[Map[String, String]]],
-       a(4).asInstanceOf[collection.mutable.ArrayBuffer[Map[String, String]]],
-       a(5).asInstanceOf[collection.mutable.ArrayBuffer[Map[String, String]]],
-       a(6).asInstanceOf[collection.mutable.ArrayBuffer[Map[String, String]]])
+       a(13).asInstanceOf[collection.mutable.WrappedArray[Map[String, String]]],
+       a(4).asInstanceOf[collection.mutable.WrappedArray[Map[String, String]]],
+       a(5).asInstanceOf[collection.mutable.WrappedArray[Map[String, String]]],
+       a(6).asInstanceOf[collection.mutable.WrappedArray[Map[String, String]]])
      )
      .toDF().save(destination+"/chrom="+chromList)//+"/band="+banda._2.toString)
 

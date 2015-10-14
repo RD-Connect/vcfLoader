@@ -169,9 +169,9 @@ def main(sc :org.apache.spark.SparkContext, rawData:org.apache.spark.sql.DataFra
 
    import sqlContext.implicits._
 
-   val i=rawData.filter(rawData("chrom")===chrom).flatMap(a=> sampleParser(a(0),a(1),a(2),a(3),a(6),a(7),a(8),a(9),chrom))
+   val i=rawData.filter(rawData("chrom")===chrom).flatMap(a=> sampleParser(a(0),a(1),a(2),a(3),a(6),a(7),a(8),a(9),chrom)).toDF()
 
-   i.toDF().save(destination+"/chrom="+chrom,SaveMode.Overwrite)
+   i.where(i("dp")>4).where(i("gq")>19).save(destination+"/chrom="+chrom,SaveMode.Overwrite)
    
 }
 

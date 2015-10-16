@@ -31,7 +31,7 @@ val effects = Effects.select("chrom","_1","_2","_3","_4","_5","_6","band")
        a(9).toString,
        a(10).toString,
        a(11).toString,
-       a(12).toString.toBoolean,
+       (a(9).toString.length != 1 || a(9).toString.length != 1),
        a(13).asInstanceOf[collection.mutable.WrappedArray[Map[String, String]]],
        a(4).asInstanceOf[collection.mutable.WrappedArray[Map[String, String]]],
        a(5).asInstanceOf[collection.mutable.WrappedArray[Map[String, String]]],

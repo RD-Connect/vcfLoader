@@ -44,7 +44,7 @@ def file_to_parquet(sc :org.apache.spark.SparkContext, origin_path: String, dest
        val file = sc.textFile(origin_path).filter(line => !line.startsWith("#"))
        //they have to be processed by chrom all together in order to have num partitions higher than 1
        val raw_file = file.map(_.split("\t"))
-         .map(p => rawTable(p(1).trim.toInt, p(2), p(3), p(4), p(5), p(6), p(7), p(8),p(9), name))
+         .map(p => rawTable(p(1).trim.toInt, p(2), p(3), p(4), p(5), p(6), p(7), p(8),p(9), name.split("/")(name.split("/").length-1)))
        raw_file
 }
 
@@ -67,7 +67,7 @@ def main(sc:org.apache.spark.SparkContext,
         }
         else if (index == files.length - 1) {
           RDD = file_to_parquet(sc, path + file +"." + chrom + ".annot.snpEff.p.g.vcf.gz", destination, chrom, file).union(RDD)
-          RDD.toDF.write.mode(SaveMode.Overwrite).save(destination+"/chrom="+chrom)
+          RDD.toDF.write.mode(SaveMode.Overwrite).save(destination+"/chrom="+chromStrToInt(chrom))
         }
 
         else

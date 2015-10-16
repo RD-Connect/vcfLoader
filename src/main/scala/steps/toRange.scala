@@ -11,7 +11,7 @@ import org.bdgenomics.adam.rdd.BroadcastRegionJoin
 import org.apache.spark.storage.StorageLevel.MEMORY_AND_DISK
 
 object toRange {
-  case  class RangeData(pos:Long,ref:String,alt:String,rs:String, Indel:Boolean, sampleId:String,gq:Double,dp:Long,gt:String,ad:String)
+  case  class RangeData(pos:Long,ref:String,alt:String,rs:String, Indel:Boolean, sampleId:String,gq:Int,dp:Long,gt:String,ad:String)
 
 
   def main(sc :org.apache.spark.SparkContext, rawSample:org.apache.spark.sql.DataFrame, chromList : String, destination: String, banda : (Int,Int),repartitions:Int)={
@@ -28,7 +28,7 @@ val variants = rawSample
     .where(rawSample("alt")!=="<NON_REF>")
     .where(rawSample("chrom")===chromList)
     .where(rawSample("gq") > 19)
-    .where(rawSample("dp") !== 0)     //add indel,rs field here
+    .where(rawSample("dp") > 7)     //add indel,rs field here
     .where(rawSample("pos") >=banda._1)
     .where(rawSample("pos") < banda._2)
   .select("chrom","pos","ref","alt","rs","indel","sampleId")
@@ -38,7 +38,7 @@ val bands = rawSample
     .where(rawSample("alt")==="<NON_REF>")
     .where(rawSample("chrom")===chromList)
     .where(rawSample("gq") > 19)
-    .where(rawSample("dp") !== 0)
+    .where(rawSample("dp") > 7)
       .where(rawSample("end_pos") !== 0)
       .where(rawSample("pos") >=banda._1)
       .where(rawSample("pos") < banda._2)
@@ -69,7 +69,7 @@ val bands = rawSample
     .setContig(Contig.newBuilder.setContigName("chr1").build)
     .build())
     .setSampleId(x.getAs[String]("sampleId"))
-    .setGenotypeQuality(x.getAs[Double]("gq").toInt)
+    .setGenotypeQuality(x.getAs[Int]("gq"))
     .setReadDepth(x.getAs[Int]("dp")).build()}
   )
 
@@ -82,7 +82,7 @@ val bands = rawSample
         recordsRdd
       ).distinct.persist(MEMORY_AND_DISK)
 
-    res.map(x=>RangeData(x._1.variant.start,x._1.variant.referenceAllele,x._1.variant.alternateAllele,x._1.getSiftPred,x._1.variant.alternateAllele.length!=1,x._2.sampleId,x._2.genotypeQuality.toDouble,x._2.readDepth.toLong,"0/0","0")).repartition(repartitions)
+    res.map(x=>RangeData(x._1.variant.start,x._1.variant.referenceAllele,x._1.variant.alternateAllele,x._1.getSiftPred,false,x._2.sampleId,x._2.genotypeQuality,x._2.readDepth.toLong,"0/0","0")).repartition(repartitions)
       .toDF.save(destination+"/chrom="+chromList+"/band="+banda._2.toString)
 // val gro = ranges.groupBy(ranges("_1"),ranges("_2"),ranges("_3"),ranges("_4")).agg(array(ranges("_5"))).take(2)
 }

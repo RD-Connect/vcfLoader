@@ -139,11 +139,16 @@ val Gp1_ASN_AF= idMap.getOrElse("1000Gp1_ASN_AF","")
 val Gp1_EUR_AF= idMap.getOrElse("1000Gp1_EUR_AF","")
 val Gp1_AF= idMap.getOrElse("1000Gp1_AF","")
 
+  def truncateAt(n: Double, p: Int): Double = {
+    //exponsive but the other way with bigdecimal causes an issue with spark sql
+    val s = math pow (10, p); (math floor n * s) / s
+  }
 
-def removedot(value:String)={
+def removedot(value:String,precision :Int)={
   value match{
     case "." => ""
-    case _ => value
+    case "" => ""
+    case _ => truncateAt(value.toDouble,4).toString
   }
 }
 
@@ -157,14 +162,14 @@ def removedot(value:String)={
     "phyloP46way_placental" -> phyloP46way_placental,
     "GERP_RS" -> GERP_RS,
     "SiPhy_29way_pi" -> SiPhy_29way_pi,
-    "CADD_phred" -> removedot(CADD_phred)),
-    Map("esp6500_ea" -> removedot(esp6500_ea),
-        "esp6500_aa" -> removedot(esp6500_aa),
-        "gp1_afr_af"-> removedot(Gp1_AFR_AF),
-        "gp1_asn_af" -> removedot(Gp1_ASN_AF),
-        "gp1_eur_af" -> removedot(Gp1_EUR_AF),
-        "gp1_af" -> removedot(Gp1_AF),        
-        "exac"-> exac))
+    "CADD_phred" -> removedot(CADD_phred,0)),
+    Map("esp6500_ea" -> removedot(esp6500_ea,4),
+        "esp6500_aa" -> removedot(esp6500_aa,4),
+        "gp1_afr_af"-> removedot(Gp1_AFR_AF,4),
+        "gp1_asn_af" -> removedot(Gp1_ASN_AF,4),
+        "gp1_eur_af" -> removedot(Gp1_EUR_AF,4),
+        "gp1_af" -> removedot(Gp1_AF,4),
+        "exac"-> removedot(exac,5)))
   
 }
 
@@ -180,7 +185,13 @@ def effsParser(pos:Any,ID:Any, ref:Any, alt:Any, info: Any, format: Any,  sample
   val (prediction,population) :(Map[String,String],Map[String,String])=annotation_parser(idMap)
   val altSplitted = altMultiallelic(ref.toString,alt.toString,gt)
   //create a array of map and then group by/distinct and first
-  eff2(pos.toString.toInt,ref.toString,altSplitted,functionalEffs.toArray,Array(population),Array(prediction))
+  if ( (gq < 20) && (dp < 8)){
+    eff2(0, ref.toString, altSplitted, functionalEffs.toArray, Array(population), Array(prediction))
+
+  }
+  else {
+    eff2(pos.toString.toInt, ref.toString, altSplitted, functionalEffs.toArray, Array(population), Array(prediction))
+  }
        
   
 }
@@ -192,11 +203,11 @@ def main(sqlContext :org.apache.spark.sql.SQLContext, rawData:org.apache.spark.s
                  .where(rawData("pos") >=banda._1)
                  .where(rawData("pos") < banda._2)
                  .filter(rawData("alt")!=="<NON_REF>").map(a=> steps.toEffects.effsParser(a(0),a(1),a(2),a(3),a(6),a(7),a(8),a(9),a(10))).toDF()
-s.groupBy("pos", "ref", "alt").agg(s("pos"), s("ref"), s("alt"), first("effects"), first("populations"), first("prediction"))
+s.where(s("pos")!==0).groupBy("pos", "ref", "alt").agg(s("pos"), s("ref"), s("alt"), first("effects"), first("populations"), first("prediction"))
   .map(x => (x(0).toString.toInt, x(1).toString, x(2).toString,
-  x(6).asInstanceOf[collection.mutable.ArrayBuffer[Map[String, String]]].toSet.toArray,
-  x(7).asInstanceOf[collection.mutable.ArrayBuffer[Map[String, String]]].toSet.toArray,
-  x(8).asInstanceOf[collection.mutable.ArrayBuffer[Map[String, String]]].toSet.toArray)).repartition(repartitions).toDF().save(destination+"/chrom="+chromList+"/band="+banda._2.toString)
+  x(6).asInstanceOf[collection.mutable.WrappedArray[Map[String, String]]].toSet.toArray,
+  x(7).asInstanceOf[collection.mutable.WrappedArray[Map[String, String]]].toSet.toArray,
+  x(8).asInstanceOf[collection.mutable.WrappedArray[Map[String, String]]].toSet.toArray)).repartition(repartitions).toDF().save(destination+"/chrom="+chromList+"/band="+banda._2.toString)
 }
 //val effs= rawData.filter(rawData("alt")!=="<NON_REF>").map(a=> effsParser(a(0),a(1),a(2),a(3),a(6),a(7),a(8),a(9),a(10))).toDF()
 //val effs = rawData.filter(rawData("alt")!=="<NON_REF>").map(line=> effsParser(rawData("pos"),rawData("ID"),rawData("ref"),rawData("alt"),rawData("info"),rawData("format"),rawData("Sample"),rawData("sampleID"),rawData("chrom"))).take(1).toDF()

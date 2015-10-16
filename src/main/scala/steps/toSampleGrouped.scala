@@ -16,7 +16,7 @@ object toSampleGrouped{
     .where(rawSample("alt")!=="<NON_REF>")
     .where(rawSample("chrom")===chromList.toInt)
     .where(rawSample("gq") > 19)
-    .where(rawSample("dp") !== 0)
+    .where(rawSample("dp") > 4)
  //   .where(rawSample("pos") >= banda._1)
  //   .where(rawSample("pos") < banda._2)
   
@@ -31,7 +31,7 @@ val s=sqlContext.sql("select pos,ref,alt,rs,indel, collect( map('sample',sampleI
           x(2).toString,
           x(3).toString,
           x(4).toString.toBoolean,
-          x(5).asInstanceOf[collection.mutable.ArrayBuffer[Map[String,String]]].toSet.toArray))
+          x(5).asInstanceOf[collection.mutable.WrappedArray[Map[String,String]]].toSet.toArray))
 s.toDF().save(destination+"/chrom="+chromList)//+"/band="+banda._2.toString)
   }
   

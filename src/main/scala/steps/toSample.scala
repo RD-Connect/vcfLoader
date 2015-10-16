@@ -32,7 +32,7 @@ case class Sample( pos:Int,end_pos:Int,
                   indel : Boolean,
                   gt : String, 
                   dp :Int, 
-                  gq: Double,
+                  gq: Int,
                   pl : String,
                   ad : String,
                   sampleId: String) 
@@ -43,7 +43,7 @@ def toMap(raw :Any):Map[String,String]={
   raw.toString.split(";").map(_ split "=") collect { case Array(k, v) => (k, v) } toMap
 }
 
-def gqBands(gq :Double):Double={
+def gqBands(gq :Int):Int={
   //[20, 25, 30, 35, 40, 45, 50, 70, 90, 99]
   gq match{
     case x  if x < 20 => 0
@@ -60,17 +60,17 @@ def gqBands(gq :Double):Double={
   }
 }
 
-def formatCase(format : Any, sample : String):(String,Int,Double,String,String)={
+def formatCase(format : Any, sample : String):(String,Int,Int,String,String)={
   val sA = sample.split(":")
   //gt,dp,gq,pl,ad
   //gq should be min ,also dp for bands
   format match {
-    case "GT:DP:GQ:MIN_DP:PL" => (sA(0),sA(3).trim.toInt,gqBands(sA(2).trim.toDouble),sA(4),"")
-    case "GT:GQ:PL:SB" => (sA(0),0,sA(1).trim.toDouble,sA(2),"") 
-    case "GT:AD:DP:GQ:PGT:PID:PL:SB" => (sA(0),sA(2).trim.toInt,sA(3).trim.toDouble,sA(6),sA(1)) 
-    case "GT:GQ:PGT:PID:PL:SB" => (sA(0),0,0.0,"","") 
-    case "GT:AD:DP:GQ:PL:SB"=> (sA(0),sA(2).trim.toInt,sA(3).trim.toDouble,sA(4),sA(1))
-    case _ => ("",0,0.0,"","")
+    case "GT:DP:GQ:MIN_DP:PL" => (sA(0),sA(3).trim.toInt,gqBands(sA(2).trim.toInt),sA(4),"")
+    case "GT:GQ:PL:SB" => (sA(0),0,sA(1).trim.toInt,sA(2),"")
+    case "GT:AD:DP:GQ:PGT:PID:PL:SB" => (sA(0),sA(2).trim.toInt,sA(3).trim.toInt,sA(6),sA(1))
+    case "GT:GQ:PGT:PID:PL:SB" => (sA(0),0,0,"","")
+    case "GT:AD:DP:GQ:PL:SB"=> (sA(0),sA(2).trim.toInt,sA(3).trim.toInt,sA(4),sA(1))
+    case _ => ("",0,0,"","")
   }
   
 }
@@ -94,14 +94,18 @@ def altMultiallelic(ref:String,alt:String,gt:String):String={
 
 
 
-
+  def truncateAt(n: Double, p: Int): Double = {
+    //exponsive but the other way with bigdecimal causes an issue with spark sql
+    val s = math pow (10, p); (math floor n * s) / s
+  }
 def ADsplit(ad:String,gt:String)={
   if (ad=="") ad
   else{
   val adArray= ad.split(",")
   val total=adArray.map(_.toInt).sum
   val altAD=adArray(gt.split("/")(1).toInt).toInt/total.toDouble
-  altAD.toString}
+    /*BigDecimal(altAD).setScale(3, BigDecimal.RoundingMode.HALF_DOWN).*/
+    truncateAt(altAD,3).toString}
 }
 
 def endPos(alt:String,info:String,pos:Int):Int={
@@ -110,14 +114,32 @@ def endPos(alt:String,info:String,pos:Int):Int={
     case _ => pos
   }
 }
-val chromBands = List(20000000,40000000,60000000,80000000,100000000,120000000,140000000,160000000,180000000,200000000,220000000,240000000)
-def sampleParser( pos:Any,ID:Any, ref:Any, alt:Any, info: Any, format: Any,  sampleline : Any, sampleID : Any,chrom : String)  ={
+  def split(pos:Int,endPos:Int,ref:String,alt:String,rs:String,indel:Boolean,gt:String,dp:Int,gq:Int,pl:String,ad:String,sampleId:String, bands:List[Int]):List[Sample]={
+    //this operation should be moved to the loader step, aka first step
+    val res = alt match {
+      case "<NON_REF>" => {
+        //it should be rewritten ,no need to iterate over all bands,no?
+        bands.flatMap(band=>  {
+          if (band > pos && band < endPos) {
+
+            Sample(pos,band,ref,alt,rs,indel,gt,dp,gq,pl,ad,sampleId) ::
+              Sample(band,endPos,ref,alt,rs,indel,gt,dp,gq,pl,ad,sampleId)   :: List()
+          }
+          else List()
+        })}
+      case _ => List()
+    }
+    res match { case x if x.length==0 => List(Sample(pos,endPos,ref,alt,rs,indel,gt,dp,gq,pl,ad,sampleId))
+    case _ => res}
+  }
+
+  def sampleParser( pos:Any,ID:Any, ref:Any, alt:Any, info: Any, format: Any,  sampleline : Any, sampleID : Any,chrom : String, chromBands : List[Int])  ={
   val IDmap= toMap(ID)
   val rs = IDmap.getOrElse("RS","")
   val (gt,dp,gq,pl,ad) = formatCase(format,sampleline.toString)
   //ad should be extracted by multi-allelic position
   val altSplitted = altMultiallelic(ref.toString,alt.toString,gt)
-  val indel = ref.toString.length != alt.toString.length //maybe something ref legnth != 1 or pos !=1//wrong if alt is not handled correctly
+  val indel = false //maybe something ref legnth != 1 or pos !=1//wrong if alt is not handled correctly
   val posOK = pos.toString.toInt
   val endOK = endPos(altSplitted,info.toString,posOK)
   //check if it's  band,if not return List(Sample)
@@ -163,15 +185,15 @@ class DomainNamePartitioner(numParts: Int, bands:List[Int]) extends Partitioner 
 //flatmap
 // Should we use a partition to gain performance improvement,yes
 //create function to write to partitions given a bands List
-def main(sc :org.apache.spark.SparkContext, rawData:org.apache.spark.sql.DataFrame, chrom : String, destination : String)={
+def main(sc :org.apache.spark.SparkContext, rawData:org.apache.spark.sql.DataFrame, chrom : String, destination : String,chromBands:List[Int])={
    val sqlContext = new org.apache.spark.sql.SQLContext(sc)
 // this is used to implicitly convert an RDD to a DataFrame.
 
    import sqlContext.implicits._
 
-   val i=rawData.filter(rawData("chrom")===chrom).flatMap(a=> sampleParser(a(0),a(1),a(2),a(3),a(6),a(7),a(8),a(9),chrom))
+   val i=rawData.filter(rawData("chrom")===chrom).flatMap(a=> sampleParser(a(0),a(1),a(2),a(3),a(6),a(7),a(8),a(9),chrom,chromBands)).toDF()
 
-   i.toDF().save(destination+"/chrom="+chrom,SaveMode.Overwrite)
+   i.where(i("dp")>7).where(i("gq")>19).save(destination+"/chrom="+chrom,SaveMode.Overwrite)
    
 }
 

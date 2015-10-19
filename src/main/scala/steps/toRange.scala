@@ -31,7 +31,7 @@ val variants = rawSample
     .where(rawSample("dp") > 7)     //add indel,rs field here
     .where(rawSample("pos") >=banda._1)
     .where(rawSample("pos") < banda._2)
-  .select("chrom","pos","ref","alt","rs","indel","sampleId")
+  .select("chrom","pos","ref","alt","rs","indel","sampleId") //if we put distinct it should be much better
     //eliminate distinct it causes a shuffle and repartions,we don't want it
 val bands = rawSample
 //    .where(rawSample("sampleId")==="E000010")

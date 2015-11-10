@@ -7,9 +7,9 @@ import com.sksamuel.elastic4s.mappings.FieldType._
 object Data {
   def mapping(index_name: String, version: String) = {
     
-    val client = ElasticClient.remote("10.10.0.61", 9300)
+    val client = ElasticClient.remote("10.10.0.62", 9300)
     client.execute {
-      create index "dev4.2" mappings("V0.1" as (
+      create index "dev4.3.3" mappings("V0.1" as (
     
       "chrom" typed IntegerType index "not_analyzed",
       "pos" typed IntegerType index "not_analyzed",

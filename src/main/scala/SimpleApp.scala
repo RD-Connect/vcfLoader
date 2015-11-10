@@ -52,8 +52,8 @@ object SimpleApp {
     origin="/user/dpiscia/"
     val sizePartition= 30000000
     val chromBands = sizePartition until 270000001 by sizePartition toList
-    val chromList=List("1")
-   // val chromList=(1 to 25 by 1  toList)map(_.toString)
+    //val chromList=List("1")
+   val chromList=(1 to 25 by 1  toList)map(_.toString)
 
     val due = chromBands.map(x=> (x-sizePartition,x))
 val repartitions=30
@@ -88,19 +88,34 @@ for (ch <- chromList; band <-due) yield{
         //step 2
         
         //step2.1 intersect ranges against point
-        steps.toRange.main(sc,rawSample,ch.toString,destination+"/ranges",band,repartitions)
+        steps.toRange.main(sc,rawSample,ch.toString,destination+"/ranges2",band,repartitions)
 }
      //step 2.2 join variants to range position and group by chrom,pos,ref,alt
+val chromList=(1 to 25 by 1  toList)map(_.toString)
+
 val rawRange = sqlContext.load(destination+"/ranges")
+
 for (ch <- chromList) yield{
         steps.toSampleGrouped.main(sqlContext,rawSample,rawRange,destination+"/samples",ch.toString,(0,0))
 }
+val Effects=sqlContext.load(destination+"/rawEffects")
+val Samples=sqlContext.load(destination+"/samples")
+for (ch <- chromList) yield{
+        steps.toVariant.main(sc,Samples,Effects,destination+"/variants",ch.toString,(0,0))
+}
+
+
         //from raw to effect
+
 for (ch <- chromList; band <-due) yield{
 steps.toEffects.main(sqlContext,rawData,destination+"/rawEffects",ch.toString,band,repartitions)
 }
       /*  steps.toVariant.main(sc,Samples,Effects,destination+"/variants",ch.toString,band)*/
 
+ for (ch <- chromList; band <-due) yield{
+steps.toEffects.main(sqlContext,rawData,destination+"/rawEffects",ch.toString,band,repartitions)
+}
+val chromList=(1 to 25 by 1  toList)map(_.toString)
 val Effects=sqlContext.load(destination+"/rawEffects")
 val Samples=sqlContext.load(destination+"/samples")
 for (ch <- chromList) yield{
@@ -108,7 +123,6 @@ for (ch <- chromList) yield{
 }*/
 //        }
      /*   val variants=sqlContext.load(destination+"/variants")
-     //   steps.toElastic.main(sqlContext,variants)      
 */
 
   }

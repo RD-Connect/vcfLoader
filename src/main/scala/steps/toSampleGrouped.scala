@@ -10,13 +10,15 @@ object toSampleGrouped{
    rawRange.registerTempTable("rawRange")
    val ranges= rawRange.select("chrom","pos","ref","alt","sampleId","gq","dp","gt","ad","rs","indel") //add rs,indel
     .where(rawRange("chrom")===chromList.toInt)
-   // .where(rawRange("band") === banda._2)
+     .where(rawRange("gq") > 19)
+     .where(rawRange("dp") > 7)
+     // .where(rawRange("band") === banda._2)
 
     val variants=rawSample.select("chrom","pos","ref","alt","sampleId","gq","dp","gt","ad","rs","indel")  //add rs,indel
     .where(rawSample("alt")!=="<NON_REF>")
     .where(rawSample("chrom")===chromList.toInt)
     .where(rawSample("gq") > 19)
-    .where(rawSample("dp") > 4)
+    .where(rawSample("dp") > 7)
  //   .where(rawSample("pos") >= banda._1)
  //   .where(rawSample("pos") < banda._2)
   

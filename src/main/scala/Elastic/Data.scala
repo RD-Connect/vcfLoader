@@ -9,7 +9,7 @@ object Data {
     
     val client = ElasticClient.remote("10.10.0.62", 9300)
     client.execute {
-      create index "dev4.3.2" mappings("V0.1" as (
+      create index "dev4.3.3" mappings("V0.1" as (
     
       "chrom" typed IntegerType index "not_analyzed",
       "pos" typed IntegerType index "not_analyzed",

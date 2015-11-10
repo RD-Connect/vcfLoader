@@ -88,7 +88,7 @@ for (ch <- chromList; band <-due) yield{
         //step 2
         
         //step2.1 intersect ranges against point
-        steps.toRange.main(sc,rawSample,ch.toString,destination+"/ranges",band,repartitions)
+        steps.toRange.main(sc,rawSample,ch.toString,destination+"/ranges2",band,repartitions)
 }
      //step 2.2 join variants to range position and group by chrom,pos,ref,alt
 val chromList=(1 to 25 by 1  toList)map(_.toString)
@@ -123,7 +123,6 @@ for (ch <- chromList) yield{
 }*/
 //        }
      /*   val variants=sqlContext.load(destination+"/variants")
-     //   steps.toElastic.main(sqlContext,variants)      
 */
 
   }

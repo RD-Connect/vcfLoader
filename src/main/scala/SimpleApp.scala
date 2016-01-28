@@ -44,19 +44,19 @@ object SimpleApp {
           })
           names
         }
-    val version = "V4.3.2"
-        var destination = s"/user/dpiscia/$version"
+    val version = "V4.3.3"
+        var destination = s"/user/dpiscia/Trio/$version"
         //destination = s"/Users/dpiscia/spark/$version"
     //val origin="/Users/dpiscia/RD-repositories/GenPipe/data/NA12878/"
     var origin="/user/dpiscia/platinumTrio/"
-    origin="/user/dpiscia/"
-    val sizePartition= 30000000
+    //origin="/user/dpiscia/"
+    val sizePartition= 90000000//30000000
     val chromBands = sizePartition until 270000001 by sizePartition toList
     //val chromList=List("1")
    val chromList=(1 to 25 by 1  toList)map(_.toString)
 
     val due = chromBands.map(x=> (x-sizePartition,x))
-val repartitions=30
+val repartitions=5//30
     //step 1
 
         
@@ -88,7 +88,7 @@ for (ch <- chromList; band <-due) yield{
         //step 2
         
         //step2.1 intersect ranges against point
-        steps.toRange.main(sc,rawSample,ch.toString,destination+"/ranges2",band,repartitions)
+        steps.toRange.main(sc,rawSample,ch.toString,destination+"/ranges",band,repartitions)
 }
      //step 2.2 join variants to range position and group by chrom,pos,ref,alt
 val chromList=(1 to 25 by 1  toList)map(_.toString)

@@ -3,11 +3,12 @@ package Elastic
 import com.sksamuel.elastic4s.ElasticClient
 import com.sksamuel.elastic4s.ElasticDsl._
 import com.sksamuel.elastic4s.mappings.FieldType._
+import org.elasticsearch.common.settings.ImmutableSettings
 
 object Data {
   def mapping(index_name: String, version: String) = {
-    
-    val client = ElasticClient.remote("10.10.0.62", 9300)
+    val settings = ImmutableSettings.settingsBuilder().put("cluster.name", "testelastic").build()
+    val client = ElasticClient.remote(settings,"10.10.0.61", 9300)
     client.execute {
       create index "dev4.3.3" mappings("V0.1" as (
     

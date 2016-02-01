@@ -3,10 +3,16 @@ package steps
 object toSampleGrouped{
   
 
-   def main(sqlContext :org.apache.spark.sql.SQLContext, rawSample:org.apache.spark.sql.DataFrame,rawRange:org.apache.spark.sql.DataFrame,destination :String, chromList:String, banda:(Int,Int))={
+   def main(sqlContext :org.apache.spark.sql.hive.HiveContext, rawSample:org.apache.spark.sql.DataFrame,rawRange:org.apache.spark.sql.DataFrame,destination :String, chromList:String, banda:(Int,Int))={
 // this is used to implicitly convert an RDD to a DataFrame.
    import sqlContext.implicits._    
    sqlContext.sql("""CREATE TEMPORaRY function collect AS 'brickhouse.udf.collect.CollectUDAF'""")
+
+     /*it can be substitued by collect_list
+     blog info https://forums.databricks.com/questions/956/how-do-i-group-my-dataset-by-a-key-or-combination.html
+     groupedSessions.agg(Map("sessionId"->"collect_list")).take(1)
+
+      */
    rawRange.registerTempTable("rawRange")
    val ranges= rawRange.select("chrom","pos","ref","alt","sampleId","gq","dp","gt","ad","rs","indel") //add rs,indel
     .where(rawRange("chrom")===chromList.toInt)

@@ -1,7 +1,7 @@
 import org.apache.spark.SparkContext
 import org.apache.spark.SparkContext._
 import org.apache.spark.SparkConf
-
+import org.elasticsearch.spark.sql._
 
 //import sqlContext.implicits._
 import steps._
@@ -29,16 +29,82 @@ target/scala-2.11/from-gvcf-to-elasticsearch_2.11-1.0.jar
   spark-1.3.1-bin-hadoop2.3]$ ./bin/spark-shell --master yarn-client --jars /home/dpiscia/libsJar/brickhouse-0.7.1-SNAPSHOT.jar,/home/dpiscia/from-gvcf-to-elasticsearch_2.10-1.0.jar  \
   --num-executors 30 --executor-memory 2g executor-cores 4
   */
+
+/*
+spark-submit --class "GenomicsLoader"     \
+  --master local[*] \
+  --executor-memory 1G \
+  --driver-memory 1G \
+  --jars /Users/dpiscia/spark/brickhouse-0.7.1-SNAPSHOT.jar,/Users/dpiscia/RD-repositories/GenPipe/elastic4s-core_2.10-1.5.15.jar,/Users/dpiscia/RD-repositories/GenPipe/elasticsearch-1.5.2.jar,/Users/dpiscia/RD-repositories/GenPipe/lucene-core-4.10.4.jar,./elasticsearch-spark-2.10-2.1.0.jar \
+target/scala-2.10/from-gvcf-to-elasticsearch_2.10-1.0.jar
+ */
 object GenomicsLoader {
   def main(args: Array[String]) {
-        val conf = new SparkConf().setAppName("Genomics-ETL")
-        val sc = new SparkContext(conf)
-        val sqlContext = new org.apache.spark.sql.SQLContext(sc)
-        println(args)
-        import sqlContext.implicits._
+    val conf = new SparkConf().setAppName("Genomics-ETL")
+    val sc = new SparkContext(conf)
+    val sqlContext = new org.apache.spark.sql.hive.HiveContext(sc)
+    println(args)
+    import sqlContext.implicits._
+    //configuration data, in the future will be dropped into a config file
+    val origin = "/Users/dpiscia/RD-repositories/GenPipe/data/NA12878/"
+    val version = "V5.0"
+    val destination = s"/Users/dpiscia/RD-repositories/GenPipe/out/$version"
+    val sizePartition = 90000000 //30000000
+    val repartitions = 5 //30
+    val files = List("NA12892", "NA12891", "NA12878")
+    val chromList = List("1")
+    //val pipeline=List("load","rawData","interception","sampleGroup","effectsGroup","variants")
+    val pipeline = List("createIndex","toElastic")
+    //preprocessing configuraiotn data
+    val chromBands = sizePartition until 270000001 by sizePartition toList
+    val due = chromBands.map(x => (x - sizePartition, x))
 
-       
-        //LOAd chromosome 2
+    if (pipeline.contains("load")) {
+      steps.gzToParquet.main(sc, origin, chromList, files, destination + "/loaded") //val chromList=(1 to 25 by 1  toList)map(_.toString)
+    }
+    if (pipeline.contains("rawData")) {
+      val rawData = sqlContext.load(destination + "/loaded")
+      for (ch <- chromList) yield {
+        steps.toSample.main(sc, rawData, ch, destination + "/rawSamples", chromBands)
+      }
+    }
+    if (pipeline.contains("interception")) {
+      val rawSample = sqlContext.load(destination + "/rawSamples")
+      for (ch <- chromList; band <- due) yield {
+        steps.toRange.main(sc, rawSample, ch.toString, destination + "/ranges", band, repartitions)
+      }
+    }
+    if (pipeline.contains("sampleGroup")) {
+      val rawSample = sqlContext.load(destination + "/rawSamples")
+      val rawRange = sqlContext.load(destination + "/ranges")
+      for (ch <- chromList) yield {
+        steps.toSampleGrouped.main(sqlContext, rawSample, rawRange, destination + "/samples", ch.toString, (0, 0))
+      }
+    }
+    if (pipeline.contains("effectsGroup")) {
+      val rawData = sqlContext.load(destination + "/loaded")
+      for (ch <- chromList; band <- due) yield {
+        steps.toEffects.main(sqlContext, rawData, destination + "/rawEffects", ch.toString, band, repartitions)
+      }
+    }
+    if (pipeline.contains("variants")) {
+      val Effects = sqlContext.load(destination + "/rawEffects")
+      val Samples = sqlContext.load(destination + "/samples")
+      for (ch <- chromList) yield {
+        steps.toVariant.main(sc, Samples, Effects, destination + "/variants", ch.toString, (0, 0))
+      }
+  }
+    if (pipeline.contains("createIndex")) {
+      Elastic.Data.mapping("5.0.0","1.0","localhost",9300,"create")
+    }
+    if (pipeline.contains("toElastic")) {
+      val variants=sqlContext.load(destination+"/variants")
+      variants.registerTempTable("variants")
+      variants.saveToEs("5.0.0/1.0",Map("es.nodes"->"localhost:9300"))
+      //sqlContext.udf.register("pop", (s: scala.collection.mutable.ArrayBuffer[Map[String,String]]) => {var map2 = Map.empty[String,String]; s.map(  line=> line foreach (x => {var temp=x._2;  if (x._2=="") temp="0"; map2 +=x._1 -> temp}));  scala.collection.mutable.ArrayBuffer(map2)})
+      //sqlContext.sql("insert overwrite table playV01 select chrom,pos,ref,alt,rs,(length(ref)!=1 or length(alt)!=1),samples,effs,pop(populations),predictions from variants ")
+    }
+      //LOAd chromosome 2
         //var chromList= "X" ::"Y" ::"MT" ::Range(1,23).map(_.toString).toList
         //val chromList=Range(14,23).map(_.toString).toList
       //  val files=nameCreator(0,367)

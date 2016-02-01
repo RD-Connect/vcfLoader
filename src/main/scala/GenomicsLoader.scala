@@ -1,6 +1,8 @@
 import org.apache.spark.SparkContext
 import org.apache.spark.SparkContext._
 import org.apache.spark.SparkConf
+
+
 //import sqlContext.implicits._
 import steps._
  /*
@@ -13,7 +15,13 @@ nohup ./bin/spark-submit --class "SimpleApp"     \
 --executor-memory 2G     \
 --executor-cores 4  &
 */
-    
+
+/*
+spark-submit --class "SimpleApp"     \
+--master local[4] \
+target/scala-2.11/from-gvcf-to-elasticsearch_2.11-1.0.jar
+
+*/
     
 
   
@@ -21,11 +29,12 @@ nohup ./bin/spark-submit --class "SimpleApp"     \
   spark-1.3.1-bin-hadoop2.3]$ ./bin/spark-shell --master yarn-client --jars /home/dpiscia/libsJar/brickhouse-0.7.1-SNAPSHOT.jar,/home/dpiscia/from-gvcf-to-elasticsearch_2.10-1.0.jar  \
   --num-executors 30 --executor-memory 2g executor-cores 4
   */
-object SimpleApp {
+object GenomicsLoader {
   def main(args: Array[String]) {
-        val conf = new SparkConf().setAppName("vcgf to Elastic")
+        val conf = new SparkConf().setAppName("Genomics-ETL")
         val sc = new SparkContext(conf)
         val sqlContext = new org.apache.spark.sql.SQLContext(sc)
+        println(args)
         import sqlContext.implicits._
 
        
@@ -33,7 +42,7 @@ object SimpleApp {
         //var chromList= "X" ::"Y" ::"MT" ::Range(1,23).map(_.toString).toList
         //val chromList=Range(14,23).map(_.toString).toList
       //  val files=nameCreator(0,367)
-        def nameCreator(skip:Int,number:Int)={
+   /*     def nameCreator(skip:Int,number:Int)={
           val names = Range(skip+1,number+1).map(num=> {
             num.toString.length match {
               case 1 => "E00000"+num.toString
@@ -123,6 +132,7 @@ for (ch <- chromList) yield{
 }*/
 //        }
      /*   val variants=sqlContext.load(destination+"/variants")
+*/
 */
 
   }

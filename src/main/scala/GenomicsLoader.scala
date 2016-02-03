@@ -1,3 +1,5 @@
+package steps
+
 import org.apache.spark.SparkContext
 import org.apache.spark.SparkContext._
 import org.apache.spark.SparkConf
@@ -34,7 +36,7 @@ target/scala-2.11/from-gvcf-to-elasticsearch_2.11-1.0.jar
 spark-submit --class "GenomicsLoader"     \
   --master local[*] \
   --executor-memory 1G \
-  --driver-memory 1G \
+  --driver-memory 2G \
   --jars /Users/dpiscia/spark/brickhouse-0.7.1-SNAPSHOT.jar,/Users/dpiscia/RD-repositories/GenPipe/elastic4s-core_2.10-1.5.15.jar,/Users/dpiscia/RD-repositories/GenPipe/elasticsearch-1.5.2.jar,/Users/dpiscia/RD-repositories/GenPipe/lucene-core-4.10.4.jar,./elasticsearch-spark-2.10-2.1.0.jar \
 target/scala-2.10/from-gvcf-to-elasticsearch_2.10-1.0.jar
  */
@@ -47,14 +49,16 @@ object GenomicsLoader {
     import sqlContext.implicits._
     //configuration data, in the future will be dropped into a config file
     val origin = "/Users/dpiscia/RD-repositories/GenPipe/data/NA12878/"
-    val version = "V5.0"
+    val version = "V5.1"
     val destination = s"/Users/dpiscia/RD-repositories/GenPipe/out/$version"
     val sizePartition = 90000000 //30000000
     val repartitions = 5 //30
     val files = List("NA12892", "NA12891", "NA12878")
     val chromList = List("1")
-    //val pipeline=List("load","rawData","interception","sampleGroup","effectsGroup","variants")
-    val pipeline = List("createIndex","toElastic")
+    val index="5.0.1"
+    //val indexVersion="0.1"
+    //val pipeline=List("toElastic")
+    val pipeline = List("load","rawData","interception","sampleGroup","effectsGroup","variants","deleteIndex","createIndex","toElastic")
     //preprocessing configuraiotn data
     val chromBands = sizePartition until 270000001 by sizePartition toList
     val due = chromBands.map(x => (x - sizePartition, x))
@@ -95,12 +99,15 @@ object GenomicsLoader {
       }
   }
     if (pipeline.contains("createIndex")) {
-      Elastic.Data.mapping("5.0.0","1.0","localhost",9300,"create")
+      Elastic.Data.mapping(index,version,"localhost",9300,"create")
+    }
+    if (pipeline.contains("deleteIndex")) {
+      Elastic.Data.mapping(index,version,"localhost",9300,"delete")
     }
     if (pipeline.contains("toElastic")) {
       val variants=sqlContext.load(destination+"/variants")
       variants.registerTempTable("variants")
-      variants.saveToEs("5.0.0/1.0",Map("es.nodes"->"localhost:9300"))
+      variants.saveToEs(index+"/"+version,Map("es.nodes"->"localhost:9200"))
       //sqlContext.udf.register("pop", (s: scala.collection.mutable.ArrayBuffer[Map[String,String]]) => {var map2 = Map.empty[String,String]; s.map(  line=> line foreach (x => {var temp=x._2;  if (x._2=="") temp="0"; map2 +=x._1 -> temp}));  scala.collection.mutable.ArrayBuffer(map2)})
       //sqlContext.sql("insert overwrite table playV01 select chrom,pos,ref,alt,rs,(length(ref)!=1 or length(alt)!=1),samples,effs,pop(populations),predictions from variants ")
     }

@@ -1,13 +1,13 @@
 package steps
 
 import org.apache.spark.rdd.RDD._
-import org.bdgenomics.adam.models.VariantContext
-import org.bdgenomics.adam.rdd.ADAMContext._
-import org.bdgenomics.formats.avro.{Variant, Genotype, DatabaseVariantAnnotation}
+//import org.bdgenomics.adam.models.VariantContext
+//import org.bdgenomics.adam.rdd.ADAMContext._
+//import org.bdgenomics.formats.avro.{Variant, Genotype, DatabaseVariantAnnotation}
 import org.apache.spark.SparkContext._
-import org.bdgenomics.adam.models.{ ReferenceRegion, SequenceDictionary, SequenceRecord }
-import org.bdgenomics.formats.avro.{ AlignmentRecord, Contig }
-import org.bdgenomics.adam.rdd.BroadcastRegionJoin
+//import org.bdgenomics.adam.models.{ ReferenceRegion, SequenceDictionary, SequenceRecord }
+//import org.bdgenomics.formats.avro.{ AlignmentRecord, Contig }
+//import org.bdgenomics.adam.rdd.BroadcastRegionJoin
 import org.apache.spark.storage.StorageLevel.MEMORY_AND_DISK
 
 object toRange {

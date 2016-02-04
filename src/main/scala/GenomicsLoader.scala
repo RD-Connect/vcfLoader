@@ -4,6 +4,7 @@ import org.apache.spark.SparkContext
 import org.apache.spark.SparkContext._
 import org.apache.spark.SparkConf
 import org.elasticsearch.spark.sql._
+import com.typesafe.config.ConfigFactory
 
 //import sqlContext.implicits._
 import steps._
@@ -34,10 +35,10 @@ target/scala-2.11/from-gvcf-to-elasticsearch_2.11-1.0.jar
 
 /*
 spark-submit --class "GenomicsLoader"     \
-  --master local[*] \
+  --master local[2] \
   --executor-memory 1G \
   --driver-memory 2G \
-  --jars /Users/dpiscia/spark/brickhouse-0.7.1-SNAPSHOT.jar,/Users/dpiscia/RD-repositories/GenPipe/elastic4s-core_2.10-1.5.15.jar,/Users/dpiscia/RD-repositories/GenPipe/elasticsearch-1.5.2.jar,/Users/dpiscia/RD-repositories/GenPipe/lucene-core-4.10.4.jar,./elasticsearch-spark-2.10-2.1.0.jar \
+  --jars /Users/dpiscia/spark/brickhouse-0.7.1-SNAPSHOT.jar,/Users/dpiscia/RD-repositories/GenPipe/elastic4s-core_2.10-1.5.15.jar,/Users/dpiscia/RD-repositories/GenPipe/elasticsearch-1.5.2.jar,/Users/dpiscia/RD-repositories/GenPipe/lucene-core-4.10.4.jar,./elasticsearch-spark_2.10-2.1.0.jar \
 target/scala-2.10/from-gvcf-to-elasticsearch_2.10-1.0.jar
  */
 object GenomicsLoader {
@@ -49,7 +50,11 @@ object GenomicsLoader {
     import sqlContext.implicits._
     //configuration data, in the future will be dropped into a config file
     val origin = "/Users/dpiscia/RD-repositories/GenPipe/data/NA12878/"
-    val version = "V5.1"
+    //val version = "V5.1"
+    val configuration = ConfigFactory.load()
+    val version= configuration.getString("version")
+
+
     val destination = s"/Users/dpiscia/RD-repositories/GenPipe/out/$version"
     val sizePartition = 90000000 //30000000
     val repartitions = 5 //30

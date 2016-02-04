@@ -1,10 +1,11 @@
-//package steps
+
 
 import org.apache.spark.SparkContext
 import org.apache.spark.SparkContext._
 import org.apache.spark.SparkConf
 import org.elasticsearch.spark.sql._
-
+import com.typesafe.config.ConfigFactory
+import scala.collection.JavaConversions._
 //import sqlContext.implicits._
 import steps._
  /*
@@ -34,10 +35,10 @@ target/scala-2.11/from-gvcf-to-elasticsearch_2.11-1.0.jar
 
 /*
 spark-submit --class "GenomicsLoader"     \
-  --master local[*] \
+  --master local[2] \
   --executor-memory 1G \
   --driver-memory 2G \
-  --jars /Users/dpiscia/spark/brickhouse-0.7.1-SNAPSHOT.jar,/Users/dpiscia/RD-repositories/GenPipe/elastic4s-core_2.10-1.5.15.jar,/Users/dpiscia/RD-repositories/GenPipe/elasticsearch-1.5.2.jar,/Users/dpiscia/RD-repositories/GenPipe/lucene-core-4.10.4.jar,./elasticsearch-spark-2.10-2.1.0.jar \
+  --jars /Users/dpiscia/spark/brickhouse-0.7.1-SNAPSHOT.jar,/Users/dpiscia/RD-repositories/GenPipe/elastic4s-core_2.10-1.5.15.jar,/Users/dpiscia/RD-repositories/GenPipe/elasticsearch-1.5.2.jar,/Users/dpiscia/RD-repositories/GenPipe/lucene-core-4.10.4.jar,./elasticsearch-spark_2.10-2.1.0.jar \
 target/scala-2.10/from-gvcf-to-elasticsearch_2.10-1.0.jar
  */
 object GenomicsLoader {
@@ -48,21 +49,26 @@ object GenomicsLoader {
     println(args)
     import sqlContext.implicits._
     //configuration data, in the future will be dropped into a config file
-    val origin = "/Users/dpiscia/RD-repositories/GenPipe/data/NA12878/"
-    val version = "V5.1"
-    val destination = s"/Users/dpiscia/RD-repositories/GenPipe/out/$version"
-    val sizePartition = 90000000 //30000000
-    val repartitions = 5 //30
-    val files = List("NA12892", "NA12891", "NA12878")
-    val chromList = List("1")
-    val index = "5.0.1"
+    //val version = "V5.1"
+    val configuration = ConfigFactory.load()
+    val version= configuration.getString("version")
+    val origin =configuration.getString("origin")
+
+    val destination =configuration.getString("destination")+version
+    val sizePartition = configuration.getInt("sizePartition")
+    val repartitions = configuration.getInt("repartitions") //30
+    val files = configuration.getStringList("files").toList
+    val chromList  = (configuration.getStringList("chromList") ).toList
+    val index=configuration.getString("index")
     //val indexVersion="0.1"
     //val pipeline=List("toElastic")
-    val pipeline = List("load", "rawData", "interception", "sampleGroup", "effectsGroup", "variants", "deleteIndex", "createIndex", "toElastic")
+    val pipeline = configuration.getStringList("pipeline").toList
+
     //preprocessing configuraiotn data
     val chromBands = sizePartition until 270000001 by sizePartition toList
     val due = chromBands.map(x => (x - sizePartition, x))
-
+    println("-------------------------------------pipeline is "+pipeline)
+    println("-------------------------------------desitnation is "+destination)
     if (pipeline.contains("load")) {
       steps.gzToParquet.main(sc, origin, chromList, files, destination + "/loaded") //val chromList=(1 to 25 by 1  toList)map(_.toString)
     }
@@ -107,7 +113,14 @@ object GenomicsLoader {
     if (pipeline.contains("toElastic")) {
       val variants = sqlContext.load(destination + "/variants")
       variants.registerTempTable("variants")
-      variants.saveToEs(index + "/" + version, Map("es.nodes" -> "localhost:9200"))
+      variants.saveToEs(index+"/"+version,Map("es.nodes"->"localhost:9200"))
     }
+
+
   }
+
+
+  
+
 }
+eline

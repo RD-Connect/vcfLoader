@@ -1,4 +1,5 @@
 
+
 import org.apache.spark.SparkContext
 import org.apache.spark.SparkContext._
 import org.apache.spark.SparkConf
@@ -62,6 +63,7 @@ object GenomicsLoader {
     //val indexVersion="0.1"
     //val pipeline=List("toElastic")
     val pipeline = configuration.getStringList("pipeline").toList
+
     //preprocessing configuraiotn data
     val chromBands = sizePartition until 270000001 by sizePartition toList
     val due = chromBands.map(x => (x - sizePartition, x))
@@ -101,15 +103,15 @@ object GenomicsLoader {
       for (ch <- chromList) yield {
         steps.toVariant.main(sc, Samples, Effects, destination + "/variants", ch.toString, (0, 0))
       }
-  }
+    }
     if (pipeline.contains("createIndex")) {
-      Elastic.Data.mapping(index,version,"localhost",9300,"create")
+      Elastic.Data.mapping(index, version, "localhost", 9300, "create")
     }
     if (pipeline.contains("deleteIndex")) {
-      Elastic.Data.mapping(index,version,"localhost",9300,"delete")
+      Elastic.Data.mapping(index, version, "localhost", 9300, "delete")
     }
     if (pipeline.contains("toElastic")) {
-      val variants=sqlContext.load(destination+"/variants")
+      val variants = sqlContext.load(destination + "/variants")
       variants.registerTempTable("variants")
       variants.saveToEs(index+"/"+version,Map("es.nodes"->"localhost:9200"))
     }
@@ -121,3 +123,4 @@ object GenomicsLoader {
   
 
 }
+eline

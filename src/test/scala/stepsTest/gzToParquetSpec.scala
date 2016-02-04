@@ -11,7 +11,7 @@ import core.vcfToSample._
 
 class LoadData extends FlatSpec with Matchers {
   def withContext(testCode: (org.apache.spark.SparkContext, org.apache.spark.sql.SQLContext) => Any) {
-    val sc = new SparkContext("local[*]", "test") // create the fixture
+/*    val sc = new SparkContext("local[*]", "test") // create the fixture
     val sqlContext = new org.apache.spark.sql.SQLContext(sc)
     // this is used to implicitly convert an RDD to a DataFrame.
     import sqlContext.implicits._
@@ -43,6 +43,7 @@ class LoadData extends FlatSpec with Matchers {
       steps.gzToParquet.main(sc, origin, chromList, files, destination + "/loaded")
     }
     assert( sqlContext.load(destination + "/loaded").count === 10068608)
+    */
   }
 }
 

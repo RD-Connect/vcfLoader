@@ -1,0 +1,19 @@
+
+version = "V5.1"
+#origin of the files
+origin = "/Users/dpiscia/RD-repositories/GenPipe/data/NA12878/"
+
+destination = s"/Users/dpiscia/RD-repositories/GenPipe/out/"
+
+sizePartition = 90000000 //30000000
+
+repartitions = 5 //30
+
+files = ["NA12892", "NA12891", "NA12878"]
+
+chromList = ["1"]
+
+index="test"
+
+
+pipeline = []#"load","rawData","interception","sampleGroup","effectsGroup","variants","deleteIndex","createIndex","toElastic"]

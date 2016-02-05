@@ -175,14 +175,17 @@ def removedot(value:String,precision :Int)={
 
 case class eff2( pos:Int,ref:String,alt:String,effects:Array[Map[String,String]],populations:Array[Map[String,String]],prediction:Array[Map[String,String]])
 def effsParser(pos:Any,ID:Any, ref:Any, alt:Any, info: Any, format: Any,  sampleline : Any, sampleID : Any,chrom:Any)={
-  
+  //info fields include the end
   val infoMap = toMap(info)
   val idMap = toMap(ID)
-  val (gt,dp,gq,pl,ad) = formatCase(format,sampleline.toString)  
+  // format + samples it gets the sample data based on format
+  val (gt,dp,gq,pl,ad) = formatCase(format,sampleline.toString)
   val effString = infoMap.getOrElse("EFF","")
-  val functionalEffs = functionalMap_parser(effString).filter(effect => gt.split("/").map(_.toInt) contains effect.getOrElse("geno_type_number",1).toString.toInt)
+  val functionalEffs = functionalMap_parser(effString).filter(effect => gt.split("/")(1).toInt == effect.getOrElse("geno_type_number",1).toString.toInt)
  // if gt.split("/") different than 0 or 1 not give pop and predictions values, wrong
   val (prediction,population) :(Map[String,String],Map[String,String])=annotation_parser(idMap)
+
+  //only return the second position of */* i.e 1/2 return 2
   val altSplitted = altMultiallelic(ref.toString,alt.toString,gt)
   //create a array of map and then group by/distinct and first
   if ( (gq < 20) && (dp < 8)){

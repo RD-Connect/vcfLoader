@@ -1,0 +1,207 @@
+{
+  "metadata" : {
+    "name" : "Genomics",
+    "user_save_timestamp" : "1970-01-01T01:00:00.000Z",
+    "auto_save_timestamp" : "1970-01-01T01:00:00.000Z",
+    "language_info" : {
+      "name" : "scala",
+      "file_extension" : "scala",
+      "codemirror_mode" : "text/x-scala"
+    },
+    "trusted" : true,
+    "customLocalRepo" : "/tmp/repo",
+    "customRepos" : null,
+    "customDeps" : null,
+    "customImports" : null,
+    "customArgs" : null,
+    "customSparkConf" : {
+      "spark.app.name" : "Notebook",
+      "spark.master" : "spark://<home>:<port>",
+      "spark.executor.memory" : "5G"
+    }
+  },
+  "cells" : [ {
+    "metadata" : {
+      "trusted" : true,
+      "input_collapsed" : false,
+      "collapsed" : false
+    },
+    "cell_type" : "code",
+    "source" : "import org.apache.spark.SparkContext\n",
+    "outputs" : [ {
+      "name" : "stdout",
+      "output_type" : "stream",
+      "text" : "import org.apache.spark.SparkContext\n"
+    }, {
+      "metadata" : { },
+      "data" : {
+        "text/html" : ""
+      },
+      "output_type" : "execute_result",
+      "execution_count" : 1
+    } ]
+  }, {
+    "metadata" : {
+      "trusted" : true,
+      "input_collapsed" : false,
+      "collapsed" : false
+    },
+    "cell_type" : "code",
+    "source" : "import org.apache.spark.SparkConf\nimport org.apache.spark.sql.functions",
+    "outputs" : [ {
+      "name" : "stdout",
+      "output_type" : "stream",
+      "text" : "import org.apache.spark.SparkConf\nimport org.apache.spark.sql.functions\n"
+    }, {
+      "metadata" : { },
+      "data" : {
+        "text/html" : ""
+      },
+      "output_type" : "execute_result",
+      "execution_count" : 7
+    } ]
+  }, {
+    "metadata" : {
+      "trusted" : true,
+      "input_collapsed" : false,
+      "collapsed" : false
+    },
+    "cell_type" : "code",
+    "source" : "    val conf = new SparkConf().setAppName(\"Genomics-ETL\").setMaster(\"local[2]\")\n    val sc = new SparkContext(conf)\n    val sqlContext = new org.apache.spark.sql.hive.HiveContext(sc)\n",
+    "outputs" : [ {
+      "name" : "stdout",
+      "output_type" : "stream",
+      "text" : "conf: org.apache.spark.SparkConf = org.apache.spark.SparkConf@5a6193b6\nsc: org.apache.spark.SparkContext = org.apache.spark.SparkContext@36097cd6\nsqlContext: org.apache.spark.sql.hive.HiveContext = org.apache.spark.sql.hive.HiveContext@6475c938\n"
+    }, {
+      "metadata" : { },
+      "data" : {
+        "text/html" : "org.apache.spark.sql.hive.HiveContext@6475c938"
+      },
+      "output_type" : "execute_result",
+      "execution_count" : 4
+    } ]
+  }, {
+    "metadata" : {
+      "trusted" : true,
+      "input_collapsed" : false,
+      "collapsed" : false
+    },
+    "cell_type" : "code",
+    "source" : "val samples = sqlContext.load(\"/Users/dpiscia/RD-repositories/GenPipe/out/V5.1/rawSamples/\")",
+    "outputs" : [ {
+      "name" : "stdout",
+      "output_type" : "stream",
+      "text" : "<console>:21: warning: method load in class SQLContext is deprecated: Use read.load(path). This will be removed in Spark 2.0.\n         val samples = sqlContext.load(\"/Users/dpiscia/RD-repositories/GenPipe/out/V5.1/rawSamples/\")\n                                  ^\nsamples: org.apache.spark.sql.DataFrame = [pos: int, end_pos: int, ref: string, alt: string, rs: string, indel: boolean, gt: string, dp: int, gq: int, pl: string, ad: string, sampleId: string, chrom: int]\n"
+    }, {
+      "metadata" : { },
+      "data" : {
+        "text/html" : "<div class=\"df-canvas\">\n      <script data-this=\"{&quot;dataId&quot;:&quot;anon078675881c15f7890f4b6ea42e2654ea&quot;,&quot;partitionIndexId&quot;:&quot;anona9acedef1c995f9d38a1cff6b38c06b9&quot;,&quot;numPartitions&quot;:227543,&quot;dfSchema&quot;:{&quot;type&quot;:&quot;struct&quot;,&quot;fields&quot;:[{&quot;name&quot;:&quot;pos&quot;,&quot;type&quot;:&quot;integer&quot;,&quot;nullable&quot;:true,&quot;metadata&quot;:{}},{&quot;name&quot;:&quot;end_pos&quot;,&quot;type&quot;:&quot;integer&quot;,&quot;nullable&quot;:true,&quot;metadata&quot;:{}},{&quot;name&quot;:&quot;ref&quot;,&quot;type&quot;:&quot;string&quot;,&quot;nullable&quot;:true,&quot;metadata&quot;:{}},{&quot;name&quot;:&quot;alt&quot;,&quot;type&quot;:&quot;string&quot;,&quot;nullable&quot;:true,&quot;metadata&quot;:{}},{&quot;name&quot;:&quot;rs&quot;,&quot;type&quot;:&quot;string&quot;,&quot;nullable&quot;:true,&quot;metadata&quot;:{}},{&quot;name&quot;:&quot;indel&quot;,&quot;type&quot;:&quot;boolean&quot;,&quot;nullable&quot;:true,&quot;metadata&quot;:{}},{&quot;name&quot;:&quot;gt&quot;,&quot;type&quot;:&quot;string&quot;,&quot;nullable&quot;:true,&quot;metadata&quot;:{}},{&quot;name&quot;:&quot;dp&quot;,&quot;type&quot;:&quot;integer&quot;,&quot;nullable&quot;:true,&quot;metadata&quot;:{}},{&quot;name&quot;:&quot;gq&quot;,&quot;type&quot;:&quot;integer&quot;,&quot;nullable&quot;:true,&quot;metadata&quot;:{}},{&quot;name&quot;:&quot;pl&quot;,&quot;type&quot;:&quot;string&quot;,&quot;nullable&quot;:true,&quot;metadata&quot;:{}},{&quot;name&quot;:&quot;ad&quot;,&quot;type&quot;:&quot;string&quot;,&quot;nullable&quot;:true,&quot;metadata&quot;:{}},{&quot;name&quot;:&quot;sampleId&quot;,&quot;type&quot;:&quot;string&quot;,&quot;nullable&quot;:true,&quot;metadata&quot;:{}},{&quot;name&quot;:&quot;chrom&quot;,&quot;type&quot;:&quot;integer&quot;,&quot;nullable&quot;:true,&quot;metadata&quot;:{}}]}}\" type=\"text/x-scoped-javascript\">/*<![CDATA[*/req(['../javascripts/notebook/dataframe','../javascripts/notebook/consoleDir'], \n      function(dataframe, extension) {\n        dataframe.call(data, this, extension);\n      }\n    );/*]]>*/</script>\n      <link rel=\"stylesheet\" href=\"/assets/stylesheets/ipython/css/dataframe.css\" type=\"text/css\"/>\n    </div>"
+      },
+      "output_type" : "execute_result",
+      "execution_count" : 5
+    } ]
+  }, {
+    "metadata" : {
+      "trusted" : true,
+      "input_collapsed" : false,
+      "collapsed" : false
+    },
+    "cell_type" : "code",
+    "source" : "import org.apache.spark.sql.functions._\nval samplesGroup=samples.groupBy(\"ref\",\"alt\").agg(collect_list(json_tuple(samples(\"sampleId\"),\"sampleID\")))",
+    "outputs" : [ {
+      "name" : "stdout",
+      "output_type" : "stream",
+      "text" : "org.apache.spark.sql.AnalysisException: No handler for Hive udf class org.apache.hadoop.hive.ql.udf.generic.GenericUDAFCollectList because: null.;\n\tat org.apache.spark.sql.hive.HiveFunctionRegistry$$anonfun$lookupFunction$2.apply(hiveUDFs.scala:105)\n\tat org.apache.spark.sql.hive.HiveFunctionRegistry$$anonfun$lookupFunction$2.apply(hiveUDFs.scala:64)\n\tat scala.util.Try.getOrElse(Try.scala:77)\n\tat org.apache.spark.sql.hive.HiveFunctionRegistry.lookupFunction(hiveUDFs.scala:64)\n\tat org.apache.spark.sql.catalyst.analysis.Analyzer$ResolveFunctions$$anonfun$apply$12$$anonfun$applyOrElse$5$$anonfun$applyOrElse$24.apply(Analyzer.scala:574)\n\tat org.apache.spark.sql.catalyst.analysis.Analyzer$ResolveFunctions$$anonfun$apply$12$$anonfun$applyOrElse$5$$anonfun$applyOrElse$24.apply(Analyzer.scala:574)\n\tat org.apache.spark.sql.catalyst.analysis.package$.withPosition(package.scala:48)\n\tat org.apache.spark.sql.catalyst.analysis.Analyzer$ResolveFunctions$$anonfun$apply$12$$anonfun$applyOrElse$5.applyOrElse(Analyzer.scala:573)\n\tat org.apache.spark.sql.catalyst.analysis.Analyzer$ResolveFunctions$$anonfun$apply$12$$anonfun$applyOrElse$5.applyOrElse(Analyzer.scala:570)\n\tat org.apache.spark.sql.catalyst.trees.TreeNode$$anonfun$3.apply(TreeNode.scala:243)\n\tat org.apache.spark.sql.catalyst.trees.TreeNode$$anonfun$3.apply(TreeNode.scala:243)\n\tat org.apache.spark.sql.catalyst.trees.CurrentOrigin$.withOrigin(TreeNode.scala:53)\n\tat org.apache.spark.sql.catalyst.trees.TreeNode.transformDown(TreeNode.scala:242)\n\tat org.apache.spark.sql.catalyst.trees.TreeNode$$anonfun$transformDown$1.apply(TreeNode.scala:248)\n\tat org.apache.spark.sql.catalyst.trees.TreeNode$$anonfun$transformDown$1.apply(TreeNode.scala:248)\n\tat org.apache.spark.sql.catalyst.trees.TreeNode$$anonfun$4.apply(TreeNode.scala:265)\n\tat scala.collection.Iterator$$anon$11.next(Iterator.scala:328)\n\tat scala.collection.Iterator$class.foreach(Iterator.scala:727)\n\tat scala.collection.AbstractIterator.foreach(Iterator.scala:1157)\n\tat scala.collection.generic.Growable$class.$plus$plus$eq(Growable.scala:48)\n\tat scala.collection.mutable.ArrayBuffer.$plus$plus$eq(ArrayBuffer.scala:103)\n\tat scala.collection.mutable.ArrayBuffer.$plus$plus$eq(ArrayBuffer.scala:47)\n\tat scala.collection.TraversableOnce$class.to(TraversableOnce.scala:273)\n\tat scala.collection.AbstractIterator.to(Iterator.scala:1157)\n\tat scala.collection.TraversableOnce$class.toBuffer(TraversableOnce.scala:265)\n\tat scala.collection.AbstractIterator.toBuffer(Iterator.scala:1157)\n\tat scala.collection.TraversableOnce$class.toArray(TraversableOnce.scala:252)\n\tat scala.collection.AbstractIterator.toArray(Iterator.scala:1157)\n\tat org.apache.spark.sql.catalyst.trees.TreeNode.transformChildren(TreeNode.scala:305)\n\tat org.apache.spark.sql.catalyst.trees.TreeNode.transformDown(TreeNode.scala:248)\n\tat org.apache.spark.sql.catalyst.plans.QueryPlan.transformExpressionDown$1(QueryPlan.scala:75)\n\tat org.apache.spark.sql.catalyst.plans.QueryPlan.org$apache$spark$sql$catalyst$plans$QueryPlan$$recursiveTransform$1(QueryPlan.scala:85)\n\tat org.apache.spark.sql.catalyst.plans.QueryPlan$$anonfun$org$apache$spark$sql$catalyst$plans$QueryPlan$$recursiveTransform$1$1.apply(QueryPlan.scala:89)\n\tat scala.collection.TraversableLike$$anonfun$map$1.apply(TraversableLike.scala:244)\n\tat scala.collection.TraversableLike$$anonfun$map$1.apply(TraversableLike.scala:244)\n\tat scala.collection.mutable.ResizableArray$class.foreach(ResizableArray.scala:59)\n\tat scala.collection.mutable.ArrayBuffer.foreach(ArrayBuffer.scala:47)\n\tat scala.collection.TraversableLike$class.map(TraversableLike.scala:244)\n\tat scala.collection.AbstractTraversable.map(Traversable.scala:105)\n\tat org.apache.spark.sql.catalyst.plans.QueryPlan.org$apache$spark$sql$catalyst$plans$QueryPlan$$recursiveTransform$1(QueryPlan.scala:89)\n\tat org.apache.spark.sql.catalyst.plans.QueryPlan$$anonfun$1.apply(QueryPlan.scala:93)\n\tat scala.collection.Iterator$$anon$11.next(Iterator.scala:328)\n\tat scala.collection.Iterator$class.foreach(Iterator.scala:727)\n\tat scala.collection.AbstractIterator.foreach(Iterator.scala:1157)\n\tat scala.collection.generic.Growable$class.$plus$plus$eq(Growable.scala:48)\n\tat scala.collection.mutable.ArrayBuffer.$plus$plus$eq(ArrayBuffer.scala:103)\n\tat scala.collection.mutable.ArrayBuffer.$plus$plus$eq(ArrayBuffer.scala:47)\n\tat scala.collection.TraversableOnce$class.to(TraversableOnce.scala:273)\n\tat scala.collection.AbstractIterator.to(Iterator.scala:1157)\n\tat scala.collection.TraversableOnce$class.toBuffer(TraversableOnce.scala:265)\n\tat scala.collection.AbstractIterator.toBuffer(Iterator.scala:1157)\n\tat scala.collection.TraversableOnce$class.toArray(TraversableOnce.scala:252)\n\tat scala.collection.AbstractIterator.toArray(Iterator.scala:1157)\n\tat org.apache.spark.sql.catalyst.plans.QueryPlan.transformExpressionsDown(QueryPlan.scala:93)\n\tat org.apache.spark.sql.catalyst.plans.QueryPlan.transformExpressions(QueryPlan.scala:64)\n\tat org.apache.spark.sql.catalyst.analysis.Analyzer$ResolveFunctions$$anonfun$apply$12.applyOrElse(Analyzer.scala:570)\n\tat org.apache.spark.sql.catalyst.analysis.Analyzer$ResolveFunctions$$anonfun$apply$12.applyOrElse(Analyzer.scala:568)\n\tat org.apache.spark.sql.catalyst.plans.logical.LogicalPlan$$anonfun$resolveOperators$1.apply(LogicalPlan.scala:57)\n\tat org.apache.spark.sql.catalyst.plans.logical.LogicalPlan$$anonfun$resolveOperators$1.apply(LogicalPlan.scala:57)\n\tat org.apache.spark.sql.catalyst.trees.CurrentOrigin$.withOrigin(TreeNode.scala:53)\n\tat org.apache.spark.sql.catalyst.plans.logical.LogicalPlan.resolveOperators(LogicalPlan.scala:56)\n\tat org.apache.spark.sql.catalyst.analysis.Analyzer$ResolveFunctions$.apply(Analyzer.scala:568)\n\tat org.apache.spark.sql.catalyst.analysis.Analyzer$ResolveFunctions$.apply(Analyzer.scala:567)\n\tat org.apache.spark.sql.catalyst.rules.RuleExecutor$$anonfun$execute$1$$anonfun$apply$1.apply(RuleExecutor.scala:83)\n\tat org.apache.spark.sql.catalyst.rules.RuleExecutor$$anonfun$execute$1$$anonfun$apply$1.apply(RuleExecutor.scala:80)\n\tat scala.collection.LinearSeqOptimized$class.foldLeft(LinearSeqOptimized.scala:111)\n\tat scala.collection.immutable.List.foldLeft(List.scala:84)\n\tat org.apache.spark.sql.catalyst.rules.RuleExecutor$$anonfun$execute$1.apply(RuleExecutor.scala:80)\n\tat org.apache.spark.sql.catalyst.rules.RuleExecutor$$anonfun$execute$1.apply(RuleExecutor.scala:72)\n\tat scala.collection.immutable.List.foreach(List.scala:318)\n\tat org.apache.spark.sql.catalyst.rules.RuleExecutor.execute(RuleExecutor.scala:72)\n\tat org.apache.spark.sql.execution.QueryExecution.analyzed$lzycompute(QueryExecution.scala:36)\n\tat org.apache.spark.sql.execution.QueryExecution.analyzed(QueryExecution.scala:36)\n\tat org.apache.spark.sql.execution.QueryExecution.assertAnalyzed(QueryExecution.scala:34)\n\tat org.apache.spark.sql.DataFrame.<init>(DataFrame.scala:133)\n\tat org.apache.spark.sql.DataFrame$.apply(DataFrame.scala:52)\n\tat org.apache.spark.sql.GroupedData.toDF(GroupedData.scala:57)\n\tat org.apache.spark.sql.GroupedData.agg(GroupedData.scala:213)\n\tat $iwC$$iwC$$iwC$$iwC$$iwC$$iwC$$iwC.<init>(<console>:36)\n\tat $iwC$$iwC$$iwC$$iwC$$iwC$$iwC.<init>(<console>:42)\n\tat $iwC$$iwC$$iwC$$iwC$$iwC.<init>(<console>:44)\n\tat $iwC$$iwC$$iwC$$iwC.<init>(<console>:46)\n\tat $iwC$$iwC$$iwC.<init>(<console>:48)\n\tat $iwC$$iwC.<init>(<console>:50)\n\tat $iwC.<init>(<console>:52)\n\tat <init>(<console>:54)\n\tat .<init>(<console>:58)\n\tat .<clinit>(<console>)\n\tat .<init>(<console>:7)\n\tat .<clinit>(<console>)\n\tat $print(<console>)\n\tat sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)\n\tat sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)\n\tat sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)\n\tat java.lang.reflect.Method.invoke(Method.java:483)\n\tat org.apache.spark.repl.SparkIMain$ReadEvalPrint.call(SparkIMain.scala:1065)\n\tat org.apache.spark.repl.SparkIMain$Request.loadAndRun(SparkIMain.scala:1346)\n\tat org.apache.spark.repl.SparkIMain.loadAndRunReq$1(SparkIMain.scala:840)\n\tat org.apache.spark.repl.SparkIMain.interpret(SparkIMain.scala:871)\n\tat org.apache.spark.repl.SparkIMain.interpret(SparkIMain.scala:819)\n\tat notebook.kernel.Repl$$anonfun$3.apply(Repl.scala:173)\n\tat notebook.kernel.Repl$$anonfun$3.apply(Repl.scala:173)\n\tat scala.util.DynamicVariable.withValue(DynamicVariable.scala:57)\n\tat scala.Console$.withOut(Console.scala:126)\n\tat notebook.kernel.Repl.evaluate(Repl.scala:172)\n\tat notebook.client.ReplCalculator$$anonfun$10$$anon$1$$anonfun$24.apply(ReplCalculator.scala:364)\n\tat notebook.client.ReplCalculator$$anonfun$10$$anon$1$$anonfun$24.apply(ReplCalculator.scala:361)\n\tat scala.concurrent.impl.Future$PromiseCompletingRunnable.liftedTree1$1(Future.scala:24)\n\tat scala.concurrent.impl.Future$PromiseCompletingRunnable.run(Future.scala:24)\n\tat akka.dispatch.TaskInvocation.run(AbstractDispatcher.scala:40)\n\tat akka.dispatch.ForkJoinExecutorConfigurator$AkkaForkJoinTask.exec(AbstractDispatcher.scala:397)\n\tat scala.concurrent.forkjoin.ForkJoinTask.doExec(ForkJoinTask.java:260)\n\tat scala.concurrent.forkjoin.ForkJoinPool$WorkQueue.runTask(ForkJoinPool.java:1339)\n\tat scala.concurrent.forkjoin.ForkJoinPool.runWorker(ForkJoinPool.java:1979)\n\tat scala.concurrent.forkjoin.ForkJoinWorkerThread.run(ForkJoinWorkerThread.java:107)\n\n"
+    } ]
+  }, {
+    "metadata" : {
+      "trusted" : true,
+      "input_collapsed" : false,
+      "collapsed" : false
+    },
+    "cell_type" : "code",
+    "source" : "samplesGroup.take(10)",
+    "outputs" : [ {
+      "name" : "stdout",
+      "output_type" : "stream",
+      "text" : "res8: Array[org.apache.spark.sql.Row] = Array([A,AAAAT,WrappedArray(NA12878, NA12891, NA12892),WrappedArray(99, 44, 42, 93, 36, 33)], [A,ACGG,WrappedArray(NA12878, NA12891),WrappedArray(99)], [AAAAG,AAAGAAAG,WrappedArray(NA12892),WrappedArray(57)], [ACTCT,ACT,WrappedArray(NA12892),WrappedArray(99)], [CAAAAAAA,<NON_REF>,WrappedArray(NA12878),WrappedArray(61)], [CAATAAATA,CAATA,WrappedArray(NA12878, NA12891),WrappedArray(99)], [CAT,C,WrappedArray(NA12878, NA12891, NA12892),WrappedArray(99, 41, 21, 62, 23, 28, 45, 20, 79, 63)], [CATTT,C,WrappedArray(NA12878, NA12891),WrappedArray(99, 63)], [CTGTG,CTGTGTG,WrappedArray(NA12878),WrappedArray(28)], [GAAGAAGAAAAGAAGAAGAAGAAGAAGAAGAA,G,WrappedArray(NA12892),WrappedArray(99)])\n"
+    }, {
+      "metadata" : { },
+      "data" : {
+        "text/html" : "<div class=\"container-fluid\"><div><div class=\"col-md-12\"><div>\n      <script data-this=\"{&quot;dataId&quot;:&quot;anoneb2d436beb900de30f4117bacf9412d6&quot;,&quot;dataInit&quot;:[{&quot;ref&quot;:&quot;A&quot;,&quot;alt&quot;:&quot;AAAAT&quot;,&quot;collect_set(sampleId)&quot;:[&quot;NA12878&quot;,&quot;NA12891&quot;,&quot;NA12892&quot;],&quot;collect_set(gq)&quot;:[99,44,42,93,36,33]},{&quot;ref&quot;:&quot;A&quot;,&quot;alt&quot;:&quot;ACGG&quot;,&quot;collect_set(sampleId)&quot;:[&quot;NA12878&quot;,&quot;NA12891&quot;],&quot;collect_set(gq)&quot;:[99]},{&quot;ref&quot;:&quot;AAAAG&quot;,&quot;alt&quot;:&quot;AAAGAAAG&quot;,&quot;collect_set(sampleId)&quot;:[&quot;NA12892&quot;],&quot;collect_set(gq)&quot;:[57]},{&quot;ref&quot;:&quot;ACTCT&quot;,&quot;alt&quot;:&quot;ACT&quot;,&quot;collect_set(sampleId)&quot;:[&quot;NA12892&quot;],&quot;collect_set(gq)&quot;:[99]},{&quot;ref&quot;:&quot;CAAAAAAA&quot;,&quot;alt&quot;:&quot;&lt;NON_REF&gt;&quot;,&quot;collect_set(sampleId)&quot;:[&quot;NA12878&quot;],&quot;collect_set(gq)&quot;:[61]},{&quot;ref&quot;:&quot;CAATAAATA&quot;,&quot;alt&quot;:&quot;CAATA&quot;,&quot;collect_set(sampleId)&quot;:[&quot;NA12878&quot;,&quot;NA12891&quot;],&quot;collect_set(gq)&quot;:[99]},{&quot;ref&quot;:&quot;CAT&quot;,&quot;alt&quot;:&quot;C&quot;,&quot;collect_set(sampleId)&quot;:[&quot;NA12878&quot;,&quot;NA12891&quot;,&quot;NA12892&quot;],&quot;collect_set(gq)&quot;:[99,41,21,62,23,28,45,20,79,63]},{&quot;ref&quot;:&quot;CATTT&quot;,&quot;alt&quot;:&quot;C&quot;,&quot;collect_set(sampleId)&quot;:[&quot;NA12878&quot;,&quot;NA12891&quot;],&quot;collect_set(gq)&quot;:[99,63]},{&quot;ref&quot;:&quot;CTGTG&quot;,&quot;alt&quot;:&quot;CTGTGTG&quot;,&quot;collect_set(sampleId)&quot;:[&quot;NA12878&quot;],&quot;collect_set(gq)&quot;:[28]},{&quot;ref&quot;:&quot;GAAGAAGAAAAGAAGAAGAAGAAGAAGAAGAA&quot;,&quot;alt&quot;:&quot;G&quot;,&quot;collect_set(sampleId)&quot;:[&quot;NA12892&quot;],&quot;collect_set(gq)&quot;:[99]}],&quot;genId&quot;:&quot;1933399558&quot;}\" type=\"text/x-scoped-javascript\">/*<![CDATA[*/req(['../javascripts/notebook/playground','../javascripts/notebook/magic/tableChart'], \n      function(playground, _magictableChart) {\n        // data ==> data-this (in observable.js's scopedEval) ==> this in JS => { dataId, dataInit, ... }\n        // this ==> scope (in observable.js's scopedEval) ==> this.parentElement ==> div.container below (toHtml)\n\n        playground.call(data,\n                        this\n                        ,\n                        {\n    \"f\": _magictableChart,\n    \"o\": {\"headers\":[\"ref\",\"alt\",\"collect_set(sampleId)\",\"collect_set(gq)\"],\"width\":600,\"height\":400}\n  }\n  \n                        \n                        \n                      );\n      }\n    );/*]]>*/</script>\n    <div>\n        <label for=\"input-anon20343fb0ec28f7e44b029e7780e3f9a8\">\n      Max Points\n    </label><input id=\"input-anon20343fb0ec28f7e44b029e7780e3f9a8\" type=\"number\" name=\"input-anon20343fb0ec28f7e44b029e7780e3f9a8\" data-bind=\"textInput: value, fireChange: true, valueUpdate: 'input'\">\n      <script data-selector=\"#input-anon20343fb0ec28f7e44b029e7780e3f9a8\" data-this=\"{&quot;valueId&quot;:&quot;anon20343fb0ec28f7e44b029e7780e3f9a8&quot;,&quot;valueInit&quot;:25}\" type=\"text/x-scoped-javascript\">/*<![CDATA[*/req(\n ['observable', 'knockout'],\n function (Observable, ko) {\n   //console.log(\"-----------\")\n   //console.dir(this);\n   //console.dir(valueId);\n   var obs = Observable.makeObservable(valueId)\n                       .extend({ rateLimit: { //throttle\n                                   timeout: 500,\n                                   method: \"notifyWhenChangesStop\"\n                                 }\n                               }\n                       );\n   ko.applyBindings({\n     value: obs\n   }, this);\n   obs(valueInit);\n }\n)/*]]>*/</script>\n    </input>\n        <p data-bind=\"text: value\"><script data-this=\"{&quot;valueId&quot;:&quot;anonb7851485dbe7b6727eceb14f76f2ba2f&quot;}\" type=\"text/x-scoped-javascript\">/*<![CDATA[*/\nreq(\n['observable', 'knockout'],\nfunction (O, ko) {\n  ko.applyBindings({\n      value: O.makeObservable(valueId)\n    },\n    this\n  );\n});\n        /*]]>*/</script></p> <span style=\"color:red\"><p data-bind=\"text: value\"><script data-this=\"{&quot;valueId&quot;:&quot;anon5e4f6a641b2c6525e0b41e160225c7d1&quot;}\" type=\"text/x-scoped-javascript\">/*<![CDATA[*/\nreq(\n['observable', 'knockout'],\nfunction (O, ko) {\n  ko.applyBindings({\n      value: O.makeObservable(valueId)\n    },\n    this\n  );\n});\n        /*]]>*/</script></p></span>\n        <div>\n        </div>\n      </div></div></div></div></div>"
+      },
+      "output_type" : "execute_result",
+      "execution_count" : 19
+    } ]
+  }, {
+    "metadata" : {
+      "trusted" : true,
+      "input_collapsed" : false,
+      "collapsed" : false
+    },
+    "cell_type" : "code",
+    "source" : "import org.apache.spark.sql.Row\nimport org.apache.spark.sql.expressions.{MutableAggregationBuffer, UserDefinedAggregateFunction}\nimport org.apache.spark.sql.types._\nimport org.apache.spark.sql.types.StructType\nimport org.apache.spark.sql.types.StructField",
+    "outputs" : [ {
+      "name" : "stdout",
+      "output_type" : "stream",
+      "text" : "import org.apache.spark.sql.Row\nimport org.apache.spark.sql.expressions.{MutableAggregationBuffer, UserDefinedAggregateFunction}\nimport org.apache.spark.sql.types._\nimport org.apache.spark.sql.types.StructType\nimport org.apache.spark.sql.types.StructField\n"
+    }, {
+      "metadata" : { },
+      "data" : {
+        "text/html" : ""
+      },
+      "output_type" : "execute_result",
+      "execution_count" : 32
+    } ]
+  }, {
+    "metadata" : {
+      "trusted" : true,
+      "input_collapsed" : false,
+      "collapsed" : false
+    },
+    "cell_type" : "code",
+    "source" : "import org.apache.spark.sql.types._\nclass CustomMean() extends UserDefinedAggregateFunction {\n \n  // Input Data Type Schema\n  def inputSchema: StructType = StructType(Array(StructField(\"item\", DoubleType)))\n \n  // Intermediate Schema\n  def bufferSchema = StructType(Array(\n    StructField(\"sum\", DoubleType),\n    StructField(\"cnt\", LongType)\n  ))\n \n  // Returned Data Type .\n  def dataType: DataType = DoubleType\n \n  // Self-explaining\n  def deterministic = true\n \n  // This function is called whenever key changes\n  def initialize(buffer: MutableAggregationBuffer) = {\n    buffer(0) = 0.toDouble // set sum to zero\n    buffer(1) = 0L // set number of items to 0\n  }\n \n  // Iterate over each entry of a group\n  def update(buffer: MutableAggregationBuffer, input: Row) = {\n    buffer(0) = buffer.getDouble(0) + input.getDouble(0)\n    buffer(1) = buffer.getLong(1) + 1\n  }\n \n  // Merge two partial aggregates\n  def merge(buffer1: MutableAggregationBuffer, buffer2: Row) = {\n    buffer1(0) = buffer1.getDouble(0) + buffer2.getDouble(0)\n    buffer1(1) = buffer1.getLong(1) + buffer2.getLong(1)\n  }\n \n  // Called after all the entries are exhausted.\n  def evaluate(buffer: Row) = {\n    buffer.getDouble(0)/buffer.getLong(1).toDouble\n  }\n \n}",
+    "outputs" : [ {
+      "name" : "stdout",
+      "output_type" : "stream",
+      "text" : "import org.apache.spark.sql.types._\ndefined class CustomMean\n"
+    }, {
+      "metadata" : { },
+      "data" : {
+        "text/html" : ""
+      },
+      "output_type" : "execute_result",
+      "execution_count" : 34
+    } ]
+  }, {
+    "metadata" : {
+      "trusted" : true,
+      "input_collapsed" : false,
+      "collapsed" : false
+    },
+    "cell_type" : "code",
+    "source" : "val customMean = new CustomMean()\n",
+    "outputs" : [ {
+      "name" : "stdout",
+      "output_type" : "stream",
+      "text" : "customMean: CustomMean = $iwC$$iwC$CustomMean@6021db3c\n"
+    }, {
+      "metadata" : { },
+      "data" : {
+        "text/html" : "$line73.$read$$iwC$$iwC$CustomMean@6021db3c"
+      },
+      "output_type" : "execute_result",
+      "execution_count" : 35
+    } ]
+  }, {
+    "metadata" : {
+      "trusted" : true,
+      "input_collapsed" : false,
+      "collapsed" : true
+    },
+    "cell_type" : "code",
+    "source" : "",
+    "outputs" : [ ]
+  } ],
+  "nbformat" : 4
+}

@@ -1,0 +1,256 @@
+{
+  "metadata" : {
+    "name" : "Effects",
+    "user_save_timestamp" : "1970-01-01T01:00:00.000Z",
+    "auto_save_timestamp" : "1970-01-01T01:00:00.000Z",
+    "language_info" : {
+      "name" : "scala",
+      "file_extension" : "scala",
+      "codemirror_mode" : "text/x-scala"
+    },
+    "trusted" : true,
+    "customLocalRepo" : "/tmp/repo",
+    "customRepos" : null,
+    "customDeps" : null,
+    "customImports" : null,
+    "customArgs" : null,
+    "customSparkConf" : {
+      "spark.app.name" : "Notebook",
+      "spark.master" : "spark://<home>:<port>",
+      "spark.executor.memory" : "5G"
+    }
+  },
+  "cells" : [ {
+    "metadata" : {
+      "trusted" : true,
+      "input_collapsed" : false,
+      "collapsed" : false
+    },
+    "cell_type" : "code",
+    "source" : "import org.apache.spark.SparkContext\n",
+    "outputs" : [ {
+      "name" : "stdout",
+      "output_type" : "stream",
+      "text" : "import org.apache.spark.SparkContext\n"
+    }, {
+      "metadata" : { },
+      "data" : {
+        "text/html" : ""
+      },
+      "output_type" : "execute_result",
+      "execution_count" : 1
+    } ]
+  }, {
+    "metadata" : {
+      "trusted" : true,
+      "input_collapsed" : false,
+      "collapsed" : false
+    },
+    "cell_type" : "code",
+    "source" : "import org.apache.spark.SparkConf\nimport org.apache.spark.sql.functions",
+    "outputs" : [ {
+      "name" : "stdout",
+      "output_type" : "stream",
+      "text" : "import org.apache.spark.SparkConf\nimport org.apache.spark.sql.functions\n"
+    }, {
+      "metadata" : { },
+      "data" : {
+        "text/html" : ""
+      },
+      "output_type" : "execute_result",
+      "execution_count" : 2
+    } ]
+  }, {
+    "metadata" : {
+      "trusted" : true,
+      "input_collapsed" : false,
+      "collapsed" : false
+    },
+    "cell_type" : "code",
+    "source" : "    val conf = new SparkConf().setAppName(\"Genomics-ETL\").setMaster(\"local[2]\")\n    val sc = new SparkContext(conf)\n    val sqlContext = new org.apache.spark.sql.hive.HiveContext(sc)\n",
+    "outputs" : [ {
+      "name" : "stdout",
+      "output_type" : "stream",
+      "text" : "conf: org.apache.spark.SparkConf = org.apache.spark.SparkConf@63dc9b6b\nsc: org.apache.spark.SparkContext = org.apache.spark.SparkContext@61a54ff4\nsqlContext: org.apache.spark.sql.hive.HiveContext = org.apache.spark.sql.hive.HiveContext@5cb05b7d\n"
+    }, {
+      "metadata" : { },
+      "data" : {
+        "text/html" : "org.apache.spark.sql.hive.HiveContext@5cb05b7d"
+      },
+      "output_type" : "execute_result",
+      "execution_count" : 3
+    } ]
+  }, {
+    "metadata" : {
+      "trusted" : true,
+      "input_collapsed" : false,
+      "collapsed" : false
+    },
+    "cell_type" : "code",
+    "source" : "val samples = sqlContext.load(\"/Users/dpiscia/RD-repositories/GenPipe/out/V5.1/loaded/\")",
+    "outputs" : [ {
+      "name" : "stdout",
+      "output_type" : "stream",
+      "text" : "<console>:22: warning: method load in class SQLContext is deprecated: Use read.load(path). This will be removed in Spark 2.0.\n         val samples = sqlContext.load(\"/Users/dpiscia/RD-repositories/GenPipe/out/V5.1/loaded/\")\n                                  ^\nsamples: org.apache.spark.sql.DataFrame = [pos: int, ID: string, ref: string, alt: string, qual: string, filter: string, info: string, format: string, Sample: string, SampleID: string, chrom: int]\n"
+    }, {
+      "metadata" : { },
+      "data" : {
+        "text/html" : "<div class=\"df-canvas\">\n      <script data-this=\"{&quot;dataId&quot;:&quot;anon0f33d3f3d8c999e0cecd3a7af9a33516&quot;,&quot;partitionIndexId&quot;:&quot;anon75ba1ed9fdaa6d1e24de2ffe4d5f5a41&quot;,&quot;numPartitions&quot;:402745,&quot;dfSchema&quot;:{&quot;type&quot;:&quot;struct&quot;,&quot;fields&quot;:[{&quot;name&quot;:&quot;pos&quot;,&quot;type&quot;:&quot;integer&quot;,&quot;nullable&quot;:true,&quot;metadata&quot;:{}},{&quot;name&quot;:&quot;ID&quot;,&quot;type&quot;:&quot;string&quot;,&quot;nullable&quot;:true,&quot;metadata&quot;:{}},{&quot;name&quot;:&quot;ref&quot;,&quot;type&quot;:&quot;string&quot;,&quot;nullable&quot;:true,&quot;metadata&quot;:{}},{&quot;name&quot;:&quot;alt&quot;,&quot;type&quot;:&quot;string&quot;,&quot;nullable&quot;:true,&quot;metadata&quot;:{}},{&quot;name&quot;:&quot;qual&quot;,&quot;type&quot;:&quot;string&quot;,&quot;nullable&quot;:true,&quot;metadata&quot;:{}},{&quot;name&quot;:&quot;filter&quot;,&quot;type&quot;:&quot;string&quot;,&quot;nullable&quot;:true,&quot;metadata&quot;:{}},{&quot;name&quot;:&quot;info&quot;,&quot;type&quot;:&quot;string&quot;,&quot;nullable&quot;:true,&quot;metadata&quot;:{}},{&quot;name&quot;:&quot;format&quot;,&quot;type&quot;:&quot;string&quot;,&quot;nullable&quot;:true,&quot;metadata&quot;:{}},{&quot;name&quot;:&quot;Sample&quot;,&quot;type&quot;:&quot;string&quot;,&quot;nullable&quot;:true,&quot;metadata&quot;:{}},{&quot;name&quot;:&quot;SampleID&quot;,&quot;type&quot;:&quot;string&quot;,&quot;nullable&quot;:true,&quot;metadata&quot;:{}},{&quot;name&quot;:&quot;chrom&quot;,&quot;type&quot;:&quot;integer&quot;,&quot;nullable&quot;:true,&quot;metadata&quot;:{}}]}}\" type=\"text/x-scoped-javascript\">/*<![CDATA[*/req(['../javascripts/notebook/dataframe','../javascripts/notebook/consoleDir'], \n      function(dataframe, extension) {\n        dataframe.call(data, this, extension);\n      }\n    );/*]]>*/</script>\n      <link rel=\"stylesheet\" href=\"/assets/stylesheets/ipython/css/dataframe.css\" type=\"text/css\"/>\n    </div>"
+      },
+      "output_type" : "execute_result",
+      "execution_count" : 4
+    } ]
+  }, {
+    "metadata" : {
+      "trusted" : true,
+      "input_collapsed" : false,
+      "collapsed" : false
+    },
+    "cell_type" : "code",
+    "source" : "  val infoMap = toMap(info)\n",
+    "outputs" : [ {
+      "name" : "stdout",
+      "output_type" : "stream",
+      "text" : "<console>:16: error: not found: value toMap\n           val infoMap = toMap(info)\n                         ^\n"
+    } ]
+  }, {
+    "metadata" : {
+      "trusted" : true,
+      "input_collapsed" : false,
+      "collapsed" : false
+    },
+    "cell_type" : "code",
+    "source" : "println(\"dd\")",
+    "outputs" : [ {
+      "name" : "stdout",
+      "output_type" : "stream",
+      "text" : "dd\n"
+    }, {
+      "metadata" : { },
+      "data" : {
+        "text/html" : ""
+      },
+      "output_type" : "execute_result",
+      "execution_count" : 6
+    } ]
+  }, {
+    "metadata" : {
+      "trusted" : true,
+      "input_collapsed" : false,
+      "collapsed" : false
+    },
+    "cell_type" : "code",
+    "source" : "samples.registerTempTable(\"sample\")",
+    "outputs" : [ {
+      "metadata" : { },
+      "data" : {
+        "text/html" : ""
+      },
+      "output_type" : "execute_result",
+      "execution_count" : 8
+    } ]
+  }, {
+    "metadata" : {
+      "trusted" : true,
+      "input_collapsed" : false,
+      "collapsed" : false
+    },
+    "cell_type" : "code",
+    "source" : "\ndef formatCase(format : Any, sample : String):(String,Int,Double,String,String)={\n  val sA = sample.split(\":\")\n  //gt,dp,gq,pl,ad\n  //ad should be handled for multiallelic positions\n  format match {\n    case \"GT:DP:GQ:MIN_DP:PL\" => (sA(0),sA(1).trim.toInt,sA(2).trim.toDouble,sA(4),\"\")\n    case \"GT:GQ:PL:SB\" => (sA(0),0,sA(1).trim.toDouble,sA(2),\"\") \n    case \"GT:AD:DP:GQ:PGT:PID:PL:SB\" => (sA(0),sA(2).trim.toInt,sA(3).trim.toDouble,sA(6),sA(1)) \n    case \"GT:GQ:PGT:PID:PL:SB\" => (sA(0),0,0.0,\"\",\"\") \n    case \"GT:AD:DP:GQ:PL:SB\"=> (sA(0),sA(2).trim.toInt,sA(3).trim.toDouble,sA(4),sA(1))\n    case _ => (\"\",0,0.0,\"\",\"\")\n  }\n  \n}\n",
+    "outputs" : [ {
+      "name" : "stdout",
+      "output_type" : "stream",
+      "text" : "<console>:33: error: not found: type FunctionalEffect\n         if (raw_line == \"\") List[FunctionalEffect]()\n                                  ^\n"
+    } ]
+  }, {
+    "metadata" : {
+      "trusted" : true,
+      "input_collapsed" : false,
+      "collapsed" : false
+    },
+    "cell_type" : "code",
+    "source" : "case class FunctionalEffect(\n                  effect : String,effect_impact:String, functional_class : String,codon_change : String, amino_acid_change: String,amino_acid_length: String, gene_name : String,\n    transcript_biotype : String,gene_coding : String, transcript_id: String,exon_rank : String, geno_type_number : Int)\n\ndef functionalMap_parser(raw_line:String)=\n{ \n  if (raw_line == \"\") List[FunctionalEffect]()\n  val items=raw_line.split(\",\")\n  items.map(item => {\n    Map(\"effect\"->item.split(\"\\\\(\")(0),\n        \"effect_impact\"->   item.split(\"\\\\(\")(1).split(\"\\\\|\")(0),\n        \"functional_class\" ->  item.split(\"\\\\|\")(1),\n        \"codon_change \" ->  item.split(\"\\\\|\")(2),\n         \"amino_acid_change\"->  item.split(\"\\\\|\")(3),\n          \"amino_acid_length\"-> item.split(\"\\\\|\")(4),\n          \"gene_name\"-> item.split(\"\\\\|\")(5),\n          \"transcript_biotype\"-> item.split(\"\\\\|\")(6),\n          \"gene_coding\"-> item.split(\"\\\\|\")(7),\n          \"transcript_id\"-> item.split(\"\\\\|\")(8),\n          \"exon_rank\" -> item.split(\"\\\\|\")(9),\n          \"geno_type_number\"->item.split(\"\\\\|\")(10).replace(\")\",\"\"))       \n           \n    \n  })\n}",
+    "outputs" : [ {
+      "name" : "stdout",
+      "output_type" : "stream",
+      "text" : "defined class FunctionalEffect\nfunctionalMap_parser: (raw_line: String)Array[scala.collection.immutable.Map[String,String]]\n"
+    }, {
+      "metadata" : { },
+      "data" : {
+        "text/html" : ""
+      },
+      "output_type" : "execute_result",
+      "execution_count" : 54
+    } ]
+  }, {
+    "metadata" : {
+      "trusted" : true,
+      "input_collapsed" : false,
+      "collapsed" : false
+    },
+    "cell_type" : "code",
+    "source" : "val multi=sqlContext.sql(\"\"\" select format,sample  from sample where alt != '<NON_REF>' and size(split(alt,',')) == 3 limit 10\"\"\")",
+    "outputs" : [ {
+      "name" : "stdout",
+      "output_type" : "stream",
+      "text" : "multi: org.apache.spark.sql.DataFrame = [format: string, sample: string]\n"
+    }, {
+      "metadata" : { },
+      "data" : {
+        "text/html" : "<div class=\"df-canvas\">\n      <script data-this=\"{&quot;dataId&quot;:&quot;anon5ad6158fcbb591a45eeb167d9b714629&quot;,&quot;partitionIndexId&quot;:&quot;anon75ebc8c983872a872c0be0539a762931&quot;,&quot;numPartitions&quot;:1,&quot;dfSchema&quot;:{&quot;type&quot;:&quot;struct&quot;,&quot;fields&quot;:[{&quot;name&quot;:&quot;format&quot;,&quot;type&quot;:&quot;string&quot;,&quot;nullable&quot;:true,&quot;metadata&quot;:{}},{&quot;name&quot;:&quot;sample&quot;,&quot;type&quot;:&quot;string&quot;,&quot;nullable&quot;:true,&quot;metadata&quot;:{}}]}}\" type=\"text/x-scoped-javascript\">/*<![CDATA[*/req(['../javascripts/notebook/dataframe','../javascripts/notebook/consoleDir'], \n      function(dataframe, extension) {\n        dataframe.call(data, this, extension);\n      }\n    );/*]]>*/</script>\n      <link rel=\"stylesheet\" href=\"/assets/stylesheets/ipython/css/dataframe.css\" type=\"text/css\"/>\n    </div>"
+      },
+      "output_type" : "execute_result",
+      "execution_count" : 45
+    } ]
+  }, {
+    "metadata" : {
+      "trusted" : true,
+      "input_collapsed" : false,
+      "collapsed" : false
+    },
+    "cell_type" : "code",
+    "source" : "  val (gt,dp,gq,pl,ad) = formatCase(\"GT:AD:DP:GQ:PL:SB\",\"1/2:0,1,4,0:5:8:334,252,238,35,0,8,287,241,35,275:0,0,1,3\")\n",
+    "outputs" : [ {
+      "name" : "stdout",
+      "output_type" : "stream",
+      "text" : "gt: String = 1/2\ndp: Int = 5\ngq: Double = 8.0\npl: String = 334,252,238,35,0,8,287,241,35,275\nad: String = 0,1,4,0\n"
+    }, {
+      "metadata" : { },
+      "data" : {
+        "text/html" : "0,1,4,0"
+      },
+      "output_type" : "execute_result",
+      "execution_count" : 51
+    } ]
+  }, {
+    "metadata" : {
+      "trusted" : true,
+      "input_collapsed" : false,
+      "collapsed" : false
+    },
+    "cell_type" : "code",
+    "source" : "multi.select(\"sample\")",
+    "outputs" : [ {
+      "name" : "stdout",
+      "output_type" : "stream",
+      "text" : "res36: org.apache.spark.sql.DataFrame = [sample: string]\n"
+    }, {
+      "metadata" : { },
+      "data" : {
+        "text/html" : "<div class=\"df-canvas\">\n      <script data-this=\"{&quot;dataId&quot;:&quot;anon0b93ca60efc489e8d2e57d256db7f3d6&quot;,&quot;partitionIndexId&quot;:&quot;anona2a357aaca556aacef3a71a8f2c27b32&quot;,&quot;numPartitions&quot;:1,&quot;dfSchema&quot;:{&quot;type&quot;:&quot;struct&quot;,&quot;fields&quot;:[{&quot;name&quot;:&quot;sample&quot;,&quot;type&quot;:&quot;string&quot;,&quot;nullable&quot;:true,&quot;metadata&quot;:{}}]}}\" type=\"text/x-scoped-javascript\">/*<![CDATA[*/req(['../javascripts/notebook/dataframe','../javascripts/notebook/consoleDir'], \n      function(dataframe, extension) {\n        dataframe.call(data, this, extension);\n      }\n    );/*]]>*/</script>\n      <link rel=\"stylesheet\" href=\"/assets/stylesheets/ipython/css/dataframe.css\" type=\"text/css\"/>\n    </div>"
+      },
+      "output_type" : "execute_result",
+      "execution_count" : 48
+    } ]
+  }, {
+    "metadata" : {
+      "trusted" : true,
+      "input_collapsed" : false,
+      "collapsed" : true
+    },
+    "cell_type" : "code",
+    "source" : "",
+    "outputs" : [ ]
+  } ],
+  "nbformat" : 4
+}

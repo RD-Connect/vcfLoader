@@ -86,53 +86,60 @@ object Parser {
 
     def removedot(value: String, precision: Int) = {
       value match {
-        case "." => 0
-        case "" => 0
+        case "." => 0.0
+        case "" => 0.0
         case _ => truncateAt(value.toDouble, 4)
       }
     }
-  val res=gt.split("/").map(_.toInt).map(x=>{
 
-  (Predictions(SIFT_pred=SIFT_pred(x),
-    SIFT_score=SIFT_score(x).toInt,
-    pp2=pp2(x),
-    polyphen2_hvar_pred=Polyphen2_HVAR_pred(x),
-    polyphen2_hvar_score=Polyphen2_HVAR_score(x).toInt,
-    MutationTaster_pred=MutationTaster_pred(x),
-    mt=mt(x),
-    phyloP46way_placental=phyloP46way_placental(x),
-    GERP_RS=GERP_RS(x),
-    SiPhy_29way_pi=SiPhy_29way_pi(x),
-    CADD_phred=removedot(CADD_phred(x),0)),
-    Populations(removedot(esp6500_ea(x),4),
-                removedot(esp6500_aa(x),4),
-        removedot(Gp1_AFR_AF(x),4),
-        removedot(Gp1_ASN_AF(x),4),
-        removedot(Gp1_EUR_AF(x),4),
-        removedot(Gp1_AF(x),4),
-        removedot(exac(x),5)))
+    def getOrEmpty(list:Seq[String], index:Int)={
+      if (list.size> index) list(index)
+      else ""
+    }
+    val res=gt.split("/").map(_.toInt).map(x=>{
 
-})
+      (Predictions(SIFT_pred=getOrEmpty(SIFT_pred,x),
+        SIFT_score=removedot(getOrEmpty(SIFT_score,x),0),
+        pp2=getOrEmpty(pp2,x),
+        polyphen2_hvar_pred=getOrEmpty(Polyphen2_HVAR_pred,x),
+        polyphen2_hvar_score=removedot(getOrEmpty(Polyphen2_HVAR_score,x),0),
+        MutationTaster_pred=getOrEmpty(MutationTaster_pred,x),
+        mt=getOrEmpty(mt,x),
+        phyloP46way_placental=getOrEmpty(phyloP46way_placental,x),
+        GERP_RS=getOrEmpty(GERP_RS,x),
+        SiPhy_29way_pi=getOrEmpty(SiPhy_29way_pi,x),
+        CADD_phred=removedot(getOrEmpty(CADD_phred,x),0)),
+        Populations(removedot(getOrEmpty(esp6500_ea,x),4),
+          removedot(getOrEmpty(esp6500_aa,x),4),
+          removedot(getOrEmpty(Gp1_AFR_AF,x),4),
+          removedot(getOrEmpty(Gp1_ASN_AF,x),4),
+          removedot(getOrEmpty(Gp1_EUR_AF,x),4),
+          removedot(getOrEmpty(Gp1_AF,x),4),
+          removedot(getOrEmpty(exac,x),5)))
+
+    })
     res
-}
-  def main(sc :org.apache.spark.SparkContext,
+  }
+
+  def main(sqlContext :org.apache.spark.sql.SQLContext,
            rawData:org.apache.spark.sql.DataFrame,
            destination : String,
-           chromList : String,
-           chrom:String, chromBands : (Int,Int)
-           , repartitions:Int)= {
+           chrom:String,
+           chromBands : (Int,Int),
+           repartitions:Int)= {
 
-    val sqlContext = new org.apache.spark.sql.SQLContext(sc)
 
     import sqlContext.implicits._
 
-    val i = rawData.filter(rawData("chrom") === chrom).flatMap(a => sampleParser(a(0), a(1), a(2), a(3), a(6), a(7), a(8), a(9), chrom)).toDF()
+    val parsedData = rawData
+      .where(rawData("pos") >=chromBands._1)
+      .where(rawData("pos") < chromBands._2).filter(rawData("chrom") === chrom).flatMap(a => sampleParser(a(0), a(1), a(2), a(3), a(6), a(7), a(8), a(9), chrom)).toDF()
 
-    //i.where(i("dp")>7).where(i("gq")>19).save(destination+"/chrom="+chrom,SaveMode.Overwrite)
+    parsedData.where(parsedData("Sample.dp")>7).where(parsedData("Sample.gq")>19).save(destination+"/chrom="+chrom+"/band="+chromBands._2.toString,SaveMode.Overwrite)
 
   }
 
-  def sampleParser( pos:Any,ID:Any, ref:Any, alt:Any, info: Any, format: Any,  sampleline : Any, sampleID : Any,chrom : String)  = {
+  def sampleParser( pos:Any,ID:Any, ref:Any, alt:Any, info: Any, format: Any,  sampleline : Any, sampleID : Any,chrom : String):List[Variant]  = {
      val rs = getter(ID.toString,"RS")
      val (gt,dp,gq,pl,ad) = formatCase(format,sampleline.toString)
      val infoMap = toMap(info)
@@ -143,23 +150,26 @@ object Parser {
      val res=altSplitted.map(x=>{
 
        //if 0/ what about annotation?? Null Option
-       val altGenotype= x._3.split("/")(1).toInt
+       val altGenotype= x._3.toInt
+       val altPosition = x._2.split("/")(1).toInt
+
        val indel = (x._1.length>1) //maybe something ref legnth != 1 or pos !=1//wrong if alt is not handled correctly
        val posOK = pos.toString.toInt
        val endOK = endPos(x._1,info.toString,posOK)
        //it gets functional effetcs
        val functionalEffs = functionalMap_parser(effString).filter(effect => (altGenotype == effect.geno_type_number)).toList
 
-       //check if it's  band,if not return List(Sample)
-       Variant(posOK,endOK,ref.toString,x._1,rs(0),indel,Sample(x._2,dp,gq,pl,ADsplit(ad,gt),sampleID.toString),functionalEffs, anno(altGenotype)._1,anno(altGenotype)._2 )
+       altGenotype match{
+         case 0 => Variant(posOK,endOK,ref.toString,x._1,rs(0),indel,Sample(x._2,dp,gq,pl,ADsplit(ad,gt),sampleID.toString),functionalEffs, Predictions("",0.0,"","",0.0,"","","","","",0.0),Populations(0.0,0.0,0.0,0.0,0.0,0.0,0.0) )
+         case _ => Variant(posOK,endOK,ref.toString,x._1,rs(0),indel,Sample(x._2,dp,gq,pl,ADsplit(ad,gt),sampleID.toString),functionalEffs, anno(altPosition)._1,anno(altPosition)._2 )
 
+       }
 
      })
 
      res
 
   }
-
   def altMultiallelic(ref:String,alt:String,gt:String):List[(String,String,String)]={
     alt match {
       case "<NON_REF>" => List((alt,"0/0","0"))
@@ -169,8 +179,9 @@ object Parser {
           case _ =>
             val altList =  alt.split(",")
             val gtList =  gt.split("/")
-            gtList(0) match {
-              case "0" => List((altList(gtList(1).toInt-1),"0/1",gtList(1)))
+            gtList match {
+              case x if x(0) == "0" => List((altList(gtList(1).toInt-1),"0/1",gtList(1)))
+              case x if x(0) == x(1) => List((altList(gtList(1).toInt-1),"1/1",gtList(1)))
               case _ => List((altList(gtList(0).toInt-1),"0/1",gtList(0)),(altList(gtList(1).toInt-1),"0/1",gtList(1)))
               // case _ =>       altList(gtList(0).toInt -1)+","+altList(gtList(1).toInt -1)
             }
@@ -183,7 +194,6 @@ object Parser {
   * */
   def getter(value:String,pattern:String)={
     val matches=value.split(pattern+"=")
-    println(matches.size)
     matches.size match {
       case 1 => List("")
       case x:Int if x > 1 =>{
@@ -195,26 +205,27 @@ object Parser {
 
   }
 
-  def functionalMap_parser(raw_line:String)=
+  def functionalMap_parser(raw_line:String):List[FunctionalEffect]=
   {
     if (raw_line == "") List[FunctionalEffect]()
-    val items=raw_line.split(",")
-    items.map(item => {
-      FunctionalEffect(effect=item.split("\\(")(0),
-        effect_impact=item.split("\\(")(1).split("\\|")(0),
-        functional_class=item.split("\\|")(1),
-        codon_change=item.split("\\|")(2),
-        amino_acid_change=item.split("\\|")(3),
-        amino_acid_length=item.split("\\|")(4),
-        gene_name=item.split("\\|")(5),
-        transcript_biotype=item.split("\\|")(6),
-        gene_coding=item.split("\\|")(7),
-        transcript_id=item.split("\\|")(8),
-        exon_rank=item.split("\\|")(9),
-        geno_type_number=item.split("\\|")(10).replace(")","").toInt)
+    else {val items=raw_line.split(",")
+      items.map(item => {
+        FunctionalEffect(effect=item.split("\\(")(0),
+          effect_impact=item.split("\\(")(1).split("\\|")(0),
+          functional_class=item.split("\\|")(1),
+          codon_change=item.split("\\|")(2),
+          amino_acid_change=item.split("\\|")(3),
+          amino_acid_length=item.split("\\|")(4),
+          gene_name=item.split("\\|")(5),
+          transcript_biotype=item.split("\\|")(6),
+          gene_coding=item.split("\\|")(7),
+          transcript_id=item.split("\\|")(8),
+          exon_rank=item.split("\\|")(9),
+          geno_type_number=item.split("\\|")(10).replace(")","").toInt)
 
 
-    })
+      }).toList
+    }
   }
 
 }

@@ -67,7 +67,7 @@ def main(sc:org.apache.spark.SparkContext,
         }
         else if (index == files.length - 1) {
           RDD = file_to_parquet(sc, path + file +"." + chrom + ".annot.snpEff.p.g.vcf.gz", destination, chrom, file).union(RDD)
-          RDD.toDF.write.mode(SaveMode.Overwrite).format("parquet").save(destination+"/chrom="+chromStrToInt(chrom))
+          RDD.toDF.write.mode(SaveMode.Overwrite).save(destination+"/chrom="+chromStrToInt(chrom))
         }
 
         else

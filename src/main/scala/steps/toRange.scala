@@ -29,8 +29,8 @@ import sqlContext.implicits._
       //    .where(rawSample("sampleId")!=="E000010")
       .where(rawSample("alt")!=="<NON_REF>")
       .where(rawSample("chrom")===chromList)
-      .where(rawSample("gq") > 19)
-      .where(rawSample("dp") > 7)     //add indel,rs field here
+      .where(rawSample("Sample.gq") > 19)
+      .where(rawSample("Sample.dp") > 7)     //add indel,rs field here
       .where(rawSample("pos") >=banda._1)
       .where(rawSample("pos") < banda._2)
       .select("chrom","pos","ref","alt","rs","indel").distinct //if we put distinct it should be much better
@@ -39,12 +39,12 @@ import sqlContext.implicits._
         //    .where(rawSample("sampleId")==="E000010")
         .where(rawSample("alt")==="<NON_REF>")
         .where(rawSample("chrom")===chromList)
-        .where(rawSample("gq") > 19)
-        .where(rawSample("dp") > 7)
+        .where(rawSample("Sample.gq") > 19)
+        .where(rawSample("Sample.dp") > 7)
         .where(rawSample("end_pos") !== 0)
         .where(rawSample("pos") >=banda._1)
         .where(rawSample("pos") < banda._2)
-        .select("chrom","pos","end_pos","ref","alt","sampleId","gq","dp","ad")
+        .select("chrom","pos","end_pos","ref","alt","Sample.sampleId","Sample.gq","Sample.dp","Sample.ad")
 
     val bandsexp = bands.flatMap(banda =>Range(banda(1).toString.toInt,banda(2).toString.toInt+1)
       .map(a=>(banda(0).toString,

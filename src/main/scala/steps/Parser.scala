@@ -37,7 +37,8 @@ object Parser {
                               gene_coding: String,
                               transcript_id: String,
                               exon_rank: String,
-                              geno_type_number: Int)
+                              geno_type_number: Int,
+                              UMD:String)
 
   case class Predictions(SIFT_pred: String,
                   SIFT_score: Double,
@@ -222,7 +223,8 @@ object Parser {
           gene_coding=item.split("\\|")(7),
           transcript_id=item.split("\\|")(8),
           exon_rank=item.split("\\|")(9),
-          geno_type_number=item.split("\\|")(10).replace(")","").toInt)
+          geno_type_number=item.split("\\|")(10).replace(")","").toInt,
+         UMD="")
 
 
       }).toList

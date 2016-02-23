@@ -71,7 +71,7 @@ class LoadData extends FlatSpec with Matchers {
       }
       assert(sqlContext.load(destination + "/parsedSamples").count === 5689448)
 
-      
+
       if (pipeline.contains("interception")) {
         val rawSample = sqlContext.load(destination + "/rawSamples")
         for (ch <- chromList; band <- due) yield {

@@ -53,7 +53,7 @@ object GenomicsLoader {
     val configuration = ConfigFactory.load()
     val version= configuration.getString("version")
     val origin =configuration.getString("origin")
-
+    val originUMD=configuration.getString("originUMD")
     val destination =configuration.getString("destination")+version
     val sizePartition = configuration.getInt("sizePartition")
     val repartitions = configuration.getInt("repartitions") //30
@@ -81,6 +81,17 @@ object GenomicsLoader {
         steps.Parser.main(sqlContext, rawData, destination + "/parsedSamples",ch, band,repartitions)
       }
     }
+    if (pipeline.contains("umd.get")) {
+      val parsedSample = sqlContext.load(destination + "/parsedSamples")
+      for (ch <- chromList) yield {
+        steps.umd.prepareInput(sqlContext, parsedSample, destination + "/umd",ch)
+      }
+    }
+    if (pipeline.contains("umd.parse")) {
+      for (ch <- chromList) yield {
+        steps.umd.parseUMD(sc, originUMD, destination + "/umdAnnotated",ch)
+      }
+    }
     if (pipeline.contains("rawData")) {
       val rawData = sqlContext.load(destination + "/loaded")
       for (ch <- chromList) yield {
@@ -88,7 +99,8 @@ object GenomicsLoader {
       }
     }
     if (pipeline.contains("interception")) {
-      val rawSample = sqlContext.load(destination + "/rawSamples")
+      //val rawSample = sqlContext.load(destination + "/rawSamples")
+      val rawSample = sqlContext.load(destination + "/parsedSamples")
       for (ch <- chromList; band <- due) yield {
         steps.toRange.main(sc, rawSample, ch.toString, destination + "/ranges", band, repartitions)
       }

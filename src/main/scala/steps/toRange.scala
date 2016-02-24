@@ -9,6 +9,8 @@ import org.apache.spark.SparkContext._
 //import org.bdgenomics.formats.avro.{ AlignmentRecord, Contig }
 //import org.bdgenomics.adam.rdd.BroadcastRegionJoin
 import org.apache.spark.storage.StorageLevel.MEMORY_AND_DISK
+import steps.Parser.{Populations, Predictions, Variant, Sample}
+
 
 object toRange {
   case  class RangeData(pos:Long,ref:String,alt:String,rs:String, Indel:Boolean, sampleId:String,gq:Int,dp:Long,gt:String,ad:String)
@@ -21,7 +23,6 @@ val sqlContext = new org.apache.spark.sql.SQLContext(sc)
 
 // this is used to implicitly convert an RDD to a DataFrame.
 import sqlContext.implicits._
-
 
 
 
@@ -61,17 +62,21 @@ import sqlContext.implicits._
     //chrom,pos,ref,alt,sampleId,gq,dp,chrom,band
 
     val joined= variants.join(bandsexp,variants("pos")===bandsexp("_2"),"inner")
-      .map(a=>RangeData(
+      .map(a=>Variant(
+      a(1).toString.toInt,
       a(1).toString.toInt,
       a(2).toString,
       a(3).toString,//add a(4),a(5) for indel and rs and shift the other numbers
       a(4).toString,
       a(5).toString.toBoolean,
-      a(9).toString,
-      a(10).toString.toInt,
+      Sample("0/0",
       a(11).toString.toInt,
-      "0/0",
-      a(12).toString))
+      a(10).toString.toInt,
+      "",
+      a(12).toString,
+      false,
+        a(9).toString
+      ),List(),Predictions("",0.0,"","",0.0,"","","","","",0.0),Populations(0.0,0.0,0.0,0.0,0.0,0.0,0.0)))
     val res1=joined.toDF.save(destination+"/chrom="+chromList+"/band="+banda._2.toString)
     // val gro = ranges.groupBy(ranges("_1"),ranges("_2"),ranges("_3"),ranges("_4")).agg(array(ranges("_5"))).take(2)
 }

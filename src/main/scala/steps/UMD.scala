@@ -37,9 +37,11 @@ OR effectsExploded.effect_impact == 'LOW') """)
   }
 
   def annotated(sqlContext :org.apache.spark.sql.hive.HiveContext, parsedSample :org.apache.spark.sql.DataFrame, UMDannotations :org.apache.spark.sql.DataFrame,destination :String, chrom:String)={
-    parsedSample.registerTempTable("parsed")
+    val ParsedSampleUnique=parsedSample.select("pos","ref","alt","rs","indel","effects","predictions","populations").distinct
+    ParsedSampleUnique.registerTempTable("parsed")
+    //take only unique
     val parsedExploded=sqlContext.sql("""SELECT * FROM parsed LATERAL VIEW explode(effects) a AS effectsExploded """)
 
-    val joined=parsedExploded.join(UMDannotations, parsedExploded("effectsexploded.transcript_id")===UMDannotations("tr") ).save(destination+"/chrom="+chrom)
+    val joined=parsedExploded.join(UMDannotations, parsedExploded("effectsexploded.transcript_id")===UMDannotations("tr") && parsedExploded("pos")===UMDannotations("posUMD") ,"left").save(destination+"/chrom="+chrom)
   }
 }

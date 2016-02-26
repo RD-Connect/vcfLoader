@@ -37,8 +37,7 @@ object Parser {
                               gene_coding: String,
                               transcript_id: String,
                               exon_rank: String,
-                              geno_type_number: Int,
-                              UMD:String)
+                              geno_type_number: Int)
 
   case class Predictions(SIFT_pred: String,
                   SIFT_score: Double,
@@ -52,7 +51,7 @@ object Parser {
                   SiPhy_29way_pi: String,
                   CADD_phred: Double)
 
-  case class Populations(esp6500_all: Double,
+  case class Populations(esp6500_aa: Double,
                  esp6500_ea: Double,
                  gp1_afr_af: Double,
                  gp1_asn_af: Double,
@@ -60,6 +59,11 @@ object Parser {
                  gp1_af: Double,
                  exac: Double)
 
+  // for predictor we have multiple predictor for multiple alt
+  def getOrEmpty(list:Seq[String], index:Int)={
+    if (list.size> index-1 && index!=0) list(index-1)
+    else ""
+  }
   def annotation_parser(idMap: String, gt: String) = {
     val SIFT_pred = getter(idMap, "SIFT_pred")
     val SIFT_score = getter(idMap, "SIFT_score")
@@ -94,8 +98,10 @@ object Parser {
       }
     }
 
-    def getOrEmpty(list:Seq[String], index:Int)={
-      if (list.size> index) list(index)
+    //for population we only have one annotation for variant
+    def getOrEmpty2(list:Seq[String], index:Int)={
+      if (index==0) ""
+      else if (list.size> index-1) list(0)
       else ""
     }
     val res=gt.split("/").map(_.toInt).map(x=>{
@@ -223,8 +229,7 @@ object Parser {
           gene_coding=item.split("\\|")(7),
           transcript_id=item.split("\\|")(8),
           exon_rank=item.split("\\|")(9),
-          geno_type_number=item.split("\\|")(10).replace(")","").toInt,
-         UMD="")
+          geno_type_number=item.split("\\|")(10).replace(")","").toInt)
 
 
       }).toList

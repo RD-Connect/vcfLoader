@@ -14,21 +14,25 @@ object toSampleGrouped{
 
       */
    rawRange.registerTempTable("rawRange")
-   val ranges= rawRange.select("chrom","pos","ref","alt","sampleId","gq","dp","gt","ad","rs","indel") //add rs,indel
-    .where(rawRange("chrom")===chromList.toInt)
-     .where(rawRange("gq") > 19)
-     .where(rawRange("dp") > 7)
+
+
+     val ranges= rawRange //add rs,indel
+     .where(rawRange("chrom")===chromList.toInt)
+     .where(rawRange("sample.gq") > 19)
+     .where(rawRange("sample.dp") > 7)
+       .select("chrom","pos","ref","alt","sample.sampleId","sample.gq","sample.dp","sample.gt","sample.ad","rs","indel")
      // .where(rawRange("band") === banda._2)
 
-    val variants=rawSample.select("chrom","pos","ref","alt","sampleId","gq","dp","gt","ad","rs","indel")  //add rs,indel
+    val variants=rawSample  //add rs,indel
     .where(rawSample("alt")!=="<NON_REF>")
     .where(rawSample("chrom")===chromList.toInt)
-    .where(rawSample("gq") > 19)
-    .where(rawSample("dp") > 7)
+    .where(rawSample("sample.gq") > 19)
+    .where(rawSample("sample.dp") > 7)
+      .select("chrom","pos","ref","alt","sample.sampleId","sample.gq","sample.dp","sample.gt","sample.ad","rs","indel")
  //   .where(rawSample("pos") >= banda._1)
  //   .where(rawSample("pos") < banda._2)
   
-    case class Sample(chrom:String,pos:Int,ref:String,alt:String,rs:String,indel:Boolean,samples:Array[Map[String,String]]) //add rs,indel
+    //case class Sample(chrom:String,pos:Int,ref:String,alt:String,rs:String,indel:Boolean,samples:Array[Map[String,String]]) //add rs,indel
     val united = variants.unionAll(ranges)
 united.registerTempTable("variants_tbl")
 // 'gt',gt,'dp',dp,'gq',gq,'sample',file_name )

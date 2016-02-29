@@ -19,7 +19,7 @@ object toSample{
 // 0/6 -> 57
 
 
-case class Variant(chrom: String, 
+/*case class Variant(chrom: String,
                   pos : Int,
                   ref: String, 
                   alt: String,
@@ -35,7 +35,7 @@ case class Sample( pos:Int,end_pos:Int,
                   gq: Int,
                   pl : String,
                   ad : String,
-                  sampleId: String) 
+                  sampleId: String) */
 
 
 
@@ -75,7 +75,7 @@ def formatCase(format : Any, sample : String):(String,Int,Int,String,String)={
   
 }
 
-def altMultiallelic(ref:String,alt:String,gt:String):String={
+/*def altMultiallelic(ref:String,alt:String,gt:String):String={
   alt match {
     case "<NON_REF>" => alt
     case _ =>
@@ -90,7 +90,7 @@ def altMultiallelic(ref:String,alt:String,gt:String):String={
           }
       }
   }
-}
+}*/
 
 
 
@@ -114,7 +114,7 @@ def endPos(alt:String,info:String,pos:Int):Int={
     case _ => pos
   }
 }
-  def split(pos:Int,endPos:Int,ref:String,alt:String,rs:String,indel:Boolean,gt:String,dp:Int,gq:Int,pl:String,ad:String,sampleId:String, bands:List[Int]):List[Sample]={
+  /*def split(pos:Int,endPos:Int,ref:String,alt:String,rs:String,indel:Boolean,gt:String,dp:Int,gq:Int,pl:String,ad:String,sampleId:String, bands:List[Int]):List[Sample]={
     //this operation should be moved to the loader step, aka first step
     val res = alt match {
       case "<NON_REF>" => {
@@ -131,9 +131,9 @@ def endPos(alt:String,info:String,pos:Int):Int={
     }
     res match { case x if x.length==0 => List(Sample(pos,endPos,ref,alt,rs,indel,gt,dp,gq,pl,ad,sampleId))
     case _ => res}
-  }
+  }*/
 
-  def sampleParser( pos:Any,ID:Any, ref:Any, alt:Any, info: Any, format: Any,  sampleline : Any, sampleID : Any,chrom : String, chromBands : List[Int])  ={
+  /*def sampleParser( pos:Any,ID:Any, ref:Any, alt:Any, info: Any, format: Any,  sampleline : Any, sampleID : Any,chrom : String, chromBands : List[Int])  ={
   val IDmap= toMap(ID)
   val rs = IDmap.getOrElse("RS","")
   val (gt,dp,gq,pl,ad) = formatCase(format,sampleline.toString)
@@ -145,7 +145,7 @@ def endPos(alt:String,info:String,pos:Int):Int={
   //check if it's  band,if not return List(Sample)
   val res= List(Sample(posOK,endOK,ref.toString,altSplitted,rs,indel,gt,dp,gq,pl,ADsplit(ad,gt),sampleID.toString))
   res
-}
+}*/
 
 import org.apache.spark.Partitioner
 
@@ -185,7 +185,7 @@ class DomainNamePartitioner(numParts: Int, bands:List[Int]) extends Partitioner 
 //flatmap
 // Should we use a partition to gain performance improvement,yes
 //create function to write to partitions given a bands List
-def main(sc :org.apache.spark.SparkContext, rawData:org.apache.spark.sql.DataFrame, chrom : String, destination : String,chromBands:List[Int])={
+/*def main(sc :org.apache.spark.SparkContext, rawData:org.apache.spark.sql.DataFrame, chrom : String, destination : String,chromBands:List[Int])={
    val sqlContext = new org.apache.spark.sql.SQLContext(sc)
 // this is used to implicitly convert an RDD to a DataFrame.
 
@@ -195,6 +195,6 @@ def main(sc :org.apache.spark.SparkContext, rawData:org.apache.spark.sql.DataFra
 
    i.where(i("dp")>7).where(i("gq")>19).save(destination+"/chrom="+chrom,SaveMode.Overwrite)
    
-}
+}*/
 
 }

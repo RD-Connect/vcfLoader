@@ -53,7 +53,7 @@ object GenomicsLoader {
     val configuration = ConfigFactory.load()
     val version= configuration.getString("version")
     val origin =configuration.getString("origin")
-
+    val originUMD=configuration.getString("originUMD")
     val destination =configuration.getString("destination")+version
     val sizePartition = configuration.getInt("sizePartition")
     val repartitions = configuration.getInt("repartitions") //30
@@ -81,43 +81,64 @@ object GenomicsLoader {
         steps.Parser.main(sqlContext, rawData, destination + "/parsedSamples",ch, band,repartitions)
       }
     }
-    if (pipeline.contains("rawData")) {
+    if (pipeline.contains("umd.get")) {
+      val parsedSample = sqlContext.load(destination + "/parsedSamples")
+      for (ch <- chromList) yield {
+        steps.umd.prepareInput(sqlContext, parsedSample, destination + "/umd",ch)
+      }
+    }
+    if (pipeline.contains("umd.parse")) {
+      for (ch <- chromList) yield {
+        steps.umd.parseUMD(sc, originUMD, destination + "/umdAnnotated",ch)
+      }
+    }
+    if (pipeline.contains("umd.join")) {
+      val parsedSample = sqlContext.load(destination + "/parsedSamples")
+      val UMDannotation = sqlContext.load(destination + "/umdAnnotated").select("pos","tr","umd").withColumnRenamed("pos","posUMD")
+
+      for (ch <- chromList) yield {
+        steps.umd.annotated(sqlContext, parsedSample,UMDannotation, destination + "/effectsUMD",ch)
+      }
+    }
+    /*if (pipeline.contains("rawData")) {
       val rawData = sqlContext.load(destination + "/loaded")
       for (ch <- chromList) yield {
         steps.toSample.main(sc, rawData, ch, destination + "/rawSamples", chromBands)
       }
-    }
+    }*/
     if (pipeline.contains("interception")) {
-      val rawSample = sqlContext.load(destination + "/rawSamples")
+      //val rawSample = sqlContext.load(destination + "/rawSamples")
+      val rawSample = sqlContext.load(destination + "/parsedSamples")
       for (ch <- chromList; band <- due) yield {
         steps.toRange.main(sc, rawSample, ch.toString, destination + "/ranges", band, repartitions)
       }
     }
     if (pipeline.contains("sampleGroup")) {
-      val rawSample = sqlContext.load(destination + "/rawSamples")
+      val rawSample = sqlContext.load(destination + "/parsedSamples")
       val rawRange = sqlContext.load(destination + "/ranges")
       for (ch <- chromList) yield {
         steps.toSampleGrouped.main(sqlContext, rawSample, rawRange, destination + "/samples", ch.toString, (0, 0))
       }
     }
-    if (pipeline.contains("effectsGroup")) {
-      val rawData = sqlContext.load(destination + "/loaded")
+    if (pipeline.contains("effectsGroupUMD")) {
+      val umdAnnotated = sqlContext.load(destination + "/effectsUMD")
       for (ch <- chromList; band <- due) yield {
-        steps.toEffects.main(sqlContext, rawData, destination + "/rawEffects", ch.toString, band, repartitions)
+        steps.toEffectsGrouped.main(sqlContext, umdAnnotated, destination + "/EffectsFinal", ch.toString, band)
       }
     }
     if (pipeline.contains("variants")) {
-      val Effects = sqlContext.load(destination + "/rawEffects")
+      val Annotations = sqlContext.load(destination + "/EffectsFinal")
       val Samples = sqlContext.load(destination + "/samples")
       for (ch <- chromList) yield {
-        steps.toVariant.main(sc, Samples, Effects, destination + "/variants", ch.toString, (0, 0))
+        steps.toVariant.main(sc, Samples, Annotations, destination + "/variants", ch.toString, (0, 0))
       }
+    }
+
+    if (pipeline.contains("deleteIndex")) {
+      Elastic.Data.mapping(index, version, "localhost", 9300, "delete")
     }
     if (pipeline.contains("createIndex")) {
       Elastic.Data.mapping(index, version, "localhost", 9300, "create")
-    }
-    if (pipeline.contains("deleteIndex")) {
-      Elastic.Data.mapping(index, version, "localhost", 9300, "delete")
     }
     if (pipeline.contains("toElastic")) {
       val variants = sqlContext.load(destination + "/variants")

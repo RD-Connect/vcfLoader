@@ -51,7 +51,7 @@ object Parser {
                   SiPhy_29way_pi: String,
                   CADD_phred: Double)
 
-  case class Populations(esp6500_all: Double,
+  case class Populations(esp6500_aa: Double,
                  esp6500_ea: Double,
                  gp1_afr_af: Double,
                  gp1_asn_af: Double,
@@ -59,6 +59,11 @@ object Parser {
                  gp1_af: Double,
                  exac: Double)
 
+  // for predictor we have multiple predictor for multiple alt
+  def getOrEmpty(list:Seq[String], index:Int)={
+    if (list.size> index-1 && index!=0) list(index-1)
+    else ""
+  }
   def annotation_parser(idMap: String, gt: String) = {
     val SIFT_pred = getter(idMap, "SIFT_pred")
     val SIFT_score = getter(idMap, "SIFT_score")
@@ -93,8 +98,10 @@ object Parser {
       }
     }
 
-    def getOrEmpty(list:Seq[String], index:Int)={
-      if (list.size> index) list(index)
+    //for population we only have one annotation for variant
+    def getOrEmpty2(list:Seq[String], index:Int)={
+      if (index==0) ""
+      else if (list.size> index-1) list(0)
       else ""
     }
     val res=gt.split("/").map(_.toInt).map(x=>{

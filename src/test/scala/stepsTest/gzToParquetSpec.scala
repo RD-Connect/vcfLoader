@@ -55,13 +55,13 @@ class LoadData extends FlatSpec with Matchers {
       // }
       //  "rawSamples" should  "load the chrom1 file and count" in withContext {
       //   (sc, sqlContext) =>
-      if (pipeline.contains("rawData")) {
+     /* if (pipeline.contains("rawData")) {
         val rawData = sqlContext.load(destination + "/loaded")
         for (ch <- chromList) yield {
           steps.toSample.main(sc, rawData, ch, destination + "/rawSamples", chromBands)
         }
       }
-      assert(sqlContext.load(destination + "/rawSamples").count === 5688567)
+      assert(sqlContext.load(destination + "/rawSamples").count === 5688567)*/
 
       if (pipeline.contains("parser")) {
         val rawData = sqlContext.load(destination + "/loaded")
@@ -71,7 +71,7 @@ class LoadData extends FlatSpec with Matchers {
       }
       assert(sqlContext.load(destination + "/parsedSamples").count === 5689448)
 
-      
+
       if (pipeline.contains("interception")) {
         val rawSample = sqlContext.load(destination + "/rawSamples")
         for (ch <- chromList; band <- due) yield {

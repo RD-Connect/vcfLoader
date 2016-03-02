@@ -8,7 +8,7 @@ import org.elasticsearch.common.settings.ImmutableSettings
 object Data {
   def mapping(index_name: String, version: String, host: String, port: Int, action: String) = {
     val settings = ImmutableSettings.settingsBuilder().put("cluster.name", "elasticsearch").build()
-    val client = ElasticClient.remote(settings, "localhost", 9300)
+    val client = ElasticClient.remote(settings, host, 9300)
     if (action == "create") {
       client.execute {
         create index index_name mappings (version as(

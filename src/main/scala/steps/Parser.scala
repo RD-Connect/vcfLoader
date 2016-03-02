@@ -23,7 +23,7 @@ object Parser {
                     gq: Int,
                     pl: String,
                     ad: String,
-                    multiallelic : Boolean,
+                    multi : Boolean,
                     sampleId: String)
 
   case class FunctionalEffect(effect: String,

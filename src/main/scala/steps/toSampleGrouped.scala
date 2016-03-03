@@ -20,7 +20,7 @@ object toSampleGrouped{
      .where(rawRange("chrom")===chromList.toInt)
      .where(rawRange("sample.gq") > 19)
      .where(rawRange("sample.dp") > 7)
-       .select("chrom","pos","ref","alt","sample.sampleId","sample.gq","sample.dp","sample.gt","sample.ad","rs","indel")
+       .select("chrom","pos","ref","alt","sample.sampleId","sample.gq","sample.dp","sample.gt","sample.ad","rs","indel","sample.multiallelic")
      // .where(rawRange("band") === banda._2)
 
     val variants=rawSample  //add rs,indel
@@ -28,7 +28,7 @@ object toSampleGrouped{
     .where(rawSample("chrom")===chromList.toInt)
     .where(rawSample("sample.gq") > 19)
     .where(rawSample("sample.dp") > 7)
-      .select("chrom","pos","ref","alt","sample.sampleId","sample.gq","sample.dp","sample.gt","sample.ad","rs","indel")
+      .select("chrom","pos","ref","alt","sample.sampleId","sample.gq","sample.dp","sample.gt","sample.ad","rs","indel","sample.multiallelic")
  //   .where(rawSample("pos") >= banda._1)
  //   .where(rawSample("pos") < banda._2)
   
@@ -36,7 +36,7 @@ object toSampleGrouped{
     val united = variants.unionAll(ranges)
 united.registerTempTable("variants_tbl")
 // 'gt',gt,'dp',dp,'gq',gq,'sample',file_name )
-val s=sqlContext.sql("select pos,ref,alt,rs,indel, collect( map('sample',sampleId,'gt',gt,'dp',dp,'gq',gq,'ad',ad)) from variants_tbl group by pos,ref,alt,rs,indel")
+val s=sqlContext.sql("select pos,ref,alt,rs,indel, collect( map('sample',sampleId,'gt',gt,'dp',dp,'gq',gq,'ad',ad,'multi',IF(multiallelic, 'true', 'false'))) from variants_tbl group by pos,ref,alt,rs,indel")
     .map(x=>
       (   x(0).toString.toInt,
           x(1).toString,

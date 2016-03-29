@@ -40,7 +40,7 @@ OR effectsExploded.effect_impact == 'LOW') """)
     val ParsedSampleUnique=parsedSample.filter(parsedSample("chrom")===chrom).select("pos","ref","alt","rs","indel","effects","predictions","populations").distinct
     ParsedSampleUnique.registerTempTable("parsed")
     //take only unique
-    val UMDannotationsFiltered = UMDannotations.filter(UMDannotations("chromUMD"))
+    val UMDannotationsFiltered = UMDannotations.filter(UMDannotations("chromUMD")===chrom)
     val parsedExploded=sqlContext.sql("""SELECT * FROM parsed LATERAL VIEW explode(effects) a AS effectsExploded """)
 
     val joined=parsedExploded.join(UMDannotationsFiltered, parsedExploded("effectsexploded.transcript_id")===UMDannotationsFiltered("tr") && parsedExploded("pos")===UMDannotationsFiltered("posUMD") ,"left").save(destination+"/chrom="+chrom)

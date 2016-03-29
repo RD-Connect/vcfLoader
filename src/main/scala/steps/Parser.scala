@@ -1,134 +1,240 @@
-/*
+package steps
 
-case class rawTable(chrom : String, pos:Int, ID : String, ref :String ,alt : String, qual:String,filter:String,info : String, format:String,Sample : String)
-    
-def file_to_parquet(origin_path: String, destination : String, partition : String)=
-{      //remove header
-       val file = sc.textFile(origin_path).filter(line => !line.startsWith("#"))
-       val raw_file = file.map(_.split("\t")).map(p => rawTable(p(0),p(1).trim.toInt,p(2),p(3),p(4),p(5),p(6),p(7),p(8),p(9))).toDF()
-       raw_file.save(destination+"/sample="+partition)
+
+import org.apache.spark.sql.SaveMode
+import steps.toSample.{formatCase,ADsplit,endPos,toMap}
+import steps.toEffects.{functionalMap_parser}
+object Parser {
+
+  case class Variant(pos: Int,
+                     end_pos: Int,
+                     ref: String,
+                     alt: String,
+                     rs: String,
+                     indel: Boolean,
+                     sample: Sample,
+                     effects: List[FunctionalEffect],
+                     predictions:Predictions,
+                     populations: Populations
+                      )
+
+  case class Sample(gt: String,
+                    dp: Int,
+                    gq: Int,
+                    pl: String,
+                    ad: String,
+                    multiallelic : Boolean,
+                    sampleId: String)
+
+  case class FunctionalEffect(effect: String,
+                              effect_impact: String,
+                              functional_class: String,
+                              codon_change: String,
+                              amino_acid_change: String,
+                              amino_acid_length: String,
+                              gene_name: String,
+                              transcript_biotype: String,
+                              gene_coding: String,
+                              transcript_id: String,
+                              exon_rank: String,
+                              geno_type_number: Int)
+
+  case class Predictions(SIFT_pred: String,
+                  SIFT_score: Double,
+                  polyphen2_hvar_pred: String,
+                  pp2: String,
+                  polyphen2_hvar_score: Double,
+                  MutationTaster_pred: String,
+                  mt: String,
+                  phyloP46way_placental: String,
+                  GERP_RS: String,
+                  SiPhy_29way_pi: String,
+                  CADD_phred: Double)
+
+  case class Populations(esp6500_aa: Double,
+                 esp6500_ea: Double,
+                 gp1_afr_af: Double,
+                 gp1_asn_af: Double,
+                 gp1_eur_af: Double,
+                 gp1_af: Double,
+                 exac: Double)
+
+  // for predictor we have multiple predictor for multiple alt
+  def getOrEmpty(list:Seq[String], index:Int)={
+    if (list.size> index-1 && index!=0) list(index-1)
+    else ""
+  }
+  def annotation_parser(idMap: String, gt: String) = {
+    val SIFT_pred = getter(idMap, "SIFT_pred")
+    val SIFT_score = getter(idMap, "SIFT_score")
+    val Polyphen2_HVAR_pred = getter(idMap, "Polyphen2_HVAR_pred")
+    val pp2 = getter(idMap, "pp2")
+    val Polyphen2_HVAR_score = getter(idMap, "Polyphen2_HVAR_score")
+    val MutationTaster_pred = getter(idMap, "MutationTaster_pred")
+    val mt = getter(idMap, "mt")
+    val phyloP46way_placental = getter(idMap, "phyloP46way_placental")
+    val GERP_RS = getter(idMap, "GERP++_RS")
+    val SiPhy_29way_pi = getter(idMap, "SiPhy_29way_pi")
+    val CADD_phred = getter(idMap, "CADD_phred")
+    val esp6500_ea = getter(idMap, "ESP6500_EA_AF")
+    val esp6500_aa = getter(idMap, "ESP6500_AA_AF")
+    val exac = getter(idMap, "ExAC_AF")
+    val Gp1_AFR_AF = getter(idMap, "1000Gp1_AFR_AF")
+    val Gp1_ASN_AF = getter(idMap, "1000Gp1_ASN_AF")
+    val Gp1_EUR_AF = getter(idMap, "1000Gp1_EUR_AF")
+    val Gp1_AF = getter(idMap, "1000Gp1_AF")
+
+    def truncateAt(n: Double, p: Int): Double = {
+      //exponsive but the other way with bigdecimal causes an issue with spark sql
+      val s = math pow(10, p);
+      (math floor n * s) / s
+    }
+
+    def removedot(value: String, precision: Int) = {
+      value match {
+        case "." => 0.0
+        case "" => 0.0
+        case _ => truncateAt(value.toDouble, 4)
+      }
+    }
+
+    //for population we only have one annotation for variant
+    def getOrEmpty2(list:Seq[String], index:Int)={
+      if (index==0) ""
+      else if (list.size> index-1) list(0)
+      else ""
+    }
+    val res=gt.split("/").map(_.toInt).map(x=>{
+
+      (Predictions(SIFT_pred=getOrEmpty(SIFT_pred,x),
+        SIFT_score=removedot(getOrEmpty(SIFT_score,x),0),
+        pp2=getOrEmpty(pp2,x),
+        polyphen2_hvar_pred=getOrEmpty(Polyphen2_HVAR_pred,x),
+        polyphen2_hvar_score=removedot(getOrEmpty(Polyphen2_HVAR_score,x),0),
+        MutationTaster_pred=getOrEmpty(MutationTaster_pred,x),
+        mt=getOrEmpty(mt,x),
+        phyloP46way_placental=getOrEmpty(phyloP46way_placental,x),
+        GERP_RS=getOrEmpty(GERP_RS,x),
+        SiPhy_29way_pi=getOrEmpty(SiPhy_29way_pi,x),
+        CADD_phred=removedot(getOrEmpty(CADD_phred,x),0)),
+        Populations(removedot(getOrEmpty(esp6500_ea,x),4),
+          removedot(getOrEmpty(esp6500_aa,x),4),
+          removedot(getOrEmpty(Gp1_AFR_AF,x),4),
+          removedot(getOrEmpty(Gp1_ASN_AF,x),4),
+          removedot(getOrEmpty(Gp1_EUR_AF,x),4),
+          removedot(getOrEmpty(Gp1_AF,x),4),
+          removedot(getOrEmpty(exac,x),5)))
+
+    })
+    res
+  }
+
+  def main(sqlContext :org.apache.spark.sql.SQLContext,
+           rawData:org.apache.spark.sql.DataFrame,
+           destination : String,
+           chrom:String,
+           chromBands : (Int,Int),
+           repartitions:Int)= {
+
+
+    import sqlContext.implicits._
+
+    val parsedData = rawData
+      .where(rawData("pos") >=chromBands._1)
+      .where(rawData("pos") < chromBands._2).filter(rawData("chrom") === chrom).flatMap(a => sampleParser(a(0), a(1), a(2), a(3), a(6), a(7), a(8), a(9), chrom)).toDF()
+
+    parsedData.where(parsedData("Sample.dp")>7).where(parsedData("Sample.gq")>19).save(destination+"/chrom="+chrom+"/band="+chromBands._2.toString,SaveMode.Overwrite)
+
+  }
+
+  def sampleParser( pos:Any,ID:Any, ref:Any, alt:Any, info: Any, format: Any,  sampleline : Any, sampleID : Any,chrom : String):List[Variant]  = {
+     val rs = getter(ID.toString,"RS")
+     val (gt,dp,gq,pl,ad) = formatCase(format,sampleline.toString)
+     val infoMap = toMap(info)
+     val effString = infoMap.getOrElse("EFF","")
+     //ad should be extracted by multi-allelic position
+     val altSplitted = altMultiallelic(ref.toString,alt.toString,gt) //returns
+    val anno=annotation_parser(ID.toString,gt)
+     val res=altSplitted.map(x=>{
+
+       //if 0/ what about annotation?? Null Option
+       val altGenotype= x._3.toInt
+       val altPosition = x._2.split("/")(1).toInt
+
+       val indel = (x._1.length>1) //maybe something ref legnth != 1 or pos !=1//wrong if alt is not handled correctly
+       val posOK = pos.toString.toInt
+       val endOK = endPos(x._1,info.toString,posOK)
+       //it gets functional effetcs
+       val functionalEffs = functionalMap_parser(effString).filter(effect => (altGenotype == effect.geno_type_number)).toList
+
+       altGenotype match{
+         case 0 => Variant(posOK,endOK,ref.toString,x._1,rs(0),indel,Sample(x._2,dp,gq,pl,ADsplit(ad,gt),altSplitted.size==2,sampleID.toString),functionalEffs, Predictions("",0.0,"","",0.0,"","","","","",0.0),Populations(0.0,0.0,0.0,0.0,0.0,0.0,0.0) )
+         case _ => Variant(posOK,endOK,ref.toString,x._1,rs(0),indel,Sample(x._2,dp,gq,pl,ADsplit(ad,gt),altSplitted.size==2,sampleID.toString),functionalEffs, anno(altPosition)._1,anno(altPosition)._2 )
+
+       }
+
+     })
+
+     res
+
+  }
+  def altMultiallelic(ref:String,alt:String,gt:String):List[(String,String,String)]={
+    alt match {
+      case "<NON_REF>" => List((alt,"0/0","0"))
+      case _ =>
+        gt match {
+          case "0/0" => List((ref,"0/0","0"))
+          case _ =>
+            val altList =  alt.split(",")
+            val gtList =  gt.split("/")
+            gtList match {
+              case x if x(0) == "0" => List((altList(gtList(1).toInt-1),"0/1",gtList(1)))
+              case x if x(0) == x(1) => List((altList(gtList(1).toInt-1),"1/1",gtList(1)))
+              case _ => List((altList(gtList(0).toInt-1),"0/1",gtList(0)),(altList(gtList(1).toInt-1),"0/1",gtList(1)))
+              // case _ =>       altList(gtList(0).toInt -1)+","+altList(gtList(1).toInt -1)
+            }
+        }
+    }
+  }
+
+  /* this function extracts a list of values associated to that string
+  *
+  * */
+  def getter(value:String,pattern:String)={
+    val matches=value.split(pattern+"=")
+    matches.size match {
+      case 1 => List("")
+      case x:Int if x > 1 =>{
+        Range(1,x).map(item=> matches(item).split(";")(0))
+      }
+      case _ => List("")
+
+    }
+
+  }
+
+  def functionalMap_parser(raw_line:String):List[FunctionalEffect]=
+  {
+    if (raw_line == "") List[FunctionalEffect]()
+    else {val items=raw_line.split(",")
+      items.map(item => {
+        FunctionalEffect(effect=item.split("\\(")(0),
+          effect_impact=item.split("\\(")(1).split("\\|")(0),
+          functional_class=item.split("\\|")(1),
+          codon_change=item.split("\\|")(2),
+          amino_acid_change=item.split("\\|")(3),
+          amino_acid_length=item.split("\\|")(4),
+          gene_name=item.split("\\|")(5),
+          transcript_biotype=item.split("\\|")(6),
+          gene_coding=item.split("\\|")(7),
+          transcript_id=item.split("\\|")(8),
+          exon_rank=item.split("\\|")(9),
+          geno_type_number=item.split("\\|")(10).replace(")","").toInt)
+
+
+      }).toList
+    }
+  }
 
 }
 
-file_to_parquet("/user/dpiscia/gvcf10bands/E000010.g.vcf.gz","/user/dpiscia/test/trio","E000010")
-file_to_parquet("/user/dpiscia/gvcf10bands/E000036.g.vcf.gz","/user/dpiscia/test/trio","E000036")
-file_to_parquet("/user/dpiscia/gvcf10bands/E000037.g.vcf.gz","/user/dpiscia/test/trio","E000037")
-
-
-val sqlContext = new org.apache.spark.sql.hive.HiveContext(sc)
-
-def reader(File : String)
-//READ the FILE, name should pass as variable
-   val file = sc.textFile("/user/admin/Chr22_VQSR110test.annot.snpEff.g.vcf.gz").filter(line => !line.startsWith("#"))
-//val filtered_file = file.filter(line => line.split("\t")(1)=="51066632").take(1)
-   // take sample columns out of main row
-   //import org.apache.spark.sql.{SaveMode}
-   //variants.save("variants",SaveMode.Append)
-   for (i <- Range(9,119)) yield res.take(2)(1).split("\t")(i)
-   
-res.filter(x => !x.startsWith("#")).take(2).map(line => line.split("\t").zipWithIndex.filter(x => x._2 > 9 ).map(x => x._1.split(":")))
-
-
-case class Sample(sample_id : String, gt : String, dp :Int, gq: Float)
-
-
-case class Population(gp1_afr_af : Float,gp1_asn_af : Float, gp1_eur_af : Float, esp6500_aa: Float, esp6500_ea : Float, exac:Float, gmaf: Float, rd_freq : Float)
-
-/*case class Effect(codon_change : String, amino_acid_change: String,amino_acid_length: String,effect : String, effect_impact : String ,exon_rank : String , functional_class : String,
-                  gene_coding : String, gene_name : String, transcript_biotype : String, transcript_id: String,
-                  gerp_plus_plus_rs : String,
-                  cadd_phred : String, mt :String,mutationtaster_pred: String,phylop46way_placental: String, polyphen2_hvar_pred:String, polyphen2_hvar_score:String, 
-                  sift_pred : String, sift_score : String, siphy_29way_pi :String )
-*/
-
-case class Effect(effect : String,effect_impact:String, functional_class : String,codon_change : String, amino_acid_change: String,amino_acid_length: String, gene_name : String,
-    transcript_biotype : String,gene_coding : String, transcript_id: String,exon_rank : String, geno_type_number : Int)
-case class Variant(chrom : String, pos: Int, ref : String, alt : String, indel : Boolean, rs : String, samples: List[Sample], population : List[Population], effects : List[Effect])
-case class Variant(chrom : String, pos: Int, ref : String, alt : String, indel : Boolean, rs : String)
-
-
-def parser(line : String): Variant=
-{
-   var fields = line.split("\t")
-   var chrom = fields(0)
-   var pos = fields(1).toInt
-   var ref = fields(3)
-   var alt= if (fields(4).contains("(") ) "multi"
-     else fields(4)
-   var indel= ref.length!=alt.length
-   Variant(chrom,pos,ref,alt,indel,"")
-   
-}
-
-def functional_parser(raw_line:String):Array[Effect]=
-{
-  val items=raw_line.split(",")
-  items.map(item => {
-    Effect(item.split("\\(")(0),
-           item.split("\\(")(1),
-           item.split("\\|")(1),
-           item.split("\\|")(2),
-           item.split("\\|")(3),
-           item.split("\\|")(4),
-           item.split("\\|")(5),
-           item.split("\\|")(6),
-           item.split("\\|")(7),
-           item.split("\\|")(8),
-           item.split("\\|")(9),
-           item.split("\\|")(10).replace(")","").toInt)       
-           
-    
-  })
-}
-
-
-val variants = file.map(line => parser(line)).toDF()
-
-variants.registerTempTable("variants")
-val some_variants = sqlContext.sql("SELECT * FROM variants limit 10")
-some_variants.collect().foreach(println)
-//variants.saveAsTable("variants_prova")
-
-variants.saveAsParquetFile("variants_prova.parquet")
-
-//for effects input
-
-(7).split("EFF=")(1)
-
-val effects = parser_functional(res(0).split("\t")(7).split("EFF=")(1))
-def prediction_parser(info :String)={
-  val null_option=""
-  val result = info.split(";").map(_ split "=") collect { case Array(k, v) => (k, v) } toMap
-  val sift_pred = result.getOrElse("SIFT_pred",null_option)
-  val sift_score = result.getOrElse("SIFT_score",null_option)
-  val Polyphen2_HVAR_pred = result.getOrElse("Polyphen2_HVAR_pred",null_option)
-  val pp2 = result.getOrElse("pp2",null_option)
-  val Polyphen2_HVAR_score = result.getOrElse("Polyphen2_HVAR_score",null_option)
-  val MutationTaster_pred = result.getOrElse("MutationTaster_pred",null_option)
-  val mt = result.getOrElse("mt",null_option)
-  val phyloP46way_placental = result.getOrElse("phyloP46way_placental",null_option)
-  val GERP = result.getOrElse("GERP",null_option)
-  val SiPhy_29way_pi = result.getOrElse("SiPhy_29way_pi",null_option)
-  val CADD_phred = result.getOrElse("CADD_phred",null_option)
-  (sift_pred,sift_score,Polyphen2_HVAR_pred,pp2,Polyphen2_HVAR_score,MutationTaster_pred,mt,phyloP46way_placental,GERP,SiPhy_29way_pi,CADD_phred)
-}
-
-
-def global_parser(line :String)={
-  //if eff is not present it will crash
-  val fields=line.split("\t")
-  val chrom = fields(0)
-  val pos = fields(1).toInt
-  val ref = fields(3)
-  val alt=  fields(4).split(",")
-  val indel= ref.length!=alt.length  
-  val effects = parser_functional(fields(7).split("EFF=")(1))
-  println("fields 2 is "+fields(2))
-  val predictions = prediction_parser(fields(2))
-  (chrom,pos,ref,alt,indel,effects,predictions)
-   
-}
-val res = file.map(line => global_parser(line)).take(10)
-//val filtered = file.filter(line => line.split("\t")(4).contains(",")).filter(line=> line.split("\t")(2).contains("SIFT_pred")).take(1)
-
-*/

@@ -7,7 +7,7 @@ package steps
         predictions:collection.mutable.WrappedArray[Map[String,String]])
         
         object toVariant {
-def main(sc :org.apache.spark.SparkContext, Samples:org.apache.spark.sql.DataFrame, Effects:org.apache.spark.sql.DataFrame, 
+def main(sc :org.apache.spark.SparkContext, Samples:org.apache.spark.sql.DataFrame, Annotations:org.apache.spark.sql.DataFrame,
         destination: String,
     chromList : String, 
     banda : (Int,Int))={
@@ -17,27 +17,19 @@ val sqlContext = new org.apache.spark.sql.SQLContext(sc)
 import sqlContext.implicits._
 
 //pos _2,ref_3,alt_4,rs_5,indel_6, smaples_7
-val samples = Samples.select("_1","_2","_3","_4","_5","_6","chrom","chrom")
+val samples = Samples
     .where(Samples("chrom")===chromList.toInt)
     //.where(Samples("band") ===banda._2)
+    val annotations = Annotations
+      .where(Annotations("chrom")===chromList.toInt)
 
-  
-val effects = Effects.select("chrom","_1","_2","_3","_4","_5","_6","band")
-    .where(Effects("chrom")===chromList.toInt)
-    //.where(Effects("band") === banda._2)
- 
-   val joined= effects.join(samples, effects("_1") === samples("_1") && effects("_2") === samples("_2") && effects("_3") === samples("_3"), "right")
-     .map(a => VariantModel(a(8).toString.toInt,
-       a(9).toString,
-       a(10).toString,
-       a(11).toString,
-       (a(9).toString.length != 1 || a(9).toString.length != 1),
-       a(13).asInstanceOf[collection.mutable.WrappedArray[Map[String, String]]],
-       a(4).asInstanceOf[collection.mutable.WrappedArray[Map[String, String]]],
-       a(5).asInstanceOf[collection.mutable.WrappedArray[Map[String, String]]],
-       a(6).asInstanceOf[collection.mutable.WrappedArray[Map[String, String]]])
-     )
-     .toDF().save(destination+"/chrom="+chromList)//+"/band="+banda._2.toString)
+  annotations.join(samples, annotations("pos") === samples("_1") && annotations("ref") === samples("_2") && annotations("alt") === samples("_3"), "right")
+    .select("pos","ref","alt","rs","indel","_6","_c5","_c6","_c7")
+    .withColumnRenamed("_6","samples")
+    .withColumnRenamed("_c5","effs")
+    .withColumnRenamed("_c6","populations")
+    .withColumnRenamed("_c7","predictions")
+    .save(destination+"/chrom="+chromList)//+"/band="+banda._2.toString)
 
 }
 }

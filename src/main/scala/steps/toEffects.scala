@@ -146,8 +146,8 @@ val Gp1_AF= idMap.getOrElse("1000Gp1_AF","")
 
 def removedot(value:String,precision :Int)={
   value match{
-    case "." => ""
-    case "" => ""
+    case "." => "0"
+    case "" => "0"
     case _ => truncateAt(value.toDouble,4).toString
   }
 }

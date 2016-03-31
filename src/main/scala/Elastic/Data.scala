@@ -3,16 +3,15 @@ package Elastic
 import com.sksamuel.elastic4s.ElasticClient
 import com.sksamuel.elastic4s.ElasticDsl._
 import com.sksamuel.elastic4s.mappings.FieldType._
-import org.elasticsearch.common.settings.ImmutableSettings
+import org.elasticsearch.common.settings.Settings
 import com.sksamuel.elastic4s.ElasticsearchClientUri
-import org.elasticsearch.common.settings.ImmutableSettings
 
 
 object Data {
   def mapping(index_name: String, version: String, host: String, port: Int, action: String) = {
     //val settings = Settings.s   .put("cluster.name", "myClusterName").build()
 
-    val settings = ImmutableSettings.settingsBuilder().put("cluster.name", "elasticsearch").build()
+    val settings = Settings.settingsBuilder().put("cluster.name", "elasticsearch").build()
     val uri = ElasticsearchClientUri("elasticsearch://"+host+":9300")
     val client = ElasticClient.remote(settings, uri)
     if (action == "create") {

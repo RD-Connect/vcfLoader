@@ -81,7 +81,7 @@ object GenomicsLoader {
     if (pipeline.contains("parser")) {
       val rawData = sqlContext.load(originLoaded)
       for (ch <- chromList; band <- due) yield {
-        steps.Parser.main(sqlContext, rawData, destination + "/parsedSamples",ch, band,repartitions)
+        steps.GVCFParser.main(sqlContext, rawData, destination + "/parsedSamples",ch, band,repartitions)
       }
     }
     if (pipeline.contains("umd.get")) {

@@ -9,7 +9,7 @@ import org.apache.spark.SparkContext._
 //import org.bdgenomics.formats.avro.{ AlignmentRecord, Contig }
 //import org.bdgenomics.adam.rdd.BroadcastRegionJoin
 import org.apache.spark.storage.StorageLevel.MEMORY_AND_DISK
-import steps.Parser.{Populations, Predictions, Variant, Sample}
+import steps.GVCFParser.{Populations, Predictions, Variant, Sample}
 
 
 object toRange {

@@ -4,7 +4,7 @@ package steps
 import org.apache.spark.sql.SaveMode
 import steps.toSample.{formatCase,ADsplit,endPos,toMap}
 import steps.toEffects.{functionalMap_parser}
-object Parser {
+object GVCFParser {
 
   case class Variant(pos: Int,
                      end_pos: Int,

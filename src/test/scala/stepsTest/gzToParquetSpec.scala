@@ -66,7 +66,7 @@ class LoadData extends FlatSpec with Matchers {
       if (pipeline.contains("parser")) {
         val rawData = sqlContext.load(destination + "/loaded")
         for (ch <- chromList; band <- due) yield {
-          steps.Parser.main(sqlContext, rawData, destination + "/parsedSamples",ch, band,repartitions)
+          steps.GVCFParser.main(sqlContext, rawData, destination + "/parsedSamples",ch, band,repartitions)
         }
       }
       assert(sqlContext.load(destination + "/parsedSamples").count === 5689448)

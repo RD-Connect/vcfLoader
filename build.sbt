@@ -18,5 +18,6 @@ libraryDependencies ++= Seq("org.apache.spark" %% "spark-core" % "1.6.0",
                             "com.sksamuel.elastic4s" % "elastic4s-core_2.10" % "1.5.15",
                             "org.elasticsearch" % "elasticsearch-spark_2.10" % "2.1.0",
                             "com.typesafe" % "config" % "1.3.0",
-                            "info.cukes" % "cucumber-java8" % "1.2.3"
+                            "info.cukes" % "cucumber-java8" % "1.2.3",
+                            "com.holdenkarau" %% "spark-testing-base" % "1.6.1_0.3.2"
 )

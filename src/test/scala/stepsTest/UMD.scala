@@ -1,7 +1,7 @@
 package stepsTest
 
 import com.typesafe.config.ConfigFactory
-import steps.Parser._
+import steps.GVCFParser._
 
 import steps.toSample.{toMap, formatCase, endPos, ADsplit}
 
@@ -11,8 +11,8 @@ import org.apache.spark.SparkConf
 import org.apache.spark.SparkContext
 import core.vcfToSample._
 import scala.collection.JavaConversions._
-import steps.Parser.altMultiallelic
-import steps.Parser.{ Variant,Sample,Populations,Predictions,FunctionalEffect}
+import steps.GVCFParser.altMultiallelic
+import steps.GVCFParser.{ Variant,Sample,Populations,Predictions,FunctionalEffect}
 //import steps.toSample.{formatCase}
 /**
  * Created by dpiscia on 14/09/15.

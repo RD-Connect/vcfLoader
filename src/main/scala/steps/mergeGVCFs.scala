@@ -1,4 +1,4 @@
-case class rangeList (start:Int,end:Int,samples:List[String])
+/*case class rangeList (start:Int,end:Int,samples:List[String])
 
 def mergegVcf(aiter: Iterator[range], biter: Iterator[range]): Iterator[rangeList] =
 {
@@ -68,3 +68,5 @@ def mergegVcf(aiter: Iterator[range], biter: Iterator[range]): Iterator[rangeLis
   res.iterator
 }
 a.zipPartitions(b)(mergegVcf).collect
+
+*/

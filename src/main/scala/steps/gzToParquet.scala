@@ -10,6 +10,9 @@ package steps
 
 import org.apache.spark.sql.SQLContext
 import org.apache.spark.sql.SaveMode
+import utils.helpers._
+
+
 object gzToParquet {
 case class rawTable(pos:Int,
                     ID : String,
@@ -22,14 +25,7 @@ case class rawTable(pos:Int,
                     Sample : String,
                      SampleID: String)
     
-def chromStrToInt(chrom:String)={
-  chrom match {
-    case "MT" =>"23"
-    case "X" => "24"
-    case "Y" => "25"
-    case _ => chrom
-  }
-}
+
 
 
 //val files = List("E000001")

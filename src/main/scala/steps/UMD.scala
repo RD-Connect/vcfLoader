@@ -2,8 +2,7 @@ package steps
 
 import org.apache.spark.sql.SaveMode
 import org.apache.spark.sql.hive.HiveContext
-
-case class umdVariant (chrom : String, pos :Int, ref:String, alt:String, tr: String, umd:String)
+import models.umdVariant
 
 //umdfile.map(_.split("\t")).map(x=>  umd(x(0),x(1),x(6),x(7),x(5),if (x.lenght==13) x(12) else ""))
 

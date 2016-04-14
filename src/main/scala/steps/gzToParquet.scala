@@ -11,19 +11,10 @@ package steps
 import org.apache.spark.sql.SQLContext
 import org.apache.spark.sql.SaveMode
 import utils.helpers._
-
+import models.{rawTable}
 
 object gzToParquet {
-case class rawTable(pos:Int,
-                    ID : String,
-                    ref :String ,
-                    alt : String,
-                    qual:String,
-                    filter:String,
-                    info : String,
-                    format:String,
-                    Sample : String,
-                     SampleID: String)
+
     
 
 
@@ -55,7 +46,7 @@ def main(sc:org.apache.spark.SparkContext,
   import sqlContext.implicits._
 
   for (chrom <- chromList) yield {
-      var RDD: org.apache.spark.rdd.RDD[steps.gzToParquet.rawTable] = null;
+      var RDD: org.apache.spark.rdd.RDD[rawTable] = null;
       for ((file, index) <- files.zipWithIndex) yield {
         println("index dpdpdpdpd is "+index)
         if (index == 0) {

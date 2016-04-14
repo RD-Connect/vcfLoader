@@ -4,19 +4,10 @@ package steps
 import org.apache.spark.sql.SQLContext
 import org.apache.spark.sql.SaveMode
 import utils.helpers._
-
+import models.rawTableMultiple
 
 object vcfLoader {
-  case class rawTableMultiple(pos:Int,
-                      ID : String,
-                      ref :String ,
-                      alt : String,
-                      qual:String,
-                      filter:String,
-                      info : String,
-                      format:String,
-                      Sample : Array[(String,String)]
-                      )
+
 
   /** vcf multiline parser
    *
@@ -61,7 +52,7 @@ def file_to_parquetMultiple(sc :org.apache.spark.SparkContext, origin_path: Stri
    * @param destination
    * @param numPartitions
    * @param suffix
-   * @return
+   * @return Dataframe
    */
   def apply(sc:org.apache.spark.SparkContext,
            path : String,
@@ -78,11 +69,11 @@ def file_to_parquetMultiple(sc :org.apache.spark.SparkContext, origin_path: Stri
      * a big RDD and then processed.
      * In this case we handle big vcf multisamples, so just one fle per chromosome, if the file is bigger than hdfs block size, it will be splitted automatically
      */
+    var RDD: org.apache.spark.rdd.RDD[models.rawTableMultiple] = null;
     for ((chrom,index) <- chromList.zipWithIndex) yield {
-      var RDD: org.apache.spark.rdd.RDD[steps.vcfLoader.rawTableMultiple] = null;
-          RDD = file_to_parquetMultiple(sc, path + file +"." + chrom + suffix, samples).union(RDD)
+          RDD = file_to_parquetMultiple(sc, path + file +"." + chrom + suffix, samples)
           RDD.toDF.write.mode(SaveMode.Overwrite).save(destination+"/chrom="+chromStrToInt(chrom))
-      RDD}
-    }
-
+      }
+    RDD.toDF
+  }
 }

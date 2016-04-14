@@ -9,11 +9,10 @@ import org.apache.spark.SparkContext._
 //import org.bdgenomics.formats.avro.{ AlignmentRecord, Contig }
 //import org.bdgenomics.adam.rdd.BroadcastRegionJoin
 import org.apache.spark.storage.StorageLevel.MEMORY_AND_DISK
-import steps.GVCFParser.{Populations, Predictions, Variant, Sample}
+import models.{Populations, Predictions, Variant, Sample}
 
 
 object toRange {
-  case  class RangeData(pos:Long,ref:String,alt:String,rs:String, Indel:Boolean, sampleId:String,gq:Int,dp:Long,gt:String,ad:String)
 
 
   def main(sc :org.apache.spark.SparkContext, rawSample:org.apache.spark.sql.DataFrame, chromList : String, destination: String, banda : (Int,Int),repartitions:Int)={

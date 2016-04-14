@@ -1,10 +1,6 @@
 package steps
 
-    case class VariantModel(pos:Int,ref:String,alt:String,rs:String,indel:Boolean,
-         samples: collection.mutable.WrappedArray[Map[String,String]],
-        effs: collection.mutable.WrappedArray[Map[String,String]],
-        populations:collection.mutable.WrappedArray[Map[String,String]],
-        predictions:collection.mutable.WrappedArray[Map[String,String]])
+
         
         object toVariant {
 def main(sc :org.apache.spark.SparkContext, Samples:org.apache.spark.sql.DataFrame, Annotations:org.apache.spark.sql.DataFrame,

@@ -4,60 +4,10 @@ package steps
 import org.apache.spark.sql.SaveMode
 import steps.toSample.{formatCase,ADsplit,endPos,toMap}
 import steps.toEffects.{functionalMap_parser}
+import models.{Variant,Sample,FunctionalEffect,Predictions,Populations}
 object GVCFParser {
 
-  case class Variant(pos: Int,
-                     end_pos: Int,
-                     ref: String,
-                     alt: String,
-                     rs: String,
-                     indel: Boolean,
-                     sample: Sample,
-                     effects: List[FunctionalEffect],
-                     predictions:Predictions,
-                     populations: Populations
-                      )
 
-  case class Sample(gt: String,
-                    dp: Int,
-                    gq: Int,
-                    pl: String,
-                    ad: String,
-                    multiallelic : Boolean,
-                    sampleId: String)
-
-  case class FunctionalEffect(effect: String,
-                              effect_impact: String,
-                              functional_class: String,
-                              codon_change: String,
-                              amino_acid_change: String,
-                              amino_acid_length: String,
-                              gene_name: String,
-                              transcript_biotype: String,
-                              gene_coding: String,
-                              transcript_id: String,
-                              exon_rank: String,
-                              geno_type_number: Int)
-
-  case class Predictions(SIFT_pred: String,
-                  SIFT_score: Double,
-                  polyphen2_hvar_pred: String,
-                  pp2: String,
-                  polyphen2_hvar_score: Double,
-                  MutationTaster_pred: String,
-                  mt: String,
-                  phyloP46way_placental: String,
-                  GERP_RS: String,
-                  SiPhy_29way_pi: String,
-                  CADD_phred: Double)
-
-  case class Populations(esp6500_aa: Double,
-                 esp6500_ea: Double,
-                 gp1_afr_af: Double,
-                 gp1_asn_af: Double,
-                 gp1_eur_af: Double,
-                 gp1_af: Double,
-                 exac: Double)
 
   // for predictor we have multiple predictor for multiple alt
   def getOrEmpty(list:Seq[String], index:Int)={

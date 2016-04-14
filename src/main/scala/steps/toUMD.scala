@@ -14,6 +14,7 @@ import org.apache.spark.sql.GroupedData
 import org.apache.spark.sql.functions.first
 
 import scala.language.postfixOps
+import models.{FunctionalEffect,Effect}
 
 //import sqlContext.implicits._
 import steps._
@@ -30,15 +31,9 @@ object toEffects2{
 
   variant22.map(x=> "22\t"+x.getAs[Int]("pos")+"\t.\t"+x.getAs[String]("ref")+"\t"+x-getAs[String]("alt"))
    */
-  case class FunctionalEffect(
-                               effect : String,effect_impact:String, functional_class : String,codon_change : String, amino_acid_change: String,amino_acid_length: String, gene_name : String,
-                               transcript_biotype : String,gene_coding : String, transcript_id: String,exon_rank : String, geno_type_number : Int)
 
-  case class Effect(chrom: String,
-                    pos : Int,
-                    ref: String,
-                    alt: String,
-                    effects : Array[FunctionalEffect])
+
+
 
   def toMap(raw :Any):Map[String,String]={
     raw.toString.split(";").map(_ split "=") collect { case Array(k, v) => (k, v) } toMap

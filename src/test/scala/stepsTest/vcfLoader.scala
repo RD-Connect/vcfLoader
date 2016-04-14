@@ -13,11 +13,11 @@ import core.vcfToSample._
 import scala.collection.JavaConversions._
 import steps.GVCFParser.altMultiallelic
 import steps.GVCFParser.{ Variant,Sample,Populations,Predictions,FunctionalEffect}
-//import steps.toSample.{formatCase}
 import steps.vcfLoader.{multiSampleParser, file_to_parquetMultiple}
 import com.holdenkarau.spark.testing.SharedSparkContext
+
 /**
- * Created by dpiscia on 14/09/15.
+ * this class will test the vcfLoader features with no spark context
  */
 
 class vcfLoader extends FlatSpec with Matchers {
@@ -35,23 +35,23 @@ class vcfLoader extends FlatSpec with Matchers {
 
 }
 
+/**
+ * the class vcfLoader2 test with sparkcontext
+ */
 class vcfLoader2 extends FunSuite with SharedSparkContext {
- /* val url="/Users/dpiscia/GenomeAnalysisTK-3.5/bigvcf.g.vcf"
+  val url="/Users/dpiscia/GenomeAnalysisTK-3.5/bigvcf.g.vcf"
+  val origin="/Users/dpiscia/GenomeAnalysisTK-3.5/"
+  val destination="/Users/dpiscia/GenomeAnalysisTK-3.5"
+  val namesList = List("NA18782","NA18791","NA18792")
 
-  "fileToParquetMulti" should "" in {
-    val file = sc.textFile("/Users/dpiscia/GenomeAnalysisTK-3.5/bigvcf.g.vcf").filter(line => !line.startsWith("#"))
-
-    //file_to_parquet(sc,url,namesList)
-    true should be (true)
-  }*/
-  test("really simple transformation") {
-    val url="/Users/dpiscia/GenomeAnalysisTK-3.5/bigvcf.g.vcf"
-    val namesList = List("NA18782","NA18791","NA18792")
+ test("file_to_parquetMultiple") {
     assert(file_to_parquetMultiple(sc,url,namesList).count === 242720)
   }
 
-}
-/*class prova extends SparkFunSuite {
+ test("vcfLoader apply"){
+    val res=steps.vcfLoader(sc,origin,List("1"),"bigvcf",namesList,destination,4,".g.vcf")
+    assert(res.count === 242720 )
+ }
 
-  file_to_parquet(sc,"",namesList)
-}*/
+}
+

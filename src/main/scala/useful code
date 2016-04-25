@@ -1,0 +1,212 @@
+class DomainNamePartitioner(numParts: Int) extends Partitioner {
+  override def numPartitions: Int = numParts
+  def getPartition(key: Any): Int = {
+    val k = key.asInstanceOf[Int]
+    // `k` is assumed to go continuously from 0 to elements-1.
+    return k * numPartitions 
+  }
+  // Java equals method to let Spark compare our Partitioner objects
+}
+
+class ExactPartitioner[V] extends Partitioner (
+    partitions: Int,
+    elements: Int)
+  extends Partitioner {
+
+  def getPartition(key: Any): Int = {
+    val k = key.asInstanceOf[Int]
+    // `k` is assumed to go continuously from 0 to elements-1.
+    return k * partitions / elements
+  }
+}
+class ChromPartitioner(numParts: Int) extends Partitioner {
+  override def numPartitions: Int = numParts
+  def getPartition(key: Any,value:(Any,Any)): Int = {
+    val k = key.asInstanceOf[Int]
+    // `k` is assumed to go continuously from 0 to elements-1.
+    return 1 //k  
+  }
+  // Java equals method to let Spark compare our Partitioner objects
+}
+
+class DomainNamePartitioner(numParts: Int) extends Partitioner {
+  override def numPartitions: Int = numParts
+  def getPartition(key: Any): Int = {
+    // `k` is assumed to go continuously from 0 to elements-1.
+    return 0 //k
+  }
+  // Java equals method to let Spark compare our Partitioner objects
+}
+
+
+import scala.reflect.runtime.universe._
+def paramInfo[T](x: T)(implicit tag: TypeTag[T]): Unit = {
+  val targs = tag.tpe match { case TypeRef(_, _, args) => args }
+  println(s"type of $x has type arguments $targs")
+}
+implicit def anyToString(x: Any) = x.asInstanceOf[String]
+implicit def anyToInt(x: Any) = x.asInstanceOf[Int]
+implicit def anyToBoolean(x: Any) = x.asInstanceOf[Boolean]
+
+rawSample.map(x=>(x(0).asInstanceOf[Int],
+                  Sample(x(0),
+                         x(1),
+                         x(2),
+                         x(3),
+                         x(4),
+                         x(5),
+                         x(6),
+                         x(7),
+                         x(8).asInstanceOf[Double],
+                         x(9),
+                         x(10),
+                         x(11),
+                         x(12))))
+
+rawData.select("pos","alt").map(x=>(x.getAs[Int]("pos"),x.getAs[String]("alt"))).take(1)
+
+val variantsK=variants.map(x=> (x.getAs[Int]("pos"),(x.getAs[String]("ref"))))
+
+val variantsP=variantsK.repartitionAndSortWithinPartitions(new DomainNamePartitioner(1))
+
+val bandK=bands.map(x=> (x.getAs[Int]("pos"),(x.getAs[Int]("end_pos"),x.getAs[Int]("dp"),x.getAs[Double]("gq"),x.getAs[String]("ad"))))
+
+val bandP=bandK.repartitionAndSortWithinPartitions(new DomainNamePartitioner(1 ))
+
+
+val provaP=sc.parallelize(List((3,("alt")),(7,("alt")),(70,("alt")))).repartitionAndSortWithinPartitions(new DomainNamePartitioner(1))
+val prova1P=sc.parallelize(List((0, (10, 2, 3.0, "d")) )).repartitionAndSortWithinPartitions(new DomainNamePartitioner(1))
+provaP.zipPartitions(prova1P)(myfunc).collect
+
+val rawSample=sqlContext.load("/Users/dpiscia/testing/rawSamples")
+val chromList="1"
+val variants = rawSample.select("chrom","_1","_2")
+//    .where(rawSample("sampleId")!=="E000010")
+    .where(rawSample("_2.alt")!=="<NON_REF>")
+    .where(rawSample("chrom")===chromList)
+    .where(rawSample("_2.gq") > 19)
+    .where(rawSample("_2.dp") !== 0)
+  //  .where(rawSample("pos") >=banda._1)
+  //  .where(rawSample("pos") < banda._2)
+    .select("chrom","_1","_2.ref","_2.alt","_2.rs","_2.indel","_2.sampleId") //add indel,rs field here
+  //  .distinct
+    //eliminate distinct it causes a shuffle and repartions,we don't want it
+val bands = rawSample.select("chrom","_1","_2")
+//    .where(rawSample("sampleId")==="E000010")
+    .where(rawSample("_2.alt")==="<NON_REF>")
+    .where(rawSample("chrom")===chromList)
+    .where(rawSample("_2.gq") > 19)
+    .where(rawSample("_2.dp") !== 0)
+     .where(rawSample("_2.end_pos") !== 0)
+        .select("chrom","_1","_2.ref","_2.end_pos","_2.alt","_2.rs","_2.indel","_2.gq","_2.dp","_2.sampleId")
+
+def myfunc(variant: Iterator[(Int, (String))], band: Iterator[(Int, (Int, Int, Double, String))]): Iterator[String] =
+{
+  //println("entra new applicat")
+
+  var bandBuffered=band.buffered
+  var res = List[String]()
+  var setVar=true
+  var setBand=true
+  var varValue:(Int,(String))=null
+  var varOldValue:Int=0
+  var bandValue:(Int, (Int, Int, Double, String))=null
+  var x:String=null
+    var check=true
+     while ( (variant.hasNext || !setVar) && (bandBuffered.hasNext || !setBand))
+    {  
+    check=true
+    if (setVar) {
+        varValue= variant.next
+        if (varOldValue==varValue._1) check=true //should break
+    }
+    if (setBand) {
+     bandValue= bandBuffered.next
+    }
+      // println(" variant is"+varValue)
+        // println(" band is "+bandValue)
+    setVar=false
+    setBand=false
+    var res1=List[String]()
+    //check distinct
+      if (varValue._1 < bandValue._1)
+       { varOldValue=varValue._1
+        setVar=true
+}
+      if (varValue._1 > bandValue._2._1)
+         setBand=true
+
+      if (varValue._1 >= bandValue._1 && varValue._1 <= bandValue._2._1){
+         x="varValue._1 is "+varValue._1+" bandValue._2._1 "+bandValue._2._1
+          if (bandBuffered.hasNext && ((varValue._1 >= bandBuffered.head._1) && (varValue._1 <= bandBuffered.head._2._1))){
+             println("recursive")
+             var iterators = bandBuffered.duplicate
+             bandBuffered=iterators._1.buffered
+             res1=myfunc(Iterator(varValue),iterators._2).toList
+        }
+         varOldValue=varValue._1
+         setVar=true
+         res ::= x
+         if (res1.nonEmpty) res = res++res1
+         }         
+  }
+  res.iterator
+}
+import org.apache.spark.storage.StorageLevel._
+val bandsP=bands.map(x=>(x.getAs[Int]("_1"),(x.getAs[Int]("end_pos"),x.getAs[Int]("end_pos"),x.getAs[Double]("gq"),x.getAs[String]("ref")))).persist(MEMORY_AND_DISK_SER)
+val variantsP=variants.map(x=>(x.getAs[Int]("_1"),x.getAs[String]("ref"))).persist(MEMORY_AND_DISK_SER)
+variantsP.zipPartitions(bandsP)(myfunc)
+
+.rdd.mapPartitionsWithIndex((index,iter) => Array((index,iter.size)).iterator, true).collect
+
+    val provaP=sc.parallelize(List((3,("alt")),(7,("alt")),(70,("alt")),(70,("alt")))).repartitionAndSortWithinPartitions(new DomainNamePartitioner(1))
+    val prova1P=sc.parallelize(List((0, (10, 2, 3.0, "d")),(6, (12, 2, 3.0, "d")) ,(60, (120, 2, 3.0, "d")),(60, (120, 2, 3.0, "d")) )).repartitionAndSortWithinPartitions(new DomainNamePartitioner(1))
+    provaP.zipPartitions(prova1P)(myfunc).collect
+
+
+variantsP.zipPartitions(bandP)(myfunc).take(1)
+
+val provaP=sc.parallelize(List((1,("alt")),(100,("alt")),(180,("alt")))).repartitionAndSortWithinPartitions(new DomainNamePartitioner(13,chromBands))
+val prova1P=sc.parallelize(List((0, (1, 2, 3.0, "d")),(100, (153, 2, 3.0, "d")),(154, (159, 2, 3.0, "d"))  )).repartitionAndSortWithinPartitions(new DomainNamePartitioner(13,chromBands))
+provaP.zipPartitions(prova1P)(myfunc).collect
+val prova1P=sc.parallelize(List((0, (1, 2, 3.0, "d")),(100, (153, 2, 3.0, "d")),(60000000, (60000001, 2, 3.0, "d"))  )).repartitionAndSortWithinPartitions(new DomainNamePartitioner(13,chromBands))
+val provaP=sc.parallelize(List((1,("alt")),(100,("alt")),(60000000,("alt")))).repartitionAndSortWithinPartitions(new DomainNamePartitioner(13,chromBands))
+provaP.zipPartitions(prova1P)(myfunc).collect
+
+val provaP=sc.parallelize(List((3,("alt")),(7,("alt")))).repartitionAndSortWithinPartitions(new DomainNamePartitioner(13,chromBands))
+val prova1P=sc.parallelize(List((0, (10, 2, 3.0, "d")),(6, (12, 2, 3.0, "d"))  )).repartitionAndSortWithinPartitions(new DomainNamePartitioner(13,chromBands))
+provaP.zipPartitions(prova1P)(myfunc).collect
+
+
+
+
+val bandsP=bands.map(x=>(x.getAs[Int]("_1"),(x.getAs[Int]("end_pos"),x.getAs[Int]("end_pos"),x.getAs[Double]("gq"),x.getAs[String]("ref"))))
+val variantsP=variants.map(x=>(x.getAs[Int]("_1"),x.getAs[String]("ref")))
+variantsP.zipPartitions(bandsP)(myfunc)
+
+import scala.annotation.tailrec
+def myfunc(ind:Int, aiter: Iterator[org.apache.spark.sql.Row]):Iterator[String] =
+{
+  var res = List[String]()
+  var to=1
+  while (to < 2 && aiter.hasNext) {
+  val x = "index is "+ind+" "+aiter.next.toString
+      res ::= x
+      to = to +1
+      }
+    res.iterator
+    }
+
+
+    val struct =
+  StructType(
+    StructField("pos", IntegerType, true) ::
+    StructField("end_pos", IntegerType, false) ::
+    StructField("ref", StringType, false) :: Nil)
+
+
+
+    struct<pos:int,end_pos:int,ref:string,alt:string,rs:string,indel:boolean,gt:string,dp:int,gq:double,pl:string,ad:string,sampleId:string>
+
+
+bands.join(variants).where( (variants("_1")>=bands("_1"))&&(variants("_1")<=bands("end_pos"))  )

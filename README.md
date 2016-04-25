@@ -1,2 +1,2 @@
 # GenPipe
-From gVCFS to ElasticSearch through Hive-Parquet
+From gVCFS to ElasticSearch through SparkSQL-Hive-Parquet

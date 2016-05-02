@@ -2,6 +2,7 @@ package steps
 
 
 import org.apache.spark.sql.SaveMode
+import org.apache.spark.sql.functions.explode
 import steps.toSample.{formatCase,ADsplit,endPos,toMap}
 import steps.toEffects.{functionalMap_parser}
 import models.{Variant,Sample,FunctionalEffect,Predictions,Populations}
@@ -92,6 +93,30 @@ object GVCFParser {
     val parsedData = rawData
       .where(rawData("pos") >=chromBands._1)
       .where(rawData("pos") < chromBands._2).filter(rawData("chrom") === chrom).flatMap(a => sampleParser(a(0), a(1), a(2), a(3), a(6), a(7), a(8), a(9), chrom)).toDF()
+
+    parsedData.where(parsedData("Sample.dp")>7).where(parsedData("Sample.gq")>19).save(destination+"/chrom="+chrom+"/band="+chromBands._2.toString,SaveMode.Overwrite)
+
+  }
+
+  def vcfMain(sqlContext :org.apache.spark.sql.SQLContext,
+           rawData:org.apache.spark.sql.DataFrame,
+           destination : String,
+           chrom:String,
+           chromBands : (Int,Int),
+           repartitions:Int)= {
+
+
+    import sqlContext.implicits._
+
+    val res = rawData
+      .where(rawData("pos") >=chromBands._1)
+      .where(rawData("pos") < chromBands._2).filter(rawData("chrom") === chrom)
+      .select(rawData("pos"),rawData("ID"),rawData("ref"),rawData("alt"),rawData("qual"),rawData("filter"),rawData("info"),rawData("format"),explode(rawData("Sample")).as("e"))
+//some operation to explode array of sample
+      val res1=res.select(res("pos"),res("ID"),res("ref"),res("alt"),res("qual"),res("filter"),res("info"),res("format"),res("e._1").as("sample"),res("e._2").as("sameplId"))
+
+     val parsedData=res.select(res("pos"),res("ID"),res("ref"),res("alt"),res("qual"),res("filter"),res("info"),res("format"),res("e._1").as("sample"),res("e._2").as("sampleId"))
+      .flatMap(a => sampleParser(a(0), a(1), a(2), a(3), a(6), a(7), a(8), a(9), chrom)).toDF()
 
     parsedData.where(parsedData("Sample.dp")>7).where(parsedData("Sample.gq")>19).save(destination+"/chrom="+chrom+"/band="+chromBands._2.toString,SaveMode.Overwrite)
 

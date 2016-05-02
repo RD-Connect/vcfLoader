@@ -71,7 +71,7 @@ def file_to_parquetMultiple(sc :org.apache.spark.SparkContext, origin_path: Stri
      */
     var RDD: org.apache.spark.rdd.RDD[models.rawTableMultiple] = null;
     for ((chrom,index) <- chromList.zipWithIndex) yield {
-          RDD = file_to_parquetMultiple(sc, path + file +"." + chrom + suffix, samples)
+          RDD = file_to_parquetMultiple(sc, path + file +".Chr" + chrom + suffix, samples)
           RDD.toDF.write.mode(SaveMode.Overwrite).save(destination+"/chrom="+chromStrToInt(chrom))
       }
     RDD.toDF

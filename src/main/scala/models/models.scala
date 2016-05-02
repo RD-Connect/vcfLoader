@@ -25,7 +25,7 @@ package models
                       format:String,
                       Sample : String,
                       SampleID: String)
-}
+
 
 /** Variant model, chrom is in the partition
  *

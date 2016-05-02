@@ -147,7 +147,6 @@ object GenomicsLoader {
     }
     if (pipeline.contains("toElastic")) {
       val variants = sqlContext.load(destination + "/variants")
-      variants.registerTempTable("variants")
       val esnodes= elasticsearchHost+":9200"
       variants.saveToEs(index+"/"+version,Map("es.nodes"-> esnodes))
     }

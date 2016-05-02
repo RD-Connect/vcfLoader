@@ -1,7 +1,7 @@
 import org.apache.spark.sql.SaveMode
 import org.apache.spark.{SparkContext, SparkConf}
 import org.apache.spark.streaming._
-import steps.gzToParquet.rawTable
+import models.rawTable
 import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.SQLContext
 

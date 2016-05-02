@@ -51,7 +51,6 @@ object intersectSwap {
       {
         variant = variants.next
         tempVariants ::= variant
-        maxVariant= variant.pos
       }
       if (BandNext && bands.hasNext)
       {
@@ -59,15 +58,14 @@ object intersectSwap {
         //fill the temp list
         tempBands ::= band
       }
-
-      if (variant.pos > maxVariant) {
+      if (variant.pos > tempVariants(tempVariants.size-1).pos) {
         VariantNext= false
       }
+      maxVariant= variant.pos
 
-      if (band.pos > variant.pos) {
+      if (band.pos >  tempVariants(tempVariants.size-1).pos) {
         BandNext= false
       }
-
       if ((!VariantNext && !BandNext)||( !variants.hasNext && !bands.hasNext   )){
         var result=doIntersect(tempVariants,tempBands,res)
         tempVariants=result._1
@@ -76,6 +74,7 @@ object intersectSwap {
         VariantNext=true
         BandNext=true
       }
+
       //fill oldValue
 
 
@@ -83,6 +82,7 @@ object intersectSwap {
     }
     res.iterator
   }
+
 
   def apply(sc :org.apache.spark.SparkContext, rawSample:org.apache.spark.sql.DataFrame, chromList : String, destination: String, banda : (Int,Int),repartitions:Int)={
     val sqlContext = new org.apache.spark.sql.SQLContext(sc)
@@ -125,10 +125,9 @@ object intersectSwap {
       .sortBy(x=>x.pos)
 //  case  class RangeData(pos:Long,ref:String,alt:String,rs:String, Indel:Boolean, sampleId:String,gq:Int,dp:Long,gt:String,ad:String)
 
-    val variantsRDD=bands.repartition(1).map(x  => SwapDataThin(x.getAs("pos"),x.getAs("ref"),x.getAs("alt"),x.getAs("rs"),x.getAs("indel")))
+    val variantsRDD= variants.repartition(1).map(x  => SwapDataThin(x.getAs("pos"),x.getAs("ref"),x.getAs("alt"),x.getAs("rs"),x.getAs("indel")))
       .sortBy(x=>x.pos)
-
-
+//it might be the issue, taking all in memory
     val results=variantsRDD.zipPartitions(bandsRDD)(intersectBands).map(x  => SwapData(x.pos ,x.end_pos,x.ref,x.alt,x.rs,x.Indel,x.sampleId,x.gq,x.dp,x.gt,x.ad))
     val res1=results.toDF.save(destination+"/chrom="+chromList+"/band="+banda._2.toString)
 

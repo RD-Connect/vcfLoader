@@ -118,6 +118,13 @@ object GenomicsLoader {
         steps.toRange.main(sc, rawSample, ch.toString, destination + "/ranges", band, repartitions)
       }
     }
+    if (pipeline.contains("swap")) {
+      //val rawSample = sqlContext.load(destination + "/rawSamples")
+      val rawSample = sqlContext.load(destination + "/parsedSamples")
+      for (ch <- chromList; band <- due) yield {
+        steps.intersectSwap(sc, rawSample, ch.toString, destination + "/rangesSwap", band, repartitions)
+      }
+    }
     if (pipeline.contains("sampleGroup")) {
       val rawSample = sqlContext.load(destination + "/parsedSamples")
       val rawRange = sqlContext.load(destination + "/ranges")

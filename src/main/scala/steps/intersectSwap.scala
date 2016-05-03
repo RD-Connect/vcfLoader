@@ -1,29 +1,22 @@
 package steps
 
 import steps.toRange.RangeData
-
+import steps.Parser.{Variant,Sample,FunctionalEffect,Populations,Predictions}
 object intersectSwap {
 
   case class range(start:Int,end:Int,sample:String)
   case  class SwapData(pos:Int,end_pos:Int, ref:String,alt:String,rs:String, Indel:Boolean, sampleId:String,gq:Int,dp:Int,gt:String,ad:String)
   case  class SwapDataThin(pos:Int, ref:String,alt:String,rs:String, Indel:Boolean)
 
-  def doIntersect( tempVariants:List[SwapDataThin], tempBands:List[SwapData], res:List[SwapData]):(List[SwapDataThin],List[SwapData],List[SwapData])={
+  def doIntersect( tempVariants:List[SwapDataThin], tempBands:List[SwapData], res:List[SwapData], currentValue : Int):(List[SwapDataThin],List[SwapData],List[SwapData])={
     var tempBands2,res2=List[SwapData]()
     var tempVariants2Left,tempVariants2  =List[SwapDataThin]()
     val maxValue= tempVariants.map(x=> x.pos).distinct.sorted
-    if (maxValue.size == 2){
-      tempVariants2= tempVariants.filter(variant=> variant.pos == maxValue(1))
-      tempVariants2Left= tempVariants.filter(variant=> variant.pos == maxValue(0))
-
-    }
-    else
-    {
-      tempVariants2Left=tempVariants
-    }
-    tempBands2 = tempBands.filter(band=> band.pos > maxValue(0))
+    tempVariants2= tempVariants.filter(variant=> variant.pos > currentValue)
+    tempVariants2Left= tempVariants.filter(variant=> variant.pos == currentValue)
+    tempBands2 = tempBands.filter(band=> band.pos > currentValue)
     tempVariants2Left.foreach(  variant=>  tempBands.foreach(  current=> {
-      if (variant.pos>= current.pos && variant.pos<= current.end_pos  ) {res2 ::= SwapData(variant.pos,variant.pos,variant.ref, variant.alt, current.rs, current.Indel, current.sampleId, current.gq, current.dp, current.gt,current.ad)} }
+      if (variant.pos>= current.pos && variant.pos<= current.end_pos  ) {res2 ::= SwapData(variant.pos,variant.pos,variant.ref, variant.alt, variant.rs, variant.Indel, current.sampleId, current.gq, current.dp, current.gt,current.ad)} }
     ))
 
     (tempVariants2,tempBands2,res:::res2)
@@ -39,7 +32,8 @@ object intersectSwap {
     var band:SwapData=null
     var oldValue:Int=0
     var SNV=false
-    var maxValue:Int=0
+    var currentValue:Int= -1
+    var minValue:Int= -1
     var VariantNext,BandNext=true
 
     while (variants.hasNext || bands.hasNext )
@@ -58,22 +52,36 @@ object intersectSwap {
         //fill the temp list
         tempBands ::= band
       }
-      if (variant.pos > tempVariants(tempVariants.size-1).pos) {
+
+      if (currentValue == -1) currentValue= variant.pos
+      if (variant.pos > currentValue || !variants.hasNext) {
+
         VariantNext= false
+
       }
       maxVariant= variant.pos
 
-      if (band.pos >  tempVariants(tempVariants.size-1).pos) {
+      if (band.pos >  currentValue || !bands.hasNext) {
         BandNext= false
       }
-      if ((!VariantNext && !BandNext)||( !variants.hasNext && !bands.hasNext   )){
-        var result=doIntersect(tempVariants,tempBands,res)
+      if ((!VariantNext && !BandNext) ||  (!variants.hasNext && !bands.hasNext) ){
+        //println(tempVariants)
+        //println("before" + tempBands)
+        var result=doIntersect(tempVariants,tempBands,res,currentValue)
         tempVariants=result._1
         tempBands=result._2
         res=result._3
         VariantNext=true
         BandNext=true
+        if(tempVariants.size > 0)
+        currentValue=tempVariants(0).pos
+        //println("after" + tempBands)
+        //println("results are "+res)
+
       }
+
+
+
 
       //fill oldValue
 
@@ -82,7 +90,6 @@ object intersectSwap {
     }
     res.iterator
   }
-
 
   def apply(sc :org.apache.spark.SparkContext, rawSample:org.apache.spark.sql.DataFrame, chromList : String, destination: String, banda : (Int,Int),repartitions:Int)={
     val sqlContext = new org.apache.spark.sql.SQLContext(sc)
@@ -129,9 +136,29 @@ object intersectSwap {
       .sortBy(x=>x.pos)
 //it might be the issue, taking all in memory
     val results=variantsRDD.zipPartitions(bandsRDD)(intersectBands).map(x  => SwapData(x.pos ,x.end_pos,x.ref,x.alt,x.rs,x.Indel,x.sampleId,x.gq,x.dp,x.gt,x.ad))
-    val res1=results.toDF.save(destination+"/chrom="+chromList+"/band="+banda._2.toString)
+    val res1=results.map(a=> Variant(a.pos,a.end_pos,a.ref,a.alt,a.rs,a.Indel,
+      Sample("0/0",a.dp,a.gq,"",a.ad,false,a.sampleId),
+      List(),
+      Predictions("",0.0,"","",0.0,"","","","","",0.0),
+      Populations(0.0,0.0,0.0,0.0,0.0,0.0,0.0)))
+      .toDF.save(destination+"/chrom="+chromList+"/band="+banda._2.toString)
 
   }
 
 
 }
+/*Variant(
+      a(1).toString.toInt,
+      a(1).toString.toInt,
+      a(2).toString,
+      a(3).toString,//add a(4),a(5) for indel and rs and shift the other numbers
+      a(4).toString,
+      a(5).toString.toBoolean,
+      Sample("0/0",
+      a(11).toString.toInt,
+      a(10).toString.toInt,
+      "",
+      a(12).toString,
+      false,
+        a(9).toString
+      ),List(),Predictions("",0.0,"","",0.0,"","","","","",0.0),Populations(0.0,0.0,0.0,0.0,0.0,0.0,0.0)))*/

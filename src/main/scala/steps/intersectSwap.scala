@@ -14,21 +14,16 @@ object intersectSwap {
 
   case class SwapDataThin(pos: Int, ref: String, alt: String, rs: String, Indel: Boolean)
 
-  def doIntersect(tempVariants: List[SwapDataThin], tempBands: List[SwapData], res: List[SwapData], currentValue: Int): (List[SwapDataThin], List[SwapData], List[SwapData]) = {
-    var tempBands2, res2 = List[SwapData]()
-    var tempVariants2Left, tempVariants2 = List[SwapDataThin]()
-    val maxValue = tempVariants.map(x => x.pos).distinct.sorted
-    tempVariants2 = tempVariants.filter(variant => variant.pos > currentValue)
-    tempVariants2Left = tempVariants.filter(variant => variant.pos == currentValue)
-    tempBands2 = tempBands.filter(band => band.pos > currentValue)
-    tempVariants2Left.foreach(variant => tempBands.foreach(current => {
-      if (variant.pos >= current.pos && variant.pos <= current.end_pos) {
-        res2 ::= SwapData(variant.pos, variant.pos, variant.ref, variant.alt, variant.rs, variant.Indel, current.sampleId, current.gq, current.dp, current.gt, current.ad)
+  def doIntersect(tempVariants: List[SwapDataThin], tempBands: List[SwapData],  currentValue: Int): (List[SwapDataThin], List[SwapData], List[SwapData]) = {
+    var res2 = List[SwapData]()
+    tempVariants.filter(variant => variant.pos == currentValue).foreach(variant => tempBands.foreach(current => {
+      if (currentValue >= current.pos && currentValue <= current.end_pos) {
+        res2 ::= SwapData(currentValue, currentValue, variant.ref, variant.alt, variant.rs, variant.Indel, current.sampleId, current.gq, current.dp, current.gt, current.ad)
       }
     }
     ))
 
-    (tempVariants2, tempBands2, res ::: res2)
+    (tempVariants.filter(variant => variant.pos > currentValue), tempBands.filter(band => band.end_pos > currentValue),  res2)
   }
 
   def intersectBands(variants: Iterator[(Int,SwapDataThin)], bands: Iterator[(Int,SwapData)]): Iterator[SwapData] = {
@@ -36,17 +31,12 @@ object intersectSwap {
     var tempVariants = List[SwapDataThin]()
     var tempBands = List[SwapData]()
     var maxVariant: Int = 0
-    var maxBand: Int = 0
     var variant: SwapDataThin = null
     var band: SwapData = null
-    var oldValue: Int = 0
-    var SNV = false
     var currentValue: Int = -1
-    var minValue: Int = -1
     var VariantNext, BandNext = true
 
     while (variants.hasNext || bands.hasNext) {
-
 
       //get value from iterator
       if (VariantNext && variants.hasNext) {
@@ -73,10 +63,10 @@ object intersectSwap {
       if ((!VariantNext && !BandNext) || (!variants.hasNext && !bands.hasNext)) {
         //println(tempVariants)
         //println("before" + tempBands)
-        var result = doIntersect(tempVariants, tempBands, res, currentValue)
+        val result = doIntersect(tempVariants, tempBands, currentValue)
         tempVariants = result._1
         tempBands = result._2
-        res = result._3
+        res = res ::: result._3
         VariantNext = true
         BandNext = true
         if (tempVariants.size > 0)
@@ -85,13 +75,6 @@ object intersectSwap {
         //println("results are "+res)
 
       }
-
-
-
-
-      //fill oldValue
-
-
     }
     res.iterator
   }
@@ -118,8 +101,8 @@ object intersectSwap {
       .where(rawSample("chrom")===chromList)
       .where(rawSample("Sample.gq") > 19)
       .where(rawSample("Sample.dp") > 7)     //add indel,rs field here
-      .where(rawSample("pos") >=banda._1)
-      .where(rawSample("pos") < banda._2)
+        .where(rawSample("sample.gt")!== "0/0")
+      .where(rawSample("band") === banda._2)
       .select("chrom", "pos", "ref", "alt", "rs", "indel").distinct //if we put distinct it should be much better
     //eliminate distinct it causes a shuffle and repartions,we don't want it
     val bands = rawSample
@@ -129,11 +112,11 @@ object intersectSwap {
         .where(rawSample("Sample.gq") > 19)
         .where(rawSample("Sample.dp") > 7)
         .where(rawSample("end_pos") !== 0)
-        .where(rawSample("pos") >= banda._1)
-        .where(rawSample("pos") < banda._2)
+        .where(rawSample("band") === banda._2)
         .select("chrom", "pos", "end_pos", "rs", "ref", "alt", "Sample.sampleId", "Sample.gq", "Sample.dp", "Sample.ad", "indel", "Sample.gt")
 
     val binPartitioner =  new steps.BinPartitioner(repartitions, (banda._2 - banda._1)/repartitions, banda._1)
+    //probably better idea if create the value by end_pos
     val bandsRDD :RDD[(Int,SwapData)]= bands.map(x => (x.getAs("pos").toString.toInt,SwapData(x.getAs("pos"), x.getAs("end_pos"), x.getAs("ref"), x.getAs("alt"), x.getAs("rs"), x.getAs("indel"), x.getAs("sampleId"), x.getAs("gq"), x.getAs("dp"), x.getAs("gt"), x.getAs("ad"))))
       .repartitionAndSortWithinPartitions (binPartitioner)
     //  case  class RangeData(pos:Long,ref:String,alt:String,rs:String, Indel:Boolean, sampleId:String,gq:Int,dp:Long,gt:String,ad:String)

@@ -28,6 +28,7 @@ object toSampleGrouped{
     .where(rawSample("chrom")===chromList.toInt)
     .where(rawSample("sample.gq") > 19)
     .where(rawSample("sample.dp") > 7)
+      .where(rawSample("sample.gt")!== "0/0")
       .select("chrom","pos","ref","alt","sample.sampleId","sample.gq","sample.dp","sample.gt","sample.ad","rs","indel","sample.multiallelic")
  //   .where(rawSample("pos") >= banda._1)
  //   .where(rawSample("pos") < banda._2)

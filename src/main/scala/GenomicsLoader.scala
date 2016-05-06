@@ -96,8 +96,9 @@ object GenomicsLoader {
       }
     }
     if (pipeline.contains("umd.join")) {
+      val umdAnnotated= configuration.getString("umdAnnotated")
       val parsedSample = sqlContext.load(destination + "/parsedSamples")
-      val UMDannotation = sqlContext.load(destination + "/umdAnnotated").select("pos","tr","umd","chrom")
+      val UMDannotation = sqlContext.load(umdAnnotated + "/umdAnnotated").select("pos","tr","umd","chrom")
         .withColumnRenamed("pos","posUMD")
         .withColumnRenamed("chrom","chromUMD")
 

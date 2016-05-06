@@ -148,7 +148,7 @@ object Parser {
   }
 
   def sampleParser( pos:Any,ID:Any, ref:Any, alt:Any, info: Any, format: Any,  sampleline : Any, sampleID : Any,chrom : String):List[Variant]  = {
-     val rs = getter(ID.toString,"RS")
+     val rs = getterRS(ID.toString,"RS")
      val (gt,dp,gq,pl,ad) = formatCase(format,sampleline.toString)
      val infoMap = toMap(info)
      val effString = infoMap.getOrElse("EFF","")
@@ -212,7 +212,18 @@ object Parser {
     }
 
   }
+  def getterRS(value:String,pattern:String)={
+    val matches=value.split(pattern+"=rs")
+    matches.size match {
+      case 1 => List("")
+      case x:Int if x > 1 =>{
+        Range(1,x).map(item=> "rs"+matches(item).split(";")(0))
+      }
+      case _ => List("")
 
+    }
+
+  }
   def functionalMap_parser(raw_line:String):List[FunctionalEffect]=
   {
     if (raw_line == "") List[FunctionalEffect]()

@@ -96,8 +96,9 @@ object GenomicsLoader {
       }
     }
     if (pipeline.contains("umd.join")) {
+      val umdAnnotated= configuration.getString("umdAnnotated")
       val parsedSample = sqlContext.load(destination + "/parsedSamples")
-      val UMDannotation = sqlContext.load(destination + "/umdAnnotated").select("pos","tr","umd","chrom")
+      val UMDannotation = sqlContext.load(umdAnnotated + "/umdAnnotated").select("pos","tr","umd","chrom")
         .withColumnRenamed("pos","posUMD")
         .withColumnRenamed("chrom","chromUMD")
 
@@ -118,9 +119,16 @@ object GenomicsLoader {
         steps.toRange.main(sc, rawSample, ch.toString, destination + "/ranges", band, repartitions)
       }
     }
+    if (pipeline.contains("swap")) {
+      //val rawSample = sqlContext.load(destination + "/rawSamples")
+      val rawSample = sqlContext.load(destination + "/parsedSamples")
+      for (ch <- chromList; band <- due) yield {
+        steps.intersectSwap(sc, rawSample, ch.toString, destination + "/rangesSwap", band, repartitions)
+      }
+    }
     if (pipeline.contains("sampleGroup")) {
       val rawSample = sqlContext.load(destination + "/parsedSamples")
-      val rawRange = sqlContext.load(destination + "/ranges")
+      val rawRange = sqlContext.load(destination + "/rangesSwap")
       for (ch <- chromList) yield {
         steps.toSampleGrouped.main(sqlContext, rawSample, rawRange, destination + "/samples", ch.toString, (0, 0))
       }

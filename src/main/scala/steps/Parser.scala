@@ -24,7 +24,9 @@ object Parser {
                     pl: String,
                     ad: String,
                     multiallelic : Boolean,
-                    sampleId: String)
+                    sampleId: String,
+                    diploid:Boolean = true
+  )
 
   case class FunctionalEffect(effect: String,
                               effect_impact: String,
@@ -168,8 +170,8 @@ object Parser {
        val functionalEffs = functionalMap_parser(effString).filter(effect => (altGenotype == effect.geno_type_number)).toList
 
        altGenotype match{
-         case 0 => Variant(posOK,endOK,ref.toString,x._1,rs(0),indel,Sample(x._2,dp,gq,pl,ADsplit(ad,gt),altSplitted.size==2,sampleID.toString),functionalEffs, Predictions("",0.0,"","",0.0,"","","","","",0.0),Populations(0.0,0.0,0.0,0.0,0.0,0.0,0.0) )
-         case _ => Variant(posOK,endOK,ref.toString,x._1,rs(0),indel,Sample(x._2,dp,gq,pl,ADsplit(ad,gt),altSplitted.size==2,sampleID.toString),functionalEffs, anno(altPosition)._1,anno(altPosition)._2 )
+         case 0 => Variant(posOK,endOK,ref.toString,x._1,rs(0),indel,Sample(getDiploid(x._2)._1,dp,gq,pl,ADsplit(ad,gt),altSplitted.size==2,sampleID.toString,getDiploid(x._2)._2),functionalEffs, Predictions("",0.0,"","",0.0,"","","","","",0.0),Populations(0.0,0.0,0.0,0.0,0.0,0.0,0.0) )
+         case _ => Variant(posOK,endOK,ref.toString,x._1,rs(0),indel,Sample(getDiploid(x._2)._1,dp,gq,pl,ADsplit(ad,gt),altSplitted.size==2,sampleID.toString,getDiploid(x._2)._2),functionalEffs, anno(altPosition)._1,anno(altPosition)._2 )
 
        }
 
@@ -178,6 +180,18 @@ object Parser {
      res
 
   }
+  def getDiploid(gt:String):(String,Boolean)={
+    gt match {
+      case x if x.size ==1 =>{ x match {
+        case "0" => ("0/0",false)
+        case "1" => ("1/1",false)
+      }
+    }
+      case _ =>(gt,true)
+
+    }
+  }
+
   def altMultiallelic(ref:String,alt:String,gt:String):List[(String,String,String)]={
     alt match {
       case "<NON_REF>" => List((alt,"0/0","0"))

@@ -33,7 +33,7 @@ class LoadData extends FlatSpec with Matchers {
   val destination =configuration.getString("destination")+version
   val sizePartition = configuration.getInt("sizePartition")
   val repartitions = configuration.getInt("repartitions") //30
-  val files = configuration.getStringList("files").toList
+  var files = configuration.getConfigList("files").map(x=> (x.getString("name"),x.getString("sex"))).toList
   val chromList  = (configuration.getStringList("chromList") ).toList
   val index=configuration.getString("index")
   //val indexVersion="0.1"

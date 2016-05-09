@@ -51,7 +51,7 @@ def file_to_parquet(sc :org.apache.spark.SparkContext, origin_path: String, dest
 def main(sc:org.apache.spark.SparkContext,
 		path : String, 
 		chromList : List[String],
-    files:List[String],
+    files:List[(String,String)],
 		destination : String,
 		numPartitions:Int=4)= {
 
@@ -61,21 +61,40 @@ def main(sc:org.apache.spark.SparkContext,
   for (chrom <- chromList) yield {
       var RDD: org.apache.spark.rdd.RDD[steps.gzToParquet.rawTable] = null;
       for ((file, index) <- files.zipWithIndex) yield {
-        println("index dpdpdpdpd is "+index)
-        if (index == 0) {
-          RDD = file_to_parquet(sc, path + file +"." + chrom + ".annot.snpEff.p.g.vcf.gz", destination, chrom, file)
+        if (chrom=="Y" && file._2=="F")
+          println("Do nothing, because female DNA does not bring Y chrom" )
+        else if (index == 0) {
+          RDD = file_to_parquet(sc, getName(path=path, file=file,chrom=chrom), destination, chrom, file._1)
+          if (files.length ==1)
+            RDD.toDF.write.mode(SaveMode.Overwrite).save(destination+"/chrom="+chromStrToInt(chrom))
+
         }
         else if (index == files.length - 1) {
-          RDD = file_to_parquet(sc, path + file +"." + chrom + ".annot.snpEff.p.g.vcf.gz", destination, chrom, file).union(RDD)
+          RDD = file_to_parquet(sc, getName(path=path, file=file,chrom=chrom), destination, chrom, file._1).union(RDD)
           RDD.toDF.write.mode(SaveMode.Overwrite).save(destination+"/chrom="+chromStrToInt(chrom))
         }
 
         else
-          {RDD = file_to_parquet(sc, path + file +"." + chrom + ".annot.snpEff.p.g.vcf.gz", destination, chrom, file).union(RDD)}
+          {RDD = file_to_parquet(sc, getName(path=path, file=file,chrom=chrom), destination, chrom, file._1).union(RDD)}
       }
       RDD
     }
 }
+
+  def getName(path:String, chrom:String, file:(String,String)):String={
+    if ( chrom=="X" ){
+      if (file._2=="M")
+        path + file._1 +"." + chrom + ".haplodiploid.annot.g.vcf.gz"
+      else
+        path + file._1 +"." + chrom + ".annot.snpEff.p.g.vcf.gz"
+
+    }
+    else if (chrom=="Y" && file._2=="M")
+        path + file._1 +"." + chrom + ".haploid.annot.g.vcf.gz"
+
+    else path +file._1 +"." + chrom + ".annot.snpEff.p.g.vcf.gz"
+
+  }
        
 /*file_to_parquet("/user/dpiscia/gvcf10bands/E000010.g.vcf.gz","/user/dpiscia/test/trio","E000010")
 file_to_parquet("/user/dpiscia/gvcf10bands/E000036.g.vcf.gz","/user/dpiscia/test/trio","E000036")

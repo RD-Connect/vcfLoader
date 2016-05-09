@@ -67,7 +67,8 @@ object Data {
             "ad" typed FloatType, //Floattype and filterable 
             "gt" typed StringType index "not_analyzed",
             "sample" typed StringType index "not_analyzed",
-            "multi" typed StringType index "no")
+            "multi" typed StringType index "no",
+            "diploid" typed StringType index "no")
           ) all false) refreshInterval "1000.ms"
 
       }

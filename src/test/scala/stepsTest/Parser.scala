@@ -144,12 +144,12 @@ class ParserData extends FlatSpec with Matchers {
 
   "getDiploid" should "given 0/1 should return 0/1 " in {
 
-    val gt = "1"
-    getDiploid(gt)._1 should be("1/1")
+    val gt = "0/1"
+    getDiploid(gt)._1 should be("0/1")
   }
   "getDiploid" should "given 0/1 should return true " in {
 
-    val gt = "1"
+    val gt = "0/1"
     getDiploid(gt)._2 should be(true)
   }
 }

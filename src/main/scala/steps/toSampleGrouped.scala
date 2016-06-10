@@ -37,7 +37,7 @@ object toSampleGrouped{
     val united = variants.unionAll(ranges)
 united.registerTempTable("variants_tbl")
 // 'gt',gt,'dp',dp,'gq',gq,'sample',file_name )
-val s=sqlContext.sql("select pos,ref,alt,rs,indel, collect( map('sample',sampleId,'gt',gt,'dp',dp,'gq',gq,'ad',ad,'multi',IF(multiallelic, 'true', 'false'),IF(diploid, 'true', 'false'))) from variants_tbl group by pos,ref,alt,rs,indel")
+val s=sqlContext.sql("select pos,ref,alt,rs,indel, collect( map('sample',sampleId,'gt',gt,'dp',dp,'gq',gq,'ad',ad,'multi',IF(multiallelic, 'true', 'false'),'diploid',IF(diploid, 'true', 'false'))) from variants_tbl group by pos,ref,alt,rs,indel")
     .map(x=>
       (   x(0).toString.toInt,
           x(1).toString,

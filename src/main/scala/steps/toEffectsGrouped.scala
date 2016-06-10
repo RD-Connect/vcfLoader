@@ -32,11 +32,11 @@ object toEffectsGrouped{
                        'gp1_asn_af',populations.gp1_asn_af ,
                        'gp1_eur_af',populations.gp1_eur_af,
                         'gp1_af',populations.gp1_af,
-    'esp6500_aa', populations.esp6500_aa, 'esp6500_ea', populations.esp6500_ea, 'exac', populations.exac))),
+    'esp6500_aa', populations.esp6500_aa, 'esp6500_ea', populations.esp6500_ea, 'exac', populations.exac))[0]),
  array(collect(map('sift_pred', predictions.SIFT_pred, 'sift_score', predictions.SIFT_score, 'polyphen2_hvar_pred', predictions.polyphen2_hvar_pred,
- 'pp2', predictions.pp2, 'polyphen2_hvar_score', predictions.polyphen2_hvar_score, 'mutationTaster_pred', predictions.MutationTaster_pred,
+ 'pp2', predictions.pp2, 'polyphen2_hvar_score', predictions.polyphen2_hvar_score, 'mutationtaster_pred', predictions.MutationTaster_pred,
  'mt', predictions.mt,'phylop46way_placental', predictions.phyloP46way_placental, 'gerp_rs', predictions.GERP_RS, 'siphy_29way_pi', predictions.SiPhy_29way_pi,
-  'cadd_phred', predictions.CADD_phred))) from UMD  group by pos,ref,alt,rs,indel""")
+  'cadd_phred', predictions.CADD_phred))[0]) from UMD  group by pos,ref,alt,rs,indel""")
     .save(destination+"/chrom="+chromList+"/band="+banda._2.toString)
   }
 }

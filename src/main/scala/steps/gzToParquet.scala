@@ -53,11 +53,12 @@ object gzToParquet {
            chromList : List[String],
            files:List[String],
            destination : String,
-           numPartitions:Int=4)= {
+           numPartitions:Int=4,
+            checkPointDIr:String = "/tmp")= {
 
     val sqlContext = new org.apache.spark.sql.SQLContext(sc)
     import sqlContext.implicits._
-    sc.setCheckpointDir("/user/admin/.Trash/")
+    sc.setCheckpointDir(checkPointDIr)
     for (chrom <- chromList) yield {
       var RDD1: org.apache.spark.rdd.RDD[steps.gzToParquet.rawTable] = null;
       for ((file, index) <- files.zipWithIndex) yield {

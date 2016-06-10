@@ -3,7 +3,7 @@ package steps
 import org.apache.spark.sql.SaveMode
 import org.apache.spark.sql.hive.HiveContext
 
-case class umdVariant (chrom : String, pos :Int, ref:String, alt:String, tr: String, umd:String)
+case class umdVariant (chrom : String, pos :Int, ref:String, alt:String, umd:String)
 
 //umdfile.map(_.split("\t")).map(x=>  umd(x(0),x(1),x(6),x(7),x(5),if (x.lenght==13) x(12) else ""))
 
@@ -13,7 +13,7 @@ object umd {
     parsedSample.filter(parsedSample("chrom")===chromList).registerTempTable("parsed")
     sqlContext.sql("""SELECT distinct chrom,pos,ref,alt FROM parsed LATERAL VIEW explode(effects) a AS effectsExploded where
 (effectsExploded.effect_impact == 'HIGH' OR effectsExploded.effect_impact == 'MODERATE'
-OR effectsExploded.effect_impact == 'LOW') """)
+OR effectsExploded.effect_impact == 'LOW') """)//.select("chrom","pos","ref","alt")
       .rdd.repartition(1).map(x=> x(0)+"\t"+x(1)+"\t"+"."+"\t"+x(2)+"\t"+x(3)+"\t").saveAsTextFile(destination+"/chrom"+chromList)
   }
 
@@ -21,7 +21,7 @@ OR effectsExploded.effect_impact == 'LOW') """)
     val sqlContext = new org.apache.spark.sql.SQLContext(sc)
     import sqlContext.implicits._
     val file = sc.textFile(origin+"chrom"+chrom+".annotated").filter(line => !line.startsWith("NB_LINES"))
-    val umdParsed=file.map(_.split("\t")).map(x=>  umdVariant(x(0),x(1).toInt,x(6),x(7),x(4),if (x.size==12) converter(x(11)) else "")).toDF
+    val umdParsed=file.map(_.split("\t")).map(x=>  umdVariant(x(0),x(1).toInt,x(4),x(5),if (x.size==8) converter(x(7)) else "")).toDF
     umdParsed.write.mode(SaveMode.Overwrite).save(destination+"/chrom="+chrom)
 
   }

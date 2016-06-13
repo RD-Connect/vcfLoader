@@ -1,0 +1,43 @@
+
+config.py
+config.js
+env
+*.pyc
+logs/*
+!.gitkeep
+node_modules/
+bower_components/
+tmp
+.DS_Store
+.idea
+target
+.lib
+project/target
+
+# Ignore all dotfiles...
+.*
+# except for .gitignore
+!.gitignore
+
+# Ignore Play! working directory #
+db
+eclipse
+lib
+log
+logs
+modules
+precompiled
+project/project
+project/target
+target
+tmp
+test-result
+server.pid
+*.iml
+*.eml
+activator-*.sbt
+node_modules
+bower_components
+application.conf
+public
+

@@ -125,5 +125,31 @@ class ParserData extends FlatSpec with Matchers {
     with01(0).predictions should be (with11(0).predictions)
     with01(0).effects   should be (with11(0).effects)
   }
+  "getDiploid" should "detect haploid or deploid" in {
 
+    val gt = "0"
+    getDiploid(gt)._1 should be("0/0")
+  }
+
+  "getDiploid" should "given 1 should reurn 1/1 " in {
+
+    val gt = "1"
+    getDiploid(gt)._1 should be("1/1")
+  }
+  "getDiploid" should "given 1 should return false " in {
+
+    val gt = "1"
+    getDiploid(gt)._2 should be(false)
+  }
+
+  "getDiploid" should "given 0/1 should return 0/1 " in {
+
+    val gt = "0/1"
+    getDiploid(gt)._1 should be("0/1")
+  }
+  "getDiploid" should "given 0/1 should return true " in {
+
+    val gt = "0/1"
+    getDiploid(gt)._2 should be(true)
+  }
 }

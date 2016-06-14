@@ -43,6 +43,6 @@ OR effectsExploded.effect_impact == 'LOW') """)//.select("chrom","pos","ref","al
     val UMDannotationsFiltered = UMDannotations.filter(UMDannotations("chromUMD")===chrom)
     val parsedExploded=sqlContext.sql("""SELECT * FROM parsed LATERAL VIEW explode(effects) a AS effectsExploded """)
 
-    val joined=parsedExploded.join(UMDannotationsFiltered, parsedExploded("effectsexploded.pos")===UMDannotationsFiltered("posUMD") && parsedExploded("ref")===UMDannotationsFiltered("refUMD") && parsedExploded("alt")===UMDannotationsFiltered("altUMD") ,"left").save(destination+"/chrom="+chrom)
+    val joined=parsedExploded.join(UMDannotationsFiltered, parsedExploded("pos")===UMDannotationsFiltered("posUMD") && parsedExploded("ref")===UMDannotationsFiltered("refUMD") && parsedExploded("alt")===UMDannotationsFiltered("altUMD") ,"left").save(destination+"/chrom="+chrom)
   }
 }

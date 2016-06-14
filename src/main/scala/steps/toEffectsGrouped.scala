@@ -26,7 +26,7 @@ object toEffectsGrouped{
       //first not collect predictions and populations
       """select pos,ref,alt,rs,indel, collect( map('effect',effectsexploded.effect,'effect_impact',effectsexploded.effect_impact,'functional_class',effectsexploded.functional_class,'codon_change',effectsexploded.codon_change,'amino_acid_change',effectsexploded.amino_acid_change,
 'amino_acid_length',effectsexploded.amino_acid_length,'gene_name',effectsexploded.gene_name,'transcript_biotype',effectsexploded.transcript_biotype,'gene_coding',effectsexploded.gene_coding,'transcript_id',effectsexploded.transcript_id,'gene_coding',effectsexploded.gene_coding,'transcript_id',effectsexploded.transcript_id,
-'exon_rank',effectsexploded.exon_rank,'geno_type_number',effectsexploded.geno_type_number,'UMD', IF(umd is NULL, '', umd))),
+'exon_rank',effectsexploded.exon_rank,'geno_type_number',effectsexploded.geno_type_number)),
  array(collect( map ('gp1_afr_af',
                       populations.gp1_afr_af,
                        'gp1_asn_af',populations.gp1_asn_af ,
@@ -36,7 +36,7 @@ object toEffectsGrouped{
  array(collect(map('sift_pred', predictions.SIFT_pred, 'sift_score', predictions.SIFT_score, 'polyphen2_hvar_pred', predictions.polyphen2_hvar_pred,
  'pp2', predictions.pp2, 'polyphen2_hvar_score', predictions.polyphen2_hvar_score, 'mutationtaster_pred', predictions.MutationTaster_pred,
  'mt', predictions.mt,'phylop46way_placental', predictions.phyloP46way_placental, 'gerp_rs', predictions.GERP_RS, 'siphy_29way_pi', predictions.SiPhy_29way_pi,
-  'cadd_phred', predictions.CADD_phred))[0]) from UMD  group by pos,ref,alt,rs,indel""")
+  'cadd_phred', predictions.CADD_phred , 'UMD', IF(umd is NULL, '', umd)))[0]) from UMD  group by pos,ref,alt,rs,indel""")
     .save(destination+"/chrom="+chromList+"/band="+banda._2.toString)
   }
 }

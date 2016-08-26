@@ -144,8 +144,8 @@ object Parser {
     val parsedData = rawData
       .where(rawData("pos") >=chromBands._1)
       .where(rawData("pos") < chromBands._2).filter(rawData("chrom") === chrom).flatMap(a => sampleParser(a(0), a(1), a(2), a(3), a(6), a(7), a(8), a(9), chrom)).toDF()
-
-    parsedData.where(parsedData("Sample.dp")>7).where(parsedData("Sample.gq")>19).save(destination+"/chrom="+chrom+"/band="+chromBands._2.toString,SaveMode.Overwrite)
+//multialleli off
+    parsedData.where(parsedData("Sample.multiallelic")===false).where(parsedData("Sample.dp")>7).where(parsedData("Sample.gq")>19).save(destination+"/chrom="+chrom+"/band="+chromBands._2.toString,SaveMode.Overwrite)
 
   }
 
@@ -170,8 +170,8 @@ object Parser {
        val functionalEffs = functionalMap_parser(effString).filter(effect => (altGenotype == effect.geno_type_number)).toList
 
        altGenotype match{
-         case 0 => Variant(posOK,endOK,ref.toString,x._1,rs(0),indel,Sample(getDiploid(x._2)._1,dp,gq,pl,ADsplit(ad,gt),altSplitted.size==2,sampleID.toString,getDiploid(x._2)._2),functionalEffs, Predictions("",0.0,"","",0.0,"","","","","",0.0),Populations(0.0,0.0,0.0,0.0,0.0,0.0,0.0) )
-         case _ => Variant(posOK,endOK,ref.toString,x._1,rs(0),indel,Sample(getDiploid(x._2)._1,dp,gq,pl,ADsplit(ad,gt),altSplitted.size==2,sampleID.toString,getDiploid(x._2)._2),functionalEffs, anno(altPosition)._1,anno(altPosition)._2 )
+         case 0 => Variant(posOK,endOK,ref.toString,x._1,rs(0),indel,Sample(getDiploid(x._2)._1,dp,gq,pl,ADsplit(ad,gt),x._4,sampleID.toString,getDiploid(x._2)._2),functionalEffs, Predictions("",0.0,"","",0.0,"","","","","",0.0),Populations(0.0,0.0,0.0,0.0,0.0,0.0,0.0) )
+         case _ => Variant(posOK,endOK,ref.toString,x._1,rs(0),indel,Sample(getDiploid(x._2)._1,dp,gq,pl,ADsplit(ad,gt),x._4,sampleID.toString,getDiploid(x._2)._2),functionalEffs, anno(altPosition)._1,anno(altPosition)._2 )
 
        }
 
@@ -192,19 +192,19 @@ object Parser {
     }
   }
 
-  def altMultiallelic(ref:String,alt:String,gt:String):List[(String,String,String)]={
+  def altMultiallelic(ref:String,alt:String,gt:String):List[(String,String,String,Boolean)]={
     alt match {
-      case "<NON_REF>" => List((alt,"0/0","0"))
+      case "<NON_REF>" => List((alt,"0/0","0",false))
       case _ =>
         gt match {
-          case "0/0" => List((ref,"0/0","0"))
+          case "0/0" => List((ref,"0/0","0",false))
           case _ =>
             val altList =  alt.split(",")
             val gtList =  gt.split("/")
             gtList match {
-              case x if x(0) == "0" => List((altList(gtList(1).toInt-1),"0/1",gtList(1)))
-              case x if x(0) == x(1) => List((altList(gtList(1).toInt-1),"1/1",gtList(1)))
-              case _ => List((altList(gtList(0).toInt-1),"0/1",gtList(0)),(altList(gtList(1).toInt-1),"0/1",gtList(1)))
+              case x if x(0) == "0" => List((altList(gtList(1).toInt-1),"0/1",gtList(1),gtList(1).toInt>1))
+              case x if x(0) == x(1) => List((altList(gtList(1).toInt-1),"1/1",gtList(1),gtList(1).toInt>1))
+              case _ => List((altList(gtList(0).toInt-1),"0/1",gtList(0),true),(altList(gtList(1).toInt-1),"0/1",gtList(1),true))
               // case _ =>       altList(gtList(0).toInt -1)+","+altList(gtList(1).toInt -1)
             }
         }

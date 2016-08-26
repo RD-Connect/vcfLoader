@@ -89,8 +89,38 @@ class ParserData extends FlatSpec with Matchers {
       altSplitted(0)._1 should be ("C")
       altSplitted(0)._2 should be ("0/1")
       altSplitted(0)._3 should be ("1")
+      altSplitted(0)._4 should be (false)
+
       //0/1,1
     }
+  "multilleli altSplitted" should "split and get proper values" in {
+    val altSplitted = altMultiallelic(ref.toString, "C,T", "0/2") //returns
+    altSplitted(0)._1 should be ("T")
+    altSplitted(0)._2 should be ("0/1")
+    altSplitted(0)._3 should be ("2")
+    altSplitted(0)._4 should be (true)
+
+    //0/1,1
+  }
+
+  "multilleli 1/2 altSplitted" should "split and get proper values" in {
+    val altSplitted = altMultiallelic(ref.toString, "C,T", "1/2") //returns
+    altSplitted(0)._1 should be ("C")
+    altSplitted(0)._2 should be ("0/1")
+    altSplitted(0)._3 should be ("1")
+    altSplitted(0)._4 should be (true)
+
+    //0/1,1
+  }
+  "multilleli 2/3 altSplitted" should "split and get proper values" in {
+    val altSplitted = altMultiallelic(ref.toString, "C,T,A", "2/3") //returns
+    altSplitted(0)._1 should be ("T")
+    altSplitted(0)._2 should be ("0/1")
+    altSplitted(0)._3 should be ("2")
+    altSplitted(0)._4 should be (true)
+
+    //0/1,1
+  }
 
   "annotationParser" should "get populations and predictors" in {
 

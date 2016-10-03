@@ -21,7 +21,6 @@ object gzToParquet {
                       format:String,
                       Sample : String,
                       SampleID: String)
-
   def chromStrToInt(chrom:String)={
     chrom match {
       case "MT" =>"23"
@@ -53,11 +52,11 @@ object gzToParquet {
            chromList : List[String],
            files:List[String],
            destination : String,
-           numPartitions:Int=4)= {
+           checkPointDir:String)= {
 
     val sqlContext = new org.apache.spark.sql.SQLContext(sc)
     import sqlContext.implicits._
-    sc.setCheckpointDir("/user/admin/.Trash/")
+    sc.setCheckpointDir(checkPointDir)
     for (chrom <- chromList) yield {
       var RDD1: org.apache.spark.rdd.RDD[steps.gzToParquet.rawTable] = null;
       for ((file, index) <- files.zipWithIndex) yield {

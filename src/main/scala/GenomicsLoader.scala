@@ -59,7 +59,7 @@ object GenomicsLoader {
     val sizePartition = configuration.getInt("sizePartition")
     val repartitions = configuration.getInt("repartitions") //30
     val checkPointDir = configuration.getString("checkPointDir")
-    val samplesFile =  configuration.getString("samplesFile")
+    //val samplesFile =  configuration.getString("samplesFile")
     //val files:List[String] = utils.IO.getSamplesFromFile(samplesFile)
 
     //val files1=(nameCreator(0,367).toList)map(x=> "ALL4/"+x)
@@ -68,7 +68,9 @@ object GenomicsLoader {
     val files5 = List("ALL5/E342916","ALL5/E739470","ALL5/E009521","ALL5/E609033","ALL5/E700149","ALL5/E955800","ALL5/E365961","ALL5/E336666","ALL5/E501495","ALL6/E473936")
     //val files6 = List("ALL6/E473936")
     val files7=List("ALL7/E144473","ALL7/E035087","ALL7/E363708","ALL7/E417983","ALL7/E215959","ALL7/E559588","ALL7/E037208","ALL7/E098757","ALL7/E326033","ALL7/E914380","ALL7/E710024","ALL7/E365019","ALL7/E919028","ALL7/E171096","ALL7/E924009","ALL7/E006240","ALL7/E241175","ALL7/E674123","ALL7/E335950","ALL7/E830504","ALL7/E789846","ALL7/E896819","ALL7/E656414","ALL7/E104155","ALL7/E831992","ALL7/E967390","ALL7/E159785","ALL7/E541111","ALL7/E008450","ALL7/E042486","ALL7/E283080","ALL7/E403682","ALL7/E388662","ALL7/E369025","ALL7/E336770","ALL7/E348174","ALL7/E483915","ALL7/E156149","ALL7/E703750","ALL7/E852017","ALL7/E363185","ALL7/E429536","ALL7/E823933","ALL7/E401712","ALL7/E304700","ALL7/E149987","ALL7/E018484","ALL7/E135918","ALL7/E985752","ALL7/E538745","ALL7/E547032","ALL7/E995205","ALL7/E625955","ALL7/E650138","ALL7/E176862","ALL7/E450303","ALL7/E218134","ALL7/E737203","ALL7/E810441","ALL7/E277835","ALL7/E065246","ALL7/E368234","ALL7/E458794","ALL7/E034471","ALL7/E317800","ALL7/E378796","ALL7/E249299","ALL7/E472395","ALL7/E309407","ALL7/E975043","ALL7/E565558","ALL7/E712024","ALL7/E230535","ALL7/E499278","ALL7/E422143","ALL7/E527693","ALL7/E920657","ALL7/E551235","ALL7/E486611","ALL7/E207660","ALL7/E814688","ALL7/E957798","ALL7/E222903","ALL7/E572131","ALL7/E297841","ALL7/E263465","ALL7/E305889","ALL7/E083802","ALL7/E238431","ALL7/E495905","ALL7/E807884","ALL7/E947681","ALL7/E626042","ALL7/E207448","ALL7/E203064","ALL7/E314538","ALL7/E203612","ALL7/E237663","ALL7/E849596","ALL7/E655792","ALL7/E099180","ALL7/E556690","ALL7/E023373","ALL7/E781479","ALL7/E512069","ALL7/E140478","ALL7/E802903","ALL7/E471035","ALL7/E692562","ALL7/E469308","ALL7/E659687","ALL7/E448106","ALL7/E512659","ALL7/E705364","ALL7/E720184","ALL7/E688539","ALL7/E496554","ALL7/E844741","ALL7/E474340","ALL7/E019166","ALL7/E586533","ALL7/E161110","ALL7/E886777","ALL7/E152400","ALL7/E627631","ALL7/E532159","ALL7/E852336","ALL7/E016972","ALL7/E809112","ALL7/E078533","ALL7/E846903","ALL7/E668493","ALL7/E448882","ALL7/E701525","ALL7/E117287","ALL7/E780772","ALL7/E720291","ALL7/E967392","ALL7/E507187","ALL7/E872399","ALL7/E500196","ALL7/E300361","ALL7/E101855","ALL7/E675796","ALL7/E973092","ALL7/E572639","ALL7/E819556","ALL7/E959107","ALL7/E167669")
-    val files=files7  //::: files1 ::: files2
+    val files8=List("ALL8/E944618","ALL8/E866846","ALL8/E428195","ALL8/E046973","ALL8/E357241","ALL8/E468963","ALL8/E102941","ALL8/E746858","ALL8/E800695","ALL8/E080423","ALL8/E766041","ALL8/E876661","ALL8/E792433","ALL8/E874066","ALL8/E041507","ALL8/E518628","ALL8/E962059","ALL8/E499643","ALL8/E821252","ALL8/E073747","ALL8/E236688","ALL8/E609050","ALL8/E194673")
+
+    val files=files8  //::: files1 ::: files2
     // var files = configuration.getConfigList("files").map(x=> (x.getString("name"),x.getString("sex"))).toList
    /* if (files.size == 0) {
       val files1=(nameCreator(0,367).toList)map(x=> "ALL/"+x)
@@ -113,10 +115,10 @@ object GenomicsLoader {
       if (pipeline.contains("parser")) {
         //val rawData = sqlContext.load(originLoaded)
 
-        var rawData = sqlContext.load("/user/dpiscia/V4.3.2/loaded").unionAll(sqlContext.load("/user/dpiscia/V6.0.2/loaded")).unionAll(sqlContext.load("/user/dpiscia/1.0.1/loaded")).unionAll(sqlContext.load("/user/dpiscia/1.0.2/loaded"))
-
+        var rawData = sqlContext.load("/user/dpiscia/V4.3.2/loaded").unionAll(sqlContext.load("/user/dpiscia/V6.0.2/loaded")).unionAll(sqlContext.load("/user/dpiscia/1.0.1/loaded")).unionAll(sqlContext.load("/user/dpiscia/1.0.2/loaded")).unionAll(sqlContext.load("/user/dpiscia/1.0.3/loaded"))
+   //var rawData = sqlContext.load("/user/dpiscia/1.0.3/loaded")
           if ( (ch=="23") || (ch=="24") || (ch=="25")) {
-            rawData= sqlContext.load("/user/dpiscia/1.0/loaded").unionAll(sqlContext.load("/user/dpiscia/1.0.1/loaded")).unionAll(sqlContext.load("/user/dpiscia/1.0.2/loaded"))
+            rawData= sqlContext.load("/user/dpiscia/1.0/loaded").unionAll(sqlContext.load("/user/dpiscia/1.0.1/loaded")).unionAll(sqlContext.load("/user/dpiscia/1.0.2/loaded")).unionAll(sqlContext.load("/user/dpiscia/1.0.3/loaded"))
           }
 
           //println("rawData partitions are "+rawData.rdd.partitions.size)

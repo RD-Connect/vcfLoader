@@ -145,6 +145,13 @@ class ParserData extends FlatSpec with Matchers {
 
   }
 
+  "sample Parser diploid" should "give the same effects/predictions/populations for 0/1 and 1/1" in {
+
+    val with01=sampleParser( 1,"RS=rs2306737;G5;G5A;dbSNPBuildID=100;GMAF=0.494274;SAO=0", "A","G,<NON_REF>","DP=8;MLEAC=1,0;MLEAF=1.00,0.00;MQ=60.00;MQ0=0;EFF=INTRON(MODIFIER||||147|XG|protein_coding|CODING|ENST00000509484|1|1),INTRON(MODIFIER||||147|XG|protein_coding|CODING|ENST00000509484|1|2),INTRON(MODIFIER||||180|XG|protein_coding|CODING|ENST00000381174|3|1),INTRON(MODIFIER||||180|XG|protein_coding|CODING|ENST00000381174|3|2),INTRON(MODIFIER||||181|XG|protein_coding|CODING|ENST00000426774|3|1),INTRON(MODIFIER||||181|XG|protein_coding|CODING|ENST00000426774|3|2),INTRON(MODIFIER||||195|XG|protein_coding|CODING|ENST00000419513|3|1),INTRON(MODIFIER||||195|XG|protein_coding|CODING|ENST00000419513|3|2)", "GT:AD:DP:GQ:PL:SB",  "1:0,8,0:8:99:224,0,224:0,0,7,1","sampleID","24")
+    with01(0).populations.exac should be (0.899)
+
+  }
+
   "sample Parser" should "give the same effects/predictions/populations for 0/1 and 1/1" in {
 
     val with01=sampleParser( pos,ID, ref, alt, infoValue, format,  sampleline, sampleID,"1")

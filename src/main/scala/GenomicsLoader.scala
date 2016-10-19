@@ -98,6 +98,8 @@ object GenomicsLoader {
     }
 
     if (pipeline.contains("load")) {
+      println("files to upload are "+files.length)
+      println("files are "+ files)
       steps.gzToParquet.main(sc, origin, chromList, files, destination + "/loaded",checkPointDir) //val chromList=(1 to 25 by 1  toList)map(_.toString)
     }
     for (ch <- chromList) yield {

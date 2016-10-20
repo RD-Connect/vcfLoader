@@ -107,7 +107,7 @@ var cycles = files.length/size
       ) 
      }   
     if (pipeline.contains("load")) {
-    split(files,300)
+    split(files,100)
     }
     for (ch <- chromList) yield {
 

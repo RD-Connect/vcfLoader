@@ -96,9 +96,18 @@ object GenomicsLoader {
       if (args(0) == "--chrom") chromList= args(1).split(",").toList
 
     }
-
+def split(files:List[String],size:Int)=
+     { 
+var cycles = files.length/size
+      Range(0,cycles+1).map(x=> 
+      {
+      //println(files.drop(size*x).take(size))
+            steps.gzToParquet.main(sc, origin, chromList, files.drop(size*x).take(size), destination + "/loaded",checkPointDir) 
+      }
+      ) 
+     }   
     if (pipeline.contains("load")) {
-      steps.gzToParquet.main(sc, origin, chromList, files, destination + "/loaded",checkPointDir) //val chromList=(1 to 25 by 1  toList)map(_.toString)
+    split(files,300)
     }
     for (ch <- chromList) yield {
 

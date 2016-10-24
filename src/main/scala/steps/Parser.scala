@@ -152,12 +152,13 @@ object Parser {
   def sampleParser( pos:Any,ID:Any, ref:Any, alt:Any, info: Any, format: Any,  sampleline : Any, sampleID : Any,chrom : String):List[Variant]  = {
     println("pos is "+pos)
     val rs = getterRS(ID.toString,"RS")
-    val (gt,dp,gq,pl,ad) = formatCase(format,sampleline.toString)
+    var (gt,dp,gq,pl,ad) = formatCase(format,sampleline.toString)
+    //gt= (getDiploid(gt)._1)
     val infoMap = toMap(info)
     val effString = infoMap.getOrElse("EFF","")
     //ad should be extracted by multi-allelic position
     val altSplitted = altMultiallelic(ref.toString,alt.toString,gt) //returns
-    val anno=annotation_parser(ID.toString,gt)
+    val anno=annotation_parser(ID.toString,getDiploid(gt)._1)
     println("1")
     val res=altSplitted.map(x=>{
       println("2")
@@ -173,6 +174,7 @@ object Parser {
       val functionalEffs = functionalMap_parser(effString).filter(effect => (altGenotype == effect.geno_type_number)).toList
       println("3")
       println("anno "+ anno(0))
+      println("latposition is "+altPosition)
       //println(posOK,endOK,ref.toString,x._1,rs(0),indel,Sample(getDiploid(x._2)._1,dp,gq,pl,ADsplit(ad,x._2),x._4,sampleID.toString,getDiploid(x._2)._2),functionalEffs, anno(altPosition)._1,anno(altPosition)._2 )
       altGenotype match{
         case 0 => Variant(posOK,endOK,ref.toString,x._1,rs(0),indel,Sample(getDiploid(x._2)._1,dp,gq,pl,ADsplit(ad,x._2),x._4,sampleID.toString,getDiploid(x._2)._2),functionalEffs, Predictions("",0.0,"","",0.0,"","","","","",0.0),Populations(0.0,0.0,0.0,0.0,0.0,0.0,0.0) )

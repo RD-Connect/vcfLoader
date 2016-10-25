@@ -118,7 +118,7 @@ object GenomicsLoader {
         var rawData = sqlContext.load("/user/dpiscia/V4.3.2/loaded").unionAll(sqlContext.load("/user/dpiscia/V6.0.2/loaded")).unionAll(sqlContext.load("/user/dpiscia/1.0.1/loaded")).unionAll(sqlContext.load("/user/dpiscia/1.0.2/loaded")).unionAll(sqlContext.load("/user/dpiscia/1.0.3/loaded"))
    //var rawData = sqlContext.load("/user/dpiscia/1.0.3/loaded")
           if ( (ch=="23") || (ch=="24") || (ch=="25")) {
-            rawData= sqlContext.load("/user/dpiscia/1.0/loaded").unionAll(sqlContext.load("/user/dpiscia/1.0.1/loaded")).unionAll(sqlContext.load("/user/dpiscia/1.0.2/loaded")).unionAll(sqlContext.load("/user/dpiscia/1.0.3/loaded"))
+            rawData= sqlContext.load("/user/dpiscia/V4.3.2/loaded")
           }
 
           //println("rawData partitions are "+rawData.rdd.partitions.size)

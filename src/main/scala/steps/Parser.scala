@@ -144,13 +144,12 @@ object Parser {
     val parsedData = rawData
       .where(rawData("pos") >=chromBands._1)
       .where(rawData("pos") < chromBands._2).filter(rawData("chrom") === chrom).flatMap(a => sampleParser(a(0), a(1), a(2), a(3), a(6), a(7), a(8), a(9), chrom)).toDF()
-    //multialleli off
-    parsedData.where(parsedData("Sample.multiallelic")===false).where(parsedData("Sample.dp")>7).where(parsedData("Sample.gq")>19).save(destination+"/chrom="+chrom+"/band="+chromBands._2.toString,SaveMode.Overwrite)
+
+    parsedData.where(parsedData("Sample.dp")>7).where(parsedData("Sample.gq")>19).save(destination+"/chrom="+chrom+"/band="+chromBands._2.toString,SaveMode.Overwrite)
 
   }
 
   def sampleParser( pos:Any,ID:Any, ref:Any, alt:Any, info: Any, format: Any,  sampleline : Any, sampleID : Any,chrom : String):List[Variant]  = {
-    println("pos is "+pos)
     val rs = getterRS(ID.toString,"RS")
     val (gt,dp,gq,pl,ad) = formatCase(format,sampleline.toString)
     val infoMap = toMap(info)
@@ -158,25 +157,21 @@ object Parser {
     //ad should be extracted by multi-allelic position
     val altSplitted = altMultiallelic(ref.toString,alt.toString,gt) //returns
     val anno=annotation_parser(ID.toString,gt)
-    println("1")
     val res=altSplitted.map(x=>{
-      println("2")
+
       //if 0/ what about annotation?? Null Option
       val altGenotype= x._3.toInt
-      val altPosition = if (gt.split("/").length == 2 ) gt.split("/")(1).toInt
-      else gt.toInt
+      val altPosition = x._2.split("/")(1).toInt
 
       val indel = (x._1.length>1) //maybe something ref legnth != 1 or pos !=1//wrong if alt is not handled correctly
       val posOK = pos.toString.toInt
       val endOK = endPos(x._1,info.toString,posOK)
       //it gets functional effetcs
       val functionalEffs = functionalMap_parser(effString).filter(effect => (altGenotype == effect.geno_type_number)).toList
-      println("3")
-      println("anno "+ anno(0))
-      //println(posOK,endOK,ref.toString,x._1,rs(0),indel,Sample(getDiploid(x._2)._1,dp,gq,pl,ADsplit(ad,x._2),x._4,sampleID.toString,getDiploid(x._2)._2),functionalEffs, anno(altPosition)._1,anno(altPosition)._2 )
+
       altGenotype match{
-        case 0 => Variant(posOK,endOK,ref.toString,x._1,rs(0),indel,Sample(getDiploid(x._2)._1,dp,gq,pl,ADsplit(ad,x._2),x._4,sampleID.toString,getDiploid(x._2)._2),functionalEffs, Predictions("",0.0,"","",0.0,"","","","","",0.0),Populations(0.0,0.0,0.0,0.0,0.0,0.0,0.0) )
-        case _ => Variant(posOK,endOK,ref.toString,x._1,rs(0),indel,Sample(getDiploid(x._2)._1,dp,gq,pl,ADsplit(ad,x._2),x._4,sampleID.toString,getDiploid(x._2)._2),functionalEffs, anno(altPosition)._1,anno(altPosition)._2 )
+        case 0 => Variant(posOK,endOK,ref.toString,x._1,rs(0),indel,Sample(getDiploid(x._2)._1,dp,gq,pl,ADsplit(ad,gt),altSplitted.size==2,sampleID.toString,getDiploid(x._2)._2),functionalEffs, Predictions("",0.0,"","",0.0,"","","","","",0.0),Populations(0.0,0.0,0.0,0.0,0.0,0.0,0.0) )
+        case _ => Variant(posOK,endOK,ref.toString,x._1,rs(0),indel,Sample(getDiploid(x._2)._1,dp,gq,pl,ADsplit(ad,gt),altSplitted.size==2,sampleID.toString,getDiploid(x._2)._2),functionalEffs, anno(altPosition)._1,anno(altPosition)._2 )
 
       }
 
@@ -197,26 +192,19 @@ object Parser {
     }
   }
 
-  def altMultiallelic(ref:String,alt:String,gt:String):List[(String,String,String,Boolean)]={
+  def altMultiallelic(ref:String,alt:String,gt:String):List[(String,String,String)]={
     alt match {
-      case "<NON_REF>" => List((alt,"0/0","0",false))
+      case "<NON_REF>" => List((alt,"0/0","0"))
       case _ =>
         gt match {
-          case "0/0" => List((ref,"0/0","0",false))
-          //case "0"  =>List((alt,"0","0",false))
-          //case "1"  =>List((alt,"1","1",false))
-
+          case "0/0" => List((ref,"0/0","0"))
           case _ =>
             val altList =  alt.split(",")
-            var gtList = Array("")
-            if (gt=="0" || gt=="1") gtList= Array(gt,gt)
-            else gtList = gt.split("/")
-            println("gtList is" + gtList(0))
-            println("altList "+ altList(0) + altList(1))
+            val gtList =  gt.split("/")
             gtList match {
-              case x if x(0) == "0" => List((altList(gtList(1).toInt-1),"0/1",gtList(1),gtList(1).toInt>1))
-              case x if x(0) == x(1) => List((altList(gtList(1).toInt-1),"1/1",gtList(1),gtList(1).toInt>1))
-              case _ => List((altList(gtList(0).toInt-1),"0/1",gtList(0),true),(altList(gtList(1).toInt-1),"0/1",gtList(1),true))
+              case x if x(0) == "0" => List((altList(gtList(1).toInt-1),"0/1",gtList(1)))
+              case x if x(0) == x(1) => List((altList(gtList(1).toInt-1),"1/1",gtList(1)))
+              case _ => List((altList(gtList(0).toInt-1),"0/1",gtList(0)),(altList(gtList(1).toInt-1),"0/1",gtList(1)))
               // case _ =>       altList(gtList(0).toInt -1)+","+altList(gtList(1).toInt -1)
             }
         }

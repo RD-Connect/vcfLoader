@@ -70,7 +70,7 @@ object GenomicsLoader {
       files=files1 ::: files2
     }*/
     val prefix= configuration.getString("preFix")
-    val files=fileReader(configuration.getString("sampleFile")).map(x=>prefix+"/"+x(1)).toList
+    val files=fileReader(configuration.getString("sampleFile")).filter(x=> x(12) != "NA" ).map(x=>prefix+"/"+x(1)).toList
     var chromList  = (configuration.getStringList("chromList") ).toList
     val index=configuration.getString("index")
     val elasticsearchHost = configuration.getString("elasticsearchHost")
@@ -96,9 +96,18 @@ object GenomicsLoader {
       if (args(0) == "--chrom") chromList= args(1).split(",").toList
 
     }
-
+def split(files:List[String],size:Int)=
+     { 
+var cycles = files.length/size
+      Range(0,cycles+1).map(x=> 
+      {
+      //println(files.drop(size*x).take(size))
+            steps.gzToParquet.main(sc, origin, chromList, files.drop(size*x).take(size), destination + "/loaded",checkPointDir) 
+      }
+      ) 
+     }   
     if (pipeline.contains("load")) {
-      steps.gzToParquet.main(sc, origin, chromList, files, destination + "/loaded",checkPointDir) //val chromList=(1 to 25 by 1  toList)map(_.toString)
+    split(files,100)
     }
     for (ch <- chromList) yield {
 

@@ -74,6 +74,9 @@ object GenomicsLoader {
     var chromList  = (configuration.getStringList("chromList") ).toList
     val index=configuration.getString("index")
     val elasticsearchHost = configuration.getString("elasticsearchHost")
+    val elasticsearchIPPort = configuration.getString("elasticsearchIPPort")
+    val elasticsearchTransportPort = configuration.getString("elasticsearchTransportPort")
+
     //val indexVersion="0.1"
     //val pipeline=List("toElastic")
     var pipeline = configuration.getStringList("pipeline").toList
@@ -184,15 +187,15 @@ var cycles = files.length/size
       }
 
       if (pipeline.contains("deleteIndex")) {
-        Elastic.Data.mapping(index, version, elasticsearchHost, 9300, "delete")
+        Elastic.Data.mapping(index, version, elasticsearchHost, elasticsearchTransportPort.toInt, "delete")
       }
       if (pipeline.contains("createIndex")) {
-        Elastic.Data.mapping(index, version, elasticsearchHost, 9300, "create")
+        Elastic.Data.mapping(index, version, elasticsearchHost, elasticsearchTransportPort.toInt, "create")
       }
       if (pipeline.contains("toElastic")) {
         val variants = sqlContext.load(destination + "/variants")
         variants.registerTempTable("variants")
-        val esnodes= elasticsearchHost+":9200"
+        val esnodes= elasticsearchHost+":"+elasticsearchIPPort
         variants.filter(variants("chrom")===ch.toString).saveToEs(index+"/"+version,Map("es.nodes"-> esnodes))
       }
 

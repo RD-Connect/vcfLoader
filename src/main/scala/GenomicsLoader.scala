@@ -87,8 +87,7 @@ object GenomicsLoader {
     //preprocessing configuraiotn data
     val chromBands = sizePartition until 270000001 by sizePartition toList
     val due = chromBands.map(x => (x - sizePartition, x))
-    println("-------------------------------------pipeline is "+pipeline)
-    println("-------------------------------------desitnation is "+destination)
+  
     if (args.length>0){
       if (args.length>3){
         if (args(2) == "--pipeline") pipeline= args(3).split(",").toList
@@ -106,6 +105,11 @@ var cycles = files.length/size
       }
       ) 
      }   
+
+  println("-------------------------------------pipeline is "+pipeline)
+    println("-------------------------------------desitnation is "+destination)
+
+
     if (pipeline.contains("load")) {
     split(files,100)
     }

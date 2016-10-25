@@ -193,7 +193,7 @@ var cycles = files.length/size
         val variants = sqlContext.load(destination + "/variants")
         variants.registerTempTable("variants")
         val esnodes= elasticsearchHost+":9200"
-        variants.saveToEs(index+"/"+version,Map("es.nodes"-> esnodes))
+        variants.filter(variants("chrom")===ch.toString).saveToEs(index+"/"+version,Map("es.nodes"-> esnodes))
       }
 
 

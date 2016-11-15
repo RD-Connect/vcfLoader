@@ -46,6 +46,8 @@ object GenomicsLoader {
     val conf = new SparkConf().setAppName("Genomics-ETL")
     val sc = new SparkContext(conf)
     val sqlContext = new org.apache.spark.sql.hive.HiveContext(sc)
+    sqlContext.sql( """CREATE TEMPORaRY function collect2 AS 'brickhouse.udf.collect.CollectUDAF'""")
+
     println(args)
     import sqlContext.implicits._
     //configuration data, in the future will be dropped into a config file

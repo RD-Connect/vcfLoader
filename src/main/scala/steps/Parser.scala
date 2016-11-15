@@ -143,9 +143,9 @@ object Parser {
 
     val parsedData = rawData
       .where(rawData("pos") >=chromBands._1)
-      .where(rawData("pos") < chromBands._2).filter(rawData("chrom") === chrom).flatMap(a => sampleParser(a(0), a(1), a(2), a(3), a(6), a(7), a(8), a(9), chrom)).toDF()
+      .where(rawData("pos") < chromBands._2).filter(rawData("chrom") === chrom).flatMap(a => sampleParser(a(0), a(1), a(2), a(3), a(6), a(7), a(8), a(9), chrom))
 
-    parsedData.where(parsedData("Sample.dp")>7).where(parsedData("Sample.gq")>19).save(destination+"/chrom="+chrom+"/band="+chromBands._2.toString,SaveMode.Overwrite)
+    parsedData.where(parsedData("Sample.dp")>7).where(parsedData("Sample.gq")>19).write.parquet(destination+"/chrom="+chrom+"/band="+chromBands._2.toString)
 
   }
 

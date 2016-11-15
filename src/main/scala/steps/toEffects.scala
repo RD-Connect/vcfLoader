@@ -10,7 +10,6 @@ package steps
 import org.apache.spark.SparkContext
 import org.apache.spark.SparkContext._
 import org.apache.spark.SparkConf
-import org.apache.spark.sql.GroupedData
 import org.apache.spark.sql.functions.first
 
 import scala.language.postfixOps
@@ -207,7 +206,7 @@ s.where(s("pos")!==0).groupBy("pos", "ref", "alt").agg(s("pos"), s("ref"), s("al
   .map(x => (x(0).toString.toInt, x(1).toString, x(2).toString,
   x(6).asInstanceOf[collection.mutable.WrappedArray[Map[String, String]]].toSet.toArray,
   x(7).asInstanceOf[collection.mutable.WrappedArray[Map[String, String]]].toSet.toArray,
-  x(8).asInstanceOf[collection.mutable.WrappedArray[Map[String, String]]].toSet.toArray)).repartition(repartitions).toDF().save(destination+"/chrom="+chromList+"/band="+banda._2.toString)
+  x(8).asInstanceOf[collection.mutable.WrappedArray[Map[String, String]]].toSet.toArray)).repartition(repartitions).toDF().write.parquet(destination+"/chrom="+chromList+"/band="+banda._2.toString)
 }
 //val effs= rawData.filter(rawData("alt")!=="<NON_REF>").map(a=> effsParser(a(0),a(1),a(2),a(3),a(6),a(7),a(8),a(9),a(10))).toDF()
 //val effs = rawData.filter(rawData("alt")!=="<NON_REF>").map(line=> effsParser(rawData("pos"),rawData("ID"),rawData("ref"),rawData("alt"),rawData("info"),rawData("format"),rawData("Sample"),rawData("sampleID"),rawData("chrom"))).take(1).toDF()

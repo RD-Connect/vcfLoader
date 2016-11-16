@@ -64,38 +64,6 @@ def endPos(alt:String,info:String,pos:Int):Int={
     case _ => pos
   }
 }
-  /*def split(pos:Int,endPos:Int,ref:String,alt:String,rs:String,indel:Boolean,gt:String,dp:Int,gq:Int,pl:String,ad:String,sampleId:String, bands:List[Int]):List[Sample]={
-    //this operation should be moved to the loader step, aka first step
-    val res = alt match {
-      case "<NON_REF>" => {
-        //it should be rewritten ,no need to iterate over all bands,no?
-        bands.flatMap(band=>  {
-          if (band > pos && band < endPos) {
-
-            Sample(pos,band,ref,alt,rs,indel,gt,dp,gq,pl,ad,sampleId) ::
-              Sample(band,endPos,ref,alt,rs,indel,gt,dp,gq,pl,ad,sampleId)   :: List()
-          }
-          else List()
-        })}
-      case _ => List()
-    }
-    res match { case x if x.length==0 => List(Sample(pos,endPos,ref,alt,rs,indel,gt,dp,gq,pl,ad,sampleId))
-    case _ => res}
-  }*/
-
-  /*def sampleParser( pos:Any,ID:Any, ref:Any, alt:Any, info: Any, format: Any,  sampleline : Any, sampleID : Any,chrom : String, chromBands : List[Int])  ={
-  val IDmap= toMap(ID)
-  val rs = IDmap.getOrElse("RS","")
-  val (gt,dp,gq,pl,ad) = formatCase(format,sampleline.toString)
-  //ad should be extracted by multi-allelic position
-  val altSplitted = altMultiallelic(ref.toString,alt.toString,gt)
-  val indel = false //maybe something ref legnth != 1 or pos !=1//wrong if alt is not handled correctly
-  val posOK = pos.toString.toInt
-  val endOK = endPos(altSplitted,info.toString,posOK)
-  //check if it's  band,if not return List(Sample)
-  val res= List(Sample(posOK,endOK,ref.toString,altSplitted,rs,indel,gt,dp,gq,pl,ADsplit(ad,gt),sampleID.toString))
-  res
-}*/
 
 import org.apache.spark.Partitioner
 

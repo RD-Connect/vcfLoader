@@ -21,7 +21,7 @@ OR effectsExploded.effect_impact == 'LOW') """)
     val sqlContext = new org.apache.spark.sql.SQLContext(sc)
     import sqlContext.implicits._
     val file = sc.textFile(origin+"chrom"+chrom+".annotated").filter(line => !line.startsWith("NB_LINES"))
-    val umdParsed=file.map(_.split("\t")).map(x=>  umdVariant(x(0),x(1).toInt,x(6),x(7),x(4),if (x.size==12) converter(x(11)) else "")).toDF
+    val umdParsed=file.map(_.split("\t")).map(x=>  umdVariant(x(0),x(1).toInt,x(6),x(7),x(4),if (x.size==12) converter(x(11)) else "")).toDS()
     umdParsed.write.mode(SaveMode.Overwrite).save(destination+"/chrom="+chrom)
 
   }
@@ -43,6 +43,6 @@ OR effectsExploded.effect_impact == 'LOW') """)
     val UMDannotationsFiltered = UMDannotations.filter(UMDannotations("chromUMD")===chrom)
     val parsedExploded=sqlContext.sql("""SELECT * FROM parsed LATERAL VIEW explode(effects) a AS effectsExploded """)
 
-    val joined=parsedExploded.join(UMDannotationsFiltered, parsedExploded("effectsexploded.transcript_id")===UMDannotationsFiltered("tr") && parsedExploded("pos")===UMDannotationsFiltered("posUMD") ,"left").save(destination+"/chrom="+chrom)
+    val joined=parsedExploded.join(UMDannotationsFiltered, parsedExploded("effectsexploded.transcript_id")===UMDannotationsFiltered("tr") && parsedExploded("pos")===UMDannotationsFiltered("posUMD") ,"left").write.parquet(destination+"/chrom="+chrom)
   }
 }

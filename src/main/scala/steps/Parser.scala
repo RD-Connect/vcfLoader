@@ -24,7 +24,9 @@ object Parser {
                     pl: String,
                     ad: String,
                     multiallelic : Boolean,
-                    sampleId: String)
+                    sampleId: String,
+                    diploid:Boolean = true
+  )
 
   case class FunctionalEffect(effect: String,
                               effect_impact: String,
@@ -130,7 +132,7 @@ object Parser {
   }
 
   def main(sqlContext :org.apache.spark.sql.SQLContext,
-           rawData:org.apache.spark.sql.DataFrame,
+           rawData:org.apache.spark.sql.Dataset[steps.gzToParquet.rawTable],
            destination : String,
            chrom:String,
            chromBands : (Int,Int),
@@ -139,16 +141,15 @@ object Parser {
 
     import sqlContext.implicits._
 
-    val parsedData = rawData
-      .where(rawData("pos") >=chromBands._1)
-      .where(rawData("pos") < chromBands._2).filter(rawData("chrom") === chrom).flatMap(a => sampleParser(a(0), a(1), a(2), a(3), a(6), a(7), a(8), a(9), chrom)).toDF()
+    val parsedData = rawData.where(rawData("pos") >=chromBands._1)
+      .where(rawData("pos") < chromBands._2).filter(rawData("chrom") === chrom).flatMap(a => sampleParser(a.pos, a.ID, a.ref, a.alt, a.info, a.format, a.Sample, a.SampleID, chrom))
 
-    parsedData.where(parsedData("Sample.dp")>7).where(parsedData("Sample.gq")>19).save(destination+"/chrom="+chrom+"/band="+chromBands._2.toString,SaveMode.Overwrite)
+    parsedData.where(parsedData("Sample.dp")>7).where(parsedData("Sample.gq")>19).write.parquet(destination+"/chrom="+chrom+"/band="+chromBands._2.toString)
 
   }
 
   def sampleParser( pos:Any,ID:Any, ref:Any, alt:Any, info: Any, format: Any,  sampleline : Any, sampleID : Any,chrom : String):List[Variant]  = {
-     val rs = getter(ID.toString,"RS")
+     val rs = getterRS(ID.toString,"RS")
      val (gt,dp,gq,pl,ad) = formatCase(format,sampleline.toString)
      val infoMap = toMap(info)
      val effString = infoMap.getOrElse("EFF","")
@@ -168,8 +169,8 @@ object Parser {
        val functionalEffs = functionalMap_parser(effString).filter(effect => (altGenotype == effect.geno_type_number)).toList
 
        altGenotype match{
-         case 0 => Variant(posOK,endOK,ref.toString,x._1,rs(0),indel,Sample(x._2,dp,gq,pl,ADsplit(ad,gt),altSplitted.size==2,sampleID.toString),functionalEffs, Predictions("",0.0,"","",0.0,"","","","","",0.0),Populations(0.0,0.0,0.0,0.0,0.0,0.0,0.0) )
-         case _ => Variant(posOK,endOK,ref.toString,x._1,rs(0),indel,Sample(x._2,dp,gq,pl,ADsplit(ad,gt),altSplitted.size==2,sampleID.toString),functionalEffs, anno(altPosition)._1,anno(altPosition)._2 )
+         case 0 => Variant(posOK,endOK,ref.toString,x._1,rs(0),indel,Sample(getDiploid(x._2)._1,dp,gq,pl,ADsplit(ad,gt),altSplitted.size==2,sampleID.toString,getDiploid(x._2)._2),functionalEffs, Predictions("",0.0,"","",0.0,"","","","","",0.0),Populations(0.0,0.0,0.0,0.0,0.0,0.0,0.0) )
+         case _ => Variant(posOK,endOK,ref.toString,x._1,rs(0),indel,Sample(getDiploid(x._2)._1,dp,gq,pl,ADsplit(ad,gt),altSplitted.size==2,sampleID.toString,getDiploid(x._2)._2),functionalEffs, anno(altPosition)._1,anno(altPosition)._2 )
 
        }
 
@@ -178,6 +179,18 @@ object Parser {
      res
 
   }
+  def getDiploid(gt:String):(String,Boolean)={
+    gt match {
+      case x if x.size ==1 =>{ x match {
+        case "0" => ("0/0",false)
+        case "1" => ("1/1",false)
+      }
+    }
+      case _ =>(gt,true)
+
+    }
+  }
+
   def altMultiallelic(ref:String,alt:String,gt:String):List[(String,String,String)]={
     alt match {
       case "<NON_REF>" => List((alt,"0/0","0"))
@@ -212,7 +225,18 @@ object Parser {
     }
 
   }
+  def getterRS(value:String,pattern:String)={
+    val matches=value.split(pattern+"=rs")
+    matches.size match {
+      case 1 => List("")
+      case x:Int if x > 1 =>{
+        Range(1,x).map(item=> "rs"+matches(item).split(";")(0))
+      }
+      case _ => List("")
 
+    }
+
+  }
   def functionalMap_parser(raw_line:String):List[FunctionalEffect]=
   {
     if (raw_line == "") List[FunctionalEffect]()

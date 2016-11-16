@@ -124,7 +124,7 @@ var cycles = files.length/size
 
 
       if (pipeline.contains("parser")) {
-        val rawData = sqlContext.load(originLoaded)
+        val rawData = sqlContext.load(originLoaded).as[steps.gzToParquet.rawTable]
         for (band <- due) yield {
           steps.Parser.main(sqlContext, rawData, destination + "/parsedSamples",ch, band,repartitions)
         }

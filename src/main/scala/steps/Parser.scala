@@ -132,7 +132,7 @@ object Parser {
   }
 
   def main(sqlContext :org.apache.spark.sql.SQLContext,
-           rawData:org.apache.spark.sql.DataFrame,
+           rawData:org.apache.spark.sql.Dataset[steps.gzToParquet.rawTable],
            destination : String,
            chrom:String,
            chromBands : (Int,Int),
@@ -141,9 +141,8 @@ object Parser {
 
     import sqlContext.implicits._
 
-    val parsedData = rawData
-      .where(rawData("pos") >=chromBands._1)
-      .where(rawData("pos") < chromBands._2).filter(rawData("chrom") === chrom).flatMap(a => sampleParser(a(0), a(1), a(2), a(3), a(6), a(7), a(8), a(9), chrom))
+    val parsedData = rawData.where(rawData("pos") >=chromBands._1)
+      .where(rawData("pos") < chromBands._2).filter(rawData("chrom") === chrom).flatMap(a => sampleParser(a.pos, a.ID, a.ref, a.alt, a.info, a.format, a.Sample, a.SampleID, chrom))
 
     parsedData.where(parsedData("Sample.dp")>7).where(parsedData("Sample.gq")>19).write.parquet(destination+"/chrom="+chrom+"/band="+chromBands._2.toString)
 

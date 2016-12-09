@@ -89,8 +89,38 @@ class ParserData extends FlatSpec with Matchers {
       altSplitted(0)._1 should be ("C")
       altSplitted(0)._2 should be ("0/1")
       altSplitted(0)._3 should be ("1")
+      altSplitted(0)._4 should be (false)
+
       //0/1,1
     }
+  "multilleli altSplitted" should "split and get proper values" in {
+    val altSplitted = altMultiallelic(ref.toString, "C,T", "0/2") //returns
+    altSplitted(0)._1 should be ("T")
+    altSplitted(0)._2 should be ("0/1")
+    altSplitted(0)._3 should be ("2")
+    altSplitted(0)._4 should be (true)
+
+    //0/1,1
+  }
+
+  "multilleli 1/2 altSplitted" should "split and get proper values" in {
+    val altSplitted = altMultiallelic(ref.toString, "C,T", "1/2") //returns
+    altSplitted(0)._1 should be ("C")
+    altSplitted(0)._2 should be ("0/1")
+    altSplitted(0)._3 should be ("1")
+    altSplitted(0)._4 should be (true)
+
+    //0/1,1
+  }
+  "multilleli 2/3 altSplitted" should "split and get proper values" in {
+    val altSplitted = altMultiallelic(ref.toString, "C,T,A", "2/3") //returns
+    altSplitted(0)._1 should be ("T")
+    altSplitted(0)._2 should be ("0/1")
+    altSplitted(0)._3 should be ("2")
+    altSplitted(0)._4 should be (true)
+
+    //0/1,1
+  }
 
   "annotationParser" should "get populations and predictors" in {
 
@@ -112,6 +142,13 @@ class ParserData extends FlatSpec with Matchers {
     val anno=annotation_parser(ID.toString,"0/1")
     val anno2=annotation_parser(ID.toString,"1/1")
     anno(1)._1.mt should be (anno2(1)._1.mt)
+
+  }
+
+  "sample Parser diploid" should "give the same effects/predictions/populations for 0/1 and 1/1" in {
+
+    val with01=sampleParser( 1,"RS=rs2306737;G5;G5A;dbSNPBuildID=100;GMAF=0.494274;SAO=0", "A","G,C,<NON_REF>","DP=8;MLEAC=1,0;MLEAF=1.00,0.00;MQ=60.00;MQ0=0;EFF=INTRON(MODIFIER||||147|XG|protein_coding|CODING|ENST00000509484|1|1),INTRON(MODIFIER||||147|XG|protein_coding|CODING|ENST00000509484|1|2),INTRON(MODIFIER||||180|XG|protein_coding|CODING|ENST00000381174|3|1),INTRON(MODIFIER||||180|XG|protein_coding|CODING|ENST00000381174|3|2),INTRON(MODIFIER||||181|XG|protein_coding|CODING|ENST00000426774|3|1),INTRON(MODIFIER||||181|XG|protein_coding|CODING|ENST00000426774|3|2),INTRON(MODIFIER||||195|XG|protein_coding|CODING|ENST00000419513|3|1),INTRON(MODIFIER||||195|XG|protein_coding|CODING|ENST00000419513|3|2)", "GT:AD:DP:GQ:PL:SB",  "1:0,8,0:8:99:224,0,224:0,0,7,1","sampleID","24")
+    with01(0).populations.exac should be (0.899)
 
   }
 

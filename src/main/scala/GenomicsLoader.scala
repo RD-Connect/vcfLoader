@@ -104,7 +104,7 @@ var cycles = files.length/size
       Range(0,cycles+1).map(x=> 
       {
       //println(files.drop(size*x).take(size))
-            steps.gzToParquet.main(sc, origin, chromList, files.drop(size*x).take(size), destination + "/loaded",checkPointDir) 
+            steps.gzToParquet.main(sc, origin, chromList, files.drop(size*x).take(size), destination + "/loaded",repartitions,checkPointDir) 
       }
       ) 
      }   

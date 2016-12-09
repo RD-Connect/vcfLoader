@@ -1,0 +1,3 @@
+NA12878_50x_Exome
+NA12891_50x_Exome
+NA12892_50x_Exome

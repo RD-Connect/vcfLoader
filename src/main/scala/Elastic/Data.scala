@@ -13,7 +13,7 @@ object Data {
     //val settings = Settings.s   .put("cluster.name", "myClusterName").build()
 
     val settings = ImmutableSettings.settingsBuilder().put("cluster.name", "elasticsearch").build()
-    val uri = ElasticsearchClientUri("elasticsearch://"+host+":9300")
+    val uri = ElasticsearchClientUri("elasticsearch://"+host+":"+port)
     val client = ElasticClient.remote(settings, uri)
     if (action == "create") {
       client.execute {

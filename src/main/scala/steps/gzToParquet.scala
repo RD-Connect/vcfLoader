@@ -21,7 +21,6 @@ object gzToParquet {
                       format:String,
                       Sample : String,
                       SampleID: String)
-
   def chromStrToInt(chrom:String)={
     chrom match {
       case "MT" =>"23"
@@ -59,15 +58,17 @@ object gzToParquet {
     val sqlContext = new org.apache.spark.sql.SQLContext(sc)
     import sqlContext.implicits._
     sc.setCheckpointDir(checkPointDIr)
+
     for (chrom <- chromList) yield {
       var RDD1: org.apache.spark.rdd.RDD[steps.gzToParquet.rawTable] = null;
       for ((file, index) <- files.zipWithIndex) yield {
         println("index  is "+index)
         if (index == 0) {
-          RDD1 = file_to_parquet(sc, path + file +"." + chrom + ".annot.snpEff.p.g.vcf.gz", destination, chrom, file)
+
+          RDD1 = file_to_parquet(sc, path + file +"." + chrom + ".annot.snpEff.*.vcf.gz", destination, chrom, file)
         }
         else if (index == files.length - 1) {
-          RDD1 = file_to_parquet(sc, path + file +"." + chrom + ".annot.snpEff.p.g.vcf.gz", destination, chrom, file).union(RDD1)
+          RDD1 = file_to_parquet(sc, path + file +"." + chrom + ".annot.snpEff.*.vcf.gz", destination, chrom, file).union(RDD1)
           RDD1.toDF.write.mode(SaveMode.Append).save(destination+"/chrom="+chromStrToInt(chrom))
         }
 
@@ -78,7 +79,7 @@ object gzToParquet {
             RDD1.checkpoint()
           }
 
-          RDD1 = file_to_parquet(sc, path + file +"." + chrom + ".annot.snpEff.p.g.vcf.gz", destination, chrom, file).union(RDD1)}
+          RDD1 = file_to_parquet(sc, path + file +"." + chrom + ".annot.snpEff.*.vcf.gz", destination, chrom, file).union(RDD1)}
       }
       RDD1
     }

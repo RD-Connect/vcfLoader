@@ -26,7 +26,7 @@ object Parser {
                     multiallelic : Boolean,
                     sampleId: String,
                     diploid:Boolean = true
-  )
+                     )
 
   case class FunctionalEffect(effect: String,
                               effect_impact: String,
@@ -42,24 +42,24 @@ object Parser {
                               geno_type_number: Int)
 
   case class Predictions(SIFT_pred: String,
-                  SIFT_score: Double,
-                  polyphen2_hvar_pred: String,
-                  pp2: String,
-                  polyphen2_hvar_score: Double,
-                  MutationTaster_pred: String,
-                  mt: String,
-                  phyloP46way_placental: String,
-                  GERP_RS: String,
-                  SiPhy_29way_pi: String,
-                  CADD_phred: Double)
+                         SIFT_score: Double,
+                         polyphen2_hvar_pred: String,
+                         pp2: String,
+                         polyphen2_hvar_score: Double,
+                         MutationTaster_pred: String,
+                         mt: String,
+                         phyloP46way_placental: String,
+                         GERP_RS: String,
+                         SiPhy_29way_pi: String,
+                         CADD_phred: Double)
 
   case class Populations(esp6500_aa: Double,
-                 esp6500_ea: Double,
-                 gp1_afr_af: Double,
-                 gp1_asn_af: Double,
-                 gp1_eur_af: Double,
-                 gp1_af: Double,
-                 exac: Double)
+                         esp6500_ea: Double,
+                         gp1_afr_af: Double,
+                         gp1_asn_af: Double,
+                         gp1_eur_af: Double,
+                         gp1_af: Double,
+                         exac: Double)
 
   // for predictor we have multiple predictor for multiple alt
   def getOrEmpty(list:Seq[String], index:Int)={
@@ -144,40 +144,40 @@ object Parser {
     val parsedData = rawData
       .where(rawData("pos") >=chromBands._1)
       .where(rawData("pos") < chromBands._2).filter(rawData("chrom") === chrom).flatMap(a => sampleParser(a(0), a(1), a(2), a(3), a(6), a(7), a(8), a(9), chrom)).toDF()
-
-    parsedData.where(parsedData("Sample.dp")>7).where(parsedData("Sample.gq")>19).save(destination+"/chrom="+chrom+"/band="+chromBands._2.toString,SaveMode.Overwrite)
+    //multialleli off
+    parsedData.where(parsedData("Sample.multiallelic")===false).where(parsedData("Sample.dp")>7).where(parsedData("Sample.gq")>19).save(destination+"/chrom="+chrom+"/band="+chromBands._2.toString,SaveMode.Overwrite)
 
   }
 
   def sampleParser( pos:Any,ID:Any, ref:Any, alt:Any, info: Any, format: Any,  sampleline : Any, sampleID : Any,chrom : String):List[Variant]  = {
-     val rs = getterRS(ID.toString,"RS")
-     val (gt,dp,gq,pl,ad) = formatCase(format,sampleline.toString)
-     val infoMap = toMap(info)
-     val effString = infoMap.getOrElse("EFF","")
-     //ad should be extracted by multi-allelic position
-     val altSplitted = altMultiallelic(ref.toString,alt.toString,gt) //returns
+    val rs = getterRS(ID.toString,"RS")
+    val (gt,dp,gq,pl,ad) = formatCase(format,sampleline.toString)
+    val infoMap = toMap(info)
+    val effString = infoMap.getOrElse("EFF","")
+    //ad should be extracted by multi-allelic position
+    val altSplitted = altMultiallelic(ref.toString,alt.toString,gt) //returns
     val anno=annotation_parser(ID.toString,gt)
-     val res=altSplitted.map(x=>{
+    val res=altSplitted.map(x=>{
 
-       //if 0/ what about annotation?? Null Option
-       val altGenotype= x._3.toInt
-       val altPosition = x._2.split("/")(1).toInt
+      //if 0/ what about annotation?? Null Option
+      val altGenotype= x._3.toInt
+      val altPosition = x._2.split("/")(1).toInt
 
-       val indel = (x._1.length>1) //maybe something ref legnth != 1 or pos !=1//wrong if alt is not handled correctly
-       val posOK = pos.toString.toInt
-       val endOK = endPos(x._1,info.toString,posOK)
-       //it gets functional effetcs
-       val functionalEffs = functionalMap_parser(effString).filter(effect => (altGenotype == effect.geno_type_number)).toList
+      val indel = (x._1.length>1) //maybe something ref legnth != 1 or pos !=1//wrong if alt is not handled correctly
+      val posOK = pos.toString.toInt
+      val endOK = endPos(x._1,info.toString,posOK)
+      //it gets functional effetcs
+      val functionalEffs = functionalMap_parser(effString).filter(effect => (altGenotype == effect.geno_type_number)).toList
 
-       altGenotype match{
-         case 0 => Variant(posOK,endOK,ref.toString,x._1,rs(0),indel,Sample(getDiploid(x._2)._1,dp,gq,pl,ADsplit(ad,gt),altSplitted.size==2,sampleID.toString,getDiploid(x._2)._2),functionalEffs, Predictions("",0.0,"","",0.0,"","","","","",0.0),Populations(0.0,0.0,0.0,0.0,0.0,0.0,0.0) )
-         case _ => Variant(posOK,endOK,ref.toString,x._1,rs(0),indel,Sample(getDiploid(x._2)._1,dp,gq,pl,ADsplit(ad,gt),altSplitted.size==2,sampleID.toString,getDiploid(x._2)._2),functionalEffs, anno(altPosition)._1,anno(altPosition)._2 )
+      altGenotype match{
+        case 0 => Variant(posOK,endOK,ref.toString,x._1,rs(0),indel,Sample(getDiploid(x._2)._1,dp,gq,pl,ADsplit(ad,gt),x._4,sampleID.toString,getDiploid(x._2)._2),functionalEffs, Predictions("",0.0,"","",0.0,"","","","","",0.0),Populations(0.0,0.0,0.0,0.0,0.0,0.0,0.0) )
+        case _ => Variant(posOK,endOK,ref.toString,x._1,rs(0),indel,Sample(getDiploid(x._2)._1,dp,gq,pl,ADsplit(ad,gt),x._4,sampleID.toString,getDiploid(x._2)._2),functionalEffs, anno(altPosition)._1,anno(altPosition)._2 )
 
-       }
+      }
 
-     })
+    })
 
-     res
+    res
 
   }
   def getDiploid(gt:String):(String,Boolean)={
@@ -186,25 +186,25 @@ object Parser {
         case "0" => ("0/0",false)
         case "1" => ("1/1",false)
       }
-    }
+      }
       case _ =>(gt,true)
 
     }
   }
 
-  def altMultiallelic(ref:String,alt:String,gt:String):List[(String,String,String)]={
+  def altMultiallelic(ref:String,alt:String,gt:String):List[(String,String,String,Boolean)]={
     alt match {
-      case "<NON_REF>" => List((alt,"0/0","0"))
+      case "<NON_REF>" => List((alt,"0/0","0",false))
       case _ =>
         gt match {
-          case "0/0" => List((ref,"0/0","0"))
+          case "0/0" => List((ref,"0/0","0",false))
           case _ =>
             val altList =  alt.split(",")
             val gtList =  gt.split("/")
             gtList match {
-              case x if x(0) == "0" => List((altList(gtList(1).toInt-1),"0/1",gtList(1)))
-              case x if x(0) == x(1) => List((altList(gtList(1).toInt-1),"1/1",gtList(1)))
-              case _ => List((altList(gtList(0).toInt-1),"0/1",gtList(0)),(altList(gtList(1).toInt-1),"0/1",gtList(1)))
+              case x if x(0) == "0" => List((altList(gtList(1).toInt-1),"0/1",gtList(1),gtList(1).toInt>1))
+              case x if x(0) == x(1) => List((altList(gtList(1).toInt-1),"1/1",gtList(1),gtList(1).toInt>1))
+              case _ => List((altList(gtList(0).toInt-1),"0/1",gtList(0),true),(altList(gtList(1).toInt-1),"0/1",gtList(1),true))
               // case _ =>       altList(gtList(0).toInt -1)+","+altList(gtList(1).toInt -1)
             }
         }
@@ -262,4 +262,3 @@ object Parser {
   }
 
 }
-

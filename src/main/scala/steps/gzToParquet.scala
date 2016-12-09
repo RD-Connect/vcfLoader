@@ -52,16 +52,19 @@ object gzToParquet {
            chromList : List[String],
            files:List[String],
            destination : String,
-           checkPointDir:String)= {
+           numPartitions:Int=4,
+            checkPointDIr:String = "/tmp")= {
 
     val sqlContext = new org.apache.spark.sql.SQLContext(sc)
     import sqlContext.implicits._
-    sc.setCheckpointDir(checkPointDir)
+    sc.setCheckpointDir(checkPointDIr)
+
     for (chrom <- chromList) yield {
       var RDD1: org.apache.spark.rdd.RDD[steps.gzToParquet.rawTable] = null;
       for ((file, index) <- files.zipWithIndex) yield {
         println("index  is "+index)
         if (index == 0) {
+
           RDD1 = file_to_parquet(sc, path + file +"." + chrom + ".annot.snpEff.*.vcf.gz", destination, chrom, file)
         }
         else if (index == files.length - 1) {

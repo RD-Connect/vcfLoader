@@ -37,8 +37,7 @@ object Data {
             "gene_coding" typed StringType index "not_analyzed",
             "gene_name" typed StringType index "not_analyzed",
             "transcript_biotype" typed StringType index "no",
-            "transcript_id" typed StringType index "not_analyzed",
-            "UMD" typed StringType index "not_analyzed"
+            "transcript_id" typed StringType index "not_analyzed"
             ),
           "predictions" nested(
             "cadd_phred" typed FloatType index "not_analyzed",
@@ -50,7 +49,8 @@ object Data {
             "polyphen2_hvar_score" typed StringType index "no",
             "sift_pred" typed StringType index "not_analyzed",
             "sift_score" typed StringType index "no",
-            "siphy_29way_pi" typed StringType index "no"
+            "siphy_29way_pi" typed StringType index "no",
+            "UMD" typed StringType index "not_analyzed"
             ),
           "populations" nested(
             "gp1_afr_af" typed FloatType index "no",

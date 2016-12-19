@@ -39,7 +39,7 @@ def formatCase(format : Any, sample : String):(String,Int,Int,String,String)={
     case "GT:AD:DP:GQ:PGT:PID:PL:SB" => (sA(0),sA(2).trim.toInt,sA(3).trim.toInt,sA(6),sA(1))
     case "GT:GQ:PGT:PID:PL:SB" => (sA(0),0,0,"","")
     case "GT:AD:DP:GQ:PL:SB"=> (sA(0),sA(2).trim.toInt,sA(3).trim.toInt,sA(4),sA(1))
-    case _ => ("",0,0,"","")
+    case _ => ("0/0",0,0,"","")
   }
   
 }

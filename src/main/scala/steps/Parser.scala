@@ -170,7 +170,7 @@ object Parser {
       val altGenotype= x._3.toInt
       val altPosition = x._2.split("/")(1).toInt
 
-      val indel = (x._1.length!=1)  || (ref!=1) //maybe something ref legnth != 1 or pos !=1//wrong if alt is not handled correctly
+      val indel = (x._1.length!=1)  || (ref.toString.length !=1) //maybe something ref legnth != 1 or pos !=1//wrong if alt is not handled correctly
       val posOK = pos.toString.toInt
       val endOK = endPos(x._1,info.toString,posOK)
       //it gets functional effetcs  //x._1 == effect.dgfdgf

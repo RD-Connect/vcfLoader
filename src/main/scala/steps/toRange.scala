@@ -34,7 +34,7 @@ import sqlContext.implicits._
       .where(rawSample("Sample.dp") > 7)     //add indel,rs field here
       .where(rawSample("pos") >=banda._1)
       .where(rawSample("pos") < banda._2)
-      .select("chrom","pos","ref","alt","rs","indel").distinct //if we put distinct it should be much better
+      .select("chrom","pos","ref","alt","indel").distinct //if we put distinct it should be much better
     //eliminate distinct it causes a shuffle and repartions,we don't want it
     val bands = rawSample
         //    .where(rawSample("sampleId")==="E000010")
@@ -67,7 +67,6 @@ import sqlContext.implicits._
       a(1).toString.toInt,
       a(2).toString,
       a(3).toString,//add a(4),a(5) for indel and rs and shift the other numbers
-      a(4).toString,
       a(5).toString.toBoolean,
       Sample("0/0",
       a(11).toString.toInt,
@@ -76,7 +75,7 @@ import sqlContext.implicits._
       a(12).toString,
       false,
         a(9).toString
-      ),List(),Predictions("",0.0,"","",0.0,"","","","","",0.0),Populations(0.0,0.0,0.0,0.0,0.0,0.0,0.0)))
+      ),List(),Predictions("",0.0,"","",0.0,"","","","","",0.0,"",""),Populations(0.0,0.0,0.0,0.0,0.0,0.0,0.0)))
     val res1=joined.toDF.save(destination+"/chrom="+chromList+"/band="+banda._2.toString)
     // val gro = ranges.groupBy(ranges("_1"),ranges("_2"),ranges("_3"),ranges("_4")).agg(array(ranges("_5"))).take(2)
 }

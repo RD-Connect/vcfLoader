@@ -24,7 +24,6 @@ object Data {
           "ref" typed StringType index "no",
           "alt" typed StringType index "no",
           "indel" typed StringType index "not_analyzed",
-          "rs" typed StringType index "not_analyzed",
           "effs" nested(
             "codon_change" typed StringType index "no",
             "amino_acid_change" typed StringType index "no",
@@ -50,7 +49,9 @@ object Data {
             "sift_pred" typed StringType index "not_analyzed",
             "sift_score" typed StringType index "no",
             "siphy_29way_pi" typed StringType index "no",
-            "UMD" typed StringType index "not_analyzed"
+            "UMD" typed StringType index "not_analyzed",
+            "clinvar" typed StringType index "not_analyzed",
+            "rs" typed StringType index "not_analyzed"
             ),
           "populations" nested(
             "gp1_afr_af" typed FloatType index "no",

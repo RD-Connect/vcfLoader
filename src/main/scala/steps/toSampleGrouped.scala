@@ -20,7 +20,7 @@ object toSampleGrouped{
      .where(rawRange("chrom")===chromList.toInt)
      .where(rawRange("sample.gq") > 19)
      .where(rawRange("sample.dp") > 7)
-       .select("chrom","pos","ref","alt","sample.sampleId","sample.gq","sample.dp","sample.gt","sample.ad","rs","indel","sample.multiallelic","sample.diploid")
+       .select("chrom","pos","ref","alt","sample.sampleId","sample.gq","sample.dp","sample.gt","sample.ad","indel","sample.multiallelic","sample.diploid")
      // .where(rawRange("band") === banda._2)
 
     val variants=rawSample  //add rs,indel
@@ -29,7 +29,7 @@ object toSampleGrouped{
     .where(rawSample("sample.gq") > 19)
     .where(rawSample("sample.dp") > 7)
       .where(rawSample("sample.gt")!== "0/0")
-      .select("chrom","pos","ref","alt","sample.sampleId","sample.gq","sample.dp","sample.gt","sample.ad","rs","indel","sample.multiallelic","sample.diploid")
+      .select("chrom","pos","ref","alt","sample.sampleId","sample.gq","sample.dp","sample.gt","sample.ad","indel","sample.multiallelic","sample.diploid")
  //   .where(rawSample("pos") >= banda._1)
  //   .where(rawSample("pos") < banda._2)
   
@@ -37,14 +37,13 @@ object toSampleGrouped{
     val united = variants.unionAll(ranges)
 united.registerTempTable("variants_tbl")
 // 'gt',gt,'dp',dp,'gq',gq,'sample',file_name )
-val s=sqlContext.sql("select pos,ref,alt,rs,indel, collect( map('sample',sampleId,'gt',gt,'dp',dp,'gq',gq,'ad',ad,'multi',IF(multiallelic, 'true', 'false'),'diploid',IF(diploid, 'true', 'false'))) from variants_tbl group by pos,ref,alt,rs,indel")
+val s=sqlContext.sql("select pos,ref,alt,indel, collect( map('sample',sampleId,'gt',gt,'dp',dp,'gq',gq,'ad',ad,'multi',IF(multiallelic, 'true', 'false'),'diploid',IF(diploid, 'true', 'false'))) from variants_tbl group by pos,ref,alt,indel")
     .map(x=>
       (   x(0).toString.toInt,
           x(1).toString,
           x(2).toString,
-          x(3).toString,
-          x(4).toString.toBoolean,
-          x(5).asInstanceOf[collection.mutable.WrappedArray[Map[String,String]]].toSet.toArray))
+          x(3).toString.toBoolean,
+          x(4).asInstanceOf[collection.mutable.WrappedArray[Map[String,String]]].toSet.toArray))
 s.toDF().save(destination+"/chrom="+chromList)//+"/band="+banda._2.toString)
   }
   

@@ -10,15 +10,15 @@ object intersectSwap {
 
   case class range(start: Int, end: Int, sample: String)
 
-  case class SwapData(pos: Int, end_pos: Int, ref: String, alt: String, rs: String, Indel: Boolean, sampleId: String, gq: Int, dp: Int, gt: String, ad: String)
+  case class SwapData(pos: Int, end_pos: Int, ref: String, alt: String,  Indel: Boolean, sampleId: String, gq: Int, dp: Int, gt: String, ad: String)
 
-  case class SwapDataThin(pos: Int, ref: String, alt: String, rs: String, Indel: Boolean)
+  case class SwapDataThin(pos: Int, ref: String, alt: String, Indel: Boolean)
 
   def doIntersect(tempVariants: List[SwapDataThin], tempBands: List[SwapData],  currentValue: Int): (List[SwapDataThin], List[SwapData], List[SwapData]) = {
     var res2 = List[SwapData]()
     tempVariants.filter(variant => variant.pos == currentValue).foreach(variant => tempBands.foreach(current => {
       if (currentValue >= current.pos && currentValue <= current.end_pos) {
-        res2 ::= SwapData(currentValue, currentValue, variant.ref, variant.alt, variant.rs, variant.Indel, current.sampleId, current.gq, current.dp, current.gt, current.ad)
+        res2 ::= SwapData(currentValue, currentValue, variant.ref, variant.alt,  variant.Indel, current.sampleId, current.gq, current.dp, current.gt, current.ad)
       }
     }
     ))
@@ -103,7 +103,7 @@ object intersectSwap {
       .where(rawSample("Sample.dp") > 7)     //add indel,rs field here
         .where(rawSample("sample.gt")!== "0/0")
       .where(rawSample("band") === banda._2)
-      .select("chrom", "pos", "ref", "alt", "rs", "indel").distinct //if we put distinct it should be much better
+      .select("chrom", "pos", "ref", "alt", "indel").distinct //if we put distinct it should be much better
     //eliminate distinct it causes a shuffle and repartions,we don't want it
     val bands = rawSample
         //    .where(rawSample("sampleId")==="E000010")
@@ -113,22 +113,22 @@ object intersectSwap {
         .where(rawSample("Sample.dp") > 7)
         .where(rawSample("end_pos") !== 0)
         .where(rawSample("band") === banda._2)
-        .select("chrom", "pos", "end_pos", "rs", "ref", "alt", "Sample.sampleId", "Sample.gq", "Sample.dp", "Sample.ad", "indel", "Sample.gt")
+        .select("chrom", "pos", "end_pos", "ref", "alt", "Sample.sampleId", "Sample.gq", "Sample.dp", "Sample.ad", "indel", "Sample.gt")
 
     val binPartitioner =  new steps.BinPartitioner(repartitions, (banda._2 - banda._1)/repartitions, banda._1)
     //probably better idea if create the value by end_pos
-    val bandsRDD :RDD[(Int,SwapData)]= bands.map(x => (x.getAs("pos").toString.toInt,SwapData(x.getAs("pos"), x.getAs("end_pos"), x.getAs("ref"), x.getAs("alt"), x.getAs("rs"), x.getAs("indel"), x.getAs("sampleId"), x.getAs("gq"), x.getAs("dp"), x.getAs("gt"), x.getAs("ad"))))
+    val bandsRDD :RDD[(Int,SwapData)]= bands.map(x => (x.getAs("pos").toString.toInt,SwapData(x.getAs("pos"), x.getAs("end_pos"), x.getAs("ref"), x.getAs("alt"), x.getAs("indel"), x.getAs("sampleId"), x.getAs("gq"), x.getAs("dp"), x.getAs("gt"), x.getAs("ad"))))
       .repartitionAndSortWithinPartitions (binPartitioner)
     //  case  class RangeData(pos:Long,ref:String,alt:String,rs:String, Indel:Boolean, sampleId:String,gq:Int,dp:Long,gt:String,ad:String)
 
-    val variantsRDD :RDD[(Int,SwapDataThin)]= variants.map(x => (x.getAs("pos").toString.toInt,SwapDataThin(x.getAs("pos"), x.getAs("ref"), x.getAs("alt"), x.getAs("rs"), x.getAs("indel"))))
+    val variantsRDD :RDD[(Int,SwapDataThin)]= variants.map(x => (x.getAs("pos").toString.toInt,SwapDataThin(x.getAs("pos"), x.getAs("ref"), x.getAs("alt"), x.getAs("indel"))))
       .repartitionAndSortWithinPartitions(binPartitioner)
     //it might be the issue, taking all in memory
-    val results = variantsRDD.zipPartitions(bandsRDD)(intersectBands).map(x => SwapData(x.pos, x.end_pos, x.ref, x.alt, x.rs, x.Indel, x.sampleId, x.gq, x.dp, x.gt, x.ad))
-    val res1 = results.map(a => Variant(a.pos, a.end_pos, a.ref, a.alt, a.rs, a.Indel,
+    val results = variantsRDD.zipPartitions(bandsRDD)(intersectBands).map(x => SwapData(x.pos, x.end_pos, x.ref, x.alt,  x.Indel, x.sampleId, x.gq, x.dp, x.gt, x.ad))
+    val res1 = results.map(a => Variant(a.pos, a.end_pos, a.ref, a.alt,  a.Indel,
       Sample("0/0", a.dp, a.gq, "", a.ad, false, a.sampleId),
       List(),
-      Predictions("", 0.0, "", "", 0.0, "", "", "", "", "", 0.0),
+      Predictions("", 0.0, "", "", 0.0, "", "", "", "", "", 0.0,"",""),
       Populations(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0)))
       .toDF.save(destination + "/chrom=" + chromList + "/band=" + banda._2.toString)
 

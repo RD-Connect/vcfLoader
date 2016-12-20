@@ -121,14 +121,14 @@ var cycles = files.length/size
 
       if (pipeline.contains("parser")) {
 
-        var rawData = sqlContext.load("/user/dpiscia/V4.3.2/loaded").unionAll(sqlContext.load("/user/dpiscia/V6.0.2/loaded")).unionAll(sqlContext.load("/user/dpiscia/1.0.1/loaded")).unionAll(sqlContext.load("/user/dpiscia/1.0.2/loaded")).unionAll(sqlContext.load("/user/dpiscia/1.0.3/loaded")).unionAll(sqlContext.load("/user/dpiscia/1.0.4/loaded"))
+        /*var rawData = sqlContext.load("/user/dpiscia/V4.3.2/loaded").unionAll(sqlContext.load("/user/dpiscia/V6.0.2/loaded")).unionAll(sqlContext.load("/user/dpiscia/1.0.1/loaded")).unionAll(sqlContext.load("/user/dpiscia/1.0.2/loaded")).unionAll(sqlContext.load("/user/dpiscia/1.0.3/loaded")).unionAll(sqlContext.load("/user/dpiscia/1.0.4/loaded")).unionAll(sqlContext.load("/user/dpiscia/"+version+"/loaded"))
         //var rawData = sqlContext.load("/user/dpiscia/1.0.3/loaded")
         if ( (ch=="23") || (ch=="24") || (ch=="25")) {
-          rawData= sqlContext.load("/user/dpiscia/1.0.3/loaded").unionAll(sqlContext.load("/user/dpiscia/1.0.4/loaded"))
-        }
+          rawData= sqlContext.load("/user/dpiscia/1.0.3/loaded").unionAll(sqlContext.load("/user/dpiscia/1.0.4/loaded")).unionAll(sqlContext.load("/user/dpiscia/"+version+"/loaded"))
+        }*/
 
 
-
+    var rawData = sqlContext.load(destination+"/loaded")
         for (band <- due) yield {
           steps.Parser.main(sqlContext, rawData, destination + "/parsedSamples",ch, band,repartitions)
         }

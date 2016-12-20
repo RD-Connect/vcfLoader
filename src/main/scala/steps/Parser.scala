@@ -10,7 +10,6 @@ object Parser {
                      end_pos: Int,
                      ref: String,
                      alt: String,
-                     rs: String,
                      indel: Boolean,
                      sample: Sample,
                      effects: List[FunctionalEffect],
@@ -51,7 +50,9 @@ object Parser {
                          phyloP46way_placental: String,
                          GERP_RS: String,
                          SiPhy_29way_pi: String,
-                         CADD_phred: Double)
+                         CADD_phred: Double,
+                         clinvar:String,
+                          rs:String)
 
   case class Populations(esp6500_aa: Double,
                          esp6500_ea: Double,
@@ -66,26 +67,26 @@ object Parser {
     if (list.size> index-1 && index!=0) list(index-1)
     else ""
   }
-  def annotation_parser(idMap: String, gt: String) = {
-    val SIFT_pred = getter(idMap, "SIFT_pred")
-    val SIFT_score = getter(idMap, "SIFT_score")
-    val Polyphen2_HVAR_pred = getter(idMap, "Polyphen2_HVAR_pred")
+  def annotation_parser(idMap: String,rs:String) = {
+    val SIFT_pred = getter(idMap, "dbNSFP_SIFT_pred")
+    val SIFT_score = getter(idMap, "dbNSFP_SIFT_score")
+    val Polyphen2_HVAR_pred = getter(idMap, "dbNSFP_Polyphen2_HDIV_pred")
     val pp2 = getter(idMap, "pp2")
-    val Polyphen2_HVAR_score = getter(idMap, "Polyphen2_HVAR_score")
-    val MutationTaster_pred = getter(idMap, "MutationTaster_pred")
-    val mt = getter(idMap, "mt")
-    val phyloP46way_placental = getter(idMap, "phyloP46way_placental")
-    val GERP_RS = getter(idMap, "GERP++_RS")
-    val SiPhy_29way_pi = getter(idMap, "SiPhy_29way_pi")
-    val CADD_phred = getter(idMap, "CADD_phred")
-    val esp6500_ea = getter(idMap, "ESP6500_EA_AF")
-    val esp6500_aa = getter(idMap, "ESP6500_AA_AF")
-    val exac = getter(idMap, "ExAC_AF")
-    val Gp1_AFR_AF = getter(idMap, "1000Gp1_AFR_AF")
-    val Gp1_ASN_AF = getter(idMap, "1000Gp1_ASN_AF")
-    val Gp1_EUR_AF = getter(idMap, "1000Gp1_EUR_AF")
-    val Gp1_AF = getter(idMap, "1000Gp1_AF")
-
+    val Polyphen2_HVAR_score = getter(idMap, "dbNSFP_Polyphen2_HDIV_score")
+    val MutationTaster_pred = getter(idMap, "dbNSFP_MutationTaster_pred")
+    val mt = getter(idMap, "dbNSFP_MutationTaster_score")
+    val phyloP46way_placental = getter(idMap, "dbNSFP_phyloP46way_placental")
+    val GERP_RS = getter(idMap, "dbNSFP_GERP___RS")
+    val SiPhy_29way_pi = getter(idMap, "dbNSFP_SiPhy_29way_pi")
+    val CADD_phred = getter(idMap, "dbNSFP_CADD_phred")
+    val esp6500_ea = getter(idMap, "dbNSFP_ESP6500_EA_AF")
+    val esp6500_aa = getter(idMap, "dbNSFP_ESP6500_AA_AF")
+    val exac = getter(idMap, ";ExAC_AF")
+    val Gp1_AFR_AF = getter(idMap, "dbNSFP_1000Gp1_AFR_AF")
+    val Gp1_ASN_AF = getter(idMap, "dbNSFP_1000Gp1_ASN_AF")
+    val Gp1_EUR_AF = getter(idMap, "dbNSFP_1000Gp1_EUR_AF")
+    val Gp1_AF = getter(idMap, "dbNSFP_1000Gp1_AF")
+    val clinvar = getter(idMap,"CLNSIG")
     def truncateAt(n: Double, p: Int): Double = {
       //exponsive but the other way with bigdecimal causes an issue with spark sql
       val s = math pow(10, p);
@@ -106,28 +107,31 @@ object Parser {
       else if (list.size> index-1) list(0)
       else ""
     }
-    val res=gt.split("/").map(_.toInt).map(x=>{
+    val x=0
+    val res=
 
-      (Predictions(SIFT_pred=getOrEmpty(SIFT_pred,x),
-        SIFT_score=removedot(getOrEmpty(SIFT_score,x),0),
+      (Predictions(SIFT_pred=getOrEmpty(SIFT_pred,1),
+        SIFT_score=removedot(getOrEmpty(SIFT_score,1),0),
         pp2=getOrEmpty(pp2,x),
-        polyphen2_hvar_pred=getOrEmpty(Polyphen2_HVAR_pred,x),
-        polyphen2_hvar_score=removedot(getOrEmpty(Polyphen2_HVAR_score,x),0),
-        MutationTaster_pred=getOrEmpty(MutationTaster_pred,x),
-        mt=getOrEmpty(mt,x),
-        phyloP46way_placental=getOrEmpty(phyloP46way_placental,x),
-        GERP_RS=getOrEmpty(GERP_RS,x),
-        SiPhy_29way_pi=getOrEmpty(SiPhy_29way_pi,x),
-        CADD_phred=removedot(getOrEmpty(CADD_phred,x),0)),
-        Populations(removedot(getOrEmpty(esp6500_ea,x),4),
-          removedot(getOrEmpty(esp6500_aa,x),4),
-          removedot(getOrEmpty(Gp1_AFR_AF,x),4),
-          removedot(getOrEmpty(Gp1_ASN_AF,x),4),
-          removedot(getOrEmpty(Gp1_EUR_AF,x),4),
-          removedot(getOrEmpty(Gp1_AF,x),4),
-          removedot(getOrEmpty(exac,x),5)))
+        polyphen2_hvar_pred=getOrEmpty(Polyphen2_HVAR_pred,2),
+        polyphen2_hvar_score=removedot(getOrEmpty(Polyphen2_HVAR_score,2),0),
+        MutationTaster_pred=getOrEmpty(MutationTaster_pred,2),
+        mt=getOrEmpty(mt,1),
+        phyloP46way_placental=getOrEmpty(phyloP46way_placental,1),
+        GERP_RS=getOrEmpty(GERP_RS,1),
+        SiPhy_29way_pi=getOrEmpty(SiPhy_29way_pi,1),
+        CADD_phred=removedot(getOrEmpty(CADD_phred,1),0),
+        clinvar=getOrEmpty(clinvar,1),
+         rs=rs),
+        Populations(removedot(getOrEmpty(esp6500_ea,1),4),
+          removedot(getOrEmpty(esp6500_aa,1),4),
+          removedot(getOrEmpty(Gp1_AFR_AF,1),4),
+          removedot(getOrEmpty(Gp1_ASN_AF,1),4),
+          removedot(getOrEmpty(Gp1_EUR_AF,1),4),
+          removedot(getOrEmpty(Gp1_AF,1),4),
+          removedot(getOrEmpty(exac,1),5)))
 
-    })
+
     res
   }
 
@@ -144,34 +148,38 @@ object Parser {
     val parsedData = rawData
       .where(rawData("pos") >=chromBands._1)
       .where(rawData("pos") < chromBands._2).filter(rawData("chrom") === chrom).flatMap(a => sampleParser(a(0), a(1), a(2), a(3), a(6), a(7), a(8), a(9), chrom)).toDF()
-    //multialleli off
-    parsedData.where(parsedData("Sample.multiallelic")===false).where(parsedData("Sample.dp")>7).where(parsedData("Sample.gq")>19).save(destination+"/chrom="+chrom+"/band="+chromBands._2.toString,SaveMode.Overwrite)
+    //multialleli on remove .where(parsedData("Sample.multiallelic")===false)
+    parsedData.where(parsedData("Sample.dp")>7).where(parsedData("Sample.gq")>19).save(destination+"/chrom="+chrom+"/band="+chromBands._2.toString,SaveMode.Overwrite)
 
   }
 
   def sampleParser( pos:Any,ID:Any, ref:Any, alt:Any, info: Any, format: Any,  sampleline : Any, sampleID : Any,chrom : String):List[Variant]  = {
-    val rs = getterRS(ID.toString,"RS")
+    val rs = getterRS(ID.toString)
     val (gt,dp,gq,pl,ad) = formatCase(format,sampleline.toString)
     val infoMap = toMap(info)
-    val effString = infoMap.getOrElse("EFF","")
+    val effString = infoMap.getOrElse("ANN","")
     //ad should be extracted by multi-allelic position
     val altSplitted = altMultiallelic(ref.toString,alt.toString,gt) //returns
-    val anno=annotation_parser(ID.toString,gt)
+
     val res=altSplitted.map(x=>{
 
+
+      val anno= if (!x._4 & x._3.toInt==1) annotation_parser(info.toString,rs(0))
+                else ( Predictions("",0.0,"","",0.0,"","","","","",0.0,"",""),Populations(0.0,0.0,0.0,0.0,0.0,0.0,0.0))
       //if 0/ what about annotation?? Null Option
       val altGenotype= x._3.toInt
       val altPosition = x._2.split("/")(1).toInt
 
-      val indel = (x._1.length>1) //maybe something ref legnth != 1 or pos !=1//wrong if alt is not handled correctly
+      val indel = (x._1.length!=1)  || (ref!=1) //maybe something ref legnth != 1 or pos !=1//wrong if alt is not handled correctly
       val posOK = pos.toString.toInt
       val endOK = endPos(x._1,info.toString,posOK)
-      //it gets functional effetcs
-      val functionalEffs = functionalMap_parser(effString).filter(effect => (altGenotype == effect.geno_type_number)).toList
+      //it gets functional effetcs  //x._1 == effect.dgfdgf
+      val functionalEffs = if (!x._4 & x._3.toInt==1) functionalMap_parser(effString).filter(effect => (altGenotype == effect.geno_type_number)).toList
+      else List[FunctionalEffect]()
 
       altGenotype match{
-        case 0 => Variant(posOK,endOK,ref.toString,x._1,rs(0),indel,Sample(getDiploid(x._2)._1,dp,gq,pl,ADsplit(ad,gt),x._4,sampleID.toString,getDiploid(x._2)._2),functionalEffs, Predictions("",0.0,"","",0.0,"","","","","",0.0),Populations(0.0,0.0,0.0,0.0,0.0,0.0,0.0) )
-        case _ => Variant(posOK,endOK,ref.toString,x._1,rs(0),indel,Sample(getDiploid(x._2)._1,dp,gq,pl,ADsplit(ad,gt),x._4,sampleID.toString,getDiploid(x._2)._2),functionalEffs, anno(altPosition)._1,anno(altPosition)._2 )
+        case 0 => Variant(posOK,endOK,ref.toString,x._1,indel,Sample(getDiploid(x._2)._1,dp,gq,pl,ADsplit(ad,gt),x._4,sampleID.toString,getDiploid(x._2)._2),functionalEffs, Predictions("",0.0,"","",0.0,"","","","","",0.0,"",""),Populations(0.0,0.0,0.0,0.0,0.0,0.0,0.0) )
+        case _ => Variant(posOK,endOK,ref.toString,x._1,indel,Sample(getDiploid(x._2)._1,dp,gq,pl,ADsplit(ad,gt),x._4,sampleID.toString,getDiploid(x._2)._2),functionalEffs, anno._1,anno._2 )
 
       }
 
@@ -191,7 +199,9 @@ object Parser {
 
     }
   }
-
+  /*
+  return  alt in letter, converted geneotype,original genotype number, multiallelic
+   */
   def altMultiallelic(ref:String,alt:String,gt:String):List[(String,String,String,Boolean)]={
     alt match {
       case "<NON_REF>" => List((alt,"0/0","0",false))
@@ -214,22 +224,22 @@ object Parser {
   /* this function extracts a list of values associated to that string
   *
   * */
-  def getter(value:String,pattern:String)={
+  def getter(value:String,pattern:String):List[String]={
     val matches=value.split(pattern+"=")
     matches.size match {
       case 1 => List("")
       case x:Int if x > 1 =>{
-        Range(1,x).map(item=> matches(item).split(";")(0))
+        matches(1).split(";")(0).split(",").toList
       }
       case _ => List("")
 
     }
 
   }
-  def getterRS(value:String,pattern:String)={
-    val matches=value.split(pattern+"=rs")
+  def getterRS(value:String)={
+    val matches=value.split(",")
     matches.size match {
-      case 1 => List("")
+      case 1 => List(matches(0))
       case x:Int if x > 1 =>{
         Range(1,x).map(item=> "rs"+matches(item).split(";")(0))
       }
@@ -243,20 +253,20 @@ object Parser {
     if (raw_line == "") List[FunctionalEffect]()
     else {val items=raw_line.split(",")
       items.map(item => {
-        FunctionalEffect(effect=item.split("\\(")(0),
-          effect_impact=item.split("\\(")(1).split("\\|")(0),
-          functional_class=item.split("\\|")(1),
-          codon_change=item.split("\\|")(2),
-          amino_acid_change=item.split("\\|")(3),
-          amino_acid_length=item.split("\\|")(4),
-          gene_name=item.split("\\|")(5),
-          transcript_biotype=item.split("\\|")(6),
-          gene_coding=item.split("\\|")(7),
-          transcript_id=item.split("\\|")(8),
-          exon_rank=item.split("\\|")(9),
-          geno_type_number=item.split("\\|")(10).replace(")","").toInt)
-
-
+        val elements = item.split("\\|")
+        FunctionalEffect(
+          effect=getOrEmpty(elements,2),
+          effect_impact=getOrEmpty(elements,3),
+          functional_class="",
+          codon_change="",
+          amino_acid_change=getOrEmpty(elements,14),
+          amino_acid_length=getOrEmpty(elements,14),
+          gene_name=getOrEmpty(elements,4),
+          transcript_biotype=getOrEmpty(elements,6),
+          gene_coding="",
+          transcript_id=getOrEmpty(elements,7),
+          exon_rank=getOrEmpty(elements,9),
+          geno_type_number=1)
       }).toList
     }
   }

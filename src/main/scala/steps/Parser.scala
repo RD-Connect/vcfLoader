@@ -203,6 +203,7 @@ object Parser {
   return  alt in letter, converted geneotype,original genotype number, multiallelic
    */
   def altMultiallelic(ref:String,alt:String,gt:String):List[(String,String,String,Boolean)]={
+    val multi = alt.split(",").size > 2
     alt match {
       case "<NON_REF>" => List((alt,"0/0","0",false))
       case _ =>
@@ -212,9 +213,9 @@ object Parser {
             val altList =  alt.split(",")
             val gtList =  gt.split("/")
             gtList match {
-              case x if x(0) == "0" => List((altList(gtList(1).toInt-1),"0/1",gtList(1),gtList(1).toInt>1))
-              case x if x(0) == x(1) => List((altList(gtList(1).toInt-1),"1/1",gtList(1),gtList(1).toInt>1))
-              case _ => List((altList(gtList(0).toInt-1),"0/1",gtList(0),true),(altList(gtList(1).toInt-1),"0/1",gtList(1),true))
+              case x if x(0) == "0" => List((altList(gtList(1).toInt-1),"0/1",gtList(1),multi))
+              case x if x(0) == x(1) => List((altList(gtList(1).toInt-1),"1/1",gtList(1),multi))
+              case _ => List((altList(gtList(0).toInt-1),"0/1",gtList(0),true),(altList(gtList(1).toInt-1),"0/1",gtList(1),multi))
               // case _ =>       altList(gtList(0).toInt -1)+","+altList(gtList(1).toInt -1)
             }
         }
@@ -250,6 +251,11 @@ object Parser {
   }
   def functionalMap_parser(raw_line:String):List[FunctionalEffect]=
   {
+/*
+TODO: report letter and then take it in multiallelic
+ */
+
+
     if (raw_line == "") List[FunctionalEffect]()
     else {val items=raw_line.split(",")
       items.map(item => {

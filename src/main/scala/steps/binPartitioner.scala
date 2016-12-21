@@ -11,7 +11,7 @@ import org.apache.spark.Partitioner
 
       key match {
         case null => 0
-        case key: Int => { val partition=math.floor( (key-offset) / length).toInt
+        case key: Int => { val partition= (key-offset) / length
         if (partition>numPartitions-1) numPartitions-1
         else partition}
 

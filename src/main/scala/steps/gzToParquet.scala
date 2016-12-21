@@ -10,6 +10,7 @@ package steps
 
 import org.apache.spark.sql.SQLContext
 import org.apache.spark.sql.SaveMode
+
 object gzToParquet {
   case class rawTable(pos:Int,
                       ID : String,
@@ -53,7 +54,9 @@ object gzToParquet {
            files:List[String],
            destination : String,
            numPartitions:Int=4,
-            checkPointDIr:String = "/tmp")= {
+           time:String,
+            checkPointDIr:String = "/tmp"
+            )= {
 
     val sqlContext = new org.apache.spark.sql.SQLContext(sc)
     import sqlContext.implicits._
@@ -70,7 +73,7 @@ object gzToParquet {
         }
         else if (index == files.length - 1) {
           RDD1 = file_to_parquet(sc, path + file +"." + chrom + ".annot.snpEff.*.vcf.gz", destination, chrom, file).union(RDD1)
-          RDD1.toDF.write.mode(SaveMode.Append).save(destination+"/chrom="+chromStrToInt(chrom))
+          RDD1.toDF.write.mode(SaveMode.Append).save(destination+"/time="+time+"/chrom="+chromStrToInt(chrom))
         }
 
         else

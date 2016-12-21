@@ -102,7 +102,7 @@ object GenomicsLoader {
     println("-------------------------------------desitnation is "+destination)
 
     val now = Calendar.getInstance().getTime()
-    val time = now.toString.split(" ")(1)+"_"+now.toString.split(" ")(3)+"_"+now.toString.split(" ")(2)+"_"+now.toString.split(" ")(5)
+    val time = now.toString.split(" ")(1)+"_"+now.toString.split(" ")(2)+"_"+now.toString.split(" ")(5)
 def split(files:List[String],size:Int)=
      { 
 var cycles = files.length/size

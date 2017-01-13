@@ -67,6 +67,40 @@ object Parser {
     if (list.size> index-1 && index!=0) list(index-1)
     else ""
   }
+
+
+  def removedot(value: String, precision: Int) = {
+    value match {
+      case "." => 0.0
+      case "" => 0.0
+      case _ => truncateAt(value.toDouble, 4)
+    }
+  }
+  def truncateAt(n: Double, p: Int): Double = {
+    //exponsive but the other way with bigdecimal causes an issue with spark sql
+    val s = math pow(10, p);
+    (math floor n * s) / s
+  }
+
+  def sift_pred_rules(list:List[String]):String={
+    if (list.contains("D")) "D"
+    else if (list.contains("T")) "T"
+    else ""
+  }
+
+  def polyphen2_hvar_pred_rules(list:List[String]):String={
+    if (list.contains("D")) "D"
+    else if (list.contains("P")) "P"
+    else if (list.contains("B")) "B"
+    else ""
+  }
+
+  def mutation_taster_pred_rules(list:List[String]):String={
+    if (list.contains("A")) "A"
+    else if (list.contains("D")) "D"
+    else if (list.contains("N")) "N"
+    else ""
+  }
   def annotation_parser(idMap: String,rs:String) = {
     val SIFT_pred = getter(idMap, "dbNSFP_SIFT_pred")
     val SIFT_score = getter(idMap, "dbNSFP_SIFT_score")
@@ -87,19 +121,8 @@ object Parser {
     val Gp1_EUR_AF = getter(idMap, "dbNSFP_1000Gp1_EUR_AF")
     val Gp1_AF = getter(idMap, "dbNSFP_1000Gp1_AF")
     val clinvar = getter(idMap,"CLNSIG")
-    def truncateAt(n: Double, p: Int): Double = {
-      //exponsive but the other way with bigdecimal causes an issue with spark sql
-      val s = math pow(10, p);
-      (math floor n * s) / s
-    }
 
-    def removedot(value: String, precision: Int) = {
-      value match {
-        case "." => 0.0
-        case "" => 0.0
-        case _ => truncateAt(value.toDouble, 4)
-      }
-    }
+
 
     //for population we only have one annotation for variant
     def getOrEmpty2(list:Seq[String], index:Int)={
@@ -107,16 +130,23 @@ object Parser {
       else if (list.size> index-1) list(0)
       else ""
     }
+
+    def getOrEmptyList(list:Seq[String])={
+      if (list.size> 0) list
+      else List("")
+    }
+
+
     val x=0
     val res=
 
-      (Predictions(SIFT_pred=getOrEmpty(SIFT_pred,1),
-        SIFT_score=removedot(getOrEmpty(SIFT_score,1),0),
+      (Predictions(SIFT_pred= sift_pred_rules(SIFT_pred),
+        SIFT_score=SIFT_score.map(x=> removedot(x,0)).min,
         pp2=getOrEmpty(pp2,x),
-        polyphen2_hvar_pred=getOrEmpty(Polyphen2_HVAR_pred,2),
-        polyphen2_hvar_score=removedot(getOrEmpty(Polyphen2_HVAR_score,2),0),
-        MutationTaster_pred=getOrEmpty(MutationTaster_pred,2),
-        mt=getOrEmpty(mt,1),
+        polyphen2_hvar_pred=polyphen2_hvar_pred_rules(Polyphen2_HVAR_pred),
+        polyphen2_hvar_score=Polyphen2_HVAR_score.map(x=> removedot(x,2)).max,
+        MutationTaster_pred=mutation_taster_pred_rules(MutationTaster_pred),
+        mt=mt.map(x=> removedot(x,1)).max.toString,
         phyloP46way_placental=getOrEmpty(phyloP46way_placental,1),
         GERP_RS=getOrEmpty(GERP_RS,1),
         SiPhy_29way_pi=getOrEmpty(SiPhy_29way_pi,1),

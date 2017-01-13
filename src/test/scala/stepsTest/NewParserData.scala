@@ -1,7 +1,7 @@
 package stepsTest
 
 import org.scalatest._
-import steps.Parser.{altMultiallelic, getOrEmpty, _}
+import steps.Parser.{altMultiallelic, getOrEmpty, removedot, sift_pred_rules,_}
 import steps.toSample.{formatCase, toMap}
 import scala.collection.immutable._
 //import steps.toSample.{formatCase}
@@ -233,5 +233,16 @@ class NewParserData extends FlatSpec with Matchers {
       sampleParser( pos,ID, ref, alt, info1, format, sample,"prova","1")(0).predictions.clinvar should be ("2")
 
     }
+
+
+  "rules for getting annotations" should "get" in {
+
+    val sift_score=getter(infoSimple.toString, "dbNSFP_SIFT_score")
+    val sift_pred=getter(infoSimple.toString, "dbNSFP_SIFT_pred")
+    //val anno = annotation_parser(infoValue.toString,"0/1")
+    sift_score.map(x=> removedot(x,0)).min should be  (1.0)
+    sift_pred_rules(sift_pred) should  be  ("T")
+    sift_pred_rules(List()) should be ("")
+  }
 
 }

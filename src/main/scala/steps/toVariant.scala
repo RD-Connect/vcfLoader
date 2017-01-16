@@ -23,8 +23,12 @@ val samples = Samples
     val annotations = Annotations
       .where(Annotations("chrom")===chromList.toInt)
 
-  annotations.join(samples, annotations("pos") === samples("_1") && annotations("ref") === samples("_2") && annotations("alt") === samples("_3"), "right")
-    .select("pos","ref","alt","indel","_5","_c4","_c5","_c6")
+  annotations.join(samples, annotations("pos") === samples("_1") && annotations("ref") === samples("_2") && annotations("alt") === samples("_3"), "left")
+    .select("_1","_2","_3","_4","_5","_c4","_c5","_c6")
+    .withColumnRenamed("_1","pos")
+    .withColumnRenamed("_2","ref")
+    .withColumnRenamed("_3","alt")
+    .withColumnRenamed("_4","indel")
     .withColumnRenamed("_5","samples")
     .withColumnRenamed("_c4","effs")
     .withColumnRenamed("_c5","populations")

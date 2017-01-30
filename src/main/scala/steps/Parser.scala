@@ -296,11 +296,11 @@ TODO: report letter and then take it in multiallelic
           functional_class="",
           codon_change="",
           amino_acid_change=getOrEmpty(elements,14),
-          amino_acid_length=getOrEmpty(elements,14),
+          amino_acid_length=if (( getOrEmpty(elements,14) split("/") length ) == 2 )  getOrEmpty(elements,14).split("/")(1)  else "" ,
           gene_name=getOrEmpty(elements,4),
           transcript_biotype=getOrEmpty(elements,6),
           gene_coding="",
-          transcript_id=getOrEmpty(elements,7),
+          transcript_id=getOrEmpty(elements,7) takeRight 14,
           exon_rank=getOrEmpty(elements,9),
           geno_type_number=1)
       }).toList

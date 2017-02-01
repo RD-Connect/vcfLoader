@@ -293,8 +293,8 @@ TODO: report letter and then take it in multiallelic
         FunctionalEffect(
           effect=getOrEmpty(elements,2),
           effect_impact=getOrEmpty(elements,3),
-          functional_class="",
-          codon_change="",
+          functional_class=getOrEmpty(elements,6),
+          codon_change=getOrEmpty(elements,10),
           amino_acid_change=getOrEmpty(elements,14),
           amino_acid_length=if (( getOrEmpty(elements,14) split("/") length ) == 2 )  getOrEmpty(elements,14).split("/")(1)  else "" ,
           gene_name=getOrEmpty(elements,4),

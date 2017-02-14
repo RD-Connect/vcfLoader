@@ -17,7 +17,7 @@ object Data {
     val client = ElasticClient.remote(settings, uri)
     if (action == "create") {
       client.execute {
-        create index index_name mappings (version as(
+        create index index_name shards 9 replicas 1 mappings (version as(
 
           "chrom" typed IntegerType index "not_analyzed",
           "pos" typed IntegerType index "not_analyzed",

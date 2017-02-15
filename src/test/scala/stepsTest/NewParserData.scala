@@ -179,7 +179,19 @@ class NewParserData extends FlatSpec with Matchers {
     res.size should be (7)
     res(0).gene_name should be("RP11-108K14.4")
   }
+  "functionalMap_parser feature_type" should "get " in
+    {
+      val res= functionalMap_parser(effString)
+      res.size should be (7)
+      res(0).functional_class should be("transcript")
+    }
 
+  "functionalMap_parser codon_chang" should "get " in
+    {
+      val res= functionalMap_parser(effString)
+      res.size should be (7)
+      res(0).codon_change should be("n.-2285A>G")
+    }
   "sample_parser" should "get " in
     {
       sampleParser( pos,ID, ref, alt, info1, format, sample,"prova","1")(0).populations should be (Populations(0.0,0.0,0.0,0.0,0.0,0.0,0.0))

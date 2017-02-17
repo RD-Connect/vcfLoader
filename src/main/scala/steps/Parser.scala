@@ -300,7 +300,7 @@ TODO: report letter and then take it in multiallelic
           gene_name=getOrEmpty(elements,4),
           transcript_biotype=getOrEmpty(elements,6),
           gene_coding="",
-          transcript_id=getOrEmpty(elements,7) takeRight 14,
+          transcript_id=getOrEmpty(elements,7) takeRight 15,
           exon_rank=getOrEmpty(elements,9),
           geno_type_number=1)
       }).toList

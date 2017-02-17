@@ -284,6 +284,7 @@ object Parser {
 /*
 TODO: report letter and then take it in multiallelic
  */
+   val points=Map("HIGH"->1,"MODERATE"->2,"LOW"->3,"MODIFIER"->4)
 
 
     if (raw_line == "") List[FunctionalEffect]()
@@ -303,7 +304,7 @@ TODO: report letter and then take it in multiallelic
           transcript_id=getOrEmpty(elements,7) takeRight 15,
           exon_rank=getOrEmpty(elements,9),
           geno_type_number=1)
-      }).toList
+      }).toList.distinct.groupBy(_.transcript_id).map(x=> x._2.sortWith( (l,r) => points.getOrElse(l.effect_impact,0) < points.getOrElse(r.effect_impact,0))).map(_.head).toList
     }
   }
 

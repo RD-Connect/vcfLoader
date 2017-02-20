@@ -49,7 +49,7 @@ object intersectSwap {
         tempBands ::= band
       }
       //edge case where there is a band and not a variant
-      if  (variant != null) {
+      if  (variant == null) {
         variant= new SwapDataThin(0,"no","no",false)
       }
       if ( (currentValue == -1) ) currentValue = variant.pos

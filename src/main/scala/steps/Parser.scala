@@ -38,7 +38,7 @@ object Parser {
                               gene_coding: String,
                               transcript_id: String,
                               exon_rank: String,
-                              geno_type_number: Int)
+                              geno_type_number: String)
 
   case class Predictions(SIFT_pred: String,
                          SIFT_score: Double,
@@ -296,14 +296,14 @@ TODO: report letter and then take it in multiallelic
           effect_impact=getOrEmpty(elements,3),
           functional_class=getOrEmpty(elements,6),
           codon_change=getOrEmpty(elements,10),
-          amino_acid_change=getOrEmpty(elements,14),
+          amino_acid_change=getOrEmpty(elements,12),
           amino_acid_length=if (( getOrEmpty(elements,14) split("/") length ) == 2 )  getOrEmpty(elements,14).split("/")(1)  else "" ,
           gene_name=getOrEmpty(elements,4),
-          transcript_biotype=getOrEmpty(elements,6),
-          gene_coding="",
+          transcript_biotype=getOrEmpty(elements,8),
+          gene_coding=getOrEmpty(elements,13),
           transcript_id=getOrEmpty(elements,7) takeRight 15,
           exon_rank=getOrEmpty(elements,9),
-          geno_type_number=1)
+          geno_type_number=getOrEmpty(elements,1))
       }).toList.distinct.groupBy(_.transcript_id).map(x=> x._2.sortWith( (l,r) => points.getOrElse(l.effect_impact,0) < points.getOrElse(r.effect_impact,0))).map(_.head).toList
     }
   }

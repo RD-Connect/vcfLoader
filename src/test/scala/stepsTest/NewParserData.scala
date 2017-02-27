@@ -190,7 +190,7 @@ class NewParserData extends FlatSpec with Matchers {
     {
       val res= functionalMap_parser(effString)
       res.size should be (7)
-      res(0).codon_change should be("n.-2285A>G")
+      res(0).codon_change should be("n.458A>G")
     }
 
 
@@ -200,10 +200,18 @@ class NewParserData extends FlatSpec with Matchers {
       val infoMap = toMap(effs)
       val effString = infoMap.getOrElse("ANN","")
       val res= functionalMap_parser(effString)
-      res should be (1)
+      res.length should be (4)
       //res(0).codon_change should be("n.-2285A>G")
     }
-
+ /* "functionalMap_parser same empty transcript multiple times" should "get " in
+    {
+      val effs:Any="."
+      val infoMap = toMap(effs)
+      val effString = infoMap.getOrElse("ANN","")
+      val res= functionalMap_parser(effString)
+      res should be (1)
+      //res(0).codon_change should be("n.-2285A>G")
+    }*/
   "sample_parser" should "get " in
     {
       sampleParser( pos,ID, ref, alt, info1, format, sample,"prova","1")(0).populations should be (Populations(0.0,0.0,0.0,0.0,0.0,0.0,0.0))

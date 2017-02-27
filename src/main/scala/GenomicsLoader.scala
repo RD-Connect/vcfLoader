@@ -127,8 +127,10 @@ var cycles = files.length/size
           rawData= sqlContext.load("/user/dpiscia/1.0.3/loaded").unionAll(sqlContext.load("/user/dpiscia/1.0.4/loaded")).unionAll(sqlContext.load("/user/dpiscia/"+version+"/loaded"))
         }*/
 
+        val loaded= if (configuration.getString("alreadyLoaded")!="") configuration.getString("alreadyLoaded")
+        else destination
 
-    var rawData = sqlContext.load(destination+"/loaded")
+        var rawData = sqlContext.load(loaded+"/loaded")
         for (band <- due) yield {
           steps.Parser.main(sqlContext, rawData, destination + "/parsedSamples",ch, band,repartitions)
         }

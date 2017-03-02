@@ -103,7 +103,8 @@ object GenomicsLoader {
 
 
     if (pipeline.contains("load")) {
-    split(files,100)
+      //sc, origin, chromList, files.drop(size*x).take(size), destination + "/loaded",repartitions,checkPointDir
+    split(files,100,sc, origin, chromList,destination,repartitions,checkPointDir)
     }
     for (ch <- chromList) yield {
 
@@ -222,7 +223,10 @@ object GenomicsLoader {
     val fileLines = Source.fromFile(filePath).getLines.toList.filter(line => !line.startsWith("#")).map(line=> line.split("\t"))
     fileLines
   }
-  def split(files:List[String],size:Int)=
+
+  //    split(files,100,sc, origin, chromList,destination,repartitions,checkPointDir)
+
+  def split(files:List[String],size:Int,sc : org.apache.spark.SparkContext,origin:String,chromList:List[String],destination:String,repartitions:Int,checkPointDir:String)=
   {
     var cycles = files.length/size
     Range(0,cycles+1).map(x=>

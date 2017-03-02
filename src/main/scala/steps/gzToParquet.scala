@@ -65,12 +65,12 @@ object gzToParquet {
         println("index  is "+index)
         if (index == 0) {
 
-          RDD1 = file_to_parquet(sc, path + file +"." + chrom + ".annot.snpEff.*.vcf.gz", destination, chrom, file)
+          RDD1 = file_to_parquet(sc, path + chrom + "/" + file +"." + chrom + ".annot.snpEff.*.vcf.gz", destination, chrom, file)
           if (index == files.length - 1) RDD1.toDF.write.mode(SaveMode.Append).save(destination+"/chrom="+chromStrToInt(chrom))
         }
 
         else if (index == files.length - 1) {
-          RDD1 = file_to_parquet(sc, path + file +"." + chrom + ".annot.snpEff.*.vcf.gz", destination, chrom, file).union(RDD1)
+          RDD1 = file_to_parquet(sc, path + chrom + "/" + file +"." + chrom + ".annot.snpEff.*.vcf.gz", destination, chrom, file).union(RDD1)
           RDD1.toDF.write.mode(SaveMode.Append).save(destination+"/chrom="+chromStrToInt(chrom))
         }
 
@@ -81,7 +81,7 @@ object gzToParquet {
             RDD1.checkpoint()
           }
 
-          RDD1 = file_to_parquet(sc, path + file +"." + chrom + ".annot.snpEff.*.vcf.gz", destination, chrom, file).union(RDD1)}
+          RDD1 = file_to_parquet(sc, path + chrom + "/" + file +"." + chrom + ".annot.snpEff.*.vcf.gz", destination, chrom, file).union(RDD1)}
       }
       RDD1
     }

@@ -98,16 +98,7 @@ object GenomicsLoader {
     println("-------------------------------------pipeline is "+pipeline)
     println("-------------------------------------chrom is "+chromList)
     println("-------------------------------------desitnation is "+destination)
-def split(files:List[String],size:Int)=
-     { 
-var cycles = files.length/size
-      Range(0,cycles+1).map(x=> 
-      {
-      //println(files.drop(size*x).take(size))
-            steps.gzToParquet.main(sc, origin, chromList, files.drop(size*x).take(size), destination + "/loaded",repartitions,checkPointDir) 
-      }
-      ) 
-     }   
+
 
 
 
@@ -231,5 +222,14 @@ var cycles = files.length/size
     val fileLines = Source.fromFile(filePath).getLines.toList.filter(line => !line.startsWith("#")).map(line=> line.split("\t"))
     fileLines
   }
-
+  def split(files:List[String],size:Int)=
+  {
+    var cycles = files.length/size
+    Range(0,cycles+1).map(x=>
+    {
+      //println(files.drop(size*x).take(size))
+      steps.gzToParquet.main(sc, origin, chromList, files.drop(size*x).take(size), destination + "/loaded",repartitions,checkPointDir)
+    }
+    )
+  }
 }

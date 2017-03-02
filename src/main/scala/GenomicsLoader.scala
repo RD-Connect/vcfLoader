@@ -103,8 +103,7 @@ object GenomicsLoader {
 
 
     if (pipeline.contains("load")) {
-      //sc, origin, chromList, files.drop(size*x).take(size), destination + "/loaded",repartitions,checkPointDir
-    split(files,100,sc, origin, chromList,destination,repartitions,checkPointDir)
+      splitUpload(files,100,sc, origin, chromList,destination,repartitions,checkPointDir)
     }
     for (ch <- chromList) yield {
 
@@ -112,12 +111,6 @@ object GenomicsLoader {
 
 
       if (pipeline.contains("parser")) {
-
-        /*var rawData = sqlContext.load("/user/dpiscia/V4.3.2/loaded").unionAll(sqlContext.load("/user/dpiscia/V6.0.2/loaded")).unionAll(sqlContext.load("/user/dpiscia/1.0.1/loaded")).unionAll(sqlContext.load("/user/dpiscia/1.0.2/loaded")).unionAll(sqlContext.load("/user/dpiscia/1.0.3/loaded")).unionAll(sqlContext.load("/user/dpiscia/1.0.4/loaded")).unionAll(sqlContext.load("/user/dpiscia/"+version+"/loaded"))
-        //var rawData = sqlContext.load("/user/dpiscia/1.0.3/loaded")
-        if ( (ch=="23") || (ch=="24") || (ch=="25")) {
-          rawData= sqlContext.load("/user/dpiscia/1.0.3/loaded").unionAll(sqlContext.load("/user/dpiscia/1.0.4/loaded")).unionAll(sqlContext.load("/user/dpiscia/"+version+"/loaded"))
-        }*/
 
         val loaded= if (configuration.getString("alreadyLoaded")!="") configuration.getString("alreadyLoaded")
         else destination
@@ -225,8 +218,9 @@ object GenomicsLoader {
   }
 
   //    split(files,100,sc, origin, chromList,destination,repartitions,checkPointDir)
-
-  def split(files:List[String],size:Int,sc : org.apache.spark.SparkContext,origin:String,chromList:List[String],destination:String,repartitions:Int,checkPointDir:String)=
+  //load files by bacth of size
+  //otherwise run into a spark error
+  def splitUpload(files:List[String],size:Int,sc : org.apache.spark.SparkContext,origin:String,chromList:List[String],destination:String,repartitions:Int,checkPointDir:String)=
   {
     var cycles = files.length/size
     Range(0,cycles+1).map(x=>

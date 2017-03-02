@@ -76,7 +76,7 @@ import sqlContext.implicits._
       false,
         a(9).toString
       ),List(),Predictions("",0.0,"","",0.0,"","","","","",0.0,"",""),Populations(0.0,0.0,0.0,0.0,0.0,0.0,0.0)))
-    val res1=joined.toDF.save(destination+"/chrom="+chromList+"/band="+banda._2.toString)
+    val res1=joined.toDF.write.parquet(destination+"/chrom="+chromList+"/band="+banda._2.toString)
     // val gro = ranges.groupBy(ranges("_1"),ranges("_2"),ranges("_3"),ranges("_4")).agg(array(ranges("_5"))).take(2)
 }
 }

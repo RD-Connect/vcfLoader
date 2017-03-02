@@ -33,7 +33,7 @@ val samples = Samples
     .withColumnRenamed("_c4","effs")
     .withColumnRenamed("_c5","populations")
     .withColumnRenamed("_c6","predictions")
-    .save(destination+"/chrom="+chromList)//+"/band="+banda._2.toString)
+    .write.parquet(destination+"/chrom="+chromList)//+"/band="+banda._2.toString)
 
 }
 }

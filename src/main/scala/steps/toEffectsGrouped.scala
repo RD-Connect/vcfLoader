@@ -6,7 +6,6 @@ object toEffectsGrouped{
   def main(sqlContext :org.apache.spark.sql.hive.HiveContext, umdAnnotated:org.apache.spark.sql.DataFrame,destination :String, chromList:String, banda:(Int,Int))= {
     // this is used to implicitly convert an RDD to a DataFrame.
     import sqlContext.implicits._
-    sqlContext.sql( """CREATE TEMPORaRY function collect AS 'brickhouse.udf.collect.CollectUDAF'""")
 
     /*it can be substitued by collect_list
     blog info https://forums.databricks.com/questions/956/how-do-i-group-my-dataset-by-a-key-or-combination.html
@@ -36,7 +35,15 @@ object toEffectsGrouped{
  array(collect(map('sift_pred', predictions.SIFT_pred, 'sift_score', predictions.SIFT_score, 'polyphen2_hvar_pred', predictions.polyphen2_hvar_pred,
  'pp2', predictions.pp2, 'polyphen2_hvar_score', predictions.polyphen2_hvar_score, 'mutationtaster_pred', predictions.MutationTaster_pred,
  'mt', predictions.mt,'phylop46way_placental', predictions.phyloP46way_placental, 'gerp_rs', predictions.GERP_RS, 'siphy_29way_pi', predictions.SiPhy_29way_pi,
-  'cadd_phred', predictions.CADD_phred , 'UMD', IF(umd is NULL, '', umd), 'clinvar', predictions.clinvar, 'rs', predictions.rs))[0]) from UMD  group by pos,ref,alt,indel""")
-    .save(destination+"/chrom="+chromList+"/band="+banda._2.toString)
+  'cadd_phred', predictions.CADD_phred , 'UMD', IF(umd is NULL, '', umd), 'clinvar', predictions.clinvar, 'rs', predictions.rs))[0]) from UMD  group by pos,ref,alt,indel""").map(x=>
+              (   x(0).toString.toInt,
+                  x(1).toString,
+                  x(2).toString,
+                  x(3).toString,
+                  x(4).toString.toBoolean,
+                  x(5).asInstanceOf[collection.mutable.WrappedArray[Map[String,String]]].toSet.toArray,
+                  x(6).asInstanceOf[collection.mutable.WrappedArray[Map[String,Double]]].toSet.toArray,
+                  x(7).asInstanceOf[collection.mutable.WrappedArray[Map[String,String]]].toSet.toArray))
+          .write.parquet(destination+"/chrom="+chromList+"/band="+banda._2.toString)
   }
 }

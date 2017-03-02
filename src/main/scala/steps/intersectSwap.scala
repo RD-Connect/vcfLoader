@@ -120,20 +120,18 @@ object intersectSwap {
 
     val binPartitioner =  new steps.BinPartitioner(repartitions, (banda._2 - banda._1)/repartitions, banda._1)
     //probably better idea if create the value by end_pos
-    val bandsRDD :RDD[(Int,SwapData)]= bands.map(x => (x.getAs("pos").toString.toInt,SwapData(x.getAs("pos"), x.getAs("end_pos"), x.getAs("ref"), x.getAs("alt"), x.getAs("indel"), x.getAs("sampleId"), x.getAs("gq"), x.getAs("dp"), x.getAs("gt"), x.getAs("ad"))))
-      .repartitionAndSortWithinPartitions (binPartitioner)
+    val bandsRDD :RDD[(Int,SwapData)]= bands.map(x => (x.getAs("pos").toString.toInt,SwapData(x.getAs("pos"), x.getAs("end_pos"), x.getAs("ref"), x.getAs("alt"), x.getAs("indel"), x.getAs("sampleId"), x.getAs("gq"), x.getAs("dp"), x.getAs("gt"), x.getAs("ad")))).rdd.repartitionAndSortWithinPartitions (binPartitioner)
+    //val bandsRDD :RDD[(Int,SwapData)]= bands.map(x => (x.getAs("pos").toString.toInt,SwapData(x.getAs("pos"), x.getAs("end_pos"), x.getAs("ref"), x.getAs("alt"), x.getAs("indel"), x.getAs("sampleId"), x.getAs("gq"), x.getAs("dp"), x.getAs("gt"), x.getAs("ad")))).rdd.repartitionAndSortWithinPartitions (binPartitioner)
     //  case  class RangeData(pos:Long,ref:String,alt:String,rs:String, Indel:Boolean, sampleId:String,gq:Int,dp:Long,gt:String,ad:String)
 
-    val variantsRDD :RDD[(Int,SwapDataThin)]= variants.map(x => (x.getAs("pos").toString.toInt,SwapDataThin(x.getAs("pos"), x.getAs("ref"), x.getAs("alt"), x.getAs("indel"))))
-      .repartitionAndSortWithinPartitions(binPartitioner)
+    val variantsRDD :RDD[(Int,SwapDataThin)]= variants.map(x => (x.getAs("pos").toString.toInt,SwapDataThin(x.getAs("pos"), x.getAs("ref"), x.getAs("alt"), x.getAs("indel")))).rdd.repartitionAndSortWithinPartitions(binPartitioner)
     //it might be the issue, taking all in memory
     val results = variantsRDD.zipPartitions(bandsRDD)(intersectBands).map(x => SwapData(x.pos, x.end_pos, x.ref, x.alt,  x.Indel, x.sampleId, x.gq, x.dp, x.gt, x.ad))
     val res1 = results.map(a => Variant(a.pos, a.end_pos, a.ref, a.alt,  a.Indel,
       Sample("0/0", a.dp, a.gq, "", a.ad, false, a.sampleId),
       List(),
       Predictions("", 0.0, "", "", 0.0, "", "", "", "", "", 0.0,"",""),
-      Populations(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0)))
-      .toDF.save(destination + "/chrom=" + chromList + "/band=" + banda._2.toString)
+      Populations(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0))).toDS.write.parquet(destination + "/chrom=" + chromList + "/band=" + banda._2.toString)
 
   }
 

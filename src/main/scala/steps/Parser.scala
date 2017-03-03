@@ -179,7 +179,7 @@ object Parser {
       .where(rawData("pos") >=chromBands._1)
       .where(rawData("pos") < chromBands._2).flatMap(a => sampleParser(a(0), a(1), a(2), a(3), a(6), a(7), a(8), a(9), chrom)).toDF()
     //multialleli on remove .where(parsedData("Sample.multiallelic")===false)
-    parsedData.where(parsedData("Sample.multiallelic")===false).where(parsedData("Sample.dp")>7).where(parsedData("Sample.gq")>19).write.parquet(destination+"/band="+chromBands._2.toString)
+    parsedData.where(parsedData("Sample.multiallelic")===false).where(parsedData("Sample.dp")>7).where(parsedData("Sample.gq")>19).write.parquet(destination+"/chrom="+chrom+"/band="+chromBands._2.toString)
 
   }
 

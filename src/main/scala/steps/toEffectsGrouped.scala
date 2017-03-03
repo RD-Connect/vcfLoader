@@ -12,7 +12,7 @@ object toEffectsGrouped{
     groupedSessions.agg(Map("sessionId"->"collect_list")).take(1)
 
      */
-    umdAnnotated.where(umdAnnotated("chrom") === chromList.toInt)
+    umdAnnotated
       .where(umdAnnotated("pos") >= banda._1)
       .where(umdAnnotated("pos") < banda._2)
      .where(umdAnnotated("pos") !== 0)

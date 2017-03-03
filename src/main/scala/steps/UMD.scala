@@ -38,7 +38,7 @@ OR effectsExploded.effect_impact == 'LOW') """)//.select("chrom","pos","ref","al
 
   def annotated(sqlContext :org.apache.spark.sql.hive.HiveContext, parsedSample :org.apache.spark.sql.DataFrame, UMDannotations :org.apache.spark.sql.DataFrame,destination :String, chrom:String)={
     //set .where(parsedData("Sample.multiallelic")===false)
-    val ParsedSampleUnique=parsedSample.filter(parsedSample("Sample.multiallelic")===false).filter(parsedSample("chrom")===chrom).select("pos","ref","alt","indel","effects","predictions","populations").distinct
+    val ParsedSampleUnique=parsedSample.filter(parsedSample("Sample.multiallelic")===false).select("pos","ref","alt","indel","effects","predictions","populations").distinct
     ParsedSampleUnique.registerTempTable("parsed")
     //take only unique
     val UMDannotationsFiltered = UMDannotations.filter(UMDannotations("chromUMD")===chrom.toInt)

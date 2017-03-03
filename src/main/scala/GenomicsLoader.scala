@@ -117,13 +117,13 @@ object GenomicsLoader {
         val loaded= if (configuration.getString("alreadyLoaded")!="") configuration.getString("alreadyLoaded")
         else destination
         println ("loaded path  is"+loaded)
-        var rawData = sqlContext.load(loaded+"/loaded/chrom="+1)
+        var rawData = sqlContext.load(loaded+"/loaded/chrom="+ch)
         for (band <- due) yield {
           steps.Parser.main(sqlContext, rawData, destination + "/parsedSamples/",ch, band,repartitions)
         }
       }
       if (pipeline.contains("umd.get")) {
-        val parsedSample = sqlContext.load(destination + "/parsedSamples")
+        val parsedSample = sqlContext.load(destination + "/parsedSamples/chrom="+ch)
         steps.umd.prepareInput(sqlContext, parsedSample, destination + "/umd",ch)
 
       }
@@ -134,7 +134,7 @@ object GenomicsLoader {
       if (pipeline.contains("umd.join")) {
         val umdAnnotated= if (configuration.getString("umdAnnotated")!="") configuration.getString("umdAnnotated")
         else destination
-        val parsedSample = sqlContext.load(destination + "/parsedSamples")
+        val parsedSample = sqlContext.load(destination + "/parsedSamples/chrom="+ch)
         val UMDannotation = sqlContext.load(umdAnnotated + "/umdAnnotated").select("pos","ref","alt","umd","chrom")
           .withColumnRenamed("pos","posUMD")
           .withColumnRenamed("chrom","chromUMD")
@@ -171,7 +171,7 @@ object GenomicsLoader {
 
       }
       if (pipeline.contains("effectsGroupUMD")) {
-        val umdAnnotated = sqlContext.load(destination + "/effectsUMD")
+        val umdAnnotated = sqlContext.load(destination + "/effectsUMD/chrom="+ch)
         for ( band <- due) yield {
           steps.toEffectsGrouped.main(sqlContext, umdAnnotated, destination + "/EffectsFinal", ch.toString, band)
         }

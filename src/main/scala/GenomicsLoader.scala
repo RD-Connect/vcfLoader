@@ -116,8 +116,8 @@ object GenomicsLoader {
 
         val loaded= if (configuration.getString("alreadyLoaded")!="") configuration.getString("alreadyLoaded")
         else destination
-
-        var rawData = sqlContext.load(loaded+"/loaded/chrom"+1)
+        println ("loaded path  is"+loaded)
+        var rawData = sqlContext.load(loaded+"/loaded/chrom="+1)
         for (band <- due) yield {
           steps.Parser.main(sqlContext, rawData, destination + "/parsedSamples/",ch, band,repartitions)
         }

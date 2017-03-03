@@ -119,7 +119,7 @@ object GenomicsLoader {
 
         var rawData = sqlContext.load(loaded+"/loaded")
         for (band <- due) yield {
-          steps.Parser.main(sqlContext, rawData, destination + "/parsedSamples",ch, band,repartitions)
+          steps.Parser.main(sqlContext, rawData, destination + "/parsedSamples/chrom="+ch,ch, band,repartitions)
         }
       }
       if (pipeline.contains("umd.get")) {

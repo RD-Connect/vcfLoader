@@ -24,7 +24,7 @@ val samples = Samples
       .where(Annotations("chrom")===chromList.toInt)
 
   annotations.join(samples, annotations("pos") === samples("_1") && annotations("ref") === samples("_2") && annotations("alt") === samples("_3"), "left")
-    .select("_1","_2","_3","_4","_5","_c4","_c5","_c6")
+    .select("_1","_2","_3","_4","samples","_5","_6","_7")
     .withColumnRenamed("_1","pos")
     .withColumnRenamed("_2","ref")
     .withColumnRenamed("_3","alt")

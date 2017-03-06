@@ -39,11 +39,10 @@ object toEffectsGrouped{
               (   x(0).toString.toInt,
                   x(1).toString,
                   x(2).toString,
-                  x(3).toString,
-                  x(4).toString.toBoolean,
-                  x(5).asInstanceOf[collection.mutable.WrappedArray[Map[String,String]]].toSet.toArray,
-                  x(6).asInstanceOf[collection.mutable.WrappedArray[Map[String,Double]]].toSet.toArray,
-                  x(7).asInstanceOf[collection.mutable.WrappedArray[Map[String,String]]].toSet.toArray))
+                  x(3).toString.toBoolean,
+                  x(4).asInstanceOf[collection.mutable.WrappedArray[Map[String,String]]].toSet.toArray,
+                  x(5).asInstanceOf[collection.mutable.WrappedArray[Map[String,Double]]].toSet.toArray,
+                  x(6).asInstanceOf[collection.mutable.WrappedArray[Map[String,String]]].toSet.toArray))
           .write.parquet(destination+"/chrom="+chromList+"/band="+banda._2.toString)
   }
 }

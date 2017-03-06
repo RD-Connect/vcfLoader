@@ -29,10 +29,9 @@ val samples = Samples
     .withColumnRenamed("_2","ref")
     .withColumnRenamed("_3","alt")
     .withColumnRenamed("_4","indel")
-    .withColumnRenamed("_5","samples")
-    .withColumnRenamed("_c4","effs")
-    .withColumnRenamed("_c5","populations")
-    .withColumnRenamed("_c6","predictions")
+    .withColumnRenamed("_5","effs")
+    .withColumnRenamed("_6","populations")
+    .withColumnRenamed("_7","predictions")
     .write.parquet(destination+"/chrom="+chromList)//+"/band="+banda._2.toString)
 
 }

@@ -178,14 +178,23 @@ object GenomicsLoader {
       }
       if (pipeline.contains("variants")) {
         val Annotations = sqlContext.load(destination + "/EffectsFinal")
+          .withColumnRenamed("_1","pos2")
+          .withColumnRenamed("_2","ref2")
+          .withColumnRenamed("_3","alt2")
+          .withColumnRenamed("_4","indel2")
+          .withColumnRenamed("_5","effs")
+          .withColumnRenamed("_6","populations")
+          .withColumnRenamed("_7","predictions")
+
+
+
+        val Samples = sqlContext.load(destination + "/samples")
           .withColumnRenamed("_1","pos")
           .withColumnRenamed("_2","ref")
           .withColumnRenamed("_3","alt")
           .withColumnRenamed("_4","indel")
           .withColumnRenamed("_5","samples")
 
-
-        val Samples = sqlContext.load(destination + "/samples")
         steps.toVariant.main(sc, Samples, Annotations, destination + "/variants", ch.toString, (0, 0))
 
       }

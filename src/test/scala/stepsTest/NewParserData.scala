@@ -233,7 +233,7 @@ class NewParserData extends FlatSpec with Matchers {
   }
   "sample_parser 0/1 position " should "get" in
     {
-      val pos:Any="135237166" 
+      val pos:Any="135237166"
       val ID:Any="."
       val ref:Any="G"
       val alt:Any="A,<NON_REF>"
@@ -275,6 +275,18 @@ class NewParserData extends FlatSpec with Matchers {
     sift_score.map(x=> removedot(x,0)).min should be  (1.0)
     sift_pred_rules(sift_pred) should  be  ("T")
     sift_pred_rules(List()) should be ("")
+  }
+
+  "clinvar filter " should "get" in {
+    val clinvar_1="CLNSIG=2|0"
+    clinvar_rules("2|0") should be("")
+    clinvar_rules("5|2|0") should be("5")
+    clinvar_rules("3|4|0") should be("4")
+    clinvar_rules("5|4|0") should be("9")
+    clinvar_rules("") should be("")
+
+
+
   }
 
 }

@@ -112,7 +112,7 @@ object Parser {
     val phyloP46way_placental = getter(idMap, "dbNSFP_phyloP46way_placental")
     val GERP_RS = getter(idMap, "dbNSFP_GERP___RS")
     val SiPhy_29way_pi = getter(idMap, "dbNSFP_SiPhy_29way_pi")
-    val CADD_phred = getter(idMap, "dbNSFP_CADD_phred")
+    val CADD_phred = getter(idMap, "CADD13_PHRED")
     val esp6500_ea = getter(idMap, "dbNSFP_ESP6500_EA_AF")
     val esp6500_aa = getter(idMap, "dbNSFP_ESP6500_AA_AF")
     val exac = getter(idMap, ";ExAC_AF")

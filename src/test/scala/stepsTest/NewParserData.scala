@@ -233,7 +233,7 @@ class NewParserData extends FlatSpec with Matchers {
   }
   "sample_parser 0/1 position " should "get" in
     {
-      val pos:Any="135237166"
+      val pos:Any="135237166" 
       val ID:Any="."
       val ref:Any="G"
       val alt:Any="A,<NON_REF>"
@@ -242,7 +242,7 @@ class NewParserData extends FlatSpec with Matchers {
       val sample:Any="0/1:7,3,0:10:58:58,0,209,79,218,297:2,5,2,1"
       sampleParser( pos,ID, ref, alt, info1, format, sample,"prova","1")(0).populations should be (Populations(0.682,0.3307,0.191,0.5839,0.6807,0.5201,0.601))
       sampleParser( pos,ID, ref, alt, info1, format, sample,"prova","1")(0).effects.size should be (8 )
-      sampleParser( pos,ID, ref, alt, info1, format, sample,"prova","1")(0).predictions.CADD_phred should be (12.7899)
+      sampleParser( pos,ID, ref, alt, info1, format, sample,"prova","1")(0).predictions.CADD_phred should be (24.0)
       sampleParser( pos,ID, ref, alt, info1, format, sample,"prova","1")(0).predictions.clinvar should be ("")
 
     }

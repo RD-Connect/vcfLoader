@@ -35,7 +35,7 @@ object Data {
             "functional_class" typed StringType index "no",
             "gene_coding" typed StringType index "not_analyzed",
             "gene_name" typed StringType index "not_analyzed",
-            "transcript_biotype" typed StringType index "no",
+            "transcript_biotype" typed StringType index "not_analyzed",
             "transcript_id" typed StringType index "not_analyzed"
             ),
           "predictions" nested(

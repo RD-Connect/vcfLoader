@@ -105,11 +105,11 @@ object Parser {
 
   def clinvar_rules(value:String):String={
     var result=""
-    val splitted=value.split("|")
+    val splitted=value.split("\\|")
     if (splitted.contains("5") && splitted.contains("4")) result="9"
     else if (splitted.contains("5")) result="5"
     else if (splitted.contains("4")) result="4"
-    else if (splitted.length >0)    "0"
+    else if (splitted.length >1)   result= "0"
     result
 
   }

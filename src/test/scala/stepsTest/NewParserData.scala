@@ -279,11 +279,12 @@ class NewParserData extends FlatSpec with Matchers {
 
   "clinvar filter " should "get" in {
     val clinvar_1="CLNSIG=2|0"
-    clinvar_rules("2|0") should be("")
+    clinvar_rules("2|0") should be("0")
     clinvar_rules("5|2|0") should be("5")
     clinvar_rules("3|4|0") should be("4")
     clinvar_rules("5|4|0") should be("9")
     clinvar_rules("") should be("")
+    clinvar_rules("2|255|0|1|6") should be ("0")
 
 
 

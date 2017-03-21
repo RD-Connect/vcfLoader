@@ -283,11 +283,29 @@ class NewParserData extends FlatSpec with Matchers {
     clinvar_rules("5|2|0") should be("5")
     clinvar_rules("3|4|0") should be("4")
     clinvar_rules("5|4|0") should be("9")
+    clinvar_rules("1|4|0") should be("4")
     clinvar_rules("") should be("")
     clinvar_rules("2|255|0|1|6") should be ("0")
 
 
 
   }
+  "clinvar CLNACC " should "get" in {
+    val pos:Any="126093991"
+    val ID:Any="rs9422807"
+    val ref:Any="T"
+    val alt:Any="C,<NON_REF>"
+    val info1:Any="DP=63;ExcessHet=3.0103;MLEAC=2,0;MLEAF=1.00,0.00;MQ0=0;RAW_MQ=226800.00;ExAC_AF=0.853,.;ExAC_AF_POPMAX=9.545e-01,.;ASP;CAF=0.1342,0.8658;CLNACC=RCV000153614.3;CLNALLE=1;CLNDBN=not_specified;CLNDSDB=MedGen;CLNDSDBID=CN169374;CLNHGVS=NC_000010.10:g.126093991T>C;CLNORIGIN=1;CLNREVSTAT=single;CLNSIG=2;COMMON=1;G5;GENEINFO=OAT:4942;GNO;HD;INT;KGPhase1;KGPhase3;RS=9422807;RSPOS=126093991;SAO=0;SLO;SSR=0;VC=SNV;VLD;VP=0x05010008000515053f000100;WGT=1;dbSNPBuildID=119;ANN=C|upstream_gene_variant|MODIFIER|OAT|ENSG00000065154|transcript|ENST00000471127|processed_transcript||n.-2086A>G|||||2086|,C|downstream_gene_variant|MODIFIER|OAT|ENSG00000065154|transcript|ENST00000476917|processed_transcript||n.*1934A>G|||||1934|,C|downstream_gene_variant|MODIFIER|OAT|ENSG00000065154|transcript|ENST00000490096|processed_transcript||n.*3400A>G|||||3400|,C|downstream_gene_variant|MODIFIER|OAT|ENSG00000065154|transcript|ENST00000492376|processed_transcript||n.*3471A>G|||||3471|,C|intron_variant|MODIFIER|OAT|ENSG00000065154|transcript|ENST00000368845|protein_coding|5/9|c.648+14A>G||||||,C|intron_variant|MODIFIER|OAT|ENSG00000065154|transcript|ENST00000539214|protein_coding|4/8|c.234+14A>G||||||,C|intron_variant|MODIFIER|OAT|ENSG00000065154|transcript|ENST00000467675|processed_transcript|4/6|n.449+14A>G||||||,C|intron_variant|MODIFIER|OAT|ENSG00000065154|transcript|ENST00000483711|processed_transcript|1/1|n.494+14A>G||||||"
+    val format:Any="GT:AD:DP:GQ:PL:SB"
+    val sample:Any="1/1:0,62,0:62:99:2334,186,0,2334,186,2334:0,0,45,17"
+
+    val rs = getterRS(ID.toString)
+    rs(0) should be ("rs9422807")
+    sampleParser( pos,ID, ref, alt, info1, format, sample,"prova","1")(0).predictions.clnacc should be("RCV000153614.3")
+
+
+
+  }
+
 
 }

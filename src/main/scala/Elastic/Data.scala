@@ -52,6 +52,7 @@ object Data {
             "UMD" typed StringType index "not_analyzed",
             "clinvar" typed StringType index "no",
             "clinvar_filter" typed StringType index "not_analyzed",
+            "clnacc" typed StringType index "no",
             "rs" typed StringType index "not_analyzed"
             ),
           "populations" nested(

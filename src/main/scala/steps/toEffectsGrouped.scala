@@ -35,7 +35,7 @@ object toEffectsGrouped{
  array(collect(map('sift_pred', predictions.SIFT_pred, 'sift_score', predictions.SIFT_score, 'polyphen2_hvar_pred', predictions.polyphen2_hvar_pred,
  'pp2', predictions.pp2, 'polyphen2_hvar_score', predictions.polyphen2_hvar_score, 'mutationtaster_pred', predictions.MutationTaster_pred,
  'mt', predictions.mt,'phylop46way_placental', predictions.phyloP46way_placental, 'gerp_rs', predictions.GERP_RS, 'siphy_29way_pi', predictions.SiPhy_29way_pi,
-  'cadd_phred', predictions.CADD_phred , 'UMD', IF(umd is NULL, '', umd), 'clinvar', predictions.clinvar, 'clinvar_filter', predictions.clinvar_filter, 'rs', predictions.rs))[0]) from UMD  group by pos,ref,alt,indel""").map(x=>
+  'cadd_phred', predictions.CADD_phred , 'UMD', IF(umd is NULL, '', umd), 'clinvar', predictions.clinvar, 'clinvar_filter', predictions.clinvar_filter,'clnacc', predictions.clnacc , 'rs', predictions.rs))[0]) from UMD  group by pos,ref,alt,indel""").map(x=>
               (   x(0).toString.toInt,
                   x(1).toString,
                   x(2).toString,

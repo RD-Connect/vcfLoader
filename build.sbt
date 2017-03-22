@@ -25,8 +25,8 @@ libraryDependencies ++= Seq(                             "com.google.guava" % "g
   "com.sksamuel.elastic4s" %% "elastic4s-core" % "2.4.0",
   "org.elasticsearch" % "elasticsearch-spark-20_2.11" % "5.0.1",
   "org.elasticsearch" % "elasticsearch" % "2.4.0",
-  "com.typesafe" % "config" % "1.3.0",
-  "org.elasticsearch" % "elasticsearch" % "2.1.2"
+  "com.typesafe" % "config" % "1.3.0"
+//  "org.elasticsearch" % "elasticsearch" % "2.4.2"
   //   "org.apache.lucene" % "lucene-core" % "5.4.1"
 )
 

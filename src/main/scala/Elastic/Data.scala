@@ -5,7 +5,7 @@ import com.sksamuel.elastic4s.ElasticDsl._
 import com.sksamuel.elastic4s.mappings.FieldType._
 import org.elasticsearch.common.settings.Settings
 import com.sksamuel.elastic4s.ElasticsearchClientUri
-//  import org.elasticsearch.common.settings.ImmutableSettings
+import org.elasticsearch.client.transport.TransportClient
 
 
 object Data {
@@ -15,6 +15,7 @@ object Data {
     val settings = Settings.settingsBuilder().put("cluster.name", "elasticsearch").build()
     val uri = ElasticsearchClientUri("elasticsearch://"+host+":"+port)
     val client = ElasticClient.remote(settings, uri)
+    //val client= TransportClient.builder().settings(settings).build()
     if (action == "create") {
       client.execute {
         create index index_name shards 9 replicas 1 mappings (version as(
@@ -78,9 +79,9 @@ object Data {
       }
     }
     if (action == "delete") {
-      client.execute {
+     /* client.execute {
         delete index index_name
-      }
+      }*/
     }
     //codon_changes twice
 

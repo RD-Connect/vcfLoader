@@ -22,9 +22,6 @@ libraryDependencies ++= Seq(
   "org.apache.spark" %% "spark-catalyst" % "2.0.1" % "provided" ,
   "org.scalatest" % "scalatest_2.11" % "2.2.4" % "test" ,
   "org.elasticsearch" % "elasticsearch" % "2.4.0",
-  //"org.bdgenomics.adam" % "adam-core_2.10" % "0.17.1",
-  //"com.sksamuel.elastic4s" % "elastic4s-core_2.10" % "2.2.1",
-  "com.sksamuel.elastic4s" %% "elastic4s-core" % "2.4.0",
   "org.elasticsearch" % "elasticsearch-spark-20_2.11" % "5.0.1",
   "com.typesafe" % "config" % "1.3.0"
 //  "org.elasticsearch" % "elasticsearch" % "2.4.2"

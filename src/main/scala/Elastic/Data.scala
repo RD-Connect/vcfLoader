@@ -1,10 +1,7 @@
 package Elastic
 
-import com.sksamuel.elastic4s.ElasticClient
-import com.sksamuel.elastic4s.ElasticDsl._
-import com.sksamuel.elastic4s.mappings.FieldType._
+
 import org.elasticsearch.common.settings.Settings
-import com.sksamuel.elastic4s.ElasticsearchClientUri
 import org.elasticsearch.client.transport.TransportClient
 import play.api.Play.current
 import play.api.libs.ws._
@@ -23,8 +20,6 @@ object Data {
   def mapping(sparkContext: org.apache.spark.SparkContext, index_name: String, version: String, host: String, port: Int, action: String):String = {
     //val settings = Settings.s   .put("cluster.name", "myClusterName").build()
 
-    val settings = Settings.settingsBuilder().put("cluster.name", "elasticsearch").build()
-    val uri = ElasticsearchClientUri("elasticsearch://"+host+":"+port)
     val env = Environment(new java.io.File("."), this.getClass.getClassLoader, Mode.Dev)
     val context = ApplicationLoader.createContext(env)
     val loader = ApplicationLoader(context)

@@ -200,10 +200,10 @@ object GenomicsLoader {
       }
 
       if (pipeline.contains("deleteIndex")) {
-        Elastic.Data.mapping(index, version, elasticsearchHost, elasticsearchTransportPort.toInt, "delete")
+        Elastic.Data.mapping(sc,index, version, elasticsearchHost, elasticsearchIPPort.toInt, "delete")
       }
       if (pipeline.contains("createIndex")) {
-        Elastic.Data.mapping(index, version, elasticsearchHost, elasticsearchTransportPort.toInt, "create")
+        Elastic.Data.mapping(sc,index, version, elasticsearchHost, elasticsearchIPPort.toInt, "create")
       }
       if (pipeline.contains("toElastic")) {
         val variants = sqlContext.load(destination + "/variants")

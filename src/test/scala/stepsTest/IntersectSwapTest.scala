@@ -24,10 +24,10 @@ class IntersectSwapTest extends FlatSpec with Matchers {
   val destination =configuration.getString("destination")
   "intersectSwap" should  "intersect points against range " in withContext {
     (sc, sqlContext) => {
-      val variants= List(SwapDataThin(16915619,"C","C","rs",false),SwapDataThin(16915621,"C","C","rs",false),SwapDataThin(16915623,"C","C","rs",false)).map(x=>(x.pos,x))
-      val bands = List(SwapData(16915614,16915630,"C","<NON_REF>","rs",false,"sample1",10,10,"0/0","aad"),
-        SwapData(16915619,16915637,"C","<NON_REF>","rs",false,"sample2",10,10,"0/0","aad"),
-        (SwapData(16915619,16915621,"C","<NON_REF>","rs",false,"sample3",10,10,"0/0","aad"))).map(x=>(x.pos,x))
+      val variants= List(SwapDataThin(16915619,"C","C",false),SwapDataThin(16915621,"C","C",false),SwapDataThin(16915623,"C","C",false)).map(x=>(x.pos,x))
+      val bands = List(SwapData(16915614,16915630,"C","<NON_REF>",false,"sample1",10,10,"0/0","aad"),
+        SwapData(16915619,16915637,"C","<NON_REF>",false,"sample2",10,10,"0/0","aad"),
+        (SwapData(16915619,16915621,"C","<NON_REF>",false,"sample3",10,10,"0/0","aad"))).map(x=>(x.pos,x))
       val res = intersectBands(variants.toIterator,bands.toIterator).toList
       assert(res.size === 6)
 

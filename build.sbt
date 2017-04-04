@@ -1,28 +1,36 @@
+import sbtassembly.AssemblyPlugin.autoImport._
+
+
 name := "from gvcf to ElasticSearch"
 
 version := "1.0"
 
 fork := true
 
-val sparkVers = "1.6.1"
+val sparkVers = "2.0.1"
 
 parallelExecution in Test := false
 
-scalaVersion := "2.10.4"
+scalaVersion := "2.11.8"
 
-libraryDependencies ++= Seq("org.apache.spark" %% "spark-core" % "1.6.0" % "provided" ,
-				                    "org.apache.spark" %% "spark-sql" % "1.6.0" % "provided" ,
-                            "org.apache.spark" %% "spark-streaming" % "1.6.0" % "provided" ,
-                            "org.apache.spark" %% "spark-hive" % "1.6.0" % "provided" ,
-                            "org.apache.spark" %% "spark-catalyst" % "1.6.0" % "provided",
-                            "org.scalatest" % "scalatest_2.10" % "2.2.4" % "test" ,
-                            //"org.bdgenomics.adam" % "adam-core_2.10" % "0.17.1",
-                            //"com.sksamuel.elastic4s" % "elastic4s-core_2.10" % "2.2.1",
-                             "com.sksamuel.elastic4s" %% "elastic4s" % "1.5.5",
-                            "org.elasticsearch" % "elasticsearch-spark_2.10" % "2.2.0" ,
-                         //    "org.elasticsearch" % "elasticsearch" % "2.2.1",
-                             "com.typesafe" % "config" % "1.3.0"
+libraryDependencies ++= Seq(
+  "com.google.guava" % "guava" % "18.0",
+  "org.apache.spark" %% "spark-core" % "2.0.1"   % "provided",
+  "org.apache.spark" %% "spark-sql" % "2.0.1" % "provided",
+  "org.apache.spark" %% "spark-streaming" % "2.0.1" % "provided",
+  "org.apache.spark" %% "spark-hive" % "2.0.1" % "provided" ,
+  "org.apache.spark" %% "spark-catalyst" % "2.0.1" % "provided" ,
+  "org.scalatest" % "scalatest_2.11" % "2.2.4" % "test" ,
+  "org.elasticsearch" % "elasticsearch" % "2.4.0",
+  "org.elasticsearch" % "elasticsearch-spark-20_2.11" % "5.0.1",
+  "com.typesafe" % "config" % "1.3.0"
+//  "org.elasticsearch" % "elasticsearch" % "2.4.2"
   //   "org.apache.lucene" % "lucene-core" % "5.4.1"
+)
+libraryDependencies += "com.typesafe.play" %% "play-ws" % "2.4.3"
+
+assemblyShadeRules in assembly := Seq(
+  ShadeRule.rename("com.google.**" -> "shadeproto.@1").inAll
 )
 
 // Skip tests when assembling fat JAR
@@ -61,7 +69,6 @@ resolvers ++= Seq(
 
 mergeStrategy in assembly <<= (mergeStrategy in assembly) { (old) =>
   {
-    case m if m.toLowerCase.endsWith("manifest.mf") => MergeStrategy.discard
     case m if m.startsWith("META-INF") => MergeStrategy.discard
     case PathList("javax", "servlet", xs @ _*) => MergeStrategy.first
     case PathList("org", "apache", xs @ _*) => MergeStrategy.first

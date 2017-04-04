@@ -23,13 +23,10 @@ val samples = Samples
     val annotations = Annotations
       .where(Annotations("chrom")===chromList.toInt)
 
-  annotations.join(samples, annotations("pos") === samples("_1") && annotations("ref") === samples("_2") && annotations("alt") === samples("_3"), "right")
-    .select("pos","ref","alt","rs","indel","_6","_c5","_c6","_c7")
-    .withColumnRenamed("_6","samples")
-    .withColumnRenamed("_c5","effs")
-    .withColumnRenamed("_c6","populations")
-    .withColumnRenamed("_c7","predictions")
-    .save(destination+"/chrom="+chromList)//+"/band="+banda._2.toString)
+  annotations.join(samples, annotations("pos2") === samples("pos") && annotations("ref2") === samples("ref") && annotations("alt2") === samples("alt"), "left")
+    .select("pos","ref","alt","indel","samples","effs","populations","predictions")
+    .write.parquet(destination+"/chrom="+chromList)//+"/band="+banda._2.toString)
+
 
 }
 }

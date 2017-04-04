@@ -46,6 +46,8 @@ object GenomicsLoader {
     val conf = new SparkConf().setAppName("Genomics-ETL")
     val sc = new SparkContext(conf)
     val sqlContext = new org.apache.spark.sql.hive.HiveContext(sc)
+    sqlContext.sql( """CREATE TEMPORaRY function collect AS 'brickhouse.udf.collect.CollectUDAF'""")
+
     println("arguments are "+args)
     import sqlContext.implicits._
     //configuration data, in the future will be dropped into a config file
@@ -98,21 +100,12 @@ object GenomicsLoader {
     println("-------------------------------------pipeline is "+pipeline)
     println("-------------------------------------chrom is "+chromList)
     println("-------------------------------------desitnation is "+destination)
-def split(files:List[String],size:Int)=
-     { 
-var cycles = files.length/size
-      Range(0,cycles+1).map(x=> 
-      {
-      //println(files.drop(size*x).take(size))
-            steps.gzToParquet.main(sc, origin, chromList, files.drop(size*x).take(size), destination + "/loaded",repartitions,checkPointDir) 
-      }
-      ) 
-     }   
+
 
 
 
     if (pipeline.contains("load")) {
-    split(files,100)
+      splitUpload(files,100,sc, origin, chromList,destination,repartitions,checkPointDir)
     }
     for (ch <- chromList) yield {
 
@@ -121,20 +114,16 @@ var cycles = files.length/size
 
       if (pipeline.contains("parser")) {
 
-        var rawData = sqlContext.load("/user/dpiscia/V4.3.2/loaded").unionAll(sqlContext.load("/user/dpiscia/V6.0.2/loaded")).unionAll(sqlContext.load("/user/dpiscia/1.0.1/loaded")).unionAll(sqlContext.load("/user/dpiscia/1.0.2/loaded")).unionAll(sqlContext.load("/user/dpiscia/1.0.3/loaded")).unionAll(sqlContext.load("/user/dpiscia/1.0.4/loaded"))
-        //var rawData = sqlContext.load("/user/dpiscia/1.0.3/loaded")
-        if ( (ch=="23") || (ch=="24") || (ch=="25")) {
-          rawData= sqlContext.load("/user/dpiscia/1.0.3/loaded").unionAll(sqlContext.load("/user/dpiscia/1.0.4/loaded"))
-        }
-
-
-
+        val loaded= if (configuration.getString("alreadyLoaded")!="") configuration.getString("alreadyLoaded")
+        else destination
+        println ("loaded path  is"+loaded)
+        var rawData = sqlContext.load(loaded+"/loaded/chrom="+ch)
         for (band <- due) yield {
-          steps.Parser.main(sqlContext, rawData, destination + "/parsedSamples",ch, band,repartitions)
+          steps.Parser.main(sqlContext, rawData, destination + "/parsedSamples/",ch, band,repartitions)
         }
       }
       if (pipeline.contains("umd.get")) {
-        val parsedSample = sqlContext.load(destination + "/parsedSamples")
+        val parsedSample = sqlContext.load(destination + "/parsedSamples/chrom="+ch)
         steps.umd.prepareInput(sqlContext, parsedSample, destination + "/umd",ch)
 
       }
@@ -145,7 +134,7 @@ var cycles = files.length/size
       if (pipeline.contains("umd.join")) {
         val umdAnnotated= if (configuration.getString("umdAnnotated")!="") configuration.getString("umdAnnotated")
         else destination
-        val parsedSample = sqlContext.load(destination + "/parsedSamples")
+        val parsedSample = sqlContext.load(destination + "/parsedSamples/chrom="+ch)
         val UMDannotation = sqlContext.load(umdAnnotated + "/umdAnnotated").select("pos","ref","alt","umd","chrom")
           .withColumnRenamed("pos","posUMD")
           .withColumnRenamed("chrom","chromUMD")
@@ -182,23 +171,39 @@ var cycles = files.length/size
 
       }
       if (pipeline.contains("effectsGroupUMD")) {
-        val umdAnnotated = sqlContext.load(destination + "/effectsUMD")
+        val umdAnnotated = sqlContext.load(destination + "/effectsUMD/chrom="+ch)
         for ( band <- due) yield {
           steps.toEffectsGrouped.main(sqlContext, umdAnnotated, destination + "/EffectsFinal", ch.toString, band)
         }
       }
       if (pipeline.contains("variants")) {
         val Annotations = sqlContext.load(destination + "/EffectsFinal")
+          .withColumnRenamed("_1","pos2")
+          .withColumnRenamed("_2","ref2")
+          .withColumnRenamed("_3","alt2")
+          .withColumnRenamed("_4","indel2")
+          .withColumnRenamed("_5","effs")
+          .withColumnRenamed("_6","populations")
+          .withColumnRenamed("_7","predictions")
+
+
+
         val Samples = sqlContext.load(destination + "/samples")
+          .withColumnRenamed("_1","pos")
+          .withColumnRenamed("_2","ref")
+          .withColumnRenamed("_3","alt")
+          .withColumnRenamed("_4","indel")
+          .withColumnRenamed("_5","samples")
+
         steps.toVariant.main(sc, Samples, Annotations, destination + "/variants", ch.toString, (0, 0))
 
       }
 
       if (pipeline.contains("deleteIndex")) {
-        Elastic.Data.mapping(index, version, elasticsearchHost, elasticsearchTransportPort.toInt, "delete")
+        Elastic.Data.mapping(sc,index, version, elasticsearchHost, elasticsearchIPPort.toInt, "delete")
       }
       if (pipeline.contains("createIndex")) {
-        Elastic.Data.mapping(index, version, elasticsearchHost, elasticsearchTransportPort.toInt, "create")
+        Elastic.Data.mapping(sc,index, version, elasticsearchHost, elasticsearchIPPort.toInt, "create")
       }
       if (pipeline.contains("toElastic")) {
         val variants = sqlContext.load(destination + "/variants")
@@ -230,4 +235,17 @@ var cycles = files.length/size
     fileLines
   }
 
+  //    split(files,100,sc, origin, chromList,destination,repartitions,checkPointDir)
+  //load files by bacth of size
+  //otherwise run into a spark error
+  def splitUpload(files:List[String],size:Int,sc : org.apache.spark.SparkContext,origin:String,chromList:List[String],destination:String,repartitions:Int,checkPointDir:String)=
+  {
+    var cycles = files.length/size
+    Range(0,cycles+1).map(x=>
+    {
+      //println(files.drop(size*x).take(size))
+      steps.gzToParquet.main(sc, origin, chromList, files.drop(size*x).take(size), destination + "/loaded",repartitions,checkPointDir)
+    }
+    )
+  }
 }

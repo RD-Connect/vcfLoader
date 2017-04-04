@@ -20,7 +20,7 @@ import steps.Parser.{ Variant,Sample,Populations,Predictions,FunctionalEffect, g
 
 class ParserData extends FlatSpec with Matchers {
 
-  val ID:Any="RS=rs10267;G5;dbSNPBuildID=52;GMAF=0.158;SAO=0;esp5400_all=0.787972;esp5400_ea=0.920513;esp5400_aa=0.539058;ExAC_AF=0.899;mt=1.0"
+  /*val ID:Any="RS=rs10267;G5;dbSNPBuildID=52;GMAF=0.158;SAO=0;esp5400_all=0.787972;esp5400_ea=0.920513;esp5400_aa=0.539058;ExAC_AF=0.899;mt=1.0"
   val ID2:Any="RS=rs10267;G5;dbSNPBuildID=52;GMAF=0.158;SAO=0;esp5400_all=0.787972;esp5400_ea=0.920513;esp5400_aa=0.539058;ExAC_AF=0.899;mt=1.0;ExAC_AF=0.899"
   val format:Any="GT:AD:DP:GQ:PL:SB"
   val sampleline:Any="0/1:298,219,0:517:99:5648,0,7236,6540,7892,14433:162,136,114,105"
@@ -43,9 +43,9 @@ class ParserData extends FlatSpec with Matchers {
   val (gt,dp,gq,pl,ad) = formatCase(format,sampleline.toString)
   val sampleID:Any="NA12878"
   val anno=annotation_parser(ID.toString,gt)
-  val anno2=annotation_parser(ID.toString,"1/1")
+  val anno2=annotation_parser(ID.toString,"1/1")*/
 
-  "getter" should  "get the RS from a string" in {
+ /* "getter" should  "get the RS from a string" in {
     getter(ID.toString,"RS") should be (List("rs10267"))
 
   }
@@ -145,9 +145,9 @@ class ParserData extends FlatSpec with Matchers {
 
   }
 
-  "sample Parser diploid" should "give the same effects/predictions/populations for 0/1 and 1/1" in {
+  "sample Parser diploid" should "multi give the same effects/predictions/populations for 0/1 and 1/1" in {
 
-    val with01=sampleParser( 1,"RS=rs2306737;G5;G5A;dbSNPBuildID=100;GMAF=0.494274;SAO=0", "A","G,C,<NON_REF>","DP=8;MLEAC=1,0;MLEAF=1.00,0.00;MQ=60.00;MQ0=0;EFF=INTRON(MODIFIER||||147|XG|protein_coding|CODING|ENST00000509484|1|1),INTRON(MODIFIER||||147|XG|protein_coding|CODING|ENST00000509484|1|2),INTRON(MODIFIER||||180|XG|protein_coding|CODING|ENST00000381174|3|1),INTRON(MODIFIER||||180|XG|protein_coding|CODING|ENST00000381174|3|2),INTRON(MODIFIER||||181|XG|protein_coding|CODING|ENST00000426774|3|1),INTRON(MODIFIER||||181|XG|protein_coding|CODING|ENST00000426774|3|2),INTRON(MODIFIER||||195|XG|protein_coding|CODING|ENST00000419513|3|1),INTRON(MODIFIER||||195|XG|protein_coding|CODING|ENST00000419513|3|2)", "GT:AD:DP:GQ:PL:SB",  "1:0,8,0:8:99:224,0,224:0,0,7,1","sampleID","24")
+    val with01=sampleParser( 1,"RS=rs2306737;G5;G5A;dbSNPBuildID=100;GMAF=0.494274;SAO=0", "A","G,C,<NON_REF>","DP=8;MLEAC=1,0;MLEAF=1.00,0.00;MQ=60.00;MQ0=0;EFF=INTRON(MODIFIER||||147|XG|protein_coding|CODING|ENST00000509484|1|1),INTRON(MODIFIER||||147|XG|protein_coding|CODING|ENST00000509484|1|2),INTRON(MODIFIER||||180|XG|protein_coding|CODING|ENST00000381174|3|1),INTRON(MODIFIER||||180|XG|protein_coding|CODING|ENST00000381174|3|2),INTRON(MODIFIER||||181|XG|protein_coding|CODING|ENST00000426774|3|1),INTRON(MODIFIER||||181|XG|protein_coding|CODING|ENST00000426774|3|2),INTRON(MODIFIER||||195|XG|protein_coding|CODING|ENST00000419513|3|1),INTRON(MODIFIER||||195|XG|protein_coding|CODING|ENST00000419513|3|2)", "GT:AD:DP:GQ:PL:SB",  "0/1:0,8,0:8:99:224,0,224:0,0,7,1","sampleID","24")
     with01(0).populations.exac should be (0.899)
 
   }
@@ -188,5 +188,5 @@ class ParserData extends FlatSpec with Matchers {
 
     val gt = "0/1"
     getDiploid(gt)._2 should be(true)
-  }
+  }*/
 }

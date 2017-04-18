@@ -19,7 +19,7 @@ libraryDependencies ++= Seq("org.apache.spark" %% "spark-core" % "2.0.1" % "prov
   //"org.bdgenomics.adam" % "adam-core_2.10" % "0.17.1",
   //"com.sksamuel.elastic4s" % "elastic4s-core_2.10" % "2.2.1",
   "com.sksamuel.elastic4s" %% "elastic4s" % "1.5.5",
-  "org.elasticsearch" % "elasticsearch-spark_2.11" % "2.2.0" ,
+  "org.elasticsearch" % "elasticsearch-spark-20_2.11" % "5.2.0" ,
   //    "org.elasticsearch" % "elasticsearch" % "2.2.1",
   "com.typesafe" % "config" % "1.3.0"
   //   "org.apache.lucene" % "lucene-core" % "5.4.1"

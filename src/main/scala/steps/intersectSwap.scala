@@ -130,7 +130,7 @@ object intersectSwap {
     val res1 = results.map(a => Variant(a.pos, a.end_pos, a.ref, a.alt,  a.Indel,
       Sample("0/0", a.dp, a.gq, "", a.ad, false, a.sampleId),
       List(),
-      Predictions("", 0.0, "", "", 0.0, "", "", "", "", "", 0.0,"",""),
+      Predictions("", 0.0, "", "", 0.0, "", "", "", "", "", 0.0,"","","",""),
       Populations(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0))).toDS.write.parquet(destination + "/chrom=" + chromList + "/band=" + banda._2.toString)
 
   }

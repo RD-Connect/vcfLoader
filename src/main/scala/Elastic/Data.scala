@@ -50,7 +50,9 @@ object Data {
             "sift_score" typed StringType index "no",
             "siphy_29way_pi" typed StringType index "no",
             "UMD" typed StringType index "not_analyzed",
-            "clinvar" typed StringType index "not_analyzed",
+            "clinvar" typed StringType index "no",
+            "clinvar_filter" typed StringType index "not_analyzed",
+            "clnacc" typed StringType index "no",
             "rs" typed StringType index "not_analyzed"
             ),
           "populations" nested(

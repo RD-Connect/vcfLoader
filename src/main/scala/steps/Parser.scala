@@ -52,7 +52,9 @@ object Parser {
                          SiPhy_29way_pi: String,
                          CADD_phred: Double,
                          clinvar:String,
-                          rs:String)
+                         clinvar_filter:String,
+                         clnacc:String,
+                         rs:String)
 
   case class Populations(esp6500_aa: Double,
                          esp6500_ea: Double,
@@ -101,6 +103,17 @@ object Parser {
     else if (list.contains("N")) "N"
     else ""
   }
+
+  def clinvar_rules(value:String):String={
+    var result=""
+    val splitted=value.split("\\|")
+    if (splitted.contains("5") && splitted.contains("4")) result="9"
+    else if (splitted.contains("5")) result="5"
+    else if (splitted.contains("4")) result="4"
+    else if (splitted.length >1)   result= "0"
+    result
+
+  }
   def annotation_parser(idMap: String,rs:String) = {
     val SIFT_pred = getter(idMap, "dbNSFP_SIFT_pred")
     val SIFT_score = getter(idMap, "dbNSFP_SIFT_score")
@@ -121,6 +134,8 @@ object Parser {
     val Gp1_EUR_AF = getter(idMap, "dbNSFP_1000Gp1_EUR_AF")
     val Gp1_AF = getter(idMap, "dbNSFP_1000Gp1_AF")
     val clinvar = getter(idMap,"CLNSIG")
+    val clnacc = getter(idMap,"CLNACC")
+   // val clinvar_filter = clinvar_rules(getter(idMap,"CLNSIG"))
 
 
 
@@ -152,7 +167,9 @@ object Parser {
         SiPhy_29way_pi=getOrEmpty(SiPhy_29way_pi,1),
         CADD_phred=removedot(getOrEmpty(CADD_phred,1),0),
         clinvar=getOrEmpty(clinvar,1),
-         rs=rs),
+        clinvar_filter = clinvar_rules(getOrEmpty(clinvar,1)),
+        clnacc = getOrEmpty(clnacc,1),
+        rs=rs),
         Populations(removedot(getOrEmpty(esp6500_ea,1),4),
           removedot(getOrEmpty(esp6500_aa,1),4),
           removedot(getOrEmpty(Gp1_AFR_AF,1),4),
@@ -195,7 +212,7 @@ object Parser {
 
 
       val anno= if (!x._4 & x._3.toInt==1) annotation_parser(info.toString,rs(0))
-                else ( Predictions("",0.0,"","",0.0,"","","","","",0.0,"",""),Populations(0.0,0.0,0.0,0.0,0.0,0.0,0.0))
+                else ( Predictions("",0.0,"","",0.0,"","","","","",0.0,"","","",""),Populations(0.0,0.0,0.0,0.0,0.0,0.0,0.0))
       //if 0/ what about annotation?? Null Option
       val altGenotype= x._3.toInt
       val altPosition = x._2.split("/")(1).toInt
@@ -208,7 +225,7 @@ object Parser {
       else List[FunctionalEffect]()
 
       altGenotype match{
-        case 0 => Variant(posOK,endOK,ref.toString,x._1,indel,Sample(getDiploid(x._2)._1,dp,gq,pl,ADsplit(ad,gt),x._4,sampleID.toString,getDiploid(x._2)._2),functionalEffs, Predictions("",0.0,"","",0.0,"","","","","",0.0,"",""),Populations(0.0,0.0,0.0,0.0,0.0,0.0,0.0) )
+        case 0 => Variant(posOK,endOK,ref.toString,x._1,indel,Sample(getDiploid(x._2)._1,dp,gq,pl,ADsplit(ad,gt),x._4,sampleID.toString,getDiploid(x._2)._2),functionalEffs, Predictions("",0.0,"","",0.0,"","","","","",0.0,"","","",""),Populations(0.0,0.0,0.0,0.0,0.0,0.0,0.0) )
         case _ => Variant(posOK,endOK,ref.toString,x._1,indel,Sample(getDiploid(x._2)._1,dp,gq,pl,ADsplit(ad,gt),x._4,sampleID.toString,getDiploid(x._2)._2),functionalEffs, anno._1,anno._2 )
 
       }

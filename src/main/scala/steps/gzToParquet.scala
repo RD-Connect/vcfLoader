@@ -31,9 +31,6 @@ object gzToParquet {
   }
 
 
-  //val files = List("E000001")
-  //val chromList = List("X")
-
   def file_to_parquet(sc :org.apache.spark.SparkContext, origin_path: String, destination : String, chrom:String,name:String)=
   {      //remove header
 
@@ -87,9 +84,5 @@ object gzToParquet {
     }
   }
 
-
-  /*file_to_parquet("/user/dpiscia/gvcf10bands/E000010.g.vcf.gz","/user/dpiscia/test/trio","E000010")
-  file_to_parquet("/user/dpiscia/gvcf10bands/E000036.g.vcf.gz","/user/dpiscia/test/trio","E000036")
-  file_to_parquet("/user/dpiscia/gvcf10bands/E000037.g.vcf.gz","/user/dpiscia/test/trio","E000037")*/
 
 }

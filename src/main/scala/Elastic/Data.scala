@@ -32,7 +32,7 @@ object Data {
       //import scala.concurrent.ExecutionContext.Implicits._
 
       val json: JsValue = Json.parse(s"""
-      {"settings":{"index":{"number_of_shards":9,"number_of_replicas":0,"refresh_interval":"1000.ms"}}
+      {"settings":{"index":{"number_of_shards":8,"number_of_replicas":0,"refresh_interval":"1000.ms"}}
         ,"mappings":{"$version"
         :{"_all":{"enabled":false},
         "properties":{"chrom":{"type":"integer","index":"not_analyzed"},

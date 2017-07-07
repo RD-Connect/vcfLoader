@@ -1,0 +1,10 @@
+README
+setup.py
+rdconnect/__init__.py
+rdconnect/config.py
+rdconnect/loadVCF.py
+rdconnect/main.py
+vcfLoader.egg-info/PKG-INFO
+vcfLoader.egg-info/SOURCES.txt
+vcfLoader.egg-info/dependency_links.txt
+vcfLoader.egg-info/top_level.txt

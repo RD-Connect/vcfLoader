@@ -165,8 +165,8 @@ object GenomicsLoader {
         }
       }
       if (pipeline.contains("sampleGroup")) {
-        val rawSample = sqlContext.load(destination + "/parsedSamples")
-        val rawRange = sqlContext.load(destination + "/rangesSwap")
+        val rawSample = sqlContext.load(destination + "/parsedSamples/chrom="+ch)
+        val rawRange = sqlContext.load(destination + "/rangesSwap/chrom="+ch)
         steps.toSampleGrouped.main(sqlContext, rawSample, rawRange, destination + "/samples", ch.toString, (0, 0))
 
       }

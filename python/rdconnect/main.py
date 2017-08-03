@@ -1,7 +1,7 @@
 ## Imports
 
 from pyspark import SparkConf, SparkContext
-from rdconnect import config, loadVCF
+from rdconnect import config, loadVCF , annotations
 import hail
 
 from rdconnect import loadVCF
@@ -19,14 +19,17 @@ def main(hc):
     #hc._jvm.core.vcfToSample.hello()
     destination =  configuration["destination"] + "/" + configuration["version"]
     chrom="1"
-    fileName=chrom+"chrom+".vds
+    fileName="chrom"+chrom+".vds"
     if (configuration["steps"]["loadVCF"]):
         print ("step loadVCF")
         loadVCF.importVCF(hc,configuration["source_path"],destination+"/loaded/"+fileName)
 
     if (configuration["steps"]["annotationVEP"]):
         print ("step loadVCF")
-        loadVCF.annotations.annotationsVEP(hc,destination+"/loaded/"+fileName,destination+"/annotations")
+        print ("source file is "+destination+"/loaded/"+fileName)
+        annotations.annotationsVEP(hc,str(destination+"/loaded/"+fileName),destination+"/annotated/"+fileName)
+        #variants= hc.sqlContext.read.load("Users/dpiscia/RD-repositories/data/output/1.1.0/dataframe/chrom1")
+        #annotations.VEP2(hc,variants)
 
 
 

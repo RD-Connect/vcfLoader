@@ -16,19 +16,19 @@ object toSampleGrouped{
 
 
      val ranges= rawRange //add rs,indel
-     .where(rawRange("chrom")===chromList.toInt)
+    // .where(rawRange("chrom")===chromList.toInt)
      .where(rawRange("sample.gq") > 19)
      .where(rawRange("sample.dp") > 7)
-       .select("chrom","pos","ref","alt","sample.sampleId","sample.gq","sample.dp","sample.gt","sample.ad","indel","sample.multiallelic","sample.diploid")
+       .select("pos","ref","alt","sample.sampleId","sample.gq","sample.dp","sample.gt","sample.ad","indel","sample.multiallelic","sample.diploid")
      // .where(rawRange("band") === banda._2)
 
     val variants=rawSample  //add rs,indel
     .where(rawSample("alt")!=="<NON_REF>")
-    .where(rawSample("chrom")===chromList.toInt)
+   // .where(rawSample("chrom")===chromList.toInt)
     .where(rawSample("sample.gq") > 19)
     .where(rawSample("sample.dp") > 7)
       .where(rawSample("sample.gt")!== "0/0")
-      .select("chrom","pos","ref","alt","sample.sampleId","sample.gq","sample.dp","sample.gt","sample.ad","indel","sample.multiallelic","sample.diploid")
+      .select("pos","ref","alt","sample.sampleId","sample.gq","sample.dp","sample.gt","sample.ad","indel","sample.multiallelic","sample.diploid")
  //   .where(rawSample("pos") >= banda._1)
  //   .where(rawSample("pos") < banda._2)
   

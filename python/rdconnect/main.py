@@ -15,7 +15,7 @@ APP_NAME = "My Spark Application"
 
 def main(hc):
 
-    configuration= config.readConfig("/Users/dpiscia/RD-repositories/vcfLoader2/src/main/resources/config.json")
+    configuration= config.readConfig("/rdconnect/config.json")
     #hc._jvm.core.vcfToSample.hello()
     destination =  configuration["destination"] + "/" + configuration["version"]
     chrom="1"

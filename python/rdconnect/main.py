@@ -29,7 +29,7 @@ def main(hc):
     if (configuration["steps"]["annotationVEP"]):
         print ("step loadVCF")
         print ("source file is "+destination+"/loaded/"+fileName)
-        annotations.annotationsVEP(hc,str(destination+"/loaded/"+fileName),destination+"/annotated/"+fileName)
+        annotations.annotationsVEP(hc,str(destination+"/loaded/"+fileName),destination+"/annotated/"+fileName,configuration["vep"])
         #variants= hc.sqlContext.read.load("Users/dpiscia/RD-repositories/data/output/1.1.0/dataframe/chrom1")
         #annotations.VEP2(hc,variants)
 

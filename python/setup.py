@@ -17,6 +17,7 @@ setup(
     license = "BSD",
     keywords = "e",
     url = "",
+    data_files=[('rdconnect', ['rdconnect/*.json'])]
     packages=['rdconnect'],
     long_description=read('README'),
     classifiers=[

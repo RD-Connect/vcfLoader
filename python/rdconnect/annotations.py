@@ -3,7 +3,7 @@
 def annotationsVEP(hc,source, destination, vepPath):
     variants= hc.read(source)
     print("running vep")
-    varAnnotated= variants.vep(vepPath+"vep.properties")
+    varAnnotated= variants.vep(vepPath)
     varAnnotated.write(destination,overwrite=True)
     #hc._jvm.core.annotations.vep(hc._jhc,"dd")
     #variants =

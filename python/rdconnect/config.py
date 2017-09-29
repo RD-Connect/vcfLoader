@@ -1,6 +1,7 @@
 import json
 
 
-def readConfig(dataRaw):
-        data = json.loads(dataRaw)
-        return data
+def readConfig(config_path):
+    with open(config_path) as data_file:
+        data = json.load(data_file)
+    return data

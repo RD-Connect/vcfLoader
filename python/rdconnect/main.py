@@ -7,7 +7,6 @@ import hail
 from rdconnect import loadVCF
 ## CONSTANTS
 from subprocess import call
-import pkg_resources
 APP_NAME = "My Spark Application"
 
 ##OTHER FUNCTIONS/CLASSES
@@ -15,11 +14,10 @@ APP_NAME = "My Spark Application"
 ## Main functionality
 
 
-
 def main(hc):
     call(["ls", "-l"])
-    configfile =pkg_resources.resource_string(__name__, "rdconnect/config.json")
-    configuration= config.readConfig(configfile)
+
+    configuration= config.readConfig("/home/dpiscia/config.json")
     #hc._jvm.core.vcfToSample.hello()
     destination =  configuration["destination"] + "/" + configuration["version"]
     chrom="1"

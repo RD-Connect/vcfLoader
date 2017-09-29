@@ -13,8 +13,11 @@ APP_NAME = "My Spark Application"
 
 ## Main functionality
 
+
+
 def main(hc):
     call(["ls", "-l"])
+    configfile
     configuration= config.readConfig("./rdconnect/config.json")
     #hc._jvm.core.vcfToSample.hello()
     destination =  configuration["destination"] + "/" + configuration["version"]

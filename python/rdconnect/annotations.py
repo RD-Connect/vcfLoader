@@ -10,7 +10,7 @@ def annotationsVEP(hc,source, destination):
 
 
 def dbnsfpTAble(hc,source_path):
-    dbnsfpTable=hc.import_table("/Users/dpiscia/spark/dbs/1.dbNSFP2.9.2a.2000lines.txt").annotate('variant= Variant(`#chr`,`pos(1-coor)`.toInt,`ref`,`alt`)').key_by('variant') \
+    dbnsfpTable=hc.import_table("/Users/dpiscia/spark/dbs/1.dbNSFP2.9.2a.2000lines.txt").annotate('variant= Variant(`#chr`,`pos(1-coor)`.toInt,`ref`,`alt`)').key_by('variant') 
     dbnsfpTable.write("/Users/dpiscia/RD-repositories/data/output/dnsfp.kt",overwrite=True)
 
 

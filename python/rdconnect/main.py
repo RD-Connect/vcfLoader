@@ -6,7 +6,7 @@ import hail
 
 from rdconnect import loadVCF
 ## CONSTANTS
-
+from subprocess import call
 APP_NAME = "My Spark Application"
 
 ##OTHER FUNCTIONS/CLASSES
@@ -14,7 +14,7 @@ APP_NAME = "My Spark Application"
 ## Main functionality
 
 def main(hc):
-
+    call(["ls", "-l"])
     configuration= config.readConfig("./rdconnect/config.json")
     #hc._jvm.core.vcfToSample.hello()
     destination =  configuration["destination"] + "/" + configuration["version"]

@@ -1,4 +1,4 @@
-
+from rdconnect import utils.builFileName
 
 def annotationsVEP(hc,source, destination, vepPath):
     variants= hc.read(source)
@@ -9,7 +9,7 @@ def annotationsVEP(hc,source, destination, vepPath):
     #variants =
 
 
-def dbnsfpTAble(hc,source_path):
+def dbnsfpTAble(hc,sourcePath,destinationPath):
     dbnsfpTable=hc.import_table("/Users/dpiscia/spark/dbs/1.dbNSFP2.9.2a.2000lines.txt").annotate('variant= Variant(`#chr`,`pos(1-coor)`.toInt,`ref`,`alt`)').key_by('variant')
     dbnsfpTable.write("/Users/dpiscia/RD-repositories/data/output/dnsfp.kt",overwrite=True)
 

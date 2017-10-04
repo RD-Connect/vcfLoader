@@ -4,7 +4,7 @@ from pyspark import SparkConf, SparkContext
 from rdconnect import config, loadVCF , annotations
 import hail
 
-from rdconnect import loadVCF
+from rdconnect import loadVCF,utils
 ## CONSTANTS
 from subprocess import call
 APP_NAME = "My Spark Application"
@@ -20,18 +20,19 @@ def main(hc):
     configuration= config.readConfig("/home/dpiscia/config.json")
     #hc._jvm.core.vcfToSample.hello()
     destination =  configuration["destination"] + "/" + configuration["version"]
-    chrom="1"
-    fileName="chrom"+chrom+".vds"
-    if (configuration["steps"]["loadVCF"]):
-        print ("step loadVCF")
-        loadVCF.importVCF(hc,configuration["source_path"],destination+"/loaded/"+fileName)
+    for chrom in configuration["chromosome"]:
+        sourceFileName=utils.builFileName(configuration["sourceFileName"],chrom)
+        fileName = sourceFileName+".vds"
+        if (configuration["steps"]["loadVCF"]):
+            print ("step loadVCF")
+            loadVCF.importVCF(hc,configuration["source_path"]+sourceFileName,destination+"/loaded/"+fileName)
 
-    if (configuration["steps"]["annotationVEP"]):
-        print ("step loadVCF")
-        print ("source file is "+destination+"/loaded/"+fileName)
-        annotations.annotationsVEP(hc,str(destination+"/loaded/"+fileName),destination+"/annotated/"+fileName,configuration["vep"])
-        #variants= hc.sqlContext.read.load("Users/dpiscia/RD-repositories/data/output/1.1.0/dataframe/chrom1")
-        #annotations.VEP2(hc,variants)
+        if (configuration["steps"]["annotationVEP"]):
+            print ("step loadVCF")
+            print ("source file is "+destination+"/loaded/"+fileName)
+            annotations.annotationsVEP(hc,str(destination+"/loaded/"+fileName),destination+"/annotated/"+fileName,configuration["vep"])
+            #variants= hc.sqlContext.read.load("Users/dpiscia/RD-repositories/data/output/1.1.0/dataframe/chrom1")
+            #annotations.VEP2(hc,variants)
 
 
 

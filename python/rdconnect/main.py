@@ -27,7 +27,7 @@ def main(hc):
         if (configuration["steps"]["loadVCF"]):
             print ("step loadVCF")
             loadVCF.importVCF(hc,sourceFileName,destination+"/loaded/"+fileName)
-        variants= hc.read(fileName)
+        variants= hc.read(,destination+"/loaded/"+fileName)
         if (configuration["steps"]["annotationVEP"]):
             print ("step loadVCF")
             print ("source file is "+destination+"/loaded/"+fileName)

@@ -35,7 +35,7 @@ def main(hc):
             #annotations.VEP2(hc,variants)
         if (configuration["steps"]["loaddbNSFP"]):
             print ("step loaddbNSFP")
-            annotations.dbnsfpTAble(utils.buildFileName(hc,configuration["dbNSFP_Raw"],chrom),utils.buildFileName(configuration["dnNSFP_path"],chrom))
+            annotations.dbnsfpTAble(hc,utils.buildFileName(configuration["dbNSFP_Raw"],chrom),utils.buildFileName(configuration["dnNSFP_path"],chrom))
 
 
 

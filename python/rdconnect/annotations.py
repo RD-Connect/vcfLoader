@@ -16,5 +16,5 @@ def dbnsfpTAble(hc,sourcePath,destinationPath):
 
 
 def annotatedbnsfp(hc,variants, dbsfp_path):
-    dbnsfp = hc.import_table(dbsfp_path)
-    variants.annotate_variants_table(dbnfspVar,root='va.dbnsfp')
+    dbnsfp = hc.read_table(dbsfp_path)
+    variants.annotate_variants_table(dbnsfp,root='va.dbnsfp')

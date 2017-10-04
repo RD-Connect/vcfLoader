@@ -21,7 +21,7 @@ def main(hc):
     #hc._jvm.core.vcfToSample.hello()
     destination =  configuration["destination"] + "/" + configuration["version"]
     for chrom in configuration["chromosome"]:
-        sourceFileName=utils.builFileName(configuration["sourceFileName"],chrom)
+        sourceFileName=utils.buildFileName(configuration["sourceFileName"],chrom)
         fileName = sourceFileName+".vds"
         if (configuration["steps"]["loadVCF"]):
             print ("step loadVCF")
@@ -35,7 +35,7 @@ def main(hc):
             #annotations.VEP2(hc,variants)
         if (configuration["steps"]["loaddbNSFP"]):
             print ("step loaddbNSFP")
-            annotations.dbnsfpTAble(utils.builFileName(configuration["dbNSFP_Raw"],chrom),utils.buildFileName(configuration["dnNSFP_path"],chrom))
+            annotations.dbnsfpTAble(utils.buildFileName(configuration["dbNSFP_Raw"],chrom),utils.buildFileName(configuration["dnNSFP_path"],chrom))
 
 
 

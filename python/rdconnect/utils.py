@@ -10,7 +10,7 @@ def chromStrToInt(chrom):
         return chrom
 
 
-def builFileName(name,chrom):
+def buildFileName(name,chrom):
     words = name.split("chromosome")
     if (len(words)==1):
         return chrom+words[0]

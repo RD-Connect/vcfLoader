@@ -1,4 +1,4 @@
-from rdconnect import utils.builFileName
+from rdconnect import utils
 
 def annotationsVEP(hc,source, destination, vepPath):
     variants= hc.read(source)

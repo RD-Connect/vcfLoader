@@ -33,6 +33,10 @@ def main(hc):
             annotations.annotationsVEP(hc,str(destination+"/loaded/"+fileName),destination+"/annotated/"+fileName,configuration["vep"])
             #variants= hc.sqlContext.read.load("Users/dpiscia/RD-repositories/data/output/1.1.0/dataframe/chrom1")
             #annotations.VEP2(hc,variants)
+        if (configuration["steps"]["loaddbNSFP"]):
+            print ("step loaddbNSFP")
+            annotations.dbnsfpTAble(utils.builFileName(configuration["dbNSFP_Raw"],chrom),utils.buildFileName(configuration["dnNSFP_path"],chrom))
+
 
 
 

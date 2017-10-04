@@ -15,6 +15,6 @@ def dbnsfpTAble(hc,sourcePath,destinationPath):
     dbnsfpTable.write(destinationPath,overwrite=True)
 
 
-def annotatedbnsfp(variants, dbsfp_path):
-    dbnsfp = hc.import_table("/Users/dpiscia/RD-repositories/data/output/dnsfp.kt")
+def annotatedbnsfp(hc,variants, dbsfp_path):
+    dbnsfp = hc.import_table(dbsfp_path)
     variants.annotate_variants_table(dbnfspVar,root='va.dbnsfp')

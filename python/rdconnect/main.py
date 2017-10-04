@@ -21,12 +21,13 @@ def main(hc):
     #hc._jvm.core.vcfToSample.hello()
     destination =  configuration["destination"] + "/" + configuration["version"]
     for chrom in configuration["chromosome"]:
-        sourceFileName=utils.buildFileName(configuration["sourceFileName"],chrom)
-        fileName = sourceFileName+".vds"
+        sourceFileName=utils.buildFileName(configuration["source_path"],chrom)
+        fileName = "variantsRaw"+chrom+".vds"
+
         if (configuration["steps"]["loadVCF"]):
             print ("step loadVCF")
-            loadVCF.importVCF(hc,configuration["source_path"]+sourceFileName,destination+"/loaded/"+fileName)
-
+            loadVCF.importVCF(hc,sourceFileName,destination+"/loaded/"+fileName)
+        variants= hc.read(fileName)
         if (configuration["steps"]["annotationVEP"]):
             print ("step loadVCF")
             print ("source file is "+destination+"/loaded/"+fileName)
@@ -36,6 +37,9 @@ def main(hc):
         if (configuration["steps"]["loaddbNSFP"]):
             print ("step loaddbNSFP")
             annotations.dbnsfpTAble(hc,utils.buildFileName(configuration["dbNSFP_Raw"],chrom),utils.buildFileName(configuration["dnNSFP_path"],chrom))
+        if (configuration["steps"]["annotatedbNSFP"]):
+            print("step annotatedbNSFP")
+            annotations.annotatedbnsfp(hc,variants,utils.buildFileName(configuration["dnNSFP_path"],chrom))
 
 
 

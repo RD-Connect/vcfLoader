@@ -1,10 +1,10 @@
 from rdconnect import utils
 
-def annotationsVEP(hc,source, destination, vepPath):
+def annotationsVEP(hc,source, destinationPath, vepPath):
     variants= hc.read(source)
     print("running vep")
     varAnnotated= variants.vep(vepPath)
-    varAnnotated.write(destination,overwrite=True)
+    varAnnotated.write(destinationPath,overwrite=True)
     #hc._jvm.core.annotations.vep(hc._jhc,"dd")
     #variants =
 
@@ -15,6 +15,6 @@ def dbnsfpTAble(hc,sourcePath,destinationPath):
     dbnsfpTable.write(destinationPath,overwrite=True)
 
 
-def annotatedbnsfp(hc,variants, dbsfp_path):
+def annotatedbnsfp(hc,variants, dbsfp_path,destinationPath):
     dbnsfp = hc.read_table(dbsfp_path)
-    variants.annotate_variants_table(dbnsfp,root='va.dbnsfp')
+    variants.annotate_variants_table(dbnsfp,root='va.dbnsfp').write(destinationPath,overwrite=True)

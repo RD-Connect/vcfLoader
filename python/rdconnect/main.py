@@ -27,11 +27,11 @@ def main(hc):
         if (configuration["steps"]["loadVCF"]):
             print ("step loadVCF")
             loadVCF.importVCF(hc,sourceFileName,destination+"/loaded/"+fileName)
-        variants= hc.read(destination+"/loaded/"+fileName)
+
         if (configuration["steps"]["annotationVEP"]):
             print ("step loadVCF")
             print ("source file is "+destination+"/loaded/"+fileName)
-            annotations.annotationsVEP(hc,str(destination+"/loaded/"+fileName),destination+"/annotated/"+fileName,configuration["vep"])
+            annotations.annotationsVEP(hc,str(destination+"/loaded/"+fileName),destination+"/annotatedVEP/"+fileName,configuration["vep"])
             #variants= hc.sqlContext.read.load("Users/dpiscia/RD-repositories/data/output/1.1.0/dataframe/chrom1")
             #annotations.VEP2(hc,variants)
         if (configuration["steps"]["loaddbNSFP"]):
@@ -39,7 +39,8 @@ def main(hc):
             annotations.dbnsfpTAble(hc,utils.buildFileName(configuration["dbNSFP_Raw"],chrom),utils.buildFileName(configuration["dnNSFP_path"],chrom))
         if (configuration["steps"]["annotatedbNSFP"]):
             print("step annotatedbNSFP")
-            annotations.annotatedbnsfp(hc,variants,utils.buildFileName(configuration["dnNSFP_path"],chrom))
+            variants= hc.read(destination+"/annotatedVEP/"+fileName)
+            annotations.annotatedbnsfp(hc,variants,utils.buildFileName(configuration["dnNSFP_path"],chrom),destination+"/annotatedVEPdbnSFP/"+fileName)
 
 
 

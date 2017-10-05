@@ -42,6 +42,10 @@ def main(hc):
             variants= hc.read(destination+"/annotatedVEP/"+fileName)
             annotations.annotatedbnsfp(hc,variants,utils.buildFileName(configuration["dnNSFP_path"],chrom),destination+"/annotatedVEPdbnSFP/"+fileName)
 
+        if (configuration["steps"]["groupByGenotype"]):
+            print ("step groupByGenotype")
+            variants= hc.read(destination+"/annotatedVEPdbnSFP/"+fileName)
+            variants.annotate_variants_expr('va.samples = gs.map(g=>  {g: g, s : s}  ).collect()').write(destination+"/grouped/"+fileName,overwrite=True)
 
 
 

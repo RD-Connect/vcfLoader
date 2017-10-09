@@ -60,7 +60,7 @@ def main(hc):
                 'va.alt =  v.altAlleles.map(x=> x.ref)[0]',
                 'va.populations = [{exac : va.dbnsfp.ExAC_AF}]'
                 'va.indel =  if ( (v.ref.length !=  v.altAlleles.map(x=> x.ref)[0].length) || (v.ref.length !=1) ||  ( v.altAlleles.map(x=> x.ref)[0].length !=1))  true else false'
-            ]).write(destination+"/variants/"+fileName,overwrite=True)
+            ]).variants_table().to_dataframe().write.save(destination+"/variants/"+fileName,overwrite=True)
 
 
 

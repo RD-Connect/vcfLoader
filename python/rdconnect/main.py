@@ -46,6 +46,20 @@ def main(hc):
             print ("step groupByGenotype")
             variants= hc.read(destination+"/annotatedVEPdbnSFP/"+fileName)
             variants.annotate_variants_expr('va.samples = gs.map(g=>  {g: g, s : s}  ).collect()').write(destination+"/grouped/"+fileName,overwrite=True)
+        if (configuration["steps"]["transform"]):
+            print ("step transform")
+            grouped= hc.read(destination+"/grouped/"+fileName)
+            grouped.annotate_variants_expr([
+                'va= let c= va in drop(va,info,rsid,qual,filters)',
+                'va.vep = let c= va.vep in drop(va.vep,colocated_variants,motif_feature_consequences,intergenic_consequences,regulatory_feature_consequences,most_severe_consequence,variant_class, assembly_name,allele_string,ancestral,context,end,id,input,seq_region_name,start,strand)',
+                'va.vep.transcript_consequences =  va.vep.transcript_consequences.map(x=> {( let vaf = {foo: x.gene_pheno} in merge(x,vaf))})',
+                'va.vep.transcript_consequences =  va.vep.transcript_consequences.map(x=> {(let vaf = x in drop(x,biotype,uniparc))})',
+                'va.samples = gs.map(g=>  {gq: g.gq, dp : g.dp, gt:g.gt, ad : g.ad, sample : s}  ).collect()',
+                'va.chrom=  v.contig',
+                'va.pos = v.start',
+                'va.alt =  v.altAlleles.map(x=> x.ref)[0]',
+                'va.indel =  if ( (v.ref.length !=  v.altAlleles.map(x=> x.ref)[0].length) || (v.ref.length !=1) ||  ( v.altAlleles.map(x=> x.ref)[0].length !=1))  true else false'
+            ])
 
 
 

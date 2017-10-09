@@ -58,7 +58,7 @@ def main(hc):
                 'va.chrom=  v.contig',
                 'va.pos = v.start',
                 'va.alt =  v.altAlleles.map(x=> x.ref)[0]',
-                'va.populations = [{exac : va.dbnsfp.ExAC_AF}]',
+                'va.populations = [{exac : va.dbnsfp.ExAC_AF   , gp1_asn_af : va.dbnsfp.1000Gp1_ASN_AF, gp1_eur_af: va.dbnsfp.1000Gp1_EUR_AF,gp1_af: va.dbnsfp.1000Gp1_AFR_AF , esp6500_aa: va.dbnsfp.ESP6500_AA_AF , esp6500_ea: va.dbnsfp.ESP6500_EA_AF"}]',
                 'va.indel =  if ( (v.ref.length !=  v.altAlleles.map(x=> x.ref)[0].length) || (v.ref.length !=1) ||  ( v.altAlleles.map(x=> x.ref)[0].length !=1))  true else false'
             ]).variants_table().to_dataframe().write.mode('overwrite').save(destination+"/variants/"+fileName)
 

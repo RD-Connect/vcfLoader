@@ -59,7 +59,7 @@ def main(hc):
                 'va.pos = v.start',
                 'va.alt =  v.altAlleles.map(x=> x.ref)[0]',
                 'va.indel =  if ( (v.ref.length !=  v.altAlleles.map(x=> x.ref)[0].length) || (v.ref.length !=1) ||  ( v.altAlleles.map(x=> x.ref)[0].length !=1))  true else false'
-            ])
+            ]).write(destination+"/variants/"+fileName,overwrite=True)
 
 
 

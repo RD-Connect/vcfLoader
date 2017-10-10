@@ -69,7 +69,7 @@ def main(hc):
                                       polyphen2_hvar_pred: if ( va.dbnsfp.Polyphen2_HDIV_pred.split(",").exists(e => e == "D") ) "D" else  if  (va.dbnsfp.Polyphen2_HDIV_pred.split(",").exists(e => e == "P")) "P" else  if ( va.dbnsfp.Polyphen2_HDIV_pred.split(",").exists(e => e == "B")) "B" else "",
                                       polyphen2_hvar_score : va.dbnsfp.Polyphen2_HVAR_score ,
                                       sift_pred:  if  (va.dbnsfp.SIFT_pred.split(",").exists(e => e == "D")) "D" else  if ( va.dbnsfp.SIFT_pred.split(",").exists(e => e == "T")) "T" else "" ,
-                                      sift_score : removedot(va.dbnsfp.sift_score,0) }]''']
+                                      sift_score : removedot(va.dbnsfp.SIFT_score,0) }]''']
             ).variants_table().to_dataframe().write.mode('overwrite').save(destination+"/variants/"+fileName)
 
 

@@ -54,13 +54,14 @@ def main(hc):
                 'va.vep = let c= va.vep in drop(va.vep,colocated_variants,motif_feature_consequences,intergenic_consequences,regulatory_feature_consequences,most_severe_consequence,variant_class, assembly_name,allele_string,ancestral,context,end,id,input,seq_region_name,start,strand)',
                 'va.vep.transcript_consequences =  va.vep.transcript_consequences.map(x=> {( let vaf = {foo: x.gene_pheno} in merge(x,vaf))})',
                 'va.vep.transcript_consequences =  va.vep.transcript_consequences.map(x=> {(let vaf = x in drop(x,biotype,uniparc))})',
-                'va.samples = gs.map(g=>  {gq: g.gq, dp : g.dp, gt:g.gt, ad : g.ad, sample : s}  ).collect()',
+                'va.samples = gs.filter(x=> x.dp >7 && x.gq> 19).map(g=>  {gq: g.gq, dp : g.dp, gt:g.gt, ad : g.ad, sample : s}  ).collect()',
                 'va.chrom=  v.contig',
                 'va.pos = v.start',
                 'va.alt =  v.altAlleles.map(x=> x.ref)[0]',
-                'va.populations = [{exac : va.dbnsfp.ExAC_AF   , gp1_asn_af : va.dbnsfp.Gp1_ASN_AF1000, gp1_eur_af: va.dbnsfp.Gp1_EUR_AF1000,gp1_af: va.dbnsfp.Gp1_AFR_AF1000 , esp6500_aa: va.dbnsfp.ESP6500_AA_AF , esp6500_ea: va.dbnsfp.ESP6500_EA_AF}]',
                 'va.indel =  if ( (v.ref.length !=  v.altAlleles.map(x=> x.ref)[0].length) || (v.ref.length !=1) ||  ( v.altAlleles.map(x=> x.ref)[0].length !=1))  true else false'
-            ]).variants_table().to_dataframe().write.mode('overwrite').save(destination+"/variants/"+fileName)
+            ]).annotate_variants_expr('va.af = va.samples.map(x=> x.gt).sum()/va.samples.filter(x=> x.dp > 8).map(x=> 2).sum()'
+            ).annotate_variants_expr('va.populations = [{af_internal:va.af , exac : va.dbnsfp.ExAC_AF   , gp1_asn_af : va.dbnsfp.Gp1_ASN_AF1000, gp1_eur_af: va.dbnsfp.Gp1_EUR_AF1000,gp1_af: va.dbnsfp.Gp1_AFR_AF1000 , esp6500_aa: va.dbnsfp.ESP6500_AA_AF , esp6500_ea: va.dbnsfp.ESP6500_EA_AF}]'
+            ).variants_table().to_dataframe().write.mode('overwrite').save(destination+"/variants/"+fileName)
 
 
 

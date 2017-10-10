@@ -60,7 +60,9 @@ def main(hc):
                 'va.alt =  v.altAlleles.map(x=> x.ref)[0]',
                 'va.indel =  if ( (v.ref.length !=  v.altAlleles.map(x=> x.ref)[0].length) || (v.ref.length !=1) ||  ( v.altAlleles.map(x=> x.ref)[0].length !=1))  true else false'
             ]).annotate_variants_expr('va.af = va.samples.map(x=> x.gt).sum()/va.samples.filter(x=> x.dp > 8).map(x=> 2).sum()'
-            ).annotate_variants_expr('va.populations = [{af_internal:va.af , exac : va.dbnsfp.ExAC_AF   , gp1_asn_af : va.dbnsfp.Gp1_ASN_AF1000, gp1_eur_af: va.dbnsfp.Gp1_EUR_AF1000,gp1_af: va.dbnsfp.Gp1_AFR_AF1000 , esp6500_aa: va.dbnsfp.ESP6500_AA_AF , esp6500_ea: va.dbnsfp.ESP6500_EA_AF}]'
+            ).annotate_variants_expr(['va.populations = [{af_internal:va.af , exac : va.dbnsfp.ExAC_AF   , gp1_asn_af : va.dbnsfp.Gp1_ASN_AF1000, gp1_eur_af: va.dbnsfp.Gp1_EUR_AF1000,gp1_af: va.dbnsfp.Gp1_AFR_AF1000 , esp6500_aa: va.dbnsfp.ESP6500_AA_AF , esp6500_ea: va.dbnsfp.ESP6500_EA_AF}]',
+                                      'va.predictions = [{gerp_rs: va.dbnsp.GERP++_RS, mt:va.dbnsfp.MutationTaster_score,  mutationtaster_pred: va.dbnsfp.MutationTaster_pred , '
+                                      'phylop46way_placental:va.dbnsfp.phyloP46way_placental, polyphen2_hvar_pred: if ( dbNSFP_Polyphen2_HDIV_pred.split(',').exists(e => e == "D") ) "D" else  if (dbNSFP_Polyphen2_HDIV_pred.split(',').exists(e => e == "P")) "P" else  if (dbNSFP_Polyphen2_HDIV_pred.split(',').exists(e => e == "B")) "B" else "" ]']
             ).variants_table().to_dataframe().write.mode('overwrite').save(destination+"/variants/"+fileName)
 
 

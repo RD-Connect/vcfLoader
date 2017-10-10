@@ -67,7 +67,7 @@ def main(hc):
                                        mutationtaster_pred: va.dbnsfp.MutationTaster_pred ,
                                       phylop46way_placental:va.dbnsfp.phyloP46way_placental,
                                       polyphen2_hvar_pred: if ( va.dbnsfp.Polyphen2_HDIV_pred.split(",").exists(e => e == "D") ) "D" else  if  (va.dbnsfp.Polyphen2_HDIV_pred.split(",").exists(e => e == "P")) "P" else  if ( va.dbnsfp.Polyphen2_HDIV_pred.split(",").exists(e => e == "B")) "B" else "",
-                                      polyphen2_hvar_score : d }]''']
+                                      polyphen2_hvar_score : va.dbnsfp.Polyphen2_HVAR_score }]''']
             ).variants_table().to_dataframe().write.mode('overwrite').save(destination+"/variants/"+fileName)
 
 

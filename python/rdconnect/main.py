@@ -85,7 +85,6 @@ if __name__ == "__main__":
     sc = SparkContext()
     sqlContext = SQLContext(sc)
     #in cluster this will be like
-    #"spark://ec2-0-17-03-078.compute-#1.amazonaws.com:7077"
-    hc = hail.HailContext(sc)
+    hc = hail.HailContext()
     # Execute Main functionality
     main(hc,sqlContext)

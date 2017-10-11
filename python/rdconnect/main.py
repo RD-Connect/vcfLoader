@@ -82,7 +82,7 @@ def main(hc,sqlContext):
 if __name__ == "__main__":
     # Configure OPTIONS
     conf = SparkConf().setAppName(APP_NAME)
-    sc = SparkContext(conf=conf)
+    sc = SparkContext()
     sqlContext = SQLContext(sc)
     #in cluster this will be like
     #"spark://ec2-0-17-03-078.compute-#1.amazonaws.com:7077"

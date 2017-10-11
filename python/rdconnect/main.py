@@ -1,6 +1,7 @@
 ## Imports
 
 from pyspark import SparkConf, SparkContext
+from pyspark.sql import SQLContext
 from rdconnect import config, loadVCF , annotations
 import hail
 
@@ -14,7 +15,7 @@ APP_NAME = "My Spark Application"
 ## Main functionality
 
 
-def main(hc):
+def main(hc,sqlContext):
     call(["ls", "-l"])
 
     configuration= config.readConfig("/home/dpiscia/config.json")
@@ -69,16 +70,22 @@ def main(hc):
                                       polyphen2_hvar_pred: if ( va.dbnsfp.Polyphen2_HDIV_pred.split(",").exists(e => e == "D") ) "D" else  if  (va.dbnsfp.Polyphen2_HDIV_pred.split(",").exists(e => e == "P")) "P" else  if ( va.dbnsfp.Polyphen2_HDIV_pred.split(",").exists(e => e == "B")) "B" else "",
                                       polyphen2_hvar_score : va.dbnsfp.Polyphen2_HVAR_score ,
                                       sift_pred:  if  (va.dbnsfp.SIFT_pred.split(",").exists(e => e == "D")) "D" else  if ( va.dbnsfp.SIFT_pred.split(",").exists(e => e == "T")) "T" else "" ,
-                                      sift_score : removedot("2.3",0) }]''']
+                                      sift_score : removedot(va.dbnsfp.SIFT_score,0) }]''']
             ).variants_table().to_dataframe().write.mode('overwrite').save(destination+"/variants/"+fileName)
+        if (configuration["steps"]["toElastic"]):
+            print ("step to elastic")
+            variants = sqlContext.read.load(destination+"/variants/"+fileName)
+
 
 
 
 if __name__ == "__main__":
     # Configure OPTIONS
     conf = SparkConf().setAppName(APP_NAME)
+    sc = SparkContext(conf=conf)
+    sqlContext = SQLContext(sc)
     #in cluster this will be like
     #"spark://ec2-0-17-03-078.compute-#1.amazonaws.com:7077"
-    hc = hail.HailContext()
+    hc = hail.HailContext(sc)
     # Execute Main functionality
-    main(hc)
+    main(hc,sqlContext)

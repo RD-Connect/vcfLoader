@@ -75,6 +75,7 @@ def main(hc,sqlContext):
         if (configuration["steps"]["toElastic"]):
             print ("step to elastic")
             variants = sqlContext.read.load(destination+"/variants/"+fileName)
+            variants.write.format("org.elasticsearch.spark.sql").option("es.nodes","10.1.0.110").save("test/mber")
 
 
 

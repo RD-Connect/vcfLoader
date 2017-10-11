@@ -1,7 +1,7 @@
 ## Imports
 
 from pyspark import SparkConf, SparkContext
-from pyspark.sql import SQLContext
+from pyspark.sql import SparkSession
 from rdconnect import config, loadVCF , annotations
 import hail
 
@@ -82,9 +82,8 @@ def main(hc,sqlContext):
 if __name__ == "__main__":
     # Configure OPTIONS
     conf = SparkConf().setAppName(APP_NAME)
-    sc = SparkContext()
-    sqlContext = SQLContext(sc)
+    spark = SparkSession.builder().getOrCreate()
     #in cluster this will be like
     hc = hail.HailContext()
     # Execute Main functionality
-    main(hc,sqlContext)
+    main(hc,spark)

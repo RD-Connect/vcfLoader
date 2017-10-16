@@ -85,16 +85,16 @@ def main(hc,sqlContext):
 
         if (configuration["steps"]["toElastic"]):
             print ("step to elastic")
-            variants = sqlContext.read.load(destination+"/variants/"+fileName).select("`va.predictions`","`va.populations`","`va.indel`","`va.alt`","`v.ref`","`va.pos`","`va.chrom`","`va.samples`","`va.vep.transcript_consequences`") 
-            variantsRN=variants.withColumnRenamed("`va.predictions`","predictions") \
-                .withColumnRenamed("`va.populations`","populations") \
-                .withColumnRenamed("`va.indel`","indel") \
-                .withColumnRenamed("`va.alt`","alt") \
-                .withColumnRenamed("`v.ref`","ref") \
-                .withColumnRenamed("`va.pos`","pos") \
-                .withColumnRenamed("`va.chrom`","chrom") \
-                .withColumnRenamed("`va.samples`","samples") \
-                .withColumnRenamed("`va.vep.transcript_consequences`","effs")
+            variants = sqlContext.read.load(destination+"/variants/"+fileName).select("`va.predictions`","`va.populations`","`va.indel`","`va.alt`","`v.ref`","`va.pos`","`va.chrom`","`va.samples`","`va.vep.transcript_consequences`")
+            variantsRN=variants.withColumnRenamed("va.predictions","predictions") \
+                .withColumnRenamed("va.populations","populations") \
+                .withColumnRenamed("va.indel","indel") \
+                .withColumnRenamed("va.alt","alt") \
+                .withColumnRenamed("v.ref","ref") \
+                .withColumnRenamed("va.pos","pos") \
+                .withColumnRenamed("va.chrom","chrom") \
+                .withColumnRenamed("va.samples","samples") \
+                .withColumnRenamed("va.vep.transcript_consequences","effs")
             variantsRN.printSchema()
             variantsRN.write.format("org.elasticsearch.spark.sql").option("es.nodes",configuration["elasticsearch"]["host"]).option("es.port",configuration["elasticsearch"]["port"] ).save(configuration["elasticsearch"]["index_name"]+"/"+configuration["version"])
 

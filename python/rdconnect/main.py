@@ -74,12 +74,14 @@ def main(hc,sqlContext):
                                       sift_score : va.dbnsfp.SIFT_score.split(";").map(x=> removedot(x,0)).min()
                                       }]''']
             ).variants_table().to_dataframe().write.mode('overwrite').save(destination+"/variants/"+fileName)
-        if (configuration["steps"]["createIndex"]):
-            print ("step to create index")
-            index.create_index(configuration["elasticsearch"]["host"],configuration["elasticsearch"]["port"],configuration["elasticsearch"]["index_name"],configuration["version"])
         if (configuration["steps"]["deleteIndex"]):
             print ("step to delete index")
             index.delete_index(configuration["elasticsearch"]["host"],configuration["elasticsearch"]["port"],configuration["elasticsearch"]["index_name"],configuration["version"])
+
+        if (configuration["steps"]["createIndex"]):
+            print ("step to create index")
+            index.create_index(configuration["elasticsearch"]["host"],configuration["elasticsearch"]["port"],configuration["elasticsearch"]["index_name"],configuration["version"])
+
 
         if (configuration["steps"]["toElastic"]):
             print ("step to elastic")
@@ -93,6 +95,7 @@ def main(hc,sqlContext):
                 .withColumnRenamed("`va.chrom`","chrom") \
                 .withColumnRenamed("`va.samples`","samples") \
                 .withColumnRenamed("`va.vep.transcript_consequences`","effs")
+            variants.printSchema()
             variants.write.format("org.elasticsearch.spark.sql").option("es.nodes",configuration["elasticsearch"]["host"]).option("es.port",configuration["elasticsearch"]["port"] ).save(configuration["elasticsearch"]["index_name"]+"/"+configuration["version"])
 
 

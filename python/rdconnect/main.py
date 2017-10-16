@@ -2,7 +2,7 @@
 
 from pyspark import SparkConf, SparkContext
 from pyspark.sql import SQLContext
-from rdconnect import config, loadVCF , annotations
+from rdconnect import config, loadVCF , annotations,index
 import hail
 
 from rdconnect import loadVCF,utils
@@ -58,6 +58,7 @@ def main(hc,sqlContext):
                 'va.samples = gs.filter(x=> x.dp >7 && x.gq> 19).map(g=>  {gq: g.gq, dp : g.dp, gt:g.gt, ad : g.ad, sample : s}  ).collect()',
                 'va.chrom=  v.contig',
                 'va.pos = v.start',
+                'va.ref= v.ref',
                 'va.alt =  v.altAlleles.map(x=> x.ref)[0]',
                 'va.indel =  if ( (v.ref.length !=  v.altAlleles.map(x=> x.ref)[0].length) || (v.ref.length !=1) ||  ( v.altAlleles.map(x=> x.ref)[0].length !=1))  true else false'
             ]).annotate_variants_expr('va.af = va.samples.map(x=> x.gt).sum()/va.samples.filter(x=> x.dp > 8).map(x=> 2).sum()'
@@ -71,11 +72,28 @@ def main(hc,sqlContext):
                                       polyphen2_hvar_score : va.dbnsfp.Polyphen2_HVAR_score ,
                                       sift_pred:  if  (va.dbnsfp.SIFT_pred.split(",").exists(e => e == "D")) "D" else  if ( va.dbnsfp.SIFT_pred.split(",").exists(e => e == "T")) "T" else "" ,
                                       sift_score : removedot(va.dbnsfp.SIFT_score,0) }]''']
-            ).variants_table().to_dataframe().write.mode('overwrite').save(destination+"/variants/"+fileName)
+            ).variants_table().select("`va.predictions`","`va.populations`","`va.indel`","`va.alt`","`v.ref`","`va.pos`","`va.chrom`","`va.samples`","`va.vep.transcript_consequences`") \
+                .withColumnRenamed("`va.predictions`","predictions")\
+                .withColumnRenamed("`va.populations`","populations")\
+                .withColumnRenamed("`va.indel`","indel")\
+                .withColumnRenamed("`va.alt`","alt")\
+                .withColumnRenamed("`v.ref`","ref")\
+                .withColumnRenamed("`va.pos`","pos")\
+                .withColumnRenamed("`va.chrom`","chrom")\
+                .withColumnRenamed("`va.samples`","samples")\
+                .withColumnRenamed("`va.vep.transcript_consequences`","effs")\
+                .to_dataframe().write.mode('overwrite').save(destination+"/variants/"+fileName)
+        if (configuration["steps"]["createIndex"]):
+            print ("step to create index")
+            index.create_index(configuration["elasticsearch"]["host"],configuration["elasticsearch"]["port"],configuration["elasticsearch"]["index_name"],configuration["version"])
+        if (configuration["steps"]["deleteIndex"]):
+            print ("step to delete index")
+            index.delete_index(configuration["elasticsearch"]["host"],configuration["elasticsearch"]["port"],configuration["elasticsearch"]["index_name"],configuration["version"])
+
         if (configuration["steps"]["toElastic"]):
             print ("step to elastic")
             variants = sqlContext.read.load(destination+"/variants/"+fileName)
-            variants.write.format("org.elasticsearch.spark.sql").option("es.nodes","10.1.0.110").save("test/mber")
+            variants.write.format("org.elasticsearch.spark.sql").option("es.nodes",configuration["elasticsearch"]["host"]).option("es.port",configuration["elasticsearch"]["port"] ).save(configuration["elasticsearch"]["index_name"]+"/"+configuration["version"])
 
 
 

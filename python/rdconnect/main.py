@@ -27,7 +27,7 @@ def main(hc,sqlContext):
 
         if (configuration["steps"]["loadVCF"]):
             print ("step loadVCF")
-            loadVCF.importVCF(hc,sourceFileName,destination+"/loaded/"+fileName)
+            loadVCF.importVCF(hc,sourceFileName,destination+"/loaded/"+fileName,configuration["number_of_partitions"])
 
         if (configuration["steps"]["annotationVEP"]):
             print ("step loadVCF")

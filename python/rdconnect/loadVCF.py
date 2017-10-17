@@ -2,12 +2,12 @@
 
 
 
-def importVCF(hc,source_path, destination_path):
+def importVCF(hc,source_path, destination_path,number_partitions):
     try:
         print ("reading vcf from "+ source_path )
         vcf= hc.import_vcf(str(source_path)).split_multi()
         print ("writing vds to" + destination_path)
-        vcf.write(destination_path,overwrite=True)
+        vcf.repartitions(number_partitions).write(destination_path,overwrite=True)
         return True
     except ValueError:
         print (ValueError)

@@ -64,7 +64,7 @@ def create_index(host,port,index_name,version):
           """
     url="http://"+host+":"+port+"/"+index_name
     header={'Content-Type', 'application/json'}
-    response = requests.post(url, json.loads(data))
+    response = requests.post(url, data)
     print("response code"+ response.content)
 def delete_index(host,port,index_name,version):
     url="http://"+host+":"+port+"/"+index_name

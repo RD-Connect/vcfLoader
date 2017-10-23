@@ -5,7 +5,7 @@ import requests
 def create_index(host,port,index_name,version):
     data="""
           {"settings":{"index":{"number_of_shards":8,"number_of_replicas":0,"refresh_interval":"1000.ms"}}
-            ,"mappings":{"""+version+"""
+            ,"mappings":{"""+"\""+version+"\""+"""
             :{"_all":{"enabled":false},
             "properties":{"chrom":{"type":"integer","index":"not_analyzed"},
             "pos":{"type":"integer","index":"not_analyzed"}

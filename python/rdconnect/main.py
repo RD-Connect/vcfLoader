@@ -55,13 +55,13 @@ def main(hc,sqlContext):
                 'va.vep = let c= va.vep in drop(va.vep,colocated_variants,motif_feature_consequences,intergenic_consequences,regulatory_feature_consequences,most_severe_consequence,variant_class, assembly_name,allele_string,ancestral,context,end,id,input,seq_region_name,start,strand)',
                 'va.vep.transcript_consequences =  va.vep.transcript_consequences.map(x=> {( let vaf = {foo: x.gene_pheno} in merge(x,vaf))})',
                 'va.vep.transcript_consequences =  va.vep.transcript_consequences.map(x=> {(let vaf = x in drop(x,biotype,uniparc))})',
-                'va.samples = gs.filter(x=> x.dp >7 && x.gq> 19).map(g=>  {gq: g.gq, dp : g.dp, gt:ToGenotype(g.gt) , gt_int : g.gt ,  ad : ADsplit(g.ad.mkString(','),ToGenotype(g.gt)), sample : s}  ).collect()',
+                'va.samples = gs.filter(x=> x.dp >7 && x.gq> 19).map(g=>  {gq: g.gq, dp : g.dp, gt:g.gt, ad : ADsplit(g.ad.mkString(','),ToGenotype(gt)), sample : s}  ).collect()',
                 'va.chrom=  v.contig',
                 'va.pos = v.start',
                 'va.ref= v.ref',
                 'va.alt =  v.altAlleles.map(x=> x.ref)[0]',
                 'va.indel =  if ( (v.ref.length !=  v.altAlleles.map(x=> x.ref)[0].length) || (v.ref.length !=1) ||  ( v.altAlleles.map(x=> x.ref)[0].length !=1))  true else false'
-            ]).annotate_variants_expr('va.af = va.samples.map(x=> x.gt_int).sum()/va.samples.filter(x=> x.dp > 8).map(x=> 2).sum()'
+            ]).annotate_variants_expr('va.af = va.samples.map(x=> x.gt).sum()/va.samples.filter(x=> x.dp > 8).map(x=> 2).sum()'
             ).annotate_variants_expr(['''va.populations = [{
                                       af_internal:va.af , exac : removedot(va.dbnsfp.ExAC_AF,4)   ,
                                       gp1_asn_af : removedot(va.dbnsfp.Gp1_ASN_AF1000,4), gp1_eur_af: removedot(va.dbnsfp.Gp1_EUR_AF1000,4),gp1_af: removedot(va.dbnsfp.Gp1_AFR_AF1000,4) , esp6500_aa: removedot(va.dbnsfp.ESP6500_AA_AF,4) , esp6500_ea: removedot(va.dbnsfp.ESP6500_EA_AF,4)}]''',

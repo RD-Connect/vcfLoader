@@ -63,7 +63,7 @@ def main(hc,sqlContext):
                 'va.indel =  if ( (v.ref.length !=  v.altAlleles.map(x=> x.ref)[0].length) || (v.ref.length !=1) ||  ( v.altAlleles.map(x=> x.ref)[0].length !=1))  true else false'
             ]).annotate_variants_expr('va.af = va.samples.map(x=> x.gt).sum()/va.samples.filter(x=> x.dp > 8).map(x=> 2).sum()'
             ).annotate_variants_expr(['''va.populations = [{
-                                      af_internal:va.af , exac : va.dbnsfp.ExAC_AF   ,
+                                      af_internal:va.af , exac : removedot(va.dbnsfp.ExAC_AF,4)   ,
                                       gp1_asn_af : removedot(va.dbnsfp.Gp1_ASN_AF1000,4), gp1_eur_af: removedot(va.dbnsfp.Gp1_EUR_AF1000,4),gp1_af: removedot(va.dbnsfp.Gp1_AFR_AF1000,4) , esp6500_aa: removedot(va.dbnsfp.ESP6500_AA_AF,4) , esp6500_ea: removedot(va.dbnsfp.ESP6500_EA_AF,4)}]''',
                                       '''va.predictions = [{gerp_rs: va.dbnsfp.GERP_RS, mt:va.dbnsfp.MutationTaster_score,
                                        mutationtaster_pred: va.dbnsfp.MutationTaster_pred ,

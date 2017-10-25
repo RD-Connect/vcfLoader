@@ -59,7 +59,7 @@ def main(hc,sqlContext):
                 'va.chrom=  v.contig',
                 'va.pos = v.start',
                 'va.ref= v.ref',
-                'va.alt =  v.altAlleles.map(x=> x.ref)[1]',
+                'va.alt =  v.altAlleles.map(x=> x.alt)[0]',
                 'va.indel =  if ( (v.ref.length !=  v.altAlleles.map(x=> x.ref)[0].length) || (v.ref.length !=1) ||  ( v.altAlleles.map(x=> x.ref)[0].length !=1))  true else false'
             ]).annotate_variants_expr('va.af = va.samples.map(x=> x.gtInt).sum()/va.samples.filter(x=> x.dp > 8).map(x=> 2).sum()'
             ).annotate_variants_expr(['''va.populations = [{

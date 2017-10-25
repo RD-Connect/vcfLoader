@@ -64,7 +64,7 @@ def main(hc,sqlContext):
             ]).annotate_variants_expr('va.af = va.samples.map(x=> x.gt).sum()/va.samples.filter(x=> x.dp > 8).map(x=> 2).sum()'
             ).annotate_variants_expr(['''va.populations = [{
                                       af_internal:va.af , exac : va.dbnsfp.ExAC_AF   ,
-                                      gp1_asn_af : removedot(va.dbnsfp.Gp1_ASN_AF1000), gp1_eur_af: removedot(va.dbnsfp.Gp1_EUR_AF1000),gp1_af: removedot(va.dbnsfp.Gp1_AFR_AF1000) , esp6500_aa: removedot(va.dbnsfp.ESP6500_AA_AF) , esp6500_ea: removedot(va.dbnsfp.ESP6500_EA_AF)}]''',
+                                      gp1_asn_af : removedot(va.dbnsfp.Gp1_ASN_AF1000,4), gp1_eur_af: removedot(va.dbnsfp.Gp1_EUR_AF1000,4),gp1_af: removedot(va.dbnsfp.Gp1_AFR_AF1000,4) , esp6500_aa: removedot(va.dbnsfp.ESP6500_AA_AF,4) , esp6500_ea: removedot(va.dbnsfp.ESP6500_EA_AF,4)}]''',
                                       '''va.predictions = [{gerp_rs: va.dbnsfp.GERP_RS, mt:va.dbnsfp.MutationTaster_score,
                                        mutationtaster_pred: va.dbnsfp.MutationTaster_pred ,
                                       phylop46way_placental:va.dbnsfp.phyloP46way_placental,

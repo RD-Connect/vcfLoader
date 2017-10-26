@@ -86,7 +86,7 @@ def main(hc,sqlContext):
 
         if (configuration["steps"]["toElastic"]):
             print ("step to elastic")
-            variants = sqlContext.read.load(destination+"/variants/"+fileName).select("`va.predictions`","`va.populations`","`va.indel`","`va.alt`","`v.ref`","`va.pos`","`va.chrom`","`va.samples`","`va.vep.transcript_consequences`")
+            variants = sqlContext.read.load(destination+"/variants/"+fileName).select("`va.predictions`","`va.populations`","`va.indel`","`va.alt`","`v.ref`","`va.pos`","`va.chrom`","`va.samples`","`va.effs`")
             variantsRN=variants.withColumnRenamed("va.predictions","predictions") \
                 .withColumnRenamed("va.populations","populations") \
                 .withColumnRenamed("va.indel","indel") \

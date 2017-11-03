@@ -56,8 +56,8 @@ def main(hc,sqlContext):
 
         if (configuration["steps"]["groupByGenotype"]):
             print ("step groupByGenotype")
-            variants= hc.read(destination+"/annotatedVEPdbnSFP/"+fileName)
-            variants.variants_table().to_dataframe().write.mode('overwrite').save(destination+"/annotatedVEPdbnSFPDEbug/"+fileName)
+            variants= hc.read(destination+"/annotatedVEPdbnSFPCadd/"+fileName)
+            #variants.variants_table().to_dataframe().write.mode('overwrite').save(destination+"/annotatedVEPdbnSFPDEbug/"+fileName)
             variants.annotate_variants_expr('va.samples = gs.map(g=>  {g: g, s : s}  ).collect()').write(destination+"/grouped/"+fileName,overwrite=True)
         if (configuration["steps"]["transform"]):
             print ("step transform")

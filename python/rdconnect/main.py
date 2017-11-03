@@ -49,6 +49,11 @@ def main(hc,sqlContext):
             variants= hc.read(destination+"/annotatedVEP/"+fileName)
             annotations.annotatedbnsfp(hc,variants,utils.buildFileName(configuration["dnNSFP_path"],chrom),destination+"/annotatedVEPdbnSFP/"+fileName)
 
+        if (configuration["steps"]["annotatecadd"]):
+            print("step annotatedbcadd")
+            variants= hc.read(destination+"/annotatedVEPdbnSFP/"+fileName)
+            annotations.annotatedcadd(hc,variants,utils.buildFileName(configuration["cadd_path"],chrom),destination+"/annotatedVEPdbnSFPCadd/"+fileName)
+
         if (configuration["steps"]["groupByGenotype"]):
             print ("step groupByGenotype")
             variants= hc.read(destination+"/annotatedVEPdbnSFP/"+fileName)

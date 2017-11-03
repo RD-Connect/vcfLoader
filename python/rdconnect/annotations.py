@@ -25,3 +25,8 @@ def caddTAble(hc,sourcePath,destinationPath,number_partitions):
     dbnsfpTable=hc.import_vcf(sourcePath).repartition(number_partitions).write(destinationPath,overwrite=True)
     #select(['C3', 'C1', 'C2']) select which column we are interested or drop
     #dbnsfpTable.rename({'1000Gp1_EUR_AF':'Gp1_EUR_AF1000','1000Gp1_ASN_AF':'Gp1_ASN_AF1000','1000Gp1_AFR_AF':'Gp1_AFR_AF1000','ESP6500_EA_AF ':'ESP6500_EA_AF','GERP++_RS':'GERP_RS'}).write(destinationPath,overwrite=True)
+
+
+def annotatedcadd(hc,variants,cadd_path,destinationPath):
+    cadd = hc.read(cadd_path)
+    variants.annotate_variants_vds(cadd,expr='va.cadd = vds.info.CADD13_PHRED').write(destinationPath,overwrite=True)

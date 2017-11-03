@@ -70,9 +70,9 @@ def main(hc,sqlContext):
                                       '''va.predictions = [{gerp_rs: va.dbnsfp.GERP_RS, mt: va.dbnsfp.MutationTaster_score.split(";").map(x=> removedot(x,1)).max(),
                                       mutationtaster_pred: if ( va.dbnsfp.MutationTaster_pred.split(";").exists(e => e == "A") ) "A" else  if  (va.dbnsfp.MutationTaster_pred.split(";").exists(e => e == "D")) "D" else  if ( va.dbnsfp.MutationTaster_pred.split(";").exists(e => e == "N")) "N" else "" ,
                                       phylop46way_placental:va.dbnsfp.phyloP46way_placental,
-                                      polyphen2_hvar_pred: if ( va.dbnsfp.Polyphen2_HDIV_pred.split(",").exists(e => e == "D") ) "D" else  if  (va.dbnsfp.Polyphen2_HDIV_pred.split(",").exists(e => e == "P")) "P" else  if ( va.dbnsfp.Polyphen2_HDIV_pred.split(",").exists(e => e == "B")) "B" else "",
+                                      polyphen2_hvar_pred: if ( va.dbnsfp.Polyphen2_HDIV_pred.split(";").exists(e => e == "D") ) "D" else  if  (va.dbnsfp.Polyphen2_HDIV_pred.split(";").exists(e => e == "P")) "P" else  if ( va.dbnsfp.Polyphen2_HDIV_pred.split(";").exists(e => e == "B")) "B" else "",
                                       polyphen2_hvar_score : va.dbnsfp.Polyphen2_HVAR_score ,
-                                      sift_pred:  if  (va.dbnsfp.SIFT_pred.split(",").exists(e => e == "D")) "D" else  if ( va.dbnsfp.SIFT_pred.split(",").exists(e => e == "T")) "T" else "" ,
+                                      sift_pred:  if  (va.dbnsfp.SIFT_pred.split(";").exists(e => e == "D")) "D" else  if ( va.dbnsfp.SIFT_pred.split(";").exists(e => e == "T")) "T" else "" ,
                                       sift_score : va.dbnsfp.SIFT_score.split(";").map(x=> removedot(x,0)).min()
                                       }]''']
             ).variants_table().to_dataframe().write.mode('overwrite').save(destination+"/variants/"+fileName)

@@ -24,10 +24,10 @@ def main(hc,sqlContext):
     for chrom in configuration["chromosome"]:
         sourceFileName=utils.buildFileName(configuration["source_path"],chrom)
         fileName = "variantsRaw"+chrom+".vds"
-
+        number_partitions=configuration["number_of_partitions"]
         if (configuration["steps"]["loadVCF"]):
             print ("step loadVCF")
-            loadVCF.importVCF(hc,sourceFileName,destination+"/loaded/"+fileName,configuration["number_of_partitions"])
+            loadVCF.importVCF(hc,sourceFileName,destination+"/loaded/"+fileName,number_partitions)
 
         if (configuration["steps"]["annotationVEP"]):
             print ("step loadVCF")
@@ -38,6 +38,13 @@ def main(hc,sqlContext):
         if (configuration["steps"]["loaddbNSFP"]):
             print ("step loaddbNSFP")
             annotations.dbnsfpTAble(hc,utils.buildFileName(configuration["dbNSFP_Raw"],chrom),utils.buildFileName(configuration["dnNSFP_path"],chrom))
+
+
+        if (configuration["steps"]["loadcadd"]):
+            print ("step loaddbNSFP")
+            annotations.dbnsfpTAble(hc,utils.buildFileName(configuration["dbNSFP_Raw"],chrom),utils.buildFileName(configuration["dnNSFP_path"],chrom))
+            annotations.caddTAble(hc,utils.buildFileName(configuration["cadd_Raw"],chrom),utils.buildFileName(configuration["cadd_path"],number_partitions))
+
         if (configuration["steps"]["annotatedbNSFP"]):
             print("step annotatedbNSFP")
             variants= hc.read(destination+"/annotatedVEP/"+fileName)

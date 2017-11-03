@@ -67,8 +67,7 @@ def main(hc,sqlContext):
             ).annotate_variants_expr(['''va.populations = [{
                                       af_internal:va.af , exac : removedot(va.dbnsfp.ExAC_AF,4)   ,
                                       gp1_asn_af : removedot(va.dbnsfp.Gp1_ASN_AF1000,4), gp1_eur_af: removedot(va.dbnsfp.Gp1_EUR_AF1000,4),gp1_af: removedot(va.dbnsfp.Gp1_AFR_AF1000,4) , esp6500_aa: removedot(va.dbnsfp.ESP6500_AA_AF,4) , esp6500_ea: removedot(va.dbnsfp.ESP6500_EA_AF,4)}]''',
-                                      '''va.predictions = [{gerp_rs: va.dbnsfp.GERP_RS,
-                                      mt: va.dbnsfp.MutationTaster_score.split(";").map(x=> removedot(x,1)).max(),
+                                      '''va.predictions = [{gerp_rs: va.dbnsfp.GERP_RS, mt: va.dbnsfp.MutationTaster_score.split(";").map(x=> removedot(x,1)).max(),
                                       mutationtaster_pred: if ( va.dbnsfp.MutationTaster_pred.split(";").exists(e => e == "A") ) "A" else  if  (va.dbnsfp.MutationTaster_pred.split(";").exists(e => e == "D")) "D" else  if ( va.dbnsfp.MutationTaster_pred.split(";").exists(e => e == "N")) "N" else "" ,
                                       phylop46way_placental:va.dbnsfp.phyloP46way_placental,
                                       polyphen2_hvar_pred: if ( va.dbnsfp.Polyphen2_HDIV_pred.split(",").exists(e => e == "D") ) "D" else  if  (va.dbnsfp.Polyphen2_HDIV_pred.split(",").exists(e => e == "P")) "P" else  if ( va.dbnsfp.Polyphen2_HDIV_pred.split(",").exists(e => e == "B")) "B" else "",

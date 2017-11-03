@@ -42,8 +42,7 @@ def main(hc,sqlContext):
 
         if (configuration["steps"]["loadcadd"]):
             print ("step loaddbNSFP")
-            annotations.dbnsfpTAble(hc,utils.buildFileName(configuration["dbNSFP_Raw"],chrom),utils.buildFileName(configuration["dnNSFP_path"],chrom))
-            annotations.caddTAble(hc,utils.buildFileName(configuration["cadd_Raw"],chrom),utils.buildFileName(configuration["cadd_path"],number_partitions))
+            annotations.caddTAble(hc,utils.buildFileName(configuration["cadd_Raw"],chrom),utils.buildFileName(configuration["cadd_path"],str(number_partitions)))
 
         if (configuration["steps"]["annotatedbNSFP"]):
             print("step annotatedbNSFP")

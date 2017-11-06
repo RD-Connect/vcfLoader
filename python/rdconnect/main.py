@@ -56,12 +56,12 @@ def main(hc,sqlContext):
         if (configuration["steps"]["annotatecadd"]):
             print("step annotatedbcadd")
             variants= hc.read(destination+"/annotatedVEPdbnSFP/"+fileName)
-            annotations.annotatedcadd(hc,variants,utils.buildFileName(configuration["cadd_path"],chrom),destination+"/annotatedVEPdbnSFPCadd/"+fileName)
+            annotations.annotateVCF(hc,variants,utils.buildFileName(configuration["cadd_path"],chrom),destination+"/annotatedVEPdbnSFPCadd/"+fileName,'va.cadd = vds.info.CADD13_PHRED')
 
         if (configuration["steps"]["annotateclinvar"]):
             print("step annotated clinvar")
             variants= hc.read(destination+"/annotatedVEPdbnSFPCadd/"+fileName)
-            annotations.annotatedcadd(hc,variants,utils.buildFileName(configuration["cadd_path"],""),destination+"/annotatedVEPdbnSFPCaddClinvar/"+fileName)
+            annotations.annotateVCF(hc,variants,utils.buildFileName(configuration["clinvar_path"],""),destination+"/annotatedVEPdbnSFPCaddClinvar/"+fileName,'va.CLNSIG=vds.info.CLNSIG','va.CLNACC=vds.info.CLNACC')
 
         if (configuration["steps"]["groupByGenotype"]):
             print ("step groupByGenotype")

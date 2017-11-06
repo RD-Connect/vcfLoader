@@ -28,6 +28,7 @@ def importDBvcf(hc,sourcePath,destinationPath,number_partitions):
 
 
     dbnsfpTable=hc.import_vcf(sourcePath).repartition(number_partitions).split_multi().write(destinationPath,overwrite=True)
-def annotatedcadd(hc,variants,cadd_path,destinationPath):
-    cadd = hc.read(cadd_path)
-    variants.annotate_variants_vds(cadd,expr='va.cadd = vds.info.CADD13_PHRED').write(destinationPath,overwrite=True)
+def annotateVCF(hc,variants,annotation_path,destinationPath,annotation):
+    cadd = hc.read(annotation_path)
+    variants.annotate_variants_vds(cadd,expr=annotations).write(destinationPath,overwrite=True)
+

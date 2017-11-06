@@ -72,6 +72,7 @@ def main(hc,sqlContext):
             print ("step transform")
             # add filter ad>0 before gt collect maybe?
             grouped= hc.read(destination+"/grouped/"+fileName)
+            grouped.variants_table().to_dataframe().printSchema()
             transform.transform(grouped,destination,fileName)
         if (configuration["steps"]["deleteIndex"]):
             print ("step to delete index")

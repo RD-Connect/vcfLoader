@@ -50,12 +50,8 @@ def main(hc,sqlContext):
 
         if (configuration["steps"]["loadExomesGnomad"]):
             print ("step load exomes gnomad")
-            annotations.importDBvcf(hc,utils.buildFileName(configuration["exomesGnomad_Raw"],""),utils.buildFileName(configuration["exomesGnomad_path"],""),number_partitions)
+            annotations.importDBvcf(hc,utils.buildFileName(configuration["exomesGnomad_Raw"],chrom),utils.buildFileName(configuration["exomesGnomad_path"],""),number_partitions)
 
-
-        if (configuration["steps"]["exomesgnomad"]):
-            print ("step load exoe gnomad")
-            annotations.importDBvcf(hc,utils.buildFileName(configuration["exomesgnomad_Raw"],""),utils.buildFileName(configuration["exomesgnomad_path"],""),number_partitions)
 
         if (configuration["steps"]["annotatedbNSFP"]):
             print("step annotatedbNSFP")
@@ -75,7 +71,7 @@ def main(hc,sqlContext):
         if (configuration["steps"]["annotateExomesGnomad"]):
             print("step annotated exomes gnomad")
             variants= hc.read(destination+"/annotatedVEPdbnSFPCaddClinvar/"+fileName)
-            annotations.annotateVCF(hc,variants,utils.buildFileName(configuration["exomesgnomad_path"],""),destination+"/annotatedVEPdbnSFPCaddClinvarExGnomad/"+fileName,'va.gnomAD_Ex_AC =vds.info.gnomAD_Ex_AC, va.gnomAD_Ex_AF =vds.info.gnomAD_Ex_AF')
+            annotations.annotateVCF(hc,variants,utils.buildFileName(configuration["exomesgnomad_path"],chrom),destination+"/annotatedVEPdbnSFPCaddClinvarExGnomad/"+fileName,'va.gnomAD_Ex_AC =vds.info.gnomAD_Ex_AC, va.gnomAD_Ex_AF =vds.info.gnomAD_Ex_AF')
 
         if (configuration["steps"]["groupByGenotype"]):
             print ("step groupByGenotype")

@@ -50,7 +50,7 @@ def main(hc,sqlContext):
 
         if (configuration["steps"]["loadExomesGnomad"]):
             print ("step load exomes gnomad")
-            annotations.importDBvcf(hc,utils.buildFileName(configuration["exomesGnomad_Raw"],chrom),utils.buildFileName(configuration["exomesGnomad_path"],""),number_partitions)
+            annotations.importDBvcf(hc,utils.buildFileName(configuration["exomesGnomad_Raw"],chrom),utils.buildFileName(configuration["exomesGnomad_path"],chrom),number_partitions)
 
 
         if (configuration["steps"]["annotatedbNSFP"]):

@@ -71,7 +71,7 @@ def main(hc,sqlContext):
         if (configuration["steps"]["annotateExomesGnomad"]):
             print("step annotated exomes gnomad")
             variants= hc.read(destination+"/annotatedVEPdbnSFPCaddClinvar/"+fileName)
-            annotations.annotateVCF(hc,variants,utils.buildFileName(configuration["exomesgnomad_path"],chrom),destination+"/annotatedVEPdbnSFPCaddClinvarExGnomad/"+fileName,'va.gnomAD_Ex_AC =vds.info.gnomAD_Ex_AC, va.gnomAD_Ex_AF =vds.info.gnomAD_Ex_AF')
+            annotations.annotateVCF(hc,variants,utils.buildFileName(configuration["exomesGnomad_path"],chrom),destination+"/annotatedVEPdbnSFPCaddClinvarExGnomad/"+fileName,'va.gnomAD_Ex_AC =vds.info.gnomAD_Ex_AC, va.gnomAD_Ex_AF =vds.info.gnomAD_Ex_AF')
 
         if (configuration["steps"]["groupByGenotype"]):
             print ("step groupByGenotype")

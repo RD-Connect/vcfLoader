@@ -37,12 +37,16 @@ def main(hc,sqlContext):
             #annotations.VEP2(hc,variants)
         if (configuration["steps"]["loaddbNSFP"]):
             print ("step loaddbNSFP")
-            annotations.dbnsfpTAble(hc,utils.buildFileName(configuration["dbNSFP_Raw"],chrom),utils.buildFileName(configuration["dnNSFP_path"],chrom))
+            annotations.importDBTable(hc,utils.buildFileName(configuration["dbNSFP_Raw"],chrom),utils.buildFileName(configuration["dnNSFP_path"],chrom),number_partitions)
 
 
         if (configuration["steps"]["loadcadd"]):
             print ("step loaddbNSFP")
-            annotations.caddTAble(hc,utils.buildFileName(configuration["cadd_Raw"],chrom),utils.buildFileName(configuration["cadd_path"],chrom),number_partitions)
+            annotations.importDBvcf(hc,utils.buildFileName(configuration["cadd_Raw"],chrom),utils.buildFileName(configuration["cadd_path"],chrom),number_partitions)
+
+        if (configuration["steps"]["loadclinvar"]):
+            print ("step loadclinvar")
+            annotations.importDBvcf(hc,utils.buildFileName(configuration["clinvar_Raw"],""),utils.buildFileName(configuration["cadd_path"],""),number_partitions)
 
         if (configuration["steps"]["annotatedbNSFP"]):
             print("step annotatedbNSFP")
@@ -54,9 +58,14 @@ def main(hc,sqlContext):
             variants= hc.read(destination+"/annotatedVEPdbnSFP/"+fileName)
             annotations.annotatedcadd(hc,variants,utils.buildFileName(configuration["cadd_path"],chrom),destination+"/annotatedVEPdbnSFPCadd/"+fileName)
 
+        if (configuration["steps"]["annotateclinvar"]):
+            print("step annotated clinvar")
+            variants= hc.read(destination+"/annotatedVEPdbnSFPCadd/"+fileName)
+            annotations.annotatedcadd(hc,variants,utils.buildFileName(configuration["cadd_path"],""),destination+"/annotatedVEPdbnSFPCaddClinvar/"+fileName)
+
         if (configuration["steps"]["groupByGenotype"]):
             print ("step groupByGenotype")
-            variants= hc.read(destination+"/annotatedVEPdbnSFPCadd/"+fileName)
+            variants= hc.read(destination+"/annotatedVEPdbnSFPCaddClinvar/"+fileName)
             #variants.variants_table().to_dataframe().write.mode('overwrite').save(destination+"/annotatedVEPdbnSFPDEbug/"+fileName)
             variants.annotate_variants_expr('va.samples = gs.map(g=>  {g: g, s : s}  ).collect()').write(destination+"/grouped/"+fileName,overwrite=True)
         if (configuration["steps"]["transform"]):

@@ -23,6 +23,6 @@ def transform(dataset,destination,fileName):
                                                         sift_score : va.dbnsfp.SIFT_score.split(";").map(x=> removedot(x,0)).min(),
                                                         cadd_phred  : va.cadd.max(),
                                                         clinvar: va.CLNSIG, clnacc: va.CLNACC,
-                                                        clinvar_filter: if ( va.CLNSIG.exists(e => e == "5") && va.CLNSIG.exists(e => e == "4") ) "9" else  if  (va.CLNSIG.exists(e => e == "5")) "5" else  if ( va.CLNSIG.exists(e => e == "4")) "4" else if  (va.CLNSIG.length > 1) "0" else ""
+                                                        clinvar_filter: if ( va.CLNSIG.split("\\|").exists(e => e == "5") || va.CLNSIG.split("\\|").exists(e => e == "4") ) "9" else  if  (va.CLNSIG.split("\\|").exists(e => e == "5")) "5" else  if ( va.CLNSIG.split("\\|").exists(e => e == "4")) "4" else if  (va.CLNSIG.split("\\|").length > 1) "0" else ""
                                                         }]''']
                                                        ).variants_table().to_dataframe().write.mode('overwrite').save(destination+"/variants/"+fileName)

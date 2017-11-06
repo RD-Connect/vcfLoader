@@ -61,7 +61,7 @@ def main(hc,sqlContext):
         if (configuration["steps"]["annotateclinvar"]):
             print("step annotated clinvar")
             variants= hc.read(destination+"/annotatedVEPdbnSFPCadd/"+fileName)
-            annotations.annotateVCF(hc,variants,utils.buildFileName(configuration["clinvar_path"],""),destination+"/annotatedVEPdbnSFPCaddClinvar/"+fileName,'va.CLNSIG=vds.info.CLNSIG,va.CLNACC=vds.info.CLNACC,va.clinvar_filter =va.info.CLNSIG.map(x=> if (x.split("|").exists(e => e == "5") || x.split("|").exists(e => e == "4"))  "9" else  if (x.split("|").exists(e => e == "5")) "5" else  if (x.split("|").exists(e => e == "4")) "4" else   if (x.split("|").length > 1) "5" else "") ')
+            annotations.annotateVCF(hc,variants,utils.buildFileName(configuration["clinvar_path"],""),destination+"/annotatedVEPdbnSFPCaddClinvar/"+fileName,'va.CLNSIG=vds.info.CLNSIG,va.CLNACC=vds.info.CLNACC,va.clinvar_filter =vds.info.CLNSIG.map(x=> if (x.split("|").exists(e => e == "5") || x.split("|").exists(e => e == "4"))  "9" else  if (x.split("|").exists(e => e == "5")) "5" else  if (x.split("|").exists(e => e == "4")) "4" else   if (x.split("|").length > 1) "5" else "") ')
 
         if (configuration["steps"]["groupByGenotype"]):
             print ("step groupByGenotype")

@@ -48,6 +48,15 @@ def main(hc,sqlContext):
             print ("step loadclinvar")
             annotations.importDBvcf(hc,utils.buildFileName(configuration["clinvar_Raw"],""),utils.buildFileName(configuration["clinvar_path"],""),number_partitions)
 
+        if (configuration["steps"]["loadExomesGnomad"]):
+            print ("step load exomes gnomad")
+            annotations.importDBvcf(hc,utils.buildFileName(configuration["exomesGnomad_Raw"],""),utils.buildFileName(configuration["exomesGnomad_path"],""),number_partitions)
+
+
+        if (configuration["steps"]["exomesgnomad"]):
+            print ("step load exoe gnomad")
+            annotations.importDBvcf(hc,utils.buildFileName(configuration["exomesgnomad_Raw"],""),utils.buildFileName(configuration["exomesgnomad_path"],""),number_partitions)
+
         if (configuration["steps"]["annotatedbNSFP"]):
             print("step annotatedbNSFP")
             variants= hc.read(destination+"/annotatedVEP/"+fileName)
@@ -63,11 +72,17 @@ def main(hc,sqlContext):
             variants= hc.read(destination+"/annotatedVEPdbnSFPCadd/"+fileName)
             annotations.annotateVCF(hc,variants,utils.buildFileName(configuration["clinvar_path"],""),destination+"/annotatedVEPdbnSFPCaddClinvar/"+fileName,'va.CLNSIG=vds.info.CLNSIG,va.CLNACC=vds.info.CLNACC,va.clinvar_filter =vds.info.CLNSIG.map(x=> if (x.split("\\\|").exists(e => e == "5") && x.split("\\\|").exists(e => e == "4"))  "9" else  if (x.split("\\\|").exists(e => e == "5")) "5" else  if (x.split("\\\|").exists(e => e == "4")) "4" else   if (x.split("\\\|").length > 1) "0" else "") ')
 
+        if (configuration["steps"]["annotateExomesGnomad"]):
+            print("step annotated exomes gnomad")
+            variants= hc.read(destination+"/annotatedVEPdbnSFPCaddClinvar/"+fileName)
+            annotations.annotateVCF(hc,variants,utils.buildFileName(configuration["exomesgnomad_path"],""),destination+"/annotatedVEPdbnSFPCaddClinvarExGnomad/"+fileName,'va.gnomAD_Ex_AC =vds.info.gnomAD_Ex_AC, va.gnomAD_Ex_AF =vds.info.gnomAD_Ex_AF')
+
         if (configuration["steps"]["groupByGenotype"]):
             print ("step groupByGenotype")
-            variants= hc.read(destination+"/annotatedVEPdbnSFPCaddClinvar/"+fileName)
+            variants= hc.read(destination+"/annotatedVEPdbnSFPCaddClinvarExGnomad/"+fileName)
             #variants.variants_table().to_dataframe().write.mode('overwrite').save(destination+"/annotatedVEPdbnSFPDEbug/"+fileName)
             variants.annotate_variants_expr('va.samples = gs.map(g=>  {g: g, s : s}  ).collect()').write(destination+"/grouped/"+fileName,overwrite=True)
+
         if (configuration["steps"]["transform"]):
             print ("step transform")
             # add filter ad>0 before gt collect maybe?

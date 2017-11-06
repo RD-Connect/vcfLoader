@@ -16,7 +16,7 @@ def oneFile(chrom):
     if (chrom=="All"):
         return ""
     else:
-        chrom
+        return chrom
 
 
 def buildFileName(name,chrom):

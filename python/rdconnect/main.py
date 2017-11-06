@@ -46,7 +46,7 @@ def main(hc,sqlContext):
 
         if (configuration["steps"]["loadclinvar"]):
             print ("step loadclinvar")
-            annotations.importDBvcf(hc,utils.buildFileName(configuration["clinvar_Raw"],""),utils.buildFileName(configuration["cadd_path"],""),number_partitions)
+            annotations.importDBvcf(hc,utils.buildFileName(configuration["clinvar_Raw"],""),utils.buildFileName(configuration["clinvar_path"],""),number_partitions)
 
         if (configuration["steps"]["annotatedbNSFP"]):
             print("step annotatedbNSFP")

@@ -21,6 +21,7 @@ def transform(dataset,destination,fileName):
                                                         polyphen2_hvar_score : va.dbnsfp.Polyphen2_HVAR_score.split(";").map(x=> removedot(x,1)).max() ,
                                                         sift_pred:  if  (va.dbnsfp.SIFT_pred.split(";").exists(e => e == "D")) "D" else  if ( va.dbnsfp.SIFT_pred.split(";").exists(e => e == "T")) "T" else "" ,
                                                         sift_score : va.dbnsfp.SIFT_score.split(";").map(x=> removedot(x,0)).min(),
-                                                        cadd_phred  : va.cadd.max()
+                                                        cadd_phred  : va.cadd.max(),
+                                                        clinvar: va.CLNSIG, clnacc: va.CLNACC
                                                         }]''']
                                                        ).variants_table().to_dataframe().write.mode('overwrite').save(destination+"/variants/"+fileName)

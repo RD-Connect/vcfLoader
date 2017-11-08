@@ -39,6 +39,7 @@ object Data {
         "pos":{"type":"integer","index":"not_analyzed"}
         ,"ref":{"type":"string","index":"no"}
         ,"alt":{"type":"string","index":"no"}
+        ,freqInt:{"type":"float","index":"no"}
         ,"indel":{"type":"string","index":"not_analyzed"}
         ,"effs":{"type":"nested","properties":{"codon_change":{"type":"string","index":"no"}
         ,"amino_acid_change":{"type":"string","index":"no"}

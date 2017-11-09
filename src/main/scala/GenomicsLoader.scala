@@ -69,7 +69,7 @@ object GenomicsLoader {
       files=files1 ::: files2
     }*/
     val prefix= configuration.getString("preFix")
-    val files=fileReader(configuration.getString("sampleFile")).filter(x=> x(12) != "NA" ).map(x=>prefix+"/"+x(1)).toList
+    val files=fileReader(configuration.getString("sampleFile")).map(x=>prefix+"/"+x(1)).toList
     var chromList  = (configuration.getStringList("chromList") ).toList
     val index=configuration.getString("index")
     val elasticsearchHost = configuration.getString("elasticsearchHost")
@@ -165,8 +165,8 @@ object GenomicsLoader {
         }
       }
       if (pipeline.contains("sampleGroup")) {
-        val rawSample = sqlContext.load(destination + "/parsedSamples")
-        val rawRange = sqlContext.load(destination + "/rangesSwap")
+        val rawSample = sqlContext.load(destination + "/parsedSamples/chrom="+ch)
+        val rawRange = sqlContext.load(destination + "/rangesSwap/chrom="+ch)
         steps.toSampleGrouped.main(sqlContext, rawSample, rawRange, destination + "/samples", ch.toString, (0, 0))
 
       }

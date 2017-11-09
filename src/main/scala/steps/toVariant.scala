@@ -1,5 +1,7 @@
 package steps
 
+import org.apache.spark.sql.functions.udf
+
     case class VariantModel(pos:Int,ref:String,alt:String,rs:String,indel:Boolean,
          samples: collection.mutable.WrappedArray[Map[String,String]],
         effs: collection.mutable.WrappedArray[Map[String,String]],
@@ -23,8 +25,14 @@ val samples = Samples
     val annotations = Annotations
       .where(Annotations("chrom")===chromList.toInt)
 
+  val freq = udf((array: scala.collection.mutable.WrappedArray[Map[String,String]]) => {
+    val temp = array.map(variant=> variant.getOrElse("gt","0/0"));
+    temp.toList.flatMap(x=>x.split("/")).map(x=> x.toInt).sum/((2*temp.length).toFloat) })
+
+
   annotations.join(samples, annotations("pos2") === samples("pos") && annotations("ref2") === samples("ref") && annotations("alt2") === samples("alt"), "left")
     .select("pos","ref","alt","indel","samples","effs","populations","predictions")
+    .withColumn("freqInt",freq(samples("samples")))
     .write.parquet(destination+"/chrom="+chromList)//+"/band="+banda._2.toString)
 
 

@@ -12,7 +12,7 @@ def transform(dataset,destination,fileName):
     ]).annotate_variants_expr('va.af = va.samples.map(x=> x.gtInt).sum()/va.samples.filter(x=> x.dp > 8).map(x=> 2).sum()'
                               ).annotate_variants_expr(['''
                               va.vep = let c= va.vep in drop(va.vep,colocated_variants,motif_feature_consequences,intergenic_consequences,regulatory_feature_consequences,most_severe_consequence,variant_class, assembly_name,allele_string,ancestral,context,end,id,input,seq_region_name,start,strand),
-                                      va.eff= va.vep.intergenic_consequences.map( x=> va.effs1.append({gene_name: "", effect_impact: x.impact ,transcript_id: "", effect : x.consequence_terms , gene_id : "" ,functional_class:  "intergenic" , amino_acid_length : 0, codon_change :"", amino_acid_change : "", exon_rank: "", transcript_biotype: "", gene_coding: ""})),
+                                      va.effs= va.vep.intergenic_consequences.map( x=> va.effs1.append({gene_name: "", effect_impact: x.impact ,transcript_id: "", effect : x.consequence_terms , gene_id : "" ,functional_class:  "intergenic" , amino_acid_length : 0, codon_change :"", amino_acid_change : "", exon_rank: "", transcript_biotype: "", gene_coding: ""})),
                                         va.populations = [{
                                      af_internal:va.af , exac : removedot(va.dbnsfp.ExAC_AF,4)   ,
                                       gp1_asn_af : removedot(va.dbnsfp.Gp1_ASN_AF1000,4), gp1_eur_af: removedot(va.dbnsfp.Gp1_EUR_AF1000,4),

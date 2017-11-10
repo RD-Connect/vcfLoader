@@ -14,7 +14,7 @@ def transform(dataset,destination,fileName):
         'va.indel =  if ( (v.ref.length !=  v.altAlleles.map(x=> x.ref)[0].length) || (v.ref.length !=1) ||  ( v.altAlleles.map(x=> x.ref)[0].length !=1))  true else false'
     ]).annotate_variants_expr('va.af = va.samples.map(x=> x.gtInt).sum()/va.samples.filter(x=> x.dp > 8).map(x=> 2).sum()'
                               ).annotate_variants_expr([
-                                'va.effs= if (va.transcripts.size > 0 && va.intergenetics.size > 0 ) va.transcripts.extend(va.intergenetics) else if (va.transcripts.size > 0) va.transcripts else  va.intergenetics',
+                                'va.effs= if (va.transcripts.size > 0  ) va.transcripts  else  va.intergenetics',
                                               '''va.populations = [{
                                            af_internal:va.af , exac : removedot(va.dbnsfp.ExAC_AF,4)   ,
                                             gp1_asn_af : removedot(va.dbnsfp.Gp1_ASN_AF1000,4), gp1_eur_af: removedot(va.dbnsfp.Gp1_EUR_AF1000,4),

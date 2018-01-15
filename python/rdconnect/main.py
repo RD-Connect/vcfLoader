@@ -2,7 +2,7 @@
 
 from pyspark import SparkConf, SparkContext
 from pyspark.sql import SQLContext
-from rdconnect import config, loadVCF , annotations,index,transform
+from rdconnect import config, loadVCF , annotations , index , transform
 import hail
 
 from rdconnect import loadVCF,utils
@@ -18,11 +18,12 @@ APP_NAME = "My Spark Application"
 def main(hc,sqlContext):
     call(["ls", "-l"])
 
-    configuration= config.readConfig("/home/dpiscia/config.json")
+    configuration= config.readConfig("/home/production/dpiscia/spark_jar/config.json")
     #hc._jvm.core.vcfToSample.hello()
     destination =  configuration["destination"] + "/" + configuration["version"]
     for chrom in configuration["chromosome"]:
         sourceFileName=utils.buildFileName(configuration["source_path"],chrom)
+        print("sourcefilename is "+sourceFileName)
         fileName = "variantsRaw"+chrom+".vds"
         number_partitions=configuration["number_of_partitions"]
         if (configuration["steps"]["loadVCF"]):
@@ -32,7 +33,7 @@ def main(hc,sqlContext):
         if (configuration["steps"]["annotationVEP"]):
             print ("step loadVCF")
             print ("source file is "+destination+"/loaded/"+fileName)
-            annotations.annotationsVEP(hc,str(destination+"/loaded/"+fileName),destination+"/annotatedVEP/"+fileName,configuration["vep"])
+            annotations.annotationsVEP(hc,str(destination+"/loaded/"+fileName),destination+"/annotatedVEP/"+fileName,configuration["vep"],number_partitions)
             #variants= hc.sqlContext.read.load("Users/dpiscia/RD-repositories/data/output/1.1.0/dataframe/chrom1")
             #annotations.VEP2(hc,variants)
         if (configuration["steps"]["loaddbNSFP"]):
@@ -84,7 +85,9 @@ def main(hc,sqlContext):
 
         if (configuration["steps"]["groupByGenotype"]):
             print ("step groupByGenotype")
-            variants= hc.read(destination+"/annotatedVEPdbnSFPCaddClinvarExGnomadWGGnomad/"+fileName)
+            #variants= hc.read(destination+"/annotatedVEPdbnSFPCaddClinvarExGnomadWGGnomad/"+fileName)
+
+            variants= hc.read(destination+"/annotatedVEP"+fileName)
             #variants.variants_table().to_dataframe().write.mode('overwrite').save(destination+"/annotatedVEPdbnSFPDEbug/"+fileName)
             variants.annotate_variants_expr('va.samples = gs.map(g=>  {g: g, s : s}  ).collect()').write(destination+"/grouped/"+fileName,overwrite=True)
 

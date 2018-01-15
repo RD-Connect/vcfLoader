@@ -1,5 +1,5 @@
 import json
-import requests
+import urllib2
 
 
 def create_index(host,port,index_name,version):
@@ -63,8 +63,8 @@ def create_index(host,port,index_name,version):
             "diploid":{"type":"string","index":"no"}}}}}}}
           """
     url="http://"+host+":"+port+"/"+index_name
-    header={'Content-Type', 'application/json'}
-    response = requests.post(url, data)
+    header={"Content-Type", "application/json"}
+    response = urllib2.urlopen(url, data)
     print("response code"+ response.content)
 def delete_index(host,port,index_name,version):
     url="http://"+host+":"+port+"/"+index_name

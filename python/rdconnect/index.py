@@ -63,7 +63,7 @@ def create_index(host,port,index_name,version):
             "diploid":{"type":"string","index":"no"}}}}}}}
           """
     url="http://"+host+":"+port+"/"+index_name
-    header={"Content-Type", "application/json"}
+    header={"Content-Type": "application/json"}
     response = urllib2.urlopen(url, data)
     print("response code"+ response.content)
 def delete_index(host,port,index_name,version):

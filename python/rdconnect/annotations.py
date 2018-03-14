@@ -4,6 +4,7 @@ def annotationsVEP(hc,source, destinationPath, vepPath,number_partitions):
     variants= hc.read(source)
     print("running vep")
     varAnnotated= variants.vep(vepPath)
+    print("destination is "+destinationPath)
     varAnnotated.repartition(number_partitions).split_multi().write(destinationPath,overwrite=True)
     #hc._jvm.core.annotations.vep(hc._jhc,"dd")
     #variants =

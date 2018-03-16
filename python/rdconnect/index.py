@@ -1,5 +1,5 @@
 import json
-import urllib2
+
 import requests
 
 def create_index(host,port,index_name,version):

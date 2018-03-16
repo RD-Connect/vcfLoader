@@ -18,7 +18,7 @@ APP_NAME = "My Spark Application"
 def main(hc,sqlContext):
     call(["ls", "-l"])
 
-    configuration= config.readConfig("/Users/dpiscia/RD-repositories/vcfLoader2/src/main/resources/local_config.json")
+    configuration= config.readConfig("config.json")
     #hc._jvm.core.vcfToSample.hello()
     destination =  configuration["destination"] + "/" + configuration["version"]
     for chrom in configuration["chromosome"]:

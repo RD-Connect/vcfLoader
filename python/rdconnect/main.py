@@ -70,8 +70,54 @@ def main(hc,sqlContext):
 
         if (configuration["steps"]["annotateclinvar"]):
             print("step annotated clinvar")
-            variants= hc.read(destination+"/annotatedVEPdbnSFPCadd/"+fileName)
-            annotations.annotateVCF(hc,variants,utils.buildFileName(configuration["clinvar_path"],""),destination+"/annotatedVEPdbnSFPCaddClinvar/"+fileName,'va.CLNSIG=vds.info.CLNSIG,va.CLNACC=vds.info.CLNACC,va.clinvar_filter =vds.info.CLNSIG.map(x=> if (x.split("\\\|").exists(e => e == "5") && x.split("\\\|").exists(e => e == "4"))  "9" else  if (x.split("\\\|").exists(e => e == "5")) "5" else  if (x.split("\\\|").exists(e => e == "4")) "4" else   if (x.split("\\\|").length > 1) "0" else "") ')
+            variants = hc.read(destination+"/annotatedVEPdbnSFPCadd/"+fileName)
+            # For Clinvar annotations we take either the value of the CLNSIG field, or the value of CLNSIGINCL if CLNSIG is missing. These values are specified as an array of strings in the vcf.
+            # When displaying the values for each value, we map the string terms to their corresponding numerical identifiers.
+            # All these ids can be found at clinvar's website, except for the id for Conflicting_interpretations_of_pathogenicity, since it's a field that it's interesting for us
+            # and clinvar hasn't assigned a numerical value to it.
+            clin_sigs = """[
+                {type: 'Uncertain_significance', id: '0'},
+                {type: 'not_provided', id: '1'},
+                {type: 'Benign', id: '2'},
+                {type: 'Likely_benign', id: '3'},
+                {type: 'Likely_pathogenic', id: '4'},
+                {type: 'Pathogenic', id: '5'},
+                {type: 'drug_response', id: '6'},
+                {type: 'histocompatibility', id: '7'},
+                {type: 'Conflicting_interpretations_of_pathogenicity', id: 'C'},
+                {type: 'Affects', id: '255'},
+                {type: 'risk_factor', id: '255'},
+                {type: 'association', id: '255'},
+                {type: 'protective', id: '255'},
+                {type: 'other', id: '255'}
+            ]"""
+            # We first preprocess each value in the CLNSIG (or CLNSIGINCL) array. The patterns we can find are:
+            # - word1/word2,_word3 (in CLNSIG)
+            # - word1,_word2 (in CLNSIG)
+            # - number1:word1|number2:word2 (in CLNSIGINCL)
+            # - number1:word1,word2 (in CLNSIGINCL)
+            # - number1:word1 (in CLNSIGINCL)
+            # We extract the name of each field without any underscore. 
+            preprocessing_expr = """flatMap(x => x.replace('\\\/',',')
+                                            .replace('\\\:',',')
+                                            .replace('\\\|',',')
+                                            .split(',')
+                                            .map(y => if (y[0] == '_') y[1:] else y)""" 
+            # We map each vaue of the array (CLNSIG or CLNSIGINCL) to their corresponding id. If we use the CLNSIGINCL field, there can be 
+            # numbers in the field. Therefore, we map each number to a '-1', and then filter those values out.         
+            mapping_expr_for_clnsig = preprocessing_expr + """.map(z => if (clin_sigs.contains(z)) clin_sigs.get(z).id else '-1')
+                                                              .filter(e => e != '-1'))"""
+            # Since clinvar_filter is a nested field, we map each value to a tuple with the corresponding id.  
+            mapping_expr_for_clnsig_filter = preprocessing_expr + """.map(z => if (clin_sigs.contains(z)) { clnsig: clin_sigs.get(z).id } else { clnsig: '-1' })
+                                                                     .filter(e => e.clnsig != '-1'))"""
+            # The general annotation expression takes the clin_sigs dictionary as a parameter, and processes either the CLNSIG or the CLNSIGINCL field (in case 
+            # CLNSIG field is missing).
+            annotation_expr = "let clin_sigs = index(%s,type) in orElse(vds.info.CLNSIG.%s, vds.info.CLNSIGINCL.%s)" % (clin_sigs, mapping_expr_for_clnsig, mapping_expr_for_clnsig)
+            expr = "va.clinvar_id = vds.rsid, "
+            expr += "va.clinvar_clnsig = " + annotation_expr + ".mkString('|'), "
+            annotation_expr = "let clin_sigs = index(%s,type) in orElse(vds.info.CLNSIG.%s, vds.info.CLNSIGINCL.%s)" % (clin_sigs, mapping_expr_for_clnsig_filter, mapping_expr_for_clnsig_filter)
+            expr += "va.clinvar_filter = " + annotation_expr
+            annotations.annotateVCF(hc,variants,utils.buildFileName(configuration["clinvar_path"],""),destination+"/annotatedVEPdbnSFPCaddClinvar/"+fileName,expr)
 
         if (configuration["steps"]["annotateExomesGnomad"]):
             print("step annotated exomes gnomad")
@@ -108,7 +154,7 @@ def main(hc,sqlContext):
 
         if (configuration["steps"]["toElastic"]):
             print ("step to elastic")
-            variants = sqlContext.read.load(destination+"/variants/"+fileName).select("`va.predictions`","`va.populations`","`va.indel`","`va.alt`","`v.ref`","`va.pos`","`va.chrom`","`va.samples`","`va.effs`")
+            variants = sqlContext.read.load(destination+"/variants/"+fileName).select("`va.predictions`","`va.populations`","`va.clinvar_filter`","`va.indel`","`va.alt`","`v.ref`","`va.pos`","`va.chrom`","`va.samples`","`va.effs`")
             variantsRN=variants.withColumnRenamed("va.predictions","predictions") \
                 .withColumnRenamed("va.populations","populations") \
                 .withColumnRenamed("va.indel","indel") \
@@ -117,7 +163,8 @@ def main(hc,sqlContext):
                 .withColumnRenamed("va.pos","pos") \
                 .withColumnRenamed("va.chrom","chrom") \
                 .withColumnRenamed("va.samples","samples") \
-                .withColumnRenamed("va.effs","effs")
+                .withColumnRenamed("va.effs","effs") \
+                .withColumnRenamed("va.clinvar_filter","clinvar_filter")
             variantsRN.printSchema()
             variantsRN.write.format("org.elasticsearch.spark.sql").option("es.nodes",configuration["elasticsearch"]["host"]).option("es.port",configuration["elasticsearch"]["port"] ).save(configuration["elasticsearch"]["index_name"]+"/"+configuration["version"])
 

@@ -37,13 +37,13 @@ def create_index(host,port,index_name,version):
             ,"sift_score":{"type":"string","index":"no"}
             ,"siphy_29way_pi":{"type":"string","index":"no"}
             ,"UMD":{"type":"string","index":"not_analyzed"}
-            ,"clinvar":{"type":"string","index":"no"}
-            ,"clinvar_filter":{"type":"string","index":"not_analyzed"}
-            ,"clnacc":{"type":"string","index":"no"},
-            "rs":{"type":"string","index":"not_analyzed"}
+            ,"clinvar_clnsig":{"type":"string","index":"no"}
+            ,"clinvar_id":{"type":"integer","index":"no"}
+            ,"rs":{"type":"string","index":"not_analyzed"}
             }},
             "populations":{"type":"nested",
             "properties":{"gp1_afr_af":{"type":"float","index":"no"}
+            ,"af_internal":{"type":"float","index":"no"}
             ,"gp1_asn_af":{"type":"float","index":"no"}
             ,"gp1_eur_af":{"type":"float","index":"no"}
             ,"gp1_af":{"type":"float","null_value":0.0}
@@ -60,12 +60,15 @@ def create_index(host,port,index_name,version):
             ,"index":"not_analyzed"}
             ,"sample":{"type":"string","index":"not_analyzed"}
             ,"multi":{"type":"string","index":"no"},
-            "diploid":{"type":"string","index":"no"}}}}}}}
+            "diploid":{"type":"string","index":"no"}}}
+            ,"clinvar_filter":{"type":"nested",
+            "properties": {"clnsig":{"type":"string","index":"not_analyzed"}}}}}}}
           """
     url="http://"+host+":"+port+"/"+index_name
     header={"Content-Type": "application/json"}
     response = urllib2.urlopen(url, data)
     print("response code"+ response.content)
+    
 def delete_index(host,port,index_name,version):
     url="http://"+host+":"+port+"/"+index_name
     response = requests.delete(url)

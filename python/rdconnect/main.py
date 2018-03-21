@@ -18,8 +18,8 @@ APP_NAME = "My Spark Application"
 def main(hc,sqlContext):
     call(["ls", "-l"])
 
-    configuration= config.readConfig("config.json")
     #hc._jvm.core.vcfToSample.hello()
+    configuration = config.readConfig("config.json")
     destination =  configuration["destination"] + "/" + configuration["version"]
     for chrom in configuration["chromosome"]:
         sourceFileName=utils.buildFileName(configuration["source_path"],chrom)
@@ -71,53 +71,7 @@ def main(hc,sqlContext):
         if (configuration["steps"]["annotateclinvar"]):
             print("step annotated clinvar")
             variants = hc.read(destination+"/annotatedVEPdbnSFPCadd/"+fileName)
-            # For Clinvar annotations we take either the value of the CLNSIG field, or the value of CLNSIGINCL if CLNSIG is missing. These values are specified as an array of strings in the vcf.
-            # When displaying the values for each value, we map the string terms to their corresponding numerical identifiers.
-            # All these ids can be found at clinvar's website, except for the id for Conflicting_interpretations_of_pathogenicity, since it's a field that it's interesting for us
-            # and clinvar hasn't assigned a numerical value to it.
-            clin_sigs = """[
-                {type: 'Uncertain_significance', id: '0'},
-                {type: 'not_provided', id: '1'},
-                {type: 'Benign', id: '2'},
-                {type: 'Likely_benign', id: '3'},
-                {type: 'Likely_pathogenic', id: '4'},
-                {type: 'Pathogenic', id: '5'},
-                {type: 'drug_response', id: '6'},
-                {type: 'histocompatibility', id: '7'},
-                {type: 'Conflicting_interpretations_of_pathogenicity', id: 'C'},
-                {type: 'Affects', id: '255'},
-                {type: 'risk_factor', id: '255'},
-                {type: 'association', id: '255'},
-                {type: 'protective', id: '255'},
-                {type: 'other', id: '255'}
-            ]"""
-            # We first preprocess each value in the CLNSIG (or CLNSIGINCL) array. The patterns we can find are:
-            # - word1/word2,_word3 (in CLNSIG)
-            # - word1,_word2 (in CLNSIG)
-            # - number1:word1|number2:word2 (in CLNSIGINCL)
-            # - number1:word1,word2 (in CLNSIGINCL)
-            # - number1:word1 (in CLNSIGINCL)
-            # We extract the name of each field without any underscore. 
-            preprocessing_expr = """flatMap(x => x.replace('\\\/',',')
-                                            .replace('\\\:',',')
-                                            .replace('\\\|',',')
-                                            .split(',')
-                                            .map(y => if (y[0] == '_') y[1:] else y)""" 
-            # We map each vaue of the array (CLNSIG or CLNSIGINCL) to their corresponding id. If we use the CLNSIGINCL field, there can be 
-            # numbers in the field. Therefore, we map each number to a '-1', and then filter those values out.         
-            mapping_expr_for_clnsig = preprocessing_expr + """.map(z => if (clin_sigs.contains(z)) clin_sigs.get(z).id else '-1')
-                                                              .filter(e => e != '-1'))"""
-            # Since clinvar_filter is a nested field, we map each value to a tuple with the corresponding id.  
-            mapping_expr_for_clnsig_filter = preprocessing_expr + """.map(z => if (clin_sigs.contains(z)) { clnsig: clin_sigs.get(z).id } else { clnsig: '-1' })
-                                                                     .filter(e => e.clnsig != '-1'))"""
-            # The general annotation expression takes the clin_sigs dictionary as a parameter, and processes either the CLNSIG or the CLNSIGINCL field (in case 
-            # CLNSIG field is missing).
-            annotation_expr = "let clin_sigs = index(%s,type) in orElse(vds.info.CLNSIG.%s, vds.info.CLNSIGINCL.%s)" % (clin_sigs, mapping_expr_for_clnsig, mapping_expr_for_clnsig)
-            expr = "va.clinvar_id = vds.rsid, "
-            expr += "va.clinvar_clnsig = " + annotation_expr + ".mkString('|'), "
-            annotation_expr = "let clin_sigs = index(%s,type) in orElse(vds.info.CLNSIG.%s, vds.info.CLNSIGINCL.%s)" % (clin_sigs, mapping_expr_for_clnsig_filter, mapping_expr_for_clnsig_filter)
-            expr += "va.clinvar_filter = " + annotation_expr
-            annotations.annotateVCF(hc,variants,utils.buildFileName(configuration["clinvar_path"],""),destination+"/annotatedVEPdbnSFPCaddClinvar/"+fileName,expr)
+            annotations.annotateClinvar(hc,variants,utils.buildFileName(configuration["clinvar_path"],""),destination+"/annotatedVEPdbnSFPCaddClinvar/"+fileName)
 
         if (configuration["steps"]["annotateExomesGnomad"]):
             print("step annotated exomes gnomad")
@@ -177,6 +131,5 @@ if __name__ == "__main__":
     #in cluster this will be like
     hc = hail.HailContext()
     sqlContext = SQLContext(hc.sc)
-
-# Execute Main functionality
+    # Execute Main functionality
     main(hc,sqlContext)

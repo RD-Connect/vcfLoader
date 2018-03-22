@@ -5,7 +5,7 @@ from pyspark.sql import SparkSession, SQLContext
 
 """ Base class for vcfLoader unit tests """
 class BaseTestClass(unittest.TestCase):
-    
+
     def setUp(self):
         """ Creates Spark and Hail contexts and gets configuration values """
         self.spark = SparkSession.builder \

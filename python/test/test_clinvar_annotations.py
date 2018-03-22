@@ -45,8 +45,20 @@ class ClinvarAnnotationsTests(BaseTestClass):
                                 .map(lambda x: [y[0] for y in x[0]]) \
                                 .collect()
         expected_results = expected_data.collect()
-        self.assertTrue(results == expected_results)        
+        self.assertTrue(results == expected_results)
 
+    def test_id_values(self):
+        """ Tests whether clinvar ids are correctly annotated """
+        # Creation of expected results dataframe 
+        expected_data = self.sc.parallelize([[94018,'475283'],[94026,'183381'],[94545,'475278'],[282897,'402986'],
+                                           [292927,'161455'],[294953,'161454'], [323006,'475281'],[329188,'475282'],
+                                           [412449,'474165'],[416988,'474166'],[429977,'429977'],[435880,'127198'],[459011,'429977']])
+        expected_df = self.spark.createDataFrame(expected_data, ["v.start","va.clinvar_id"])
+        # Select only position and clinical id columns, sorted by position
+        results = self.annotatedDf.select("`v.start`","`va.clinvar_id`").filter("`va.clinvar_id` != 'None'").distinct().collect()
+        expected_results = expected_df.collect()
+        self.assertTrue(results == expected_results)
+        
     def tearDown(self):
         """ Removes temporal directories once the tests are done """
         # Calling the parent function

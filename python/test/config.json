@@ -2,5 +2,7 @@
     "sampleVcfPath" : "resources/data/HapMapTrioForPlayground.WGS.genotyped.reduced.vcf",
     "sampleVdsPath" : "resources/data/variants.vds",
     "clinvarVcfPath" : "resources/annotations/clinvar.reduced.vcf",
-    "clinvarVdsPath" : "resources/annotations/clinvar.reduced.vds"
+    "clinvarVdsPath" : "resources/annotations/clinvar.reduced.vds",
+    "hailJarPath" : "resources/hail-all-spark.jar",
+    "tmpDir" : "tmp"
 }

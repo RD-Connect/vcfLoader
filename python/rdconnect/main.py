@@ -166,7 +166,7 @@ def main(hc,sqlContext):
                 .withColumnRenamed("va.effs","effs") \
                 .withColumnRenamed("va.clinvar_filter","clinvar_filter")
             variantsRN.printSchema()
-            variantsRN.write.format("org.elasticsearch.spark.sql").option("es.nodes",configuration["elasticsearch"]["host"]).option("es.port",configuration["elasticsearch"]["port"] ).save(configuration["elasticsearch"]["index_name"]+"/"+configuration["version"])
+            variantsRN.write.format("org.elasticsearch.spark.sql").option("es.nodes",configuration["elasticsearch"]["host"]).option("es.port",configuration["elasticsearch"]["port"] ).save(configuration["elasticsearch"]["index_name"]+"/"+configuration["version"],mode='append')
 
 
 

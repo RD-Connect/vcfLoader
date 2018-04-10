@@ -3,6 +3,7 @@
 from pyspark import SparkConf, SparkContext
 from pyspark.sql import SQLContext
 from rdconnect import config, loadVCF , annotations , index , transform
+from pyspark.sql.functions import lit
 import hail
 
 from rdconnect import loadVCF,utils
@@ -142,7 +143,7 @@ def main(hc,sqlContext):
             # add filter ad>0 before gt collect maybe?
             grouped= hc.read(destination+"/grouped/"+fileName)
             grouped.variants_table().to_dataframe().printSchema()
-            transform.transform(grouped,destination,fileName)
+            transform.transform(grouped,destination,chrom)
         if (configuration["steps"]["deleteIndex"]):
             print ("step to delete index")
             index.delete_index(configuration["elasticsearch"]["host"],configuration["elasticsearch"]["port"],configuration["elasticsearch"]["index_name"],configuration["version"])
@@ -151,20 +152,19 @@ def main(hc,sqlContext):
             print ("step to create index")
             index.create_index(configuration["elasticsearch"]["host"],configuration["elasticsearch"]["port"],configuration["elasticsearch"]["index_name"],configuration["version"])
 
-
         if (configuration["steps"]["toElastic"]):
             print ("step to elastic")
-            variants = sqlContext.read.load(destination+"/variants/"+fileName).select("`va.predictions`","`va.populations`","`va.clinvar_filter`","`va.indel`","`va.alt`","`v.ref`","`va.pos`","`va.chrom`","`va.samples`","`va.effs`")
+            variants = sqlContext.read.load(destination+"/variants/chrom="+chrom).select("`va.predictions`","`va.populations`","`va.clinvar_filter`","`va.indel`","`va.alt`","`v.ref`","`va.pos`","`va.samples`","`va.effs`")
             variantsRN=variants.withColumnRenamed("va.predictions","predictions") \
                 .withColumnRenamed("va.populations","populations") \
                 .withColumnRenamed("va.indel","indel") \
                 .withColumnRenamed("va.alt","alt") \
                 .withColumnRenamed("v.ref","ref") \
                 .withColumnRenamed("va.pos","pos") \
-                .withColumnRenamed("va.chrom","chrom") \
                 .withColumnRenamed("va.samples","samples") \
                 .withColumnRenamed("va.effs","effs") \
-                .withColumnRenamed("va.clinvar_filter","clinvar_filter")
+                .withColumnRenamed("va.clinvar_filter","clinvar_filter") \
+                .withColumn("chrom",lit(chrom))
             variantsRN.printSchema()
             variantsRN.write.format("org.elasticsearch.spark.sql").option("es.nodes",configuration["elasticsearch"]["host"]).option("es.port",configuration["elasticsearch"]["port"] ).save(configuration["elasticsearch"]["index_name"]+"/"+configuration["version"],mode='append')
 

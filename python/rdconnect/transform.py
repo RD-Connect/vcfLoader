@@ -1,4 +1,3 @@
-#                                     va.effs= va.vep.intergenic_consequences.map( x=> va.effs1.append({gene_name: "", effect_impact: x.impact ,transcript_id: "", effect : x.consequence_terms , gene_id : "" ,functional_class:  "intergenic_region" , amino_acid_length : 0, codon_change :"", amino_acid_change : "", exon_rank: "", transcript_biotype: "", gene_coding: ""})),
 
 def transform(dataset,destination,chrom):
     dataset.annotate_variants_expr([
@@ -11,11 +10,11 @@ def transform(dataset,destination,chrom):
         'va.ref= v.ref',
         'va.alt =  v.altAlleles.map(x=> x.alt)[0]',
         'va.indel =  if ( (v.ref.length !=  v.altAlleles.map(x=> x.alt)[0].length) || (v.ref.length !=1) ||  ( v.altAlleles.map(x=> x.alt)[0].length !=1))  true else false'
-    ]).annotate_variants_expr('va.af = va.samples.map(x=> x.gtInt).sum()/va.samples.filter(x=> x.dp > 8).map(x=> 2).sum()'
+    ]).annotate_variants_expr('va.freqInt = va.samples.map(x=> x.gtInt).sum()/va.samples.filter(x=> x.dp > 8).map(x=> 2).sum()'
                               ).annotate_variants_expr([
                                 'va.effs= if (va.vep.most_severe_consequence != "intergenic_variant"  ) va.transcripts  else  va.intergenetics',
                                               '''va.populations = [{
-                                           af_internal:va.af , exac : removedot(va.dbnsfp.ExAC_AF,4)   ,
+                                            exac : removedot(va.dbnsfp.ExAC_AF,4)   ,
                                             gp1_asn_af : removedot(va.dbnsfp.Gp1_ASN_AF1000,4), gp1_eur_af: removedot(va.dbnsfp.Gp1_EUR_AF1000,4),
                                             gp1_af: removedot(va.dbnsfp.Gp1_AFR_AF1000,4) ,
                                             esp6500_aa: removedot(va.dbnsfp.ESP6500_AA_AF,4) ,

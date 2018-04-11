@@ -35,15 +35,13 @@ def main(hc,sqlContext):
             print ("step loadVCF")
             print ("source file is "+destination+"/loaded/"+fileName)
             annotations.annotationsVEP(hc,str(destination+"/loaded/"+fileName),str(destination+"/annotatedVEP/"+fileName),configuration["vep"],number_partitions)
-            #variants= hc.sqlContext.read.load("Users/dpiscia/RD-repositories/data/output/1.1.0/dataframe/chrom1")
-            #annotations.VEP2(hc,variants)
+
         if (configuration["steps"]["loaddbNSFP"]):
             print ("step loaddbNSFP")
             annotations.importDBTable(hc,utils.buildFileName(configuration["dbNSFP_Raw"],chrom),utils.buildFileName(configuration["dnNSFP_path"],chrom),number_partitions)
 
-
         if (configuration["steps"]["loadcadd"]):
-            print ("step loaddbNSFP")
+            print ("step loadCADD")
             annotations.importDBvcf(hc,utils.buildFileName(configuration["cadd_Raw"],chrom),utils.buildFileName(configuration["cadd_path"],chrom),number_partitions)
 
         if (configuration["steps"]["loadclinvar"]):
@@ -58,6 +56,9 @@ def main(hc,sqlContext):
             print ("step load WG gnomad")
             annotations.importDBvcf(hc,utils.buildFileName(configuration["genomesGnomad_Raw"],chrom),utils.buildFileName(configuration["genomesGnomad_path"],chrom),number_partitions)
 
+        if (configuration["steps"]["loaddbSNP"]):
+            print ("step load dbSNP")
+            annotations.importDBvcf(hc,utils.buildFileName(configuration["dbSNP_Raw"],chrom),utils.buildFileName(configuration["dbSNP_path"],chrom),number_partitions)
 
         if (configuration["steps"]["annotatedbNSFP"]):
             print("step annotatedbNSFP")
@@ -84,11 +85,14 @@ def main(hc,sqlContext):
             variants= hc.read(destination+"/annotatedVEPdbnSFPCaddClinvarExGnomad/"+fileName)
             annotations.annotateVCF(hc,variants,utils.buildFileName(configuration["genomesGnomad_path"],chrom),destination+"/annotatedVEPdbnSFPCaddClinvarExGnomadWGGnomad/"+fileName,'va.gnomAD_WG_AC =vds.info.gnomAD_WG_AC, va.gnomAD_WG_AF =vds.info.gnomAD_WG_AF')
 
+        if (configuration["steps"]["annotatedbSNP"]):
+            print("step annotated dbSNP")
+            variants= hc.read(destination+"/annotatedVEPdbnSFPCaddClinvarExGnomadWGGnomad/"+fileName)
+            annotations.annotateVCF(hc,variants,utils.buildFileName(configuration["dbSNP_path"],chrom),destination+"/annotatedVEPdbnSFPCaddClinvarExGnomadWGGnomaddbSNP/"+fileName,'va.rs = vds.rsid')
+
         if (configuration["steps"]["groupByGenotype"]):
             print ("step groupByGenotype")
-            #variants= hc.read(destination+"/annotatedVEPdbnSFPCaddClinvarExGnomadWGGnomad/"+fileName)
-
-            variants= hc.read(destination+"/annotatedVEPdbnSFPCaddClinvarExGnomadWGGnomad/"+fileName)
+            variants= hc.read(destination+"/annotatedVEPdbnSFPCaddClinvarExGnomadWGGnomaddbSNP/"+fileName)
             #variants.variants_table().to_dataframe().write.mode('overwrite').save(destination+"/annotatedVEPdbnSFPDEbug/"+fileName)
             variants.annotate_variants_expr('va.samples = gs.map(g=>  {g: g, s : s}  ).collect()').write(destination+"/grouped/"+fileName,overwrite=True)
 

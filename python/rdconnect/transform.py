@@ -1,13 +1,12 @@
 #                                     va.effs= va.vep.intergenic_consequences.map( x=> va.effs1.append({gene_name: "", effect_impact: x.impact ,transcript_id: "", effect : x.consequence_terms , gene_id : "" ,functional_class:  "intergenic_region" , amino_acid_length : 0, codon_change :"", amino_acid_change : "", exon_rank: "", transcript_biotype: "", gene_coding: ""})),
 
-def transform(dataset,destination,fileName):
+def transform(dataset,destination,chrom):
     dataset.annotate_variants_expr([
         'va= let c= va in drop(va,info,rsid,qual,filters)',
         'va.transcripts =  va.vep.transcript_consequences.map(x=>  {gene_name:  x.gene_symbol, effect_impact: x.impact ,transcript_id: x.transcript_id, effect : x.consequence_terms , gene_id : x.gene_id ,functional_class:  "transcript" , amino_acid_length : x.distance, codon_change :x.hgvsc, amino_acid_change : x.hgvsp, exon_rank: x.exon, transcript_biotype: x.biotype, gene_coding: str(x.cds_start)+"/"+str(x.cds_end)})',
         'va.intergenetics =   va.vep.intergenic_consequences.map( x=> {gene_name: "", effect_impact: x.impact ,transcript_id: "", effect : x.consequence_terms , gene_id : "" ,functional_class:  "intergenic_region" , amino_acid_length : 0, codon_change :"", amino_acid_change : "", exon_rank: "", transcript_biotype: "", gene_coding: ""})',
         'va.vep.transcript_consequences =  va.vep.transcript_consequences.map(x=> {(let vaf = x in drop(x,biotype,uniparc))})',
         'va.samples = gs.filter(x=> x.dp >7 && x.gq> 19).map(g=>  {gq: g.gq, dp : g.dp, gt:intToGenotype(g.gt) , gtInt : g.gt,adBug : g.ad, ad : if(g.gt >0) truncateAt(g.ad[1]/g.ad.sum.toFloat,2) else truncateAt(g.ad[0]/g.ad.sum.toFloat,2), sample : s}  ).collect()',
-        'va.chrom=  v.contig',
         'va.pos = v.start',
         'va.ref= v.ref',
         'va.alt =  v.altAlleles.map(x=> x.alt)[0]',
@@ -34,9 +33,7 @@ def transform(dataset,destination,fileName):
                                                         sift_score : va.dbnsfp.SIFT_score.split(";").map(x=> removedot(x,0)).min(),
                                                         cadd_phred  : va.cadd.max(),
                                                         clinvar_id : va.clinvar_id,
-                                                        clinvar_clnsig : va.clinvar_clnsig,
-                                                        cosmic_id: va.dbnsfp.COSMIC_ID,
-                                                        cosmic_cnt: va.dbnsfp.COSMIC_CNT
+                                                        clinvar_clnsig : va.clinvar_clnsig
                                                         }]''']
                         ).annotate_variants_expr(['va.vep = let c= va.vep in drop(va.vep,colocated_variants,motif_feature_consequences,intergenic_consequences,regulatory_feature_consequences,most_severe_consequence,variant_class, assembly_name,allele_string,ancestral,context,end,id,input,seq_region_name,start,strand)',])\
-        .variants_table().to_dataframe().write.mode('overwrite').save(destination+"/variants/"+fileName)
+        .variants_table().to_dataframe().write.mode('overwrite').save(destination+"/variants/chrom="+chrom)

@@ -1,8 +1,12 @@
 {
     "sampleVcfPath" : "resources/data/HapMapTrioForPlayground.WGS.genotyped.reduced.vcf",
-    "sampleVdsPath" : "resources/data/variants.vds",
+    "sampleVdsPath" : "tmp/variants.vds",
     "clinvarVcfPath" : "resources/annotations/clinvar.reduced.vcf",
-    "clinvarVdsPath" : "resources/annotations/clinvar.reduced.vds",
+    "clinvarVdsPath" : "tmp/clinvar.reduced.vds",
+    "clinvarTable" : "resources/results/clinvar_results.tsv",
+    "dbSNPVcfPath" : "resources/annotations/dbSNP.reduced.vcf",
+    "dbSNPVdsPath" : "tmp/dbSNP.reduced.vds",
+    "dbSNPTable" : "resources/results/dbSNP_results.tsv",
     "hailJarPath" : "resources/hail-all-spark.jar",
     "tmpDir" : "tmp"
 }

@@ -32,7 +32,7 @@ def main(hc,sqlContext):
             loadVCF.importVCF(hc,sourceFileName,destination+"/loaded/"+fileName,number_partitions)
 
         if (configuration["steps"]["annotationVEP"]):
-            print ("step loadVCF")
+            print ("step annotate VEP")
             print ("source file is "+destination+"/loaded/"+fileName)
             annotations.annotationsVEP(hc,str(destination+"/loaded/"+fileName),str(destination+"/annotatedVEP/"+fileName),configuration["vep"],number_partitions)
 
@@ -61,32 +61,32 @@ def main(hc,sqlContext):
             annotations.importDBvcf(hc,utils.buildFileName(configuration["dbSNP_Raw"],chrom),utils.buildFileName(configuration["dbSNP_path"],chrom),number_partitions)
 
         if (configuration["steps"]["annotatedbNSFP"]):
-            print("step annotatedbNSFP")
+            print("step annotate dbNSFP")
             variants= hc.read(destination+"/annotatedVEP/"+fileName)
             annotations.annotatedbnsfp(hc,variants,utils.buildFileName(configuration["dnNSFP_path"],chrom),destination+"/annotatedVEPdbnSFP/"+fileName)
 
         if (configuration["steps"]["annotatecadd"]):
-            print("step annotatedbcadd")
+            print("step annotate dbcadd")
             variants= hc.read(destination+"/annotatedVEPdbnSFP/"+fileName)
             annotations.annotateVCF(hc,variants,utils.buildFileName(configuration["cadd_path"],chrom),destination+"/annotatedVEPdbnSFPCadd/"+fileName,'va.cadd = vds.info.CADD13_PHRED')
 
         if (configuration["steps"]["annotateclinvar"]):
-            print("step annotated clinvar")
+            print("step annotate clinvar")
             variants = hc.read(destination+"/annotatedVEPdbnSFPCadd/"+fileName)
             annotations.annotateClinvar(hc,variants,utils.buildFileName(configuration["clinvar_path"],""),destination+"/annotatedVEPdbnSFPCaddClinvar/"+fileName)
 
         if (configuration["steps"]["annotateExomesGnomad"]):
-            print("step annotated exomes gnomad")
+            print("step annotate exomes gnomad")
             variants= hc.read(destination+"/annotatedVEPdbnSFPCaddClinvar/"+fileName)
             annotations.annotateVCF(hc,variants,utils.buildFileName(configuration["exomesGnomad_path"],chrom),destination+"/annotatedVEPdbnSFPCaddClinvarExGnomad/"+fileName,'va.gnomAD_Ex_AC =vds.info.gnomAD_Ex_AC, va.gnomAD_Ex_AF =vds.info.gnomAD_Ex_AF')
 
         if (configuration["steps"]["annotateWGGnomad"]):
-            print("step annotated WG gnomad")
+            print("step annotate WG gnomad")
             variants= hc.read(destination+"/annotatedVEPdbnSFPCaddClinvarExGnomad/"+fileName)
             annotations.annotateVCF(hc,variants,utils.buildFileName(configuration["genomesGnomad_path"],chrom),destination+"/annotatedVEPdbnSFPCaddClinvarExGnomadWGGnomad/"+fileName,'va.gnomAD_WG_AC =vds.info.gnomAD_WG_AC, va.gnomAD_WG_AF =vds.info.gnomAD_WG_AF')
 
         if (configuration["steps"]["annotatedbSNP"]):
-            print("step annotated dbSNP")
+            print("step annotate dbSNP")
             variants= hc.read(destination+"/annotatedVEPdbnSFPCaddClinvarExGnomadWGGnomad/"+fileName)
             annotations.annotateVCF(hc,variants,utils.buildFileName(configuration["dbSNP_path"],chrom),destination+"/annotatedVEPdbnSFPCaddClinvarExGnomadWGGnomaddbSNP/"+fileName,'va.rs = vds.rsid')
 
@@ -102,6 +102,7 @@ def main(hc,sqlContext):
             grouped= hc.read(destination+"/grouped/"+fileName)
             grouped.variants_table().to_dataframe().printSchema()
             transform.transform(grouped,destination,chrom)
+            
         if (configuration["steps"]["deleteIndex"]):
             print ("step to delete index")
             index.delete_index(configuration["elasticsearch"]["host"],configuration["elasticsearch"]["port"],configuration["elasticsearch"]["index_name"],configuration["version"])

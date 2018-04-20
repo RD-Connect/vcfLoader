@@ -12,18 +12,19 @@ def transform(dataset,destination,chrom):
         'va.indel =  if ( (v.ref.length !=  v.altAlleles.map(x=> x.alt)[0].length) || (v.ref.length !=1) ||  ( v.altAlleles.map(x=> x.alt)[0].length !=1))  true else false'
     ]).annotate_variants_expr('va.freqInt = va.samples.map(x=> x.gtInt).sum()/va.samples.filter(x=> x.dp > 8).map(x=> 2).sum()'
                               ).annotate_variants_expr([
-                                'va.effs= if (va.vep.most_severe_consequence != "intergenic_variant"  ) va.transcripts  else  va.intergenetics',
+                                'va.effs = if (va.vep.most_severe_consequence != "intergenic_variant") va.transcripts else va.intergenetics',
                                               '''va.populations = [{
                                               exac : orElse(removedot(va.dbnsfp.ExAC_AF,4),0.0)   ,
                                               gp1_asn_af : orElse(removedot(va.dbnsfp.Gp1_ASN_AF1000,4),0.0), 
                                               gp1_eur_af: orElse(removedot(va.dbnsfp.Gp1_EUR_AF1000,4),0.0),
-                                              gp1_af: orElse(removedot(va.dbnsfp.Gp1_AFR_AF1000,4),0.0),
+                                              gp1_afr_af: orElse(removedot(va.dbnsfp.Gp1_AFR_AF1000,4),0.0),
+                                              gp1_af: orElse(removedot(va.dbnsfp.Gp1_AF1000,4),0.0),
                                               esp6500_aa: orElse(removedot(va.dbnsfp.ESP6500_AA_AF,4),0.0),
                                               esp6500_ea: orElse(removedot(va.dbnsfp.ESP6500_EA_AF,4),0.0),
-                                              gnomAD_WG_AF : va.gnomAD_WG_AF,
-                                              gnomAD_WG_AC : va.gnomAD_WG_AC,
-                                              gnomAD_Ex_AF: va.gnomAD_Ex_AF,
-                                              gnomAD_Ex_AC: va.gnomAD_Ex_AC}]''',
+                                              gnomAD_WG_AF : orElse(va.gnomAD_WG_AF,0.0),
+                                              gnomAD_WG_AC : orElse(va.gnomAD_WG_AC,0),
+                                              gnomAD_Ex_AF: orElse(va.gnomAD_Ex_AF,0.0),
+                                              gnomAD_Ex_AC: orElse(va.gnomAD_Ex_AC,0)}]''',
                                                         '''va.predictions = [{
                                                         gerp_rs: va.dbnsfp.GERP_RS, 
                                                         mt: orElse(va.dbnsfp.MutationTaster_score.split(";").map(x=> removedot(x,1)).max(),0.0),

@@ -46,12 +46,17 @@ def create_index(host,port,index_name,version):
             "properties":{"gp1_afr_af":{"type":"float","index":"no"}
             ,"gp1_asn_af":{"type":"float","index":"no"}
             ,"gp1_eur_af":{"type":"float","index":"no"}
+            ,"gp1_afr_af":{"type":"float","index":"no"}
             ,"gp1_af":{"type":"float","null_value":0.0}
             ,"esp6500_aa":{"type":"float","null_value":0.0}
             ,"esp6500_ea":{"type":"float","null_value":0.0}
             ,"exac":{"type":"float","null_value":0.0}
             ,"gmaf":{"type":"float","index":"no"}
             ,"rd_freq":{"type":"float","index":"no"}}}
+            ,"gnomAD_WG_AF":{"type":"float","null_value":0.0}
+            ,"gnomAD_WG_AC":{"type":"integer","index":"no"}
+            ,"gnomAD_Ex_AF":{"type":"float","null_value":0.0}
+            ,"gnomAD_Ex_AC":{"type":"integer","index":"no"}
             ,"samples":{"type":"nested",
             "properties":{"dp":{"type":"float"}
             ,"gq":{"type":"float"}

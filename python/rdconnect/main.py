@@ -78,12 +78,12 @@ def main(hc,sqlContext):
         if (configuration["steps"]["annotateExomesGnomad"]):
             print("step annotate exomes gnomad")
             variants= hc.read(destination+"/annotatedVEPdbnSFPCaddClinvar/"+fileName)
-            annotations.annotateVCF(hc,variants,utils.buildFileName(configuration["exomesGnomad_path"],chrom),destination+"/annotatedVEPdbnSFPCaddClinvarExGnomad/"+fileName,'va.gnomAD_Ex_AC =vds.info.gnomAD_Ex_AC, va.gnomAD_Ex_AF =vds.info.gnomAD_Ex_AF')
+            annotations.annotateVCF(hc,variants,utils.buildFileName(configuration["exomesGnomad_path"],chrom),destination+"/annotatedVEPdbnSFPCaddClinvarExGnomad/"+fileName,'va.gnomAD_Ex_AC = vds.info.gnomAD_Ex_AC[vds.aIndex-1], va.gnomAD_Ex_AF = vds.info.gnomAD_Ex_AF[vds.aIndex-1]')
 
         if (configuration["steps"]["annotateWGGnomad"]):
             print("step annotate WG gnomad")
             variants= hc.read(destination+"/annotatedVEPdbnSFPCaddClinvarExGnomad/"+fileName)
-            annotations.annotateVCF(hc,variants,utils.buildFileName(configuration["genomesGnomad_path"],chrom),destination+"/annotatedVEPdbnSFPCaddClinvarExGnomadWGGnomad/"+fileName,'va.gnomAD_WG_AC =vds.info.gnomAD_WG_AC, va.gnomAD_WG_AF =vds.info.gnomAD_WG_AF')
+            annotations.annotateVCF(hc,variants,utils.buildFileName(configuration["genomesGnomad_path"],chrom),destination+"/annotatedVEPdbnSFPCaddClinvarExGnomadWGGnomad/"+fileName,'va.gnomAD_WG_AC = vds.info.gnomAD_WG_AC[vds.aIndex-1], va.gnomAD_WG_AF = vds.info.gnomAD_WG_AF[vds.aIndex-1]')
 
         if (configuration["steps"]["annotatedbSNP"]):
             print("step annotate dbSNP")

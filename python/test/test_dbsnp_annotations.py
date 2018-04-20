@@ -19,9 +19,9 @@ class DbSNPAnnotationsTests(BaseTestClass):
         # Calling the parent setUp function 
         super(DbSNPAnnotationsTests,self).setUp()
         # Importing variants from vcf
-        variants = self.hc.import_vcf(self.config["sampleVcfPath"])
+        variants = self.hc.import_vcf(self.config["sampleVcfPath"]).split_multi()
         # Writing temporal directory to store the sample vcf variant dataset
-        self.hc.import_vcf(self.config["dbSNPVcfPath"]).write(self.config["dbSNPVdsPath"],overwrite=True)
+        self.hc.import_vcf(self.config["dbSNPVcfPath"]).split_multi().write(self.config["dbSNPVdsPath"],overwrite=True)
         # Creating annotated variants with dbSNP
         annotations.annotateVCF(self.hc,variants,self.config["dbSNPVdsPath"],self.config["sampleVdsPath"],'va.rs = vds.rsid')
         # Defining specific configuration values for the test

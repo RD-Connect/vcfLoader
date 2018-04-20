@@ -4,6 +4,7 @@ from hail import HailContext
 from pyspark.sql import SparkSession, SQLContext
 import shutil
 import nose.tools
+import logging
 
 """ 
 Base class for vcfLoader unit tests.
@@ -18,7 +19,10 @@ class BaseTestClass(unittest.TestCase):
 
     def setUp(self):
         """ Creates Spark and Hail contexts and gets configuration values """
+        # Turning off excesive logging (Error level only)
         self.config = config.readConfig("config.json")
+        logger = logging.getLogger('py4j.java_gateway')
+        logger.setLevel(logging.ERROR) 
         self.spark = SparkSession.builder \
                                  .master("local[*]") \
                                  .appName("vcfLoader unit tests") \
@@ -26,6 +30,7 @@ class BaseTestClass(unittest.TestCase):
                                  .config("spark.sql.files.maxPartitionBytes","1099511627776") \
                                  .config("spark.driver.extraClassPath",self.config["hailJarPath"]) \
                                  .config("spark.driver.extraJavaOptions","-Dorg.xerial.snappy.tempdir=" + self.config["tmpDir"]) \
+                                 .config("spark.eventLog.enabled",False) \
                                  .getOrCreate()
         self.sc = self.spark.sparkContext
         self.hc = HailContext(self.sc)
@@ -39,11 +44,16 @@ class BaseTestClass(unittest.TestCase):
         # - Expand variant types (otherwise we just get the 'v' type, instead of the chrom, position, etc)
         # - Flatten struct types (so we can select the columns with 'va._'. Otherwise, we can just access 'va')
         # - Select specified columns and key by specified key (e.g. v.start)
+        # - Filter out all rows with missing values (that way we can add result tables without modifying the
+        #   existing ones for other tests)
         annotated_table = self.hc.read(self.sample_path) \
                                  .variants_table() \
                                  .expand_types() \
                                  .flatten() \
-                                 .select(self.columns).order_by(self.key).key_by(self.key)
+                                 .select(self.columns) \
+                                 .order_by(self.key) \
+                                 .filter(" && ".join(map(lambda value: "!isMissing(`" + str(value) + "`)", self.columns))) \
+                                 .key_by(self.key)
         expected_table = self.hc.import_table(self.results_path, types=self.types).key_by(self.key)
         self.assertTrue(annotated_table.same(expected_table))
         

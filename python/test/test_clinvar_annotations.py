@@ -20,9 +20,9 @@ class ClinvarAnnotationsTests(BaseTestClass):
         # Calling the parent setUp function 
         super(ClinvarAnnotationsTests,self).setUp()
         # Importing variants from vcf
-        variants = self.hc.import_vcf(self.config["sampleVcfPath"])
+        variants = self.hc.import_vcf(self.config["sampleVcfPath"]).split_multi()
         # Writing temporal directory to store the sample vcf variant dataset
-        self.hc.import_vcf(self.config["clinvarVcfPath"]).write(self.config["clinvarVdsPath"],overwrite=True)
+        self.hc.import_vcf(self.config["clinvarVcfPath"]).split_multi().write(self.config["clinvarVdsPath"],overwrite=True)
         # Creating annotated variants with Clinvar
         annotations.annotateClinvar(self.hc,variants,self.config["clinvarVdsPath"],self.config["sampleVdsPath"])
         # Defining specific configuration values for the test

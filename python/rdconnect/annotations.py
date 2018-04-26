@@ -85,3 +85,11 @@ def annotateClinvar(hc,variants,annotationPath,destinationPath):
     annotation_expr = "let clin_sigs = index(%s,type) in orElse(vds.info.CLNSIG.%s, vds.info.CLNSIGINCL.%s)" % (clin_sigs, mapping_expr_for_clnsig_filter, mapping_expr_for_clnsig_filter)
     expr += "va.clinvar_filter = " + annotation_expr
     annotateVCF(hc,variants,annotationPath,destinationPath,expr)
+
+def annotateExAC(hc,variants,annotationPath,destinationPath):
+    annotations_vds = hc.read(annotationPath)
+    n_multiallelics = annotations_vds.summarize().multiallelics
+    annotations_expr = 'va.exac = vds.info.ExAC_AF[vds.aIndex-1]'
+    if not n_multiallelics:
+        annotations_expr = 'va.exac = vds.info.ExAC_AF[0]'
+    variants.annotate_variants_vds(annotations_vds,expr=annotations_expr).write(destinationPath,overwrite=True)

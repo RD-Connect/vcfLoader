@@ -1,9 +1,9 @@
 
 def transform(dataset,destination,chrom):
     dataset.annotate_variants_expr([
-        'va= let c= va in drop(va,info,rsid,qual,filters)',
-        'va.transcripts =  va.vep.transcript_consequences.map(x=>  {gene_name:  x.gene_symbol, effect_impact: x.impact ,transcript_id: x.transcript_id, effect : x.consequence_terms , gene_id : x.gene_id ,functional_class:  "transcript" , amino_acid_length : x.distance, codon_change :x.hgvsc, amino_acid_change : x.hgvsp, exon_rank: x.exon, transcript_biotype: x.biotype, gene_coding: str(x.cds_start)+"/"+str(x.cds_end)})',
-        'va.intergenetics =   va.vep.intergenic_consequences.map( x=> {gene_name: "", effect_impact: x.impact ,transcript_id: "", effect : x.consequence_terms , gene_id : "" ,functional_class:  "intergenic_region" , amino_acid_length : 0, codon_change :"", amino_acid_change : "", exon_rank: "", transcript_biotype: "", gene_coding: ""})',
+        'va = let c= va in drop(va,info,rsid,qual,filters)',
+        'va.transcripts =  va.vep.transcript_consequences.map(x=>  {gene_name:  x.gene_symbol, effect_impact: x.impact ,transcript_id: x.transcript_id, effect : x.consequence_terms.mkString(",") , gene_id : x.gene_id ,functional_class:  "transcript" , amino_acid_length : x.distance, codon_change: x.hgvsc.replace(x.transcript_id,""), amino_acid_change : x.hgvsp, exon_rank: x.exon, transcript_biotype: x.biotype, gene_coding: str(x.cds_start)+"/"+str(x.cds_end)})',
+        'va.intergenetics =   va.vep.intergenic_consequences.map( x=> {gene_name: "", effect_impact: x.impact ,transcript_id: "", effect : x.consequence_terms.mkString(",") , gene_id : "" ,functional_class:  "intergenic_region" , amino_acid_length : 0, codon_change :"", amino_acid_change : "", exon_rank: "", transcript_biotype: "", gene_coding: ""})',
         'va.vep.transcript_consequences =  va.vep.transcript_consequences.map(x=> {(let vaf = x in drop(x,biotype,uniparc))})',
         'va.samples = gs.filter(x=> x.dp >7 && x.gq> 19).map(g=>  {gq: g.gq, dp : g.dp, gt:intToGenotype(g.gt) , gtInt : g.gt,adBug : g.ad, ad : if(g.gt >0) truncateAt(g.ad[1]/g.ad.sum.toFloat,2) else truncateAt(g.ad[0]/g.ad.sum.toFloat,2), sample : s}  ).collect()',
         'va.pos = v.start',
@@ -14,7 +14,7 @@ def transform(dataset,destination,chrom):
                               ).annotate_variants_expr([
                                 'va.effs= if (va.vep.most_severe_consequence != "intergenic_variant"  ) va.transcripts  else  va.intergenetics',
                                               '''va.populations = [{
-                                              exac : orElse(removedot(va.dbnsfp.ExAC_AF,4),0.0)   ,
+                                              exac : orElse(truncateAt(va.exac,6),0.0),
                                               gp1_asn_af : orElse(removedot(va.dbnsfp.Gp1_ASN_AF1000,4),0.0), 
                                               gp1_eur_af: orElse(removedot(va.dbnsfp.Gp1_EUR_AF1000,4),0.0),
                                               gp1_af: orElse(removedot(va.dbnsfp.Gp1_AFR_AF1000,4),0.0),

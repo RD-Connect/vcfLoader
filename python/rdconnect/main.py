@@ -60,6 +60,10 @@ def main(hc,sqlContext):
             print ("step load dbSNP")
             annotations.importDBvcf(hc,utils.buildFileName(configuration["dbSNP_Raw"],chrom),utils.buildFileName(configuration["dbSNP_path"],chrom),number_partitions)
 
+        if (configuration["steps"]["loadExAC"]):
+            print ("step load ExAC")
+            annotations.importDBvcf(hc,utils.buildFileName(configuration["ExAC_Raw"],chrom),utils.buildFileName(configuration["ExAC_path"],chrom),number_partitions)
+            
         if (configuration["steps"]["annotatedbNSFP"]):
             print("step annotate dbNSFP")
             variants= hc.read(destination+"/annotatedVEP/"+fileName)
@@ -90,9 +94,14 @@ def main(hc,sqlContext):
             variants= hc.read(destination+"/annotatedVEPdbnSFPCaddClinvarExGnomadWGGnomad/"+fileName)
             annotations.annotateVCF(hc,variants,utils.buildFileName(configuration["dbSNP_path"],chrom),destination+"/annotatedVEPdbnSFPCaddClinvarExGnomadWGGnomaddbSNP/"+fileName,'va.rs = vds.rsid')
 
+        if (configuration["steps"]["annotateExAC"]):
+            print("step annotate ExAC")
+            variants= hc.read(destination+"/annotatedVEPdbnSFPCaddClinvarExGnomadWGGnomaddbSNP/"+fileName)
+            annotations.annotateExAC(hc,variants,utils.buildFileName(configuration["ExAC_path"],chrom),destination+"/annotatedVEPdbnSFPCaddClinvarExGnomadWGGnomaddbSNPExAC/"+fileName)
+            
         if (configuration["steps"]["groupByGenotype"]):
             print ("step groupByGenotype")
-            variants= hc.read(destination+"/annotatedVEPdbnSFPCaddClinvarExGnomadWGGnomaddbSNP/"+fileName)
+            variants= hc.read(destination+"/annotatedVEPdbnSFPCaddClinvarExGnomadWGGnomaddbSNPExAC/"+fileName)
             #variants.variants_table().to_dataframe().write.mode('overwrite').save(destination+"/annotatedVEPdbnSFPDEbug/"+fileName)
             variants.annotate_variants_expr('va.samples = gs.map(g=>  {g: g, s : s}  ).collect()').write(destination+"/grouped/"+fileName,overwrite=True)
 

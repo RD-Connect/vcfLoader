@@ -14,7 +14,7 @@ def transform(dataset,destination,chrom):
                               ).annotate_variants_expr([
                                 'va.effs = if (va.vep.most_severe_consequence != "intergenic_variant") va.transcripts else va.intergenetics',
                                               '''va.populations = [{
-                                              exac : orElse(removedot(va.exac,6),0.0),
+                                              exac : orElse(va.exac,0.0),
                                               gp1_asn_af : orElse(removedot(va.dbnsfp.Gp1_ASN_AF1000,4),0.0), 
                                               gp1_eur_af: orElse(removedot(va.dbnsfp.Gp1_EUR_AF1000,4),0.0),
                                               gp1_afr_af: orElse(removedot(va.dbnsfp.Gp1_AFR_AF1000,4),0.0),

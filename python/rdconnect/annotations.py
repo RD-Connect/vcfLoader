@@ -14,7 +14,7 @@ def importDBTable(hc,sourcePath,destinationPath,number_partitions):
     dbnsfpTable.rename({'1000Gp1_AF':'Gp1_AF1000','1000Gp1_AC':'Gp1_AC1000','1000Gp1_EUR_AF':'Gp1_EUR_AF1000','1000Gp1_ASN_AF':'Gp1_ASN_AF1000','1000Gp1_AFR_AF':'Gp1_AFR_AF1000','ESP6500_EA_AF ':'ESP6500_EA_AF','GERP++_RS':'GERP_RS'}).repartition(number_partitions).write(destinationPath,overwrite=True) 
 
 def annotatedbnsfp(hc,variants, dbsfp_path,destinationPath):
-    dbnsfp = hc.read_table(dbsfp_path).split_multi()
+    dbnsfp = hc.read_table(dbsfp_path)
     variants.annotate_variants_table(dbnsfp,root='va.dbnsfp').write(destinationPath,overwrite=True)
 
 def importDBvcf(hc,sourcePath,destinationPath,number_partitions):

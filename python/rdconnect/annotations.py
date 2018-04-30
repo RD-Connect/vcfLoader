@@ -93,3 +93,23 @@ def annotateExAC(hc,variants,annotationPath,destinationPath):
     if not n_multiallelics:
         annotations_expr = 'va.exac = vds.info.ExAC_AF[0]'
     variants.annotate_variants_vds(annotations_vds,expr=annotations_expr).write(destinationPath,overwrite=True)
+
+def annotateGnomADWG(hc,variants,annotationPath,destinationPath):
+    annotations_vds = hc.read(annotationPath)
+    n_multiallelics = annotations_vds.summarize().multiallelics
+    index = '0'
+    if n_multiallelics:
+        index = 'vds.aIndex-1'
+    annotations_expr = """va.gnomAD_WG_AF = vds.info.gnomAD_WG_AF[%s],
+                          va.gnomAD_WG_AC = vds.info.gnomAD_WG_AC[%s]""" % (index,index)
+    variants.annotate_variants_vds(annotations_vds,expr=annotations_expr).write(destinationPath,overwrite=True)
+
+def annotateGnomADEx(hc,variants,annotationPath,destinationPath):
+    annotations_vds = hc.read(annotationPath)
+    n_multiallelics = annotations_vds.summarize().multiallelics
+    index = '0'
+    if n_multiallelics:
+        index = 'vds.aIndex-1'
+    annotations_expr = """va.gnomAD_Ex_AF = vds.info.gnomAD_Ex_AF[%s],
+                          va.gnomAD_Ex_AC = vds.info.gnomAD_Ex_AC[%s]""" % (index,index)
+    variants.annotate_variants_vds(annotations_vds,expr=annotations_expr).write(destinationPath,overwrite=True)

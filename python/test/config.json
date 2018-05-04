@@ -1,5 +1,5 @@
 {
-    "sampleVcfPath" : "resources/data/HapMapTrioForPlayground.WGS.genotyped.reduced.vcf",
+    "sampleVcfPath" : "resources/data/sample.vcf",
     "sampleVdsPath" : "tmp/variants.vds",
     "clinvarVcfPath" : "resources/annotations/clinvar.reduced.vcf",
     "clinvarVdsPath" : "tmp/clinvar.reduced.vds",

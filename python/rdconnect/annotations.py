@@ -73,7 +73,7 @@ def annotateClinvar(hc,variants,annotationPath,destinationPath):
     # Since clinvar_filter is a nested field, we map each value to a tuple with the corresponding id.  
     mapping_expr_for_clnsig_filter = preprocessing_expr + """.map(z => if (clin_sigs.contains(z)) { clnsig: clin_sigs.get(z).id } else { clnsig: '-1' })
                                                              .filter(e => e.clnsig != '-1'))"""
-    expr = "va.clinvar_id = vds.rsid, "
+    expr = "va.clinvar_id = if(!isMissing(vds.info.CLNSIG)) vds.rsid else vds.info.CLNSIGINCL[0].split(':')[0], "
     # The general annotation expression takes the clin_sigs dictionary as a parameter, and processes either the CLNSIG or the CLNSIGINCL field (in case 
     # CLNSIG field is missing).
     annotation_expr = "let clin_sigs = index(%s,type) in orElse(vds.info.CLNSIG.%s, vds.info.CLNSIGINCL.%s)" % (clin_sigs, mapping_expr_for_clnsig, mapping_expr_for_clnsig)
@@ -82,33 +82,60 @@ def annotateClinvar(hc,variants,annotationPath,destinationPath):
     expr += "va.clinvar_filter = " + annotation_expr
     annotateVCF(hc,variants,annotationPath,destinationPath,expr)
 
-def annotateExAC(hc,variants,annotationPath,destinationPath):
+def annotateVCFMulti(hc,variants,annotationPath,destinationPath,annotations):
+    """ Adds annotations to variants that have multiallelic INFO fields.
+         :param HailContext hc: The Hail context
+         :param VariantDataset variants: The variants to annotate
+         :param string annotationPath: Path were the Clinvar annotation vcf can be found
+         :param string destinationPath: Path were the new annotated dataset can be found
+         :param string annotations: Array of annotations to add to the dataset
+    """
     annotations_vds = hc.read(annotationPath)
+    # Getting number of multiallelics
     n_multiallelics = annotations_vds.summarize().multiallelics
     annotations_vds = annotations_vds.split_multi()
-    annotations_expr = 'va.exac = vds.info.ExAC_AF[vds.aIndex-1]'
-    if not n_multiallelics:
-        annotations_expr = 'va.exac = vds.info.ExAC_AF[0]'
+    index = '0'
+    # If there are multiallelics, the aIndex annotation is created by default in the dataset.
+    # This is used in Hail for INFO fields which are multiallelic, since the function 'split_multi'
+    # doesn't split the info field, and we need to use the aIndex in order to get the correct value.
+    if n_multiallelics:
+        index = 'vds.aIndex-1'
+    annotations_expr = annotations[0] % index
+    for annotation in annotations[1:]:
+        annotations_expr += "," + annotation % index
     variants.annotate_variants_vds(annotations_vds,expr=annotations_expr).write(destinationPath,overwrite=True)
+    
+def annotateExAC(hc,variants,annotationPath,destinationPath):
+    """ Adds ExAC annotations to a dataset. 
+         :param HailContext hc: The Hail context
+         :param VariantDataset variants: The variants to annotate
+         :param string annotationPath: Path were the Clinvar annotation vcf can be found
+         :param string destinationPath: Path were the new annotated dataset can be found
+    """
+    # Setting the corresponding annotations we need. The index will be specified in the
+    # 'annotateVCFMulti' function, since INFO fields based on alleles don't get split in
+    # multiallelic cases.
+    annotations = ['va.exac = vds.info.ExAC_AF[%s]']
+    annotateVCFMulti(hc,variants,annotationPath,destinationPath,annotations)
 
 def annotateGnomADWG(hc,variants,annotationPath,destinationPath):
-    annotations_vds = hc.read(annotationPath)
-    n_multiallelics = annotations_vds.summarize().multiallelics
-    annotations_vds = annotations_vds.split_multi()
-    index = '0'
-    if n_multiallelics:
-        index = 'vds.aIndex-1'
-    annotations_expr = """va.gnomAD_WG_AF = vds.info.gnomAD_WG_AF[%s],
-                          va.gnomAD_WG_AC = vds.info.gnomAD_WG_AC[%s]""" % (index,index)
-    variants.annotate_variants_vds(annotations_vds,expr=annotations_expr).write(destinationPath,overwrite=True)
+    """ Adds gnomAD WG annotations to a dataset. 
+         :param HailContext hc: The Hail context
+         :param VariantDataset variants: The variants to annotate
+         :param string annotationPath: Path were the Clinvar annotation vcf can be found
+         :param string destinationPath: Path were the new annotated dataset can be found
+    """
+    annotations = ["va.gnomAD_WG_AF = vds.info.gnomAD_WG_AF[%s]",
+                   "va.gnomAD_WG_AC = vds.info.gnomAD_WG_AC[%s]"]
+    annotateVCFMulti(hc,variants,annotationPath,destinationPath,annotations)
 
 def annotateGnomADEx(hc,variants,annotationPath,destinationPath):
-    annotations_vds = hc.read(annotationPath)
-    n_multiallelics = annotations_vds.summarize().multiallelics
-    annotations_vds = annotations_vds.split_multi()
-    index = '0'
-    if n_multiallelics:
-        index = 'vds.aIndex-1'
-    annotations_expr = """va.gnomAD_Ex_AF = vds.info.gnomAD_Ex_AF[%s],
-                          va.gnomAD_Ex_AC = vds.info.gnomAD_Ex_AC[%s]""" % (index,index)
-    variants.annotate_variants_vds(annotations_vds,expr=annotations_expr).write(destinationPath,overwrite=True)
+    """ Adds gnomAD Ex annotations to a dataset. 
+         :param HailContext hc: The Hail context
+         :param VariantDataset variants: The variants to annotate
+         :param string annotationPath: Path were the Clinvar annotation vcf can be found
+         :param string destinationPath: Path were the new annotated dataset can be found
+    """
+    annotations = ["va.gnomAD_Ex_AF = vds.info.gnomAD_Ex_AF[%s]",
+                   "va.gnomAD_Ex_AC = vds.info.gnomAD_Ex_AC[%s]"]
+    annotateVCFMulti(hc,variants,annotationPath,destinationPath,annotations)

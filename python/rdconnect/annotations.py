@@ -80,6 +80,7 @@ def annotateClinvar(hc,variants,annotationPath,destinationPath):
     expr += "va.clinvar_clnsig = " + annotation_expr + ".mkString('|'), "
     annotation_expr = "let clin_sigs = index(%s,type) in orElse(vds.info.CLNSIG.%s, vds.info.CLNSIGINCL.%s)" % (clin_sigs, mapping_expr_for_clnsig_filter, mapping_expr_for_clnsig_filter)
     expr += "va.clinvar_filter = " + annotation_expr
+    expr += ", va.clinvar_clnsigconf = vds.info.CLNSIGCONF.mkString(',')" 
     annotateVCF(hc,variants,annotationPath,destinationPath,expr)
 
 def annotateVCFMulti(hc,variants,annotationPath,destinationPath,annotations):

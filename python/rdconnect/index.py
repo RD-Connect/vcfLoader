@@ -39,6 +39,7 @@ def create_index(host,port,index_name,version):
             ,"siphy_29way_pi":{"type":"string","index":"no"}
             ,"UMD":{"type":"string","index":"not_analyzed"}
             ,"clinvar_clnsig":{"type":"string","index":"no"}
+            ,"clinvar_clnsigconf":{"type":"string","index":"no"}
             ,"clinvar_id":{"type":"integer","index":"no"}
             ,"rs":{"type":"string","index":"not_analyzed"}
             }},

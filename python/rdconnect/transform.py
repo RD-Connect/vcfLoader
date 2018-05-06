@@ -37,6 +37,7 @@ def transform(dataset,destination,chrom):
                                                         cadd_phred  : orElse(va.cadd.max(),0.0),
                                                         clinvar_id : va.clinvar_id,
                                                         clinvar_clnsig : va.clinvar_clnsig,
+                                                        clinvar_clnsigconf : va.clinvar_clnsigconf,
                                                         rs : orElse(va.rs,'.')
                                                         }]''']
                         ).annotate_variants_expr(['va.vep = let c= va.vep in drop(va.vep,colocated_variants,motif_feature_consequences,intergenic_consequences,regulatory_feature_consequences,most_severe_consequence,variant_class, assembly_name,allele_string,ancestral,context,end,id,input,seq_region_name,start,strand)',])\

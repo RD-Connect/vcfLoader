@@ -54,7 +54,9 @@ class BaseTestClass(unittest.TestCase):
                                  .order_by(self.key) \
                                  .filter(" && ".join(map(lambda value: "!isMissing(`" + str(value) + "`)", self.columns))) \
                                  .key_by(self.key)
+        annotated_table.show()
         expected_table = self.hc.import_table(self.results_path, types=self.types).key_by(self.key)
+        expected_table.show()
         self.assertTrue(annotated_table.same(expected_table))
         
     def tearDown(self, tmp_dirs):

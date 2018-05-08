@@ -39,20 +39,20 @@ def annotateClinvar(hc,variants,annotationPath,destinationPath):
     # All these ids can be found at clinvar's website, except for the id for Conflicting_interpretations_of_pathogenicity, since it's a field that it's interesting for us
     # and clinvar hasn't assigned a numerical value to it.
     clin_sigs = """[
-        {type: 'Uncertain_significance', id: '0'},
-        {type: 'not_provided', id: '1'},
-        {type: 'Benign', id: '2'},
-        {type: 'Likely_benign', id: '3'},
-        {type: 'Likely_pathogenic', id: '4'},
-        {type: 'Pathogenic', id: '5'},
-        {type: 'drug_response', id: '6'},
-        {type: 'histocompatibility', id: '7'},
+        {type: 'Uncertain_significance', id: 'VUS'},
+        {type: 'not_provided', id: 'NA'},
+        {type: 'Benign', id: 'B'},
+        {type: 'Likely_benign', id: 'LB'},
+        {type: 'Likely_pathogenic', id: 'LP'},
+        {type: 'Pathogenic', id: 'P'},
+        {type: 'drug_response', id: 'Drug'},
+        {type: 'histocompatibility', id: 'Histo'},
         {type: 'Conflicting_interpretations_of_pathogenicity', id: 'C'},
-        {type: 'Affects', id: '255'},
-        {type: 'risk_factor', id: '255'},
-        {type: 'association', id: '255'},
-        {type: 'protective', id: '255'},
-        {type: 'other', id: '255'}
+        {type: 'Affects', id: 'Other'},
+        {type: 'risk_factor', id: 'Other'},
+        {type: 'association', id: 'Other'},
+        {type: 'protective', id: 'Other'},
+        {type: 'other', id: 'Other'}
     ]"""
     # We first preprocess each value in the CLNSIG (or CLNSIGINCL) array. The patterns we can find are:
     # - word1/word2,_word3 (in CLNSIG)

@@ -84,14 +84,9 @@ def main(hc,sqlContext):
             variants= hc.read(destination+"/annotatedVEPdbnSFPCaddClinvar/"+fileName)
             annotations.annotateGnomADEx(hc,variants,utils.buildFileName(configuration["exomesGnomad_path"],chrom),destination+"/annotatedVEPdbnSFPCaddClinvarExGnomad/"+fileName)
 
-        if (configuration["steps"]["annotateWGGnomad"]):
-            print("step annotate WG gnomad")
-            variants= hc.read(destination+"/annotatedVEPdbnSFPCaddClinvarExGnomad/"+fileName)
-            annotations.annotateGnomADWG(hc,variants,utils.buildFileName(configuration["genomesGnomad_path"],chrom),destination+"/annotatedVEPdbnSFPCaddClinvarExGnomadWGGnomad/"+fileName)
-
         if (configuration["steps"]["annotatedbSNP"]):
             print("step annotate dbSNP")
-            variants= hc.read(destination+"/annotatedVEPdbnSFPCaddClinvarExGnomadWGGnomad/"+fileName)
+            variants= hc.read(destination+"/annotatedVEPdbnSFPCaddClinvarExGnomad/"+fileName)
             annotations.annotateVCF(hc,variants,utils.buildFileName(configuration["dbSNP_path"],chrom),destination+"/annotatedVEPdbnSFPCaddClinvarExGnomadWGGnomaddbSNP/"+fileName,'va.rs = vds.rsid')
 
         if (configuration["steps"]["annotateExAC"]):
@@ -102,7 +97,6 @@ def main(hc,sqlContext):
         if (configuration["steps"]["groupByGenotype"]):
             print ("step groupByGenotype")
             variants= hc.read(destination+"/annotatedVEPdbnSFPCaddClinvarExGnomadWGGnomaddbSNPExAC/"+fileName)
-            #variants.variants_table().to_dataframe().write.mode('overwrite').save(destination+"/annotatedVEPdbnSFPDEbug/"+fileName)
             variants.annotate_variants_expr('va.samples = gs.map(g=>  {g: g, s : s}  ).collect()').write(destination+"/grouped/"+fileName,overwrite=True)
 
         if (configuration["steps"]["transform"]):

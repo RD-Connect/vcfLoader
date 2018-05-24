@@ -83,7 +83,7 @@ def annotateClinvar(hc,variants,annotationPath,destinationPath):
     expr += ", va.clinvar_clnsigconf = vds.info.CLNSIGCONF.mkString(',')" 
     annotateVCF(hc,variants,annotationPath,destinationPath,expr)
 
-def annotateVCFMulti(hc,variants,annotationPath,destinationPath,annotations):
+def annotateVCFMulti(hc,variants,annotationPath,destinationPath,annotations_multi,annotations):
     """ Adds annotations to variants that have multiallelic INFO fields.
          :param HailContext hc: The Hail context
          :param VariantDataset variants: The variants to annotate
@@ -101,9 +101,11 @@ def annotateVCFMulti(hc,variants,annotationPath,destinationPath,annotations):
     # doesn't split the info field, and we need to use the aIndex in order to get the correct value.
     if n_multiallelics:
         index = 'vds.aIndex-1'
-    annotations_expr = annotations[0] % index
-    for annotation in annotations[1:]:
+    annotations_expr = annotations_multi[0] % index
+    for annotation in annotations_multi[1:]:
         annotations_expr += "," + annotation % index
+    for annotation in annotations:
+        annotations_expr += "," + annotation
     variants.annotate_variants_vds(annotations_vds,expr=annotations_expr).write(destinationPath,overwrite=True)
     
 def annotateExAC(hc,variants,annotationPath,destinationPath):
@@ -116,19 +118,8 @@ def annotateExAC(hc,variants,annotationPath,destinationPath):
     # Setting the corresponding annotations we need. The index will be specified in the
     # 'annotateVCFMulti' function, since INFO fields based on alleles don't get split in
     # multiallelic cases.
-    annotations = ['va.exac = vds.info.ExAC_AF[%s]']
-    annotateVCFMulti(hc,variants,annotationPath,destinationPath,annotations)
-
-def annotateGnomADWG(hc,variants,annotationPath,destinationPath):
-    """ Adds gnomAD WG annotations to a dataset. 
-         :param HailContext hc: The Hail context
-         :param VariantDataset variants: The variants to annotate
-         :param string annotationPath: Path were the Clinvar annotation vcf can be found
-         :param string destinationPath: Path were the new annotated dataset can be found
-    """
-    annotations = ["va.gnomAD_WG_AF = vds.info.gnomAD_WG_AF[%s]",
-                   "va.gnomAD_WG_AC = vds.info.gnomAD_WG_AC[%s]"]
-    annotateVCFMulti(hc,variants,annotationPath,destinationPath,annotations)
+    annotations_multi = ['va.exac = vds.info.ExAC_AF[%s]']
+    annotateVCFMulti(hc,variants,annotationPath,destinationPath,annotations_multi,[])
 
 def annotateGnomADEx(hc,variants,annotationPath,destinationPath):
     """ Adds gnomAD Ex annotations to a dataset. 
@@ -137,6 +128,11 @@ def annotateGnomADEx(hc,variants,annotationPath,destinationPath):
          :param string annotationPath: Path were the Clinvar annotation vcf can be found
          :param string destinationPath: Path were the new annotated dataset can be found
     """
-    annotations = ["va.gnomAD_Ex_AF = vds.info.gnomAD_Ex_AF[%s]",
-                   "va.gnomAD_Ex_AC = vds.info.gnomAD_Ex_AC[%s]"]
-    annotateVCFMulti(hc,variants,annotationPath,destinationPath,annotations)
+    annotations_multi = ["va.gnomAD_AF = vds.info.gnomAD_Ex_AF[%s]",
+                         "va.gnomAD_AC = vds.info.gnomAD_Ex_AC[%s]",                        
+                         "va.gnomAD_AF_POPMAX = vds.info.gnomAD_Ex_AF_POPMAX[%s]",
+                         "va.gnomAD_AC_POPMAX = vds.info.gnomAD_Ex_AC_POPMAX[%s]",
+                         "va.gnomAD_AN_POPMAX = vds.info.gnomAD_Ex_AN_POPMAX[%s]"]
+    annotations = ["""va.gnomAD_filterStats = if(vds.info.gnomAD_Ex_filterStats == 'Pass') \"PASS\" else \"FAIL\"""",
+                   "va.gnomAD_AN = vds.info.gnomAD_Ex_AN"]
+    annotateVCFMulti(hc,variants,annotationPath,destinationPath,annotations_multi,annotations)

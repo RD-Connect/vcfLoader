@@ -4,7 +4,7 @@ A tool to load and annotate vcf files to ElasticSearch through Spark and Hail (h
 
 The annotations used and their corresponding versions are:
 
-* VEP (provided by Hail)
+* VEP (v88)
 * dbNSP (2.9.3) 
 * CADD (1.3)
 * Clinvar (20180225)

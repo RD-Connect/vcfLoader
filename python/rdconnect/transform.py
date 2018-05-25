@@ -19,13 +19,13 @@ def transform(dataset,destination,chrom):
                                               gp1_eur_af: orElse(removedot(va.dbnsfp.Gp1_EUR_AF1000,4),0.0),
                                               gp1_afr_af: orElse(removedot(va.dbnsfp.Gp1_AFR_AF1000,4),0.0),
                                               gp1_af: orElse(removedot(va.dbnsfp.Gp1_AF1000,4),0.0),
-                                              gnomAD_AF : orElse(va.gnomAD_AF,0.0),
-                                              gnomAD_AC : orElse(va.gnomAD_AC,0),
-                                              gnomAD_AN : orElse(va.gnomAD_AN,0),
-                                              gnomAD_AF_POPMAX : orElse(va.gnomAD_AF_POPMAX,0.0),
-                                              gnomAD_AC_POPMAX : orElse(va.gnomAD_AC_POPMAX,0),
-                                              gnomAD_AN_POPMAX : orElse(va.gnomAD_AN_POPMAX,0),
-                                              gnomAD_filterStats: orElse(va.gnomAD_filterStats,"")
+                                              gnomad_af : orElse(va.gnomAD_AF,0.0),
+                                              gnomad_ac : orElse(va.gnomAD_AC,0),
+                                              gnomad_an : orElse(va.gnomAD_AN,0),
+                                              gnomad_af_popmax : orElse(va.gnomAD_AF_POPMAX,0.0),
+                                              gnomad_ac_popmax : orElse(va.gnomAD_AC_POPMAX,0),
+                                              gnomad_an_popmax : orElse(va.gnomAD_AN_POPMAX,0),
+                                              gnomad_filter: orElse(va.gnomAD_filterStats,"")
                                               }]''',
                                                         '''va.predictions = [{
                                                         gerp_rs: va.dbnsfp.GERP_RS, 

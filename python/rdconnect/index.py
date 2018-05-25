@@ -52,13 +52,13 @@ def create_index(host,port,index_name,version):
             ,"exac":{"type":"float","null_value":0.0}
             ,"gmaf":{"type":"float","index":"no"}
             ,"rd_freq":{"type":"float","index":"no"}}}
-            ,"gnomAD_AF":{"type":"float","null_value":0.0}
-            ,"gnomAD_AC":{"type":"integer","index":"no"}
-            ,"gnomAD_AN":{"type":"integer","index":"no"}
-            ,"gnomAD_AF_POPMAX":{"type":"float","index":"not_analyzed"}
-            ,"gnomAD_AC_POPMAX":{"type":"integer","index":"no"}
-            ,"gnomAD_AN_POPMAX":{"type":"integer","index":"no"}
-            ,"gnomAD_filterStats":{"type":"string","index":"not_analyzed"}
+            ,"gnomad_af":{"type":"float","null_value":0.0}
+            ,"gnomad_ac":{"type":"integer","index":"no"}
+            ,"gnomad_an":{"type":"integer","index":"no"}
+            ,"gnomad_af_popmax":{"type":"float","index":"not_analyzed"}
+            ,"gnomad_ac_popmax":{"type":"integer","index":"no"}
+            ,"gnomad_an_popmax":{"type":"integer","index":"no"}
+            ,"gnomad_filter":{"type":"string","index":"not_analyzed"}
             ,"samples":{"type":"nested",
             "properties":{"dp":{"type":"float"}
             ,"gq":{"type":"float"}

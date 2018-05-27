@@ -58,7 +58,6 @@ def create_index(host,port,index_name,version):
             ,"gnomad_af_popmax":{"type":"float","index":"not_analyzed"}
             ,"gnomad_ac_popmax":{"type":"integer","index":"no"}
             ,"gnomad_an_popmax":{"type":"integer","index":"no"}
-            ,"gnomad_filter":{"type":"string","index":"not_analyzed"}
             ,"samples":{"type":"nested",
             "properties":{"dp":{"type":"float"}
             ,"gq":{"type":"float"}
@@ -69,7 +68,8 @@ def create_index(host,port,index_name,version):
             ,"multi":{"type":"string","index":"no"},
             "diploid":{"type":"string","index":"no"}}}
             ,"clinvar_filter":{"type":"nested",
-            "properties": {"clnsig":{"type":"string","index":"not_analyzed"}}}}}}}
+            "properties": {"clnsig":{"type":"string","index":"not_analyzed"}}}
+            ,"gnomad_filter": {"type": "string", "index": "not_analyzed"}}}}}
           """
     url="http://"+host+":"+port+"/"+index_name
     header={"Content-Type": "application/json"}

@@ -24,8 +24,7 @@ def transform(dataset,destination,chrom):
                                               gnomad_an : orElse(va.gnomAD_AN,0),
                                               gnomad_af_popmax : orElse(va.gnomAD_AF_POPMAX,0.0),
                                               gnomad_ac_popmax : orElse(va.gnomAD_AC_POPMAX,0),
-                                              gnomad_an_popmax : orElse(va.gnomAD_AN_POPMAX,0),
-                                              gnomad_filter: orElse(va.gnomAD_filterStats,"")
+                                              gnomad_an_popmax : orElse(va.gnomAD_AN_POPMAX,0)
                                               }]''',
                                                         '''va.predictions = [{
                                                         gerp_rs: va.dbnsfp.GERP_RS, 

@@ -20,8 +20,6 @@ def annotatedbnsfp(hc,variants, dbsfp_path,destinationPath):
 def importDBvcf(hc,sourcePath,destinationPath,number_partitions):
     print("cadd source Path is "+sourcePath)
     dbnsfpTable=hc.import_vcf(sourcePath).repartition(number_partitions).write(destinationPath,overwrite=True)
-    #select(['C3', 'C1', 'C2']) select which column we are interested or drop
-    #dbnsfpTable.rename({'1000Gp1_EUR_AF':'Gp1_EUR_AF1000','1000Gp1_ASN_AF':'Gp1_ASN_AF1000','1000Gp1_AFR_AF':'Gp1_AFR_AF1000','ESP6500_EA_AF ':'ESP6500_EA_AF','GERP++_RS':'GERP_RS'}).write(destinationPath,overwrite=True)
     
 def annotateVCF(hc,variants,annotationPath,destinationPath,annotations):
     cadd = hc.read(annotationPath).split_multi()
@@ -128,11 +126,11 @@ def annotateGnomADEx(hc,variants,annotationPath,destinationPath):
          :param string annotationPath: Path were the Clinvar annotation vcf can be found
          :param string destinationPath: Path were the new annotated dataset can be found
     """
-    annotations_multi = ["va.gnomAD_AF = vds.info.gnomAD_Ex_AF[%s]",
-                         "va.gnomAD_AC = vds.info.gnomAD_Ex_AC[%s]",                        
-                         "va.gnomAD_AF_POPMAX = vds.info.gnomAD_Ex_AF_POPMAX[%s]",
-                         "va.gnomAD_AC_POPMAX = vds.info.gnomAD_Ex_AC_POPMAX[%s]",
-                         "va.gnomAD_AN_POPMAX = vds.info.gnomAD_Ex_AN_POPMAX[%s]"]
-    annotations = ["""va.gnomAD_filterStats = if(vds.info.gnomAD_Ex_filterStats == 'Pass') \"PASS\" else \"FAIL\"""",
-                   "va.gnomAD_AN = vds.info.gnomAD_Ex_AN"]
+    annotations_multi = ["va.gnomad_AF = vds.info.gnomAD_Ex_AF[%s]",
+                         "va.gnomad_AC = vds.info.gnomAD_Ex_AC[%s]",                        
+                         "va.gnomad_AF_POPMAX = vds.info.gnomAD_Ex_AF_POPMAX[%s]",
+                         "va.gnomad_AC_POPMAX = vds.info.gnomAD_Ex_AC_POPMAX[%s]",
+                         "va.gnomad_AN_POPMAX = vds.info.gnomAD_Ex_AN_POPMAX[%s]"]
+    annotations = ["""va.gnomad_filter = if(vds.info.gnomAD_Ex_filterStats == 'Pass') \"PASS\" else \"non-PASS\"""",
+                   "va.gnomad_AN = vds.info.gnomAD_Ex_AN"]
     annotateVCFMulti(hc,variants,annotationPath,destinationPath,annotations_multi,annotations)

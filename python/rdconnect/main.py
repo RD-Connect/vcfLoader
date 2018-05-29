@@ -130,9 +130,7 @@ def main(hc,sqlContext):
                 .withColumnRenamed("va.gnomad_filter","gnomad_filter") \
                 .withColumn("chrom",lit(chrom))
             variantsRN.printSchema()
-            variantsRN.write.format("org.elasticsearch.spark.sql").option("es.nodes",configuration["elasticsearch"]["host"]).option("es.port",configuration["elasticsearch"]["port"] ).save(configuration["elasticsearch"]["index_name"]+"/"+configuration["version"], mode='append')
-
-
+            variantsRN.write.format("org.elasticsearch.spark.sql").save(configuration["elasticsearch"]["index_name"]+"/"+configuration["version"], mode='append')
 
 if __name__ == "__main__":
     # Configure OPTIONS

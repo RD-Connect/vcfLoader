@@ -50,9 +50,9 @@ class BaseTestClass(unittest.TestCase):
                                  .variants_table() \
                                  .expand_types() \
                                  .flatten() \
+                                 .filter("`v.start` >= " + self.posRange[0] + " && `v.start` <= " + self.posRange[1]) \
                                  .select(self.columns) \
                                  .order_by(self.key) \
-                                 .filter(" && ".join(map(lambda value: "!isMissing(`" + str(value) + "`)", self.columns))) \
                                  .key_by(self.key)
         annotated_table.show()
         expected_table = self.hc.import_table(self.results_path, types=self.types).key_by(self.key)

@@ -33,7 +33,9 @@ class ExACAnnotationsTests(BaseTestClass):
                        'v.start': expr.TInt(),
                        'va.exac': expr.TDouble() }
         self.key = "v.start"
-
+        self.posRange = self.config["ExACRange"]
+        
+        
     def tearDown(self):
         """ Removes temporal directories once the tests are done """
         # Calling the parent function with specific parameters

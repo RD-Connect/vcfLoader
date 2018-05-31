@@ -36,6 +36,7 @@ class ClinvarAnnotationsTests(BaseTestClass):
                   'va.clinvar_filter': expr.TArray(expr.TStruct(["clnsig"],[expr.TString()])),
                   'va.clinvar_id': expr.TString() }
         self.key = "v.start"
+        self.posRange = self.config["clinvarRange"]
         
     def tearDown(self):
         """ Removes temporal directories once the tests are done """

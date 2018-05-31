@@ -28,13 +28,15 @@ class GnomADExAnnotationsTests(BaseTestClass):
         # Defining specific configuration values for the test
         self.sample_path = self.config["sampleVdsPath"]
         self.results_path = self.config["gnomadExTable"]
-        self.columns = ["v.contig", "v.start", "va.gnomAD_Ex_AF", "va.gnomAD_Ex_AC"]
+        self.columns = ["v.contig", "v.start", "va.gnomad_af", "va.gnomad_ac"]
         # Types for table schema
         self.types = { 'v.contig': expr.TString(),
                        'v.start': expr.TInt(),
-                       'va.gnomAD_Ex_AF': expr.TDouble(),
-                       'va.gnomAD_Ex_AC': expr.TInt() }
+                       'va.gnomad_af': expr.TDouble(),
+                       'va.gnomad_ac': expr.TInt()
+        }
         self.key = "v.start"
+        self.posRange = self.config["gnomadExRange"]
         
     def tearDown(self):
         """ Removes temporal directories once the tests are done """

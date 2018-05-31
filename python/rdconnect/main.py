@@ -69,7 +69,7 @@ def main(hc,sqlContext):
         if (configuration["steps"]["annotationVEP"]):
             print ("step annotate VEP")
             print ("source file is "+destination+"/loaded/"+fileName)
-            annotations.annotationsVEP(hc,str(destination+"/loaded/"+fileName),str(destination+"/annotatedVEP/"+fileName),configuration["vep"],number_partitions)
+            annotations.annotateVEP(hc,str(destination+"/loaded/"+fileName),str(destination+"/annotatedVEP/"+fileName),configuration["vep"],number_partitions)
             
         if (configuration["steps"]["annotatedbNSFP"]):
             print("step annotate dbNSFP")

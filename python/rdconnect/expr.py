@@ -3,23 +3,23 @@
 MIN_DP = "7"
 MIN_GQ = "19"
 
-# Dictionary with all the annotations used. We use a module because methods would be static.
+# Dictionary with all the annotations used. We use a module because methods have to be static.
 annotationsExprs = {
     'samples': """gs.filter(x => x.dp > """ + MIN_DP + """ && x.gq > """ + MIN_GQ + """)
                     .map(g => {
                                 gq: g.gq, 
                                 dp : g.dp, 
-                                gt:intToGenotype(g.gt), 
+                                gt: str(gtj(g.gt)) + "/" + str(gtk(g.gt)), 
                                 gtInt : g.gt, 
                                 adArr: g.ad, 
-                                ad: truncateAt(g.ad[1]/g.ad.sum.toFloat,2),
+                                ad: %s,
                                 sample : s }).collect()""",
     'alt': 'v.altAlleles.map(x=> x.alt)[0]',
     'indel': 'if ((v.ref.length != v.altAlleles.map(x => x.alt)[0].length) || (v.ref.length !=1) ||  (v.altAlleles.map(x => x.alt)[0].length != 1)) true else false',
     'pos': 'v.start',
     'ref': 'v.ref',
     'multi': 'va.wasSplit',
-    'freqInt': 'if(!va.samples.isEmpty() && !va.samples.filter(x => x.dp > ' + MIN_DP + ').isEmpty()) va.samples.map(x=> x.gtInt).sum()/va.samples.filter(x => x.dp > ' + MIN_DP + ').map(x => 2).sum() else 0.0',
+    'freqInt': 'if(!va.samples.isEmpty() && !va.samples.filter(x => x.dp > ' + MIN_DP + ').isEmpty()) %s else 0.0',
     'gnomad_af': 'orElse(vds.info.gnomAD_Ex_AF[%s],0.0)',
     'gnomad_ac': 'orElse(vds.info.gnomAD_Ex_AC[%s],0)',
     'gnomad_an': 'orElse(vds.info.gnomAD_Ex_AN,0)',
@@ -27,19 +27,19 @@ annotationsExprs = {
     'gnomad_ac_popmax': 'orElse(vds.info.gnomAD_Ex_AC_POPMAX[%s],0)',
     'gnomad_an_popmax': 'orElse(vds.info.gnomAD_Ex_AN_POPMAX[%s],0)',
     'gnomad_filter': "if(vds.info.gnomAD_Ex_filterStats == 'Pass') 'PASS' else 'non-PASS\'",
-    'exac':  'orElse(vds.info.ExAC_AF[%s],0.0)',
-    'gp1_asn_af': 'orElse(removedot(va.dbnsfp.Gp1_ASN_AF1000,4),0.0)', 
-    'gp1_eur_af': 'orElse(removedot(va.dbnsfp.Gp1_EUR_AF1000,4),0.0)',
-    'gp1_afr_af': 'orElse(removedot(va.dbnsfp.Gp1_AFR_AF1000,4),0.0)',
-    'gp1_af': 'orElse(removedot(va.dbnsfp.Gp1_AF1000,4),0.0)',
+    'exac':  'orElse(%s,0.0)',
+    'gp1_asn_af': 'orElse(%s,0.0)', 
+    'gp1_eur_af': 'orElse(%s,0.0)',
+    'gp1_afr_af': 'orElse(%s,0.0)',
+    'gp1_af': 'orElse(%s,0.0)',
     'gerp_rs': 'va.dbnsfp.GERP_RS',
-    'mt': 'orElse(va.dbnsfp.MutationTaster_score.split(";").map(x => removedot(x,1)).max(),0.0)',
-    'mutationtaster_pred': 'if (va.dbnsfp.MutationTaster_pred.split(";").exists(e => e == "A")) "A" else  if  (va.dbnsfp.MutationTaster_pred.split(";").exists(e => e == "D")) "D" else  if ( va.dbnsfp.MutationTaster_pred.split(";").exists(e => e == "N")) "N" else ""',
+    'mt': 'orElse(va.dbnsfp.MutationTaster_score.split(";").map(x => %s).max(),0.0)',
+    'mutationtaster_pred': 'if (va.dbnsfp.MutationTaster_pred.split(";").exists(e => e == "A")) "A" else  if (va.dbnsfp.MutationTaster_pred.split(";").exists(e => e == "D")) "D" else  if ( va.dbnsfp.MutationTaster_pred.split(";").exists(e => e == "N")) "N" else ""',
     'phylop46way_placental': 'va.dbnsfp.phyloP46way_placental',
-    'polyphen2_hvar_pred': 'if (va.dbnsfp.Polyphen2_HDIV_pred.split(";").exists(e => e == "D")) "D" else  if  (va.dbnsfp.Polyphen2_HDIV_pred.split(";").exists(e => e == "P")) "P" else  if ( va.dbnsfp.Polyphen2_HDIV_pred.split(";").exists(e => e == "B")) "B" else ""',
-    'polyphen2_hvar_score': 'orElse(va.dbnsfp.Polyphen2_HVAR_score.split(";").map(x=> removedot(x,1)).max(),0.0)',
+    'polyphen2_hvar_pred': 'if (va.dbnsfp.Polyphen2_HDIV_pred.split(";").exists(e => e == "D")) "D" else  if (va.dbnsfp.Polyphen2_HDIV_pred.split(";").exists(e => e == "P")) "P" else  if ( va.dbnsfp.Polyphen2_HDIV_pred.split(";").exists(e => e == "B")) "B" else ""',
+    'polyphen2_hvar_score': 'orElse(va.dbnsfp.Polyphen2_HVAR_score.split(";").map(x => %s).max(),0.0)',
     'sift_pred': 'if (va.dbnsfp.SIFT_pred.split(";").exists(e => e == "D")) "D" else  if (va.dbnsfp.SIFT_pred.split(";").exists(e => e == "T")) "T" else ""',
-    'sift_score': 'orElse(va.dbnsfp.SIFT_score.split(";").map(x=> removedot(x,0)).min(),0.0)',
+    'sift_score': 'orElse(va.dbnsfp.SIFT_score.split(";").map(x => %s).min(),0.0)',
     'rs': 'va.vep.id',
     'effs': 'orElse(%s,%s)',
     'cadd_phred': 'orElse(vds.info.CADD13_PHRED.max(),0.0)',
@@ -49,12 +49,31 @@ annotationsExprs = {
     'clinvar_clnsigconf': """vds.info.CLNSIGCONF.mkString(',')"""
 }
 
+def truncateAtExpr(n,p):
+    """ Number truncation
+          :param double n: Number to truncate
+          :param int p: Precision
+    """
+    # Since Hail doesn't provide a 'round' or 'truncate' function, we need to implement it with the functions we can use.
+    # In this case, the function we can use is pow. As an example, let x=0.432 be the number we want to truncate, and p=2
+    # the precision. The result we'd expect is 0.43, and the operation that lets us obtain it is:
+    # floor(0.432 * 100) / 100 (in Hail, // is the floor operator for fractions)
+    return """ (%s.toDouble() // (1/pow(10,%s))) / pow(10,%s)""" % (n,p,p)
+    
+def removeDotExpr(n,p):
+    """ Number formatting and truncation for number expressed as strings in annotation files
+          :param double n: Number to truncate
+          :param int p: Precision
+    """
+    # Sets string values to 0 if they don't exist in the vcf, or formats them to float if they do
+    return """ if(%s == "." || %s == "") 0.0 else """ % (n,n) + truncateAtExpr(n,p)
+
 def annotationsVariants():
     # General annotations expressions for variants (samples, pos, alt, ref, indel)
     global annotationsExprs
     annotations = [
         'va = let c = va in drop(va,info,rsid,qual,filters)',
-        'va.samples = ' + annotationsExprs["samples"],
+        'va.samples = ' + annotationsExprs["samples"] % truncateAtExpr("g.ad[1]/g.ad.sum.toFloat","2"),
         'va.alt = ' + annotationsExprs["alt"],
         'va.indel = ' + annotationsExprs["indel"],
         'va.pos = ' + annotationsExprs["pos"],
@@ -67,7 +86,7 @@ def annotationsVariants():
 def annotationsFreqInt():
     # FreqInt annotation expressions. Must be added once variants have been annotated with their samples
     global annotationsExprs
-    return 'va.freqInt = ' + annotationsExprs["freqInt"]
+    return 'va.freqInt = ' + annotationsExprs["freqInt"] % truncateAtExpr("va.samples.map(x => x.gtInt).sum()/va.samples.filter(x => x.dp > " + MIN_DP + ").map(x => 2).sum()","2")
 
 def annotationsGnomADMulti():
     # GnomAD annotations expressions. The fields used are not split when splitting multiallelic variants
@@ -99,24 +118,24 @@ def annotationsExACMulti():
     # Setting the corresponding annotations we need. The index will be specified in the
     # 'annotateVCFMulti' function, since INFO fields based on alleles don't get split in
     # multiallelic cases.
-    return [ 'va.exac = ' + annotationsExprs["exac"] ]
+    return [ 'va.exac = ' + annotationsExprs["exac"] % truncateAtExpr("vds.info.ExAC_AF[%s]","6") ]
 
 def annotationsDbNSFP():
     # dbNSFP annotations expressions
     global annotationsExprs
     annotations = [
-        'va.gp1_asn_af = ' + annotationsExprs["gp1_asn_af"], 
-        'va.gp1_eur_af = ' + annotationsExprs["gp1_eur_af"],
-        'va.gp1_afr_af = ' + annotationsExprs["gp1_afr_af"],
-        'va.gp1_af = ' + annotationsExprs["gp1_af"],
+        'va.gp1_asn_af = ' + annotationsExprs["gp1_asn_af"] % removeDotExpr("va.dbnsfp.Gp1_ASN_AF1000","4"),
+        'va.gp1_eur_af = ' + annotationsExprs["gp1_eur_af"] % removeDotExpr("va.dbnsfp.Gp1_EUR_AF1000","4"),
+        'va.gp1_afr_af = ' + annotationsExprs["gp1_afr_af"] % removeDotExpr("va.dbnsfp.Gp1_AFR_AF1000","4"),
+        'va.gp1_af = ' + annotationsExprs["gp1_af"] % removeDotExpr("va.dbnsfp.Gp1_AF1000","4"),
         'va.gerp_rs = ' + annotationsExprs["gerp_rs"],
-        'va.mt = ' + annotationsExprs["mt"],
+        'va.mt = ' + annotationsExprs["mt"] % removeDotExpr("x","1"),
         'va.mutationtaster_pred = ' + annotationsExprs["mutationtaster_pred"],
         'va.phylop46way_placental = ' + annotationsExprs["phylop46way_placental"],
         'va.polyphen2_hvar_pred = ' + annotationsExprs["polyphen2_hvar_pred"],
-        'va.polyphen2_hvar_score = ' + annotationsExprs["polyphen2_hvar_score"],
+        'va.polyphen2_hvar_score = ' + annotationsExprs["polyphen2_hvar_score"] % removeDotExpr("x","1"),
         'va.sift_pred = ' + annotationsExprs["sift_pred"],
-        'va.sift_score = ' + annotationsExprs["sift_score"]
+        'va.sift_score = ' + annotationsExprs["sift_score"] % removeDotExpr("x","0")
     ]
     return annotations
 

@@ -152,5 +152,4 @@ def annotateExAC(hc, variants, annotationPath, destinationPath):
          :param string annotationPath: Path were the ExAC annotation vcf can be found
          :param string destinationPath: Path were the new annotated dataset can be found
     """
-    print expr.annotationsExACMulti()
     annotateVCFMulti(hc,variants,annotationPath,destinationPath,expr.annotationsExACMulti(),[])

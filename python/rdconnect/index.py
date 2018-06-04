@@ -17,13 +17,13 @@ def create_index(host,port,index_name,version):
                 ,"rs":{"type":"keyword","index":"false"}
                 ,"cadd_phred":{"type":"float","index":"true"}
                 ,"gerp_rs":{"type":"keyword","index":"false"}
-                ,"mt":{"type":"keyword","index":"false"}
+                ,"mt":{"type":"float","index":"false"}
                 ,"mutationtaster_pred":{"type":"keyword"}
                 ,"phylop46way_placental":{"type":"keyword","index":"false"}
                 ,"polyphen2_hvar_pred":{"type":"keyword"}
-                ,"polyphen2_hvar_score":{"type":"keyword","index":"false"}
+                ,"polyphen2_hvar_score":{"type":"float","index":"false"}
                 ,"sift_pred":{"type":"keyword"}
-                ,"sift_score":{"type":"keyword","index":"false"}
+                ,"sift_score":{"type":"float","index":"false"}
                 ,"siphy_29way_pi":{"type":"keyword","index":"false"}
                 ,"UMD":{"type":"keyword"}
                 ,"clinvar_clnsig":{"type":"keyword","index":"false"}

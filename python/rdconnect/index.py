@@ -13,7 +13,7 @@ def create_index(host,port,index_name,version):
                 ,"ref":{"type":"keyword","index":"false"}
                 ,"alt":{"type":"keyword","index":"false"}
                 ,"indel":{"type":"keyword"}
-                ,"freqInt":{"type":"keyword"}
+                ,"freqInt":{"type":"float","index":"true"}
                 ,"rs":{"type":"keyword","index":"false"}
                 ,"cadd_phred":{"type":"float","index":"true"}
                 ,"gerp_rs":{"type":"keyword","index":"false"}
@@ -29,10 +29,6 @@ def create_index(host,port,index_name,version):
                 ,"clinvar_clnsig":{"type":"keyword","index":"false"}
                 ,"clinvar_clnsigconf":{"type":"keyword","index":"false"}
                 ,"clinvar_id":{"type":"integer","index":"false"}
-                ,"clinvar_filter":{
-                     "type":"nested",
-                     "properties": {
-                         "clnsig":{"type":"keyword"}}}
                 ,"gp1_afr_af":{"type":"float","index":"false"}
                 ,"gp1_asn_af":{"type":"float","index":"false"}
                 ,"gp1_eur_af":{"type":"float","index":"false"}
@@ -47,6 +43,10 @@ def create_index(host,port,index_name,version):
                 ,"gnomad_ac_popmax":{"type":"integer","index":"false"}
                 ,"gnomad_an_popmax":{"type":"integer","index":"false"}
                 ,"gnomad_filter": {"type": "string", "index": "not_analyzed"}
+                ,"clinvar_filter":{
+                     "type":"nested",
+                     "properties": {
+                         "clnsig":{"type":"keyword"}}}
                 ,"effs":{
                      "type":"nested",
                      "properties":{

@@ -3,6 +3,7 @@
 from pyspark import SparkConf, SparkContext
 from pyspark.sql import SQLContext
 from rdconnect import config, loadVCF , annotations , index , transform
+from rdconnect.expr import annotationsExprs
 from pyspark.sql.functions import lit
 from rdconnect import loadVCF,utils
 from subprocess import call
@@ -54,14 +55,6 @@ def main(hc,sqlContext):
             print ("step load exomes gnomad")
             annotations.importDBVcf(hc,utils.buildFileName(configuration["exomesGnomad_Raw"],chrom),utils.buildFileName(configuration["exomesGnomad_path"],chrom),number_partitions)
 
-        if (configuration["steps"]["loadWGGnomad"]):
-            print ("step load WG gnomad")
-            annotations.importDBVcf(hc,utils.buildFileName(configuration["genomesGnomad_Raw"],chrom),utils.buildFileName(configuration["genomesGnomad_path"],chrom),number_partitions)
-
-        if (configuration["steps"]["loaddbSNP"]):
-            print ("step load dbSNP")
-            annotations.importDBVcf(hc,utils.buildFileName(configuration["dbSNP_Raw"],chrom),utils.buildFileName(configuration["dbSNP_path"],chrom),number_partitions)
-
         if (configuration["steps"]["loadExAC"]):
             print ("step load ExAC")
             annotations.importDBVcf(hc,utils.buildFileName(configuration["ExAC_Raw"],chrom),utils.buildFileName(configuration["ExAC_path"],chrom),number_partitions)
@@ -93,32 +86,21 @@ def main(hc,sqlContext):
 
         if (configuration["steps"]["annotateExAC"]):
             print("step annotate ExAC")
-            variants= hc.read(destination+"/annotatedVEPdbnSFPCaddClinvarExGnomadWGGnomaddbSNP/"+fileName)
-            annotations.annotateExAC(hc,variants,utils.buildFileName(configuration["ExAC_path"],chrom),destination+"/annotatedVEPdbnSFPCaddClinvarExGnomadWGGnomaddbSNPExAC/"+fileName)
+            variants= hc.read(destination+"/annotatedVEPdbnSFPCaddClinvarExGnomad/"+fileName)
+            annotations.annotateExAC(hc,variants,utils.buildFileName(configuration["ExAC_path"],chrom),destination+"/annotatedVEPdbnSFPCaddClinvarExGnomadExAC/"+fileName)
 
         if (configuration["steps"]["transform"]):
             print ("step transform")
-            annotated = hc.read(destination+"/annotatedVEPdbnSFPCaddClinvarExGnomadWGGnomaddbSNPExAC/"+fileName)
-            annotated.variants_table().to_dataframe().printSchema()
+            annotated = hc.read(destination+"/annotatedVEPdbnSFPCaddClinvarExGnomadExAC/"+fileName)
             transform.transform(annotated,destination,chrom)
             
         if (configuration["steps"]["toElastic"]):
             print ("step to elastic")
-            variants = sqlContext.read.load(destination+"/variants/chrom="+chrom).select("`va.freqInt`","`va.predictions`","`va.populations`","`va.clinvar_filter`","`va.gnomad_filter`","`va.indel`","`va.alt`","`v.ref`","`va.pos`","`va.samples`","`va.effs`")
-            variantsRN=variants.withColumnRenamed("va.predictions","predictions") \
-                .withColumnRenamed("va.populations","populations") \
-                .withColumnRenamed("va.indel","indel") \
-                .withColumnRenamed("va.alt","alt") \
-                .withColumnRenamed("v.ref","ref") \
-                .withColumnRenamed("va.pos","pos") \
-                .withColumnRenamed("va.freqInt","freqInt") \
-                .withColumnRenamed("va.samples","samples") \
-                .withColumnRenamed("va.effs","effs") \
-                .withColumnRenamed("va.clinvar_filter","clinvar_filter") \
-                .withColumnRenamed("va.gnomad_filter","gnomad_filter") \
-                .withColumn("chrom",lit(chrom))
-            variantsRN.printSchema()
-            variantsRN.write.format("org.elasticsearch.spark.sql").save(configuration["elasticsearch"]["index_name"]+"/"+configuration["version"], mode='append')
+            # Getting annotated variants and adding the chromosome column
+            variants = sqlContext.read.load(destination+"/variants/chrom="+chrom)\
+                                      .withColumn("chrom",lit(chrom))
+            variants.printSchema()
+            variants.write.format("org.elasticsearch.spark.sql").save(configuration["elasticsearch"]["index_name"]+"/"+configuration["version"], mode='append')
 
 if __name__ == "__main__":
     # Configure OPTIONS

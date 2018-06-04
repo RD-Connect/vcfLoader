@@ -1,6 +1,12 @@
 from rdconnect import utils, expr
 
 def importVCF(hc, sourcePath, destinationPath, nPartitions):
+    """ Imports input vcf and annotates it with general annotations (samples, freqInt, pos, alt, ref)
+          :param HailContext hc: The Hail context
+          :param String sourcePath: Annotation table path
+          :param String destinationPath: Path where the loaded annotation table will be put
+          :param String nPartitions: Number of partitions
+    """
     try:
         print ("reading vcf from "+ sourcePath)
         vcf = hc.import_vcf(str(sourcePath),force_bgz=True).split_multi()
@@ -12,19 +18,46 @@ def importVCF(hc, sourcePath, destinationPath, nPartitions):
         return True
     except ValueError:
         print (ValueError)
-        return "error in importing vcf"
+        return "Error in importing vcf"
     
 def importDbNSFPTable(hc, sourcePath, destinationPath, nPartitions):
+    """ Imports the dbNSFP annotation table
+          :param HailContext hc: The Hail context
+          :param String sourcePath: Annotation table path
+          :param String destinationPath: Path where the loaded annotation table will be put
+          :param String nPartitions: Number of partitions
+    """
     print("Annotation dbNSFP table path is " + sourcePath)
     table = hc.import_table(sourcePath).annotate('variant = Variant(`#chr`,`pos(1-coor)`.toInt,`ref`,`alt`)').key_by('variant')
-    dbnsfpTable.rename({'1000Gp1_AF':'Gp1_AF1000','1000Gp1_AC':'Gp1_AC1000','1000Gp1_EUR_AF':'Gp1_EUR_AF1000','1000Gp1_ASN_AF':'Gp1_ASN_AF1000','1000Gp1_AFR_AF':'Gp1_AFR_AF1000','ESP6500_EA_AF ':'ESP6500_EA_AF','GERP++_RS':'GERP_RS'}).repartition(number_partitions).write(destinationPath,overwrite=True) 
+    # Fields renaming. Columns starting with numbers can't be selected
+    dbnsfpTable.rename({
+        '1000Gp1_AF':'Gp1_AF1000',
+        '1000Gp1_AC':'Gp1_AC1000',
+        '1000Gp1_EUR_AF':'Gp1_EUR_AF1000',
+        '1000Gp1_ASN_AF':'Gp1_ASN_AF1000',
+        '1000Gp1_AFR_AF':'Gp1_AFR_AF1000',
+        'ESP6500_EA_AF ':'ESP6500_EA_AF',
+        'GERP++_RS':'GERP_RS'}).repartition(number_partitions).write(destinationPath,overwrite=True) 
     table.repartition(nPartitions).write(destinationPath,overwrite=True)
     
 def importDBVcf(hc, sourcePath, destinationPath, nPartitions):
+    """ Imports annotations vcfs
+          :param HailContext hc: The Hail context
+          :param String sourcePath: Annotation vcf path
+          :param String destinationPath: Path where the loaded annotation file will be put
+          :param String nPartitions: Number of partitions
+    """
     print("Annotation vcf source path is " + sourcePath)
     hc.import_vcf(sourcePath).repartition(nPartitions).write(destinationPath,overwrite=True)
 
 def annotateVCF(hc,variants,annotationPath,destinationPath,annotations):
+    """ Adds annotations to variants based on an input vds
+         :param HailContext hc: The Hail context
+         :param VariantDataset variants: The variants to annotate
+         :param string annotationPath: Path were the annotations can be found
+         :param string destinationPath: Path were the new annotated dataset can be found
+         :param string annotations: Array of annotations to add to the dataset
+    """
     annotationsVds = hc.read(annotationPath).split_multi()
     variants.annotate_variants_vds(annotationsVds,expr=annotations).write(destinationPath,overwrite=True)
 
@@ -34,6 +67,7 @@ def annotateVCFMulti(hc, variants, annotationPath, destinationPath, annotationsM
          :param VariantDataset variants: The variants to annotate
          :param string annotationPath: Path were the Clinvar annotation vcf can be found
          :param string destinationPath: Path were the new annotated dataset can be found
+         :param string annotationsMulti: Array of annotations of fields that are not split when multiallelic variants are found
          :param string annotations: Array of annotations to add to the dataset
     """
     annotationsVds = hc.read(annotationPath)
@@ -54,6 +88,13 @@ def annotateVCFMulti(hc, variants, annotationPath, destinationPath, annotationsM
     variants.annotate_variants_vds(annotationsVds,expr=annotationsExpr).write(destinationPath,overwrite=True)
     
 def annotateVEP(hc, source, destinationPath, vepPath, nPartitions):
+    """ Adds VEP annotations to variants.
+         :param HailContext hc: The Hail context
+         :param String source: variants source path
+         :param string destinationPath: Path were the new annotated dataset can be found
+         :param String vepPath: VEP configuration path
+         :param Int nPartitions: Number of partitions 
+    """
     variants = hc.read(source)
     print("running vep")
     varAnnotated = variants.vep(vepPath)
@@ -61,14 +102,27 @@ def annotateVEP(hc, source, destinationPath, vepPath, nPartitions):
     varAnnotated.repartition(nPartitions) \
                 .split_multi() \
                 .annotate_variants_expr(expr.annotationsVEP()) \
-                .annotate_variants_expr(expr.annotationsEffs()) \
                 .write(destinationPath,overwrite=True)
 
 def annotateDbNSFP(hc, variants, dbnsfpPath, destinationPath):
+    """ Adds dbNSFP annotations to variants.
+         :param HailContext hc: The Hail context
+         :param VariantDataset variants: The variants to annotate
+         :param string dbnsfpPath: Path were the dbNSFP table can be found
+         :param string destinationPath: Path were the new annotated dataset can be found
+    """
     dbnsfp = hc.read_table(dbnsfpPath)
-    variants.annotate_variants_table(dbnsfp,root='va.dbnsfp').write(destinationPath,overwrite=True)
+    variants.annotate_variants_table(dbnsfp,root='va.dbnsfp') \
+            .annotate_variants_expr(expr.annotationsDbNSFP()) \
+            .write(destinationPath,overwrite=True)
 
 def annotateCADD(hc, variants, annotationPath, destinationPath):
+    """ Adds CADD annotations to variants.
+         :param HailContext hc: The Hail context
+         :param VariantDataset variants: The variants to annotate
+         :param string annotationPath: Path were the CADD annotation vcf can be found
+         :param string destinationPath: Path were the new annotated dataset can be found
+    """
     annotateVCF(hc,variants,annotationPath,destinationPath,expr.annotationsCADD())
                                    
 def annotateClinvar(hc, variants, annotationPath, destinationPath):
@@ -84,7 +138,7 @@ def annotateGnomADEx(hc, variants, annotationPath, destinationPath):
     """ Adds gnomAD Ex annotations to a dataset. 
          :param HailContext hc: The Hail context
          :param VariantDataset variants: The variants to annotate
-         :param string annotationPath: Path were the Clinvar annotation vcf can be found
+         :param string annotationPath: Path were the GnomAD Ex annotation vcf can be found
          :param string destinationPath: Path were the new annotated dataset can be found
     """
     annotationsMulti = expr.annotationsGnomADMulti()
@@ -95,7 +149,7 @@ def annotateExAC(hc, variants, annotationPath, destinationPath):
     """ Adds ExAC annotations to a dataset. 
          :param HailContext hc: The Hail context
          :param VariantDataset variants: The variants to annotate
-         :param string annotationPath: Path were the Clinvar annotation vcf can be found
+         :param string annotationPath: Path were the ExAC annotation vcf can be found
          :param string destinationPath: Path were the new annotated dataset can be found
     """
     print expr.annotationsExACMulti()

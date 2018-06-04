@@ -18,7 +18,6 @@ def oneFile(chrom):
     else:
         return chrom
 
-
 def buildFileName(name,chrom):
     words = name.split("chromosome")
     if (len(words)==1):

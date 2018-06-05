@@ -86,7 +86,7 @@ def annotationsVariants():
 def annotationsFreqInt():
     # FreqInt annotation expressions. Must be added once variants have been annotated with their samples
     global annotationsExprs
-    return 'va.freqInt = ' + annotationsExprs["freqInt"] % truncateAtExpr("va.samples.map(x => x.gtInt).sum()/va.samples.filter(x => x.dp > " + MIN_DP + ").map(x => 2).sum()","2")
+    return 'va.freqInt = ' + annotationsExprs["freqInt"] % truncateAtExpr("va.samples.map(x => x.gtInt).sum()/va.samples.filter(x => x.dp > " + MIN_DP + ").map(x => 2).sum()","6")
 
 def annotationsGnomADMulti():
     # GnomAD annotations expressions. The fields used are not split when splitting multiallelic variants

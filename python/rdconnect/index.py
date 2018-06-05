@@ -14,7 +14,7 @@ def create_index(host,port,index_name,version):
                 ,"alt":{"type":"keyword","index":"false"}
                 ,"indel":{"type":"keyword"}
                 ,"freqInt":{"type":"float","index":"true"}
-                ,"rs":{"type":"keyword","index":"false"}
+                ,"rs":{"type":"keyword"}
                 ,"cadd_phred":{"type":"float","index":"true"}
                 ,"gerp_rs":{"type":"keyword","index":"false"}
                 ,"mt":{"type":"float","index":"false"}
@@ -42,7 +42,7 @@ def create_index(host,port,index_name,version):
                 ,"gnomad_af_popmax":{"type":"float"}
                 ,"gnomad_ac_popmax":{"type":"integer","index":"false"}
                 ,"gnomad_an_popmax":{"type":"integer","index":"false"}
-                ,"gnomad_filter": {"type": "string", "index": "not_analyzed"}
+                ,"gnomad_filter": {"type": "keyword"}
                 ,"clinvar_filter":{
                      "type":"nested",
                      "properties": {
@@ -53,7 +53,6 @@ def create_index(host,port,index_name,version):
                          "codon_change":{"type":"keyword","index":"false"}
                          ,"amino_acid_change":{"type":"keyword","index":"false"}
                          ,"amino_acid_length":{"type":"keyword","index":"false"}
-                         ,"codon_change":{"type":"keyword","index":"false"}
                          ,"effect":{"type":"keyword"}
                          ,"effect_impact":{"type":"keyword"}
                          ,"exon_rank":{"type":"keyword","index":"false"}
@@ -68,14 +67,14 @@ def create_index(host,port,index_name,version):
                          "dp":{"type":"float"}
                          ,"gq":{"type":"float"}
                          ,"ad":{"type":"float"}
-                         ,"gt":{"type":"string"
-                         ,"index":"not_analyzed"}
-                         ,"sample":{"type":"string","index":"not_analyzed"}
-                         ,"multi":{"type":"string","index":"no"}
-                         ,"diploid":{"type":"string","index":"no"}}}}}}}
+                         ,"gt":{"type":"keyword"}
+                         ,"sample":{"type":"keyword"}
+                         ,"multi":{"type":"keyword","index":"false"}
+                         ,"diploid":{"type":"keyword","index":"false"}}}}}}}
     """
     es = Elasticsearch(hosts=[host])
     response = es.indices.create(index=index_name,ignore=400,body=data)
+    print response
     
 def delete_index(host,port,index_name,version):
     es = Elasticsearch(hosts=[host])

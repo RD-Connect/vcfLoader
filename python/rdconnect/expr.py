@@ -20,6 +20,7 @@ annotationsExprs = {
     'ref': 'v.ref',
     'multi': 'va.wasSplit',
     'freqInt': 'if(!va.samples.isEmpty() && !va.samples.filter(x => x.dp > ' + MIN_DP + ').isEmpty()) %s else 0.0',
+    # ---- Population fields ----
     'gnomad_af': 'orElse(vds.info.gnomAD_Ex_AF[%s],0.0)',
     'gnomad_ac': 'orElse(vds.info.gnomAD_Ex_AC[%s],0)',
     'gnomad_an': 'orElse(vds.info.gnomAD_Ex_AN,0)',
@@ -32,6 +33,7 @@ annotationsExprs = {
     'gp1_eur_af': 'orElse(%s,0.0)',
     'gp1_afr_af': 'orElse(%s,0.0)',
     'gp1_af': 'orElse(%s,0.0)',
+    # ---------------------------
     'gerp_rs': 'va.dbnsfp.GERP_RS',
     'mt': 'orElse(va.dbnsfp.MutationTaster_score.split(";").map(x => %s).max(),0.0)',
     'mutationtaster_pred': 'if (va.dbnsfp.MutationTaster_pred.split(";").exists(e => e == "A")) "A" else  if (va.dbnsfp.MutationTaster_pred.split(";").exists(e => e == "D")) "D" else  if ( va.dbnsfp.MutationTaster_pred.split(";").exists(e => e == "N")) "N" else ""',
@@ -40,8 +42,10 @@ annotationsExprs = {
     'polyphen2_hvar_score': 'orElse(va.dbnsfp.Polyphen2_HVAR_score.split(";").map(x => %s).max(),0.0)',
     'sift_pred': 'if (va.dbnsfp.SIFT_pred.split(";").exists(e => e == "D")) "D" else  if (va.dbnsfp.SIFT_pred.split(";").exists(e => e == "T")) "T" else ""',
     'sift_score': 'orElse(va.dbnsfp.SIFT_score.split(";").map(x => %s).min(),0.0)',
+    # ---- VEP fields ----
     'rs': 'va.vep.id',
     'effs': 'orElse(%s,%s)',
+    # --------------------
     'cadd_phred': 'orElse(vds.info.CADD13_PHRED.max(),0.0)',
     'clinvar_id': """if(!isMissing(vds.info.CLNSIG)) vds.rsid else vds.info.CLNSIGINCL[0].split(':')[0]""",
     'clinvar_clnsig': "let clin_sigs = index(%s,type) in orElse(vds.info.CLNSIG.%s, vds.info.CLNSIGINCL.%s).mkString('|')",

@@ -79,3 +79,4 @@ def create_index(host,port,index_name,version):
 def delete_index(host,port,index_name,version):
 #    es = Elasticsearch(hosts=[host])
 #    es.indices.delete(index=index_name, ignore=[400, 404])
+    return ""

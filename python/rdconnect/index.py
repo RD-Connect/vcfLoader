@@ -1,6 +1,6 @@
 import json
 import urllib2
-from elasticsearch import Elasticsearch
+#from elasticsearch import Elasticsearch
 
 def create_index(host,port,index_name,version):
     data="""
@@ -72,10 +72,10 @@ def create_index(host,port,index_name,version):
                          ,"multi":{"type":"keyword","index":"false"}
                          ,"diploid":{"type":"keyword","index":"false"}}}}}}}
     """
-    es = Elasticsearch(hosts=[host])
-    response = es.indices.create(index=index_name,ignore=400,body=data)
-    print response
+#    es = Elasticsearch(hosts=[host], http_auth=('admin', 'admin'),)
+#    response = es.indices.create(index=index_name,ignore=400,body=data)
+#    print response
     
 def delete_index(host,port,index_name,version):
-    es = Elasticsearch(hosts=[host])
-    es.indices.delete(index=index_name, ignore=[400, 404])
+#    es = Elasticsearch(hosts=[host])
+#    es.indices.delete(index=index_name, ignore=[400, 404])

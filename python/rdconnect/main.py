@@ -122,11 +122,16 @@ def main(argv,hc,sqlContext):
             
     if ("toElastic" in step):
         print ("step to elastic")
+        es_conf = {
+            "es.net.http.auth.user": "admin",
+            "es.net.http.auth.pass": "admin",
+            "es.port": configuration["elasticsearch"]["port"]
+        }
         # Getting annotated variants and adding the chromosome column
         variants = sqlContext.read.load(destination+"/variants/chrom="+chrom)\
                                   .withColumn("chrom",lit(chrom))
         variants.printSchema()
-        variants.write.format("org.elasticsearch.spark.sql").save(configuration["elasticsearch"]["index_name"]+"/"+configuration["version"], mode='append')
+        variants.write.format("org.elasticsearch.spark.sql").options(**es_conf).save(configuration["elasticsearch"]["index_name"]+"/"+configuration["version"], mode='append')
 
     if("count" in step):
         if (nchroms == ""):

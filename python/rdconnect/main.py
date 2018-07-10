@@ -55,11 +55,11 @@ def main(argv,hc,sqlContext):
     # Pipeline steps
     if ("deleteIndex" in step):
         print ("step to delete index")
-        index.delete_index(configuration["elasticsearch"]["host"],configuration["elasticsearch"]["port"],configuration["elasticsearch"]["index_name"],configuration["version"])
+        index.delete_index(configuration["elasticsearch"]["host"],configuration["elasticsearch"]["port"],configuration["elasticsearch"]["index_name"],configuration["version"],configuration["elasticsearch"]["user"],configuration["elasticsearch"]["pwd"])
         
     if ("createIndex" in step):
         print ("step to create index")
-        index.create_index(configuration["elasticsearch"]["host"],configuration["elasticsearch"]["port"],configuration["elasticsearch"]["index_name"],configuration["version"])
+        index.create_index(configuration["elasticsearch"]["host"],configuration["elasticsearch"]["port"],configuration["elasticsearch"]["index_name"],configuration["version"],configuration["elasticsearch"]["user"],configuration["elasticsearch"]["pwd"])
         
     if ("loadVCF" in step):
         print ("step loadVCF")
@@ -123,8 +123,8 @@ def main(argv,hc,sqlContext):
     if ("toElastic" in step):
         print ("step to elastic")
         es_conf = {
-            "es.net.http.auth.user": "admin",
-            "es.net.http.auth.pass": "admin",
+            "es.net.http.auth.user": configuration["elasticsearch"]["user"],
+            "es.net.http.auth.pass": configuration["elasticsearch"]["pwd"],
             "es.port": configuration["elasticsearch"]["port"]
         }
         # Getting annotated variants and adding the chromosome column

@@ -1,12 +1,12 @@
 import json
 import urllib2
-#from elasticsearch import Elasticsearch
+from elasticsearch import Elasticsearch
 
-def create_index(host,port,index_name,version):
+def create_index(host,port,index_name,version,user,pwd):
     data="""
           {"settings":{"index":{"number_of_shards":8,"number_of_replicas":0,"refresh_interval":"1000ms"}}
             ,"mappings":{"""+"\"" + version + "\""+"""
-            :{"_all":{"enabled":false},
+            :{
             "properties":{
                 "chrom":{"type":"integer","index":"true"}
                 ,"pos":{"type":"integer","index":"true"}
@@ -66,17 +66,16 @@ def create_index(host,port,index_name,version):
                      "properties":{
                          "dp":{"type":"float"}
                          ,"gq":{"type":"float"}
-                         ,"ad":{"type":"float"}
+                         ,"ad":{"type":"keyword"}
                          ,"gt":{"type":"keyword"}
                          ,"sample":{"type":"keyword"}
                          ,"multi":{"type":"keyword","index":"false"}
                          ,"diploid":{"type":"keyword","index":"false"}}}}}}}
     """
-#    es = Elasticsearch(hosts=[host], http_auth=('admin', 'admin'),)
-#    response = es.indices.create(index=index_name,ignore=400,body=data)
-#    print response
+    es = Elasticsearch(hosts=[host], http_auth=(user,pwd),)
+    response = es.indices.create(index=index_name,ignore=400,body=data)
+    print response
     
 def delete_index(host,port,index_name,version):
-#    es = Elasticsearch(hosts=[host])
-#    es.indices.delete(index=index_name, ignore=[400, 404])
-    return ""
+    es = Elasticsearch(hosts=[host])
+    es.indices.delete(index=index_name, ignore=[400, 404])

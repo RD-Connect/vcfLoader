@@ -92,7 +92,7 @@ def main(argv,hc,sqlContext):
             
     if ("annotatedbNSFP" in step):
         print("step annotate dbNSFP")
-        variants= hc.read(destination+"/annotatedVEP/"+fileName)
+        variants= hc.read("hdfs://rdhdfs1:27000/test/Playground/2.0.0/annotatedVEP/"+fileName)
         annotations.annotateDbNSFP(hc,variants,utils.buildFileName(configuration["dnNSFP_path"],chrom),destination+"/annotatedVEPdbnSFP/"+fileName)
 
     if ("annotatecadd" in step):

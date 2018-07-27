@@ -30,15 +30,14 @@ def importDbNSFPTable(hc, sourcePath, destinationPath, nPartitions):
     print("Annotation dbNSFP table path is " + sourcePath)
     table = hc.import_table(sourcePath).annotate('variant = Variant(`#chr`,`pos(1-coor)`.toInt,`ref`,`alt`)').key_by('variant')
     # Fields renaming. Columns starting with numbers can't be selected
-    dbnsfpTable.rename({
+    table.rename({
         '1000Gp1_AF':'Gp1_AF1000',
         '1000Gp1_AC':'Gp1_AC1000',
         '1000Gp1_EUR_AF':'Gp1_EUR_AF1000',
         '1000Gp1_ASN_AF':'Gp1_ASN_AF1000',
         '1000Gp1_AFR_AF':'Gp1_AFR_AF1000',
         'ESP6500_EA_AF ':'ESP6500_EA_AF',
-        'GERP++_RS':'GERP_RS'}).repartition(number_partitions).write(destinationPath,overwrite=True) 
-    table.repartition(nPartitions).write(destinationPath,overwrite=True)
+        'GERP++_RS':'GERP_RS'}).repartition(nPartitions).write(destinationPath,overwrite=True) 
     
 def importDBVcf(hc, sourcePath, destinationPath, nPartitions):
     """ Imports annotations vcfs

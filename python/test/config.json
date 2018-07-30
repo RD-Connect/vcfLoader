@@ -19,6 +19,9 @@
     "ExACVdsPath" : "tmp/ExAC.reduced.vds",
     "ExACTable" : "resources/results/ExAC_results.tsv",
     "ExACRange" : ["69360", "69509"],
+    "caddVcfPath": "resources/annotations/cadd.reduced.vcf",
+    "caddVdsPath" : "tmp/cadd.reduced.vds",
+    "caddTable" : "resources/results/cadd_results.tsv",
     "hailJarPath" : "resources/hail-all-spark.jar",
     "tmpDir" : "tmp"
 }

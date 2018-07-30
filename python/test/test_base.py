@@ -50,10 +50,12 @@ class BaseTestClass(unittest.TestCase):
                                  .variants_table() \
                                  .expand_types() \
                                  .flatten() \
-                                 .filter("`v.start` >= " + self.posRange[0] + " && `v.start` <= " + self.posRange[1]) \
                                  .select(self.columns) \
                                  .order_by(self.key) \
                                  .key_by(self.key)
+        if (len(self.posRange) > 0):
+            annotated_table = annotated_table \
+                              .filter("`v.start` >= " + self.posRange[0] + " && `v.start` <= " + self.posRange[1]) 
         annotated_table.show()
         expected_table = self.hc.import_table(self.results_path, types=self.types).key_by(self.key)
         expected_table.show()

@@ -23,7 +23,7 @@ class DbNSFPAnnotationsTests(BaseTestClass):
         variants = self.hc.import_vcf(self.config["sampleVcfPath"]).split_multi()
         # Writing temporal directory to store the sample vcf variant dataset
         self.hc.import_vcf(self.config["dbNSFPTablePath"]).split_multi().write(self.config["dbNSFPVdsPath"],overwrite=True)
-        # Creating annotated variants with Clinvar
+        # Creating annotated variants with dbNSFP
         annotations.annotateDbNSFP(self.hc,variants,self.config["dbNSFPVdsPath"],self.config["sampleVdsPath"])
         # Defining specific configuration values for the test
         self.sample_path = self.config["sampleVdsPath"]

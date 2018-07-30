@@ -85,14 +85,15 @@ def main(argv,hc,sqlContext):
         print ("step load ExAC")
         annotations.importDBVcf(hc,utils.buildFileName(configuration["ExAC_Raw"],chrom),utils.buildFileName(configuration["ExAC_path"],chrom),number_partitions)
 
-    if ("annotationVEP" in step):
+    if ("annotateVEP" in step):
         print ("step annotate VEP")
         print ("source file is "+destination+"/loaded/"+fileName)
-        annotations.annotateVEP(hc,str(destination+"/loaded/"+fileName),str(destination+"/annotatedVEP/"+fileName),configuration["vep"],number_partitions)
+        variants = hc.read(destination+"/loaded/"+fileName)
+        annotations.annotateVEP(hc,variants,destination+"/annotatedVEP/"+fileName,configuration["vep"],number_partitions)
             
     if ("annotatedbNSFP" in step):
         print("step annotate dbNSFP")
-        variants= hc.read(destination+"/annotatedVEP/"+fileName)
+        variants = hc.read(destination+"/annotatedVEP/"+fileName)
         annotations.annotateDbNSFP(hc,variants,utils.buildFileName(configuration["dnNSFP_path"],chrom),destination+"/annotatedVEPdbnSFP/"+fileName)
 
     if ("annotatecadd" in step):

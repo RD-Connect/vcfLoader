@@ -86,15 +86,14 @@ def annotateVCFMulti(hc, variants, annotationPath, destinationPath, annotationsM
         annotationsExpr += "," + annotation
     variants.annotate_variants_vds(annotationsVds,expr=annotationsExpr).write(destinationPath,overwrite=True)
     
-def annotateVEP(hc, source, destinationPath, vepPath, nPartitions):
+def annotateVEP(hc, variants, destinationPath, vepPath, nPartitions):
     """ Adds VEP annotations to variants.
          :param HailContext hc: The Hail context
-         :param String source: variants source path
+         :param VariantDataset variants: The variants to annotate 
          :param string destinationPath: Path were the new annotated dataset can be found
          :param String vepPath: VEP configuration path
          :param Int nPartitions: Number of partitions 
     """
-    variants = hc.read(source)
     print("running vep")
     varAnnotated = variants.vep(vepPath)
     print("destination is "+destinationPath)

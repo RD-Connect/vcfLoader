@@ -32,7 +32,7 @@ class ExACAnnotationsTests(BaseTestClass):
         self.types = { 'v.contig': expr.TString(),
                        'v.start': expr.TInt(),
                        'va.exac': expr.TDouble() }
-        self.key = "v.start"
+        self.key = ["v.contig","v.start"]
         self.posRange = self.config["ExACRange"]
         
         

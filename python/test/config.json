@@ -22,6 +22,10 @@
     "caddVcfPath": "resources/annotations/cadd.reduced.vcf",
     "caddVdsPath" : "tmp/cadd.reduced.vds",
     "caddTable" : "resources/results/cadd_results.tsv",
+    "vepPath": "../../vep.properties",
+    "vepTable" : "resources/results/vep_results.tsv",
+    "vepRange": ["10019", "55241707"],
+    "num_partitions": 10,
     "hailJarPath" : "resources/hail-all-spark.jar",
     "tmpDir" : "tmp"
 }

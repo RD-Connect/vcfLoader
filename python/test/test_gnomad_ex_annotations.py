@@ -35,8 +35,7 @@ class GnomADExAnnotationsTests(BaseTestClass):
                        'va.gnomad_af': expr.TDouble(),
                        'va.gnomad_ac': expr.TInt()
         }
-        self.key = "v.start"
-        self.posRange = self.config["gnomadExRange"]
+        self.key = ["v.contig","v.start"]
         
     def tearDown(self):
         """ Removes temporal directories once the tests are done """

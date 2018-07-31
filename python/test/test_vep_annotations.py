@@ -25,15 +25,15 @@ class VEPAnnotationsTests(BaseTestClass):
         annotations.annotateVEP(self.hc,variants,self.config["sampleVdsPath"],self.config["vepPath"],self.config["num_partitions"])
         # Defining specific configuration values for the test
         self.sample_path = self.config["sampleVdsPath"]
-        self.results_path = self.config["VEPTable"]
-        self.columns = ["v.contig", "v.start", "va.cadd_phred"]
+        self.results_path = self.config["vepTable"]
+        self.columns = ["v.contig", "v.start", "va.effs"]
         # Types for table schema
         self.types = { 'v.contig': expr.TString(),
                   'v.start': expr.TInt(),
                   'va.effs': expr.TArray(expr.TStruct(
                       ["gene_name",
                        "effect_impact",
-                       "transcrip_id",
+                       "transcript_id",
                        "effect",
                        "gene_id",
                        "functional_class",
@@ -56,8 +56,7 @@ class VEPAnnotationsTests(BaseTestClass):
                        expr.TString(),
                        expr.TString()])),
         }
-        self.key = "v.start"
-        self.posRange = []
+        self.key = ["v.contig","v.start"]
         
     def tearDown(self):
         """ Removes temporal directories once the tests are done """

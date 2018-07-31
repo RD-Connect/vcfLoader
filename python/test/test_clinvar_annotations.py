@@ -35,7 +35,7 @@ class ClinvarAnnotationsTests(BaseTestClass):
                   'va.clinvar_clnsig': expr.TString(),
                   'va.clinvar_filter': expr.TArray(expr.TStruct(["clnsig"],[expr.TString()])),
                   'va.clinvar_id': expr.TString() }
-        self.key = "v.start"
+        self.key = ["v.contig","v.start"]
         self.posRange = self.config["clinvarRange"]
         
     def tearDown(self):

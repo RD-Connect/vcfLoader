@@ -134,7 +134,7 @@ def main(argv,hc,sqlContext):
         variants.printSchema()
         variants.write.format("org.elasticsearch.spark.sql").options(**es_conf).save(configuration["elasticsearch"]["index_name"]+"/"+configuration["version"], mode='append')
 
-    if("count" in step):
+    if ("count" in step):
         if (nchroms == ""):
             usage()
             sys.exit(2)
@@ -143,6 +143,14 @@ def main(argv,hc,sqlContext):
             variants = sqlContext.read.load(destination+"/variants/chrom=" + str(chrom))
             count += variants.count()
         print("\nTotal number of variants: " + str(count) + "\n")
+
+    if ("compare" in step):
+        if (previous == ""):
+            usage()
+            sys.exit(2)
+        previous = sqlContext.read.load(previous+"/variants/chrom=" + str(chrom))
+        current = sqlContext.read.load(destination+"/variants/chrom=" + str(chrom))
+        diff = current.subtract(previous)
 
 
 if __name__ == "__main__":

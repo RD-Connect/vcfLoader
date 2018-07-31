@@ -34,7 +34,7 @@ class CaddAnnotationsTests(BaseTestClass):
                   'v.start': expr.TInt(),
                   'va.cadd_phred': expr.TDouble()
         }
-        self.key = "v.start"
+        self.key = ["v.contig","v.start"]
         self.posRange = []
         
     def tearDown(self):

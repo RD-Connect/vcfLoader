@@ -53,10 +53,6 @@ def main(argv,hc,sqlContext):
     print("sourcefilename is "+sourceFileName)
 
     # Pipeline steps
-    if ("deleteIndex" in step):
-        print ("step to delete index")
-        index.delete_index(configuration["elasticsearch"]["host"],configuration["elasticsearch"]["port"],configuration["elasticsearch"]["index_name"],configuration["version"],configuration["elasticsearch"]["user"],configuration["elasticsearch"]["pwd"])
-        
     if ("createIndex" in step):
         print ("step to create index")
         index.create_index(configuration["elasticsearch"]["host"],configuration["elasticsearch"]["port"],configuration["elasticsearch"]["index_name"],configuration["version"],configuration["elasticsearch"]["user"],configuration["elasticsearch"]["pwd"])

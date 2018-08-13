@@ -75,7 +75,3 @@ def create_index(host,port,index_name,version,user,pwd):
     es = Elasticsearch(hosts=[host], http_auth=(user,pwd),)
     response = es.indices.create(index=index_name,ignore=400,body=data)
     print response
-    
-def delete_index(host,port,index_name,version):
-    es = Elasticsearch(hosts=[host])
-    es.indices.delete(index=index_name, ignore=[400, 404])

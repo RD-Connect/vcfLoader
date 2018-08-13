@@ -216,7 +216,8 @@ def annotationsVEP():
                                      exon_rank: %s, 
                                      transcript_biotype: %s, 
                                      gene_coding: %s }) """
-    transcriptsExpr = effsExpr % ('transcript_consequences','x.gene_symbol','x.transcript_id','x.gene_id','"transcript"','""','""','""','x.exon','x.biotype','str(x.cds_start)')
+
+    transcriptsExpr = effsExpr % ('transcript_consequences','x.gene_symbol','x.transcript_id','x.gene_id','"transcript"','""','x.hgvsc.replace(".*:","")','x.hgvsp.replace(".*:","")','x.exon','x.biotype','str(x.cds_start)')
     intergenicsExpr = effsExpr % ('intergenic_consequences','""','""','""','"intergenic_region"','"0"','""','""','""','""','""')
     annotations = [
         'va.rs = ' + annotationsExprs["rs"],

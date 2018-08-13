@@ -23,7 +23,7 @@ class CaddAnnotationsTests(BaseTestClass):
         variants = self.hc.import_vcf(self.config["sampleVcfPath"]).split_multi()
         # Writing temporal directory to store the sample vcf variant dataset
         self.hc.import_vcf(self.config["caddVcfPath"]).split_multi().write(self.config["caddVdsPath"],overwrite=True)
-        # Creating annotated variants with dbNSFP
+        # Creating annotated variants with CADD
         annotations.annotateCADD(self.hc,variants,self.config["caddVdsPath"],self.config["sampleVdsPath"])
         # Defining specific configuration values for the test
         self.sample_path = self.config["sampleVdsPath"]

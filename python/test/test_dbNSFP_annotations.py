@@ -41,8 +41,7 @@ class DbNSFPAnnotationsTests(BaseTestClass):
                   'sift_pred': expr.TString(),
                   'sift_score': expr.TDouble()
         }
-        self.key = "v.start"
-        self.posRange = self.config["dbNSFPRange"]
+        self.key = ["v.contig","v.start"]
         
     def tearDown(self):
         """ Removes temporal directories once the tests are done """

@@ -11,14 +11,15 @@ annotationsExprs = {
                                 dp : g.dp, 
                                 gt: str(gtj(g.gt)) + "/" + str(gtk(g.gt)), 
                                 gtInt : g.gt, 
-                                adArr: g.ad, 
                                 ad: %s,
                                 sample : s }).collect()""",
     'alt': 'v.altAlleles.map(x=> x.alt)[0]',
-    'indel': 'if ((v.ref.length != v.altAlleles.map(x => x.alt)[0].length) || (v.ref.length !=1) ||  (v.altAlleles.map(x => x.alt)[0].length != 1)) true else false',
+    'indel': 'if ((v.ref.length != v.altAlleles.map(x => x.alt)[0].length) || (v.ref.length !=1) || (v.altAlleles.map(x => x.alt)[0].length != 1)) true else false',
     'pos': 'v.start',
     'ref': 'v.ref',
-    'multi': 'va.wasSplit',
+    #'multi': 'va.wasSplit',
+    # We need to check whether samples have been filtered out before performing any operation
+    # (in order to avoid NaN errors)
     'freqInt': 'if(!va.samples.isEmpty() && !va.samples.filter(x => x.dp > ' + MIN_DP + ').isEmpty()) %s else 0.0',
     # ---- Population fields ----
     'gnomad_af': 'orElse(vds.info.gnomAD_Ex_AF[%s],0.0)',
@@ -27,13 +28,14 @@ annotationsExprs = {
     'gnomad_af_popmax': 'orElse(vds.info.gnomAD_Ex_AF_POPMAX[%s],0.0)',
     'gnomad_ac_popmax': 'orElse(vds.info.gnomAD_Ex_AC_POPMAX[%s],0)',
     'gnomad_an_popmax': 'orElse(vds.info.gnomAD_Ex_AN_POPMAX[%s],0)',
-    'gnomad_filter': "if(vds.info.gnomAD_Ex_filterStats == 'Pass') 'PASS' else 'non-PASS\'",
+    'gnomad_filter': "if(vds.info.gnomAD_Ex_filterStats == 'Pass') 'PASS' else 'non-PASS'",
     'exac':  'orElse(%s,0.0)',
     'gp1_asn_af': 'orElse(%s,0.0)', 
     'gp1_eur_af': 'orElse(%s,0.0)',
     'gp1_afr_af': 'orElse(%s,0.0)',
     'gp1_af': 'orElse(%s,0.0)',
     # ---------------------------
+    # ---- Prediction fields ----
     'gerp_rs': 'va.dbnsfp.GERP_RS',
     'mt': 'orElse(va.dbnsfp.MutationTaster_score.split(";").map(x => %s).max(),0.0)',
     'mutationtaster_pred': 'if (va.dbnsfp.MutationTaster_pred.split(";").exists(e => e == "A")) "A" else  if (va.dbnsfp.MutationTaster_pred.split(";").exists(e => e == "D")) "D" else  if ( va.dbnsfp.MutationTaster_pred.split(";").exists(e => e == "N")) "N" else ""',
@@ -42,15 +44,16 @@ annotationsExprs = {
     'polyphen2_hvar_score': 'orElse(va.dbnsfp.Polyphen2_HVAR_score.split(";").map(x => %s).max(),0.0)',
     'sift_pred': 'if (va.dbnsfp.SIFT_pred.split(";").exists(e => e == "D")) "D" else  if (va.dbnsfp.SIFT_pred.split(";").exists(e => e == "T")) "T" else ""',
     'sift_score': 'orElse(va.dbnsfp.SIFT_score.split(";").map(x => %s).min(),0.0)',
-    # ---- VEP fields ----
-    'rs': 'va.vep.id',
-    'effs': 'orElse(%s,%s)',
-    # --------------------
     'cadd_phred': 'orElse(vds.info.CADD13_PHRED.max(),0.0)',
     'clinvar_id': """if(!isMissing(vds.info.CLNSIG)) vds.rsid else vds.info.CLNSIGINCL[0].split(':')[0]""",
     'clinvar_clnsig': "let clin_sigs = index(%s,type) in orElse(vds.info.CLNSIG.%s, vds.info.CLNSIGINCL.%s).mkString('|')",
     'clinvar_filter': "let clin_sigs = index(%s,type) in orElse(vds.info.CLNSIG.%s, vds.info.CLNSIGINCL.%s)",
-    'clinvar_clnsigconf': """vds.info.CLNSIGCONF.mkString(',')"""
+    'clinvar_clnsigconf': """vds.info.CLNSIGCONF.mkString(',')""",
+    # ---------------------------
+    # ---- VEP fields ----
+    'rs': 'va.vep.id',
+    'effs': 'orElse(%s,%s)'
+    # --------------------
 }
 
 def truncateAtExpr(n,p):
@@ -83,7 +86,7 @@ def annotationsVariants():
         'va.pos = ' + annotationsExprs["pos"],
         'va.ref = ' + annotationsExprs["ref"],
         # Whether a variant was multiallelic and was split
-        'va.multi = ' + annotationsExprs["multi"]
+        #'va.multi = ' + annotationsExprs["multi"]
     ]
     return annotations
 

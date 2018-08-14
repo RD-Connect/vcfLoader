@@ -13,7 +13,7 @@ def create_index(host,port,index_name,version,num_shards,user,pwd):
                 ,"ref":{"type":"keyword","index":"false"}
                 ,"alt":{"type":"keyword","index":"false"}
                 ,"indel":{"type":"keyword"}
-                ,"freqInt":{"type":"float", "index":"true"}
+                ,"freqInt":{"type":"keyword"}
                 ,"rs":{"type":"keyword"}
                 ,"cadd_phred":{"type":"float","index":"true"}
                 ,"gerp_rs":{"type":"keyword","index":"false"}
@@ -66,7 +66,7 @@ def create_index(host,port,index_name,version,num_shards,user,pwd):
                      "properties":{
                          "dp":{"type":"float"}
                          ,"gq":{"type":"float"}
-                         ,"ad":{"type":"float"}
+                         ,"ad":{"type":"keyword"}
                          ,"gt":{"type":"keyword"}
                          ,"sample":{"type":"keyword"}
                          ,"multi":{"type":"keyword","index":"false"}

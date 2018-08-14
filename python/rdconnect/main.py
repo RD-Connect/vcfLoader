@@ -2,10 +2,8 @@
 
 from pyspark import SparkConf, SparkContext
 from pyspark.sql import SQLContext
-from rdconnect import config, loadVCF , annotations , index , transform
-from rdconnect.expr import annotationsExprs
+from rdconnect import config, annotations, index, transform, utils
 from pyspark.sql.functions import lit
-from rdconnect import loadVCF,utils
 from subprocess import call
 import sys, getopt
 import hail
@@ -19,6 +17,8 @@ def usage():
 def optionParser(argv):
     chrom = ""
     step = ""
+    # The number of chromosomes uploaded is only used in the counting step (to know up to
+    # which chromosome to count)
     nchroms = ""
     try:
         opts, args = getopt.getopt(argv,"c:s:n:",["chrom=","step=","nchroms="])
@@ -47,7 +47,7 @@ def main(argv,hc,sqlContext):
     configuration = config.readConfig("config.json")
     destination =  configuration["destination"] + "/" + configuration["version"]
     sourceFileName = utils.buildFileName(configuration["source_path"],chrom)
-    fileName = "variantsRaw"+chrom+".vds"
+    fileName = "variantsRaw" + chrom + ".vds"
     number_partitions = configuration["number_of_partitions"]
 
     print("sourcefilename is "+sourceFileName)
@@ -55,7 +55,7 @@ def main(argv,hc,sqlContext):
     # Pipeline steps
     if ("createIndex" in step):
         print ("step to create index")
-        index.create_index(configuration["elasticsearch"]["host"],configuration["elasticsearch"]["port"],configuration["elasticsearch"]["index_name"],configuration["version"],configuration["elasticsearch"]["user"],configuration["elasticsearch"]["pwd"])
+        index.create_index(configuration["elasticsearch"]["host"],configuration["elasticsearch"]["port"],configuration["elasticsearch"]["index_name"],configuration["version"],configuration["elasticsearch"]["num_shards"],configuration["elasticsearch"]["user"],configuration["elasticsearch"]["pwd"])
         
     if ("loadVCF" in step):
         print ("step loadVCF")
@@ -112,11 +112,13 @@ def main(argv,hc,sqlContext):
         variants= hc.read(destination+"/annotatedVEPdbnSFPCaddClinvarExGnomad/"+fileName)
         annotations.annotateExAC(hc,variants,utils.buildFileName(configuration["ExAC_path"],chrom),destination+"/annotatedVEPdbnSFPCaddClinvarExGnomadExAC/"+fileName)
 
+    # Transforming step. It sets all fields to the corresponding ElasticSearch format
     if ("transform" in step):
         print ("step transform")
         annotated = hc.read(destination+"/annotatedVEPdbnSFPCaddClinvarExGnomadExAC/"+fileName)
         transform.transform(annotated,destination,chrom)
-            
+
+    # Uploading step. It uploads all annotated variants to ElasticSearch
     if ("toElastic" in step):
         print ("step to elastic")
         es_conf = {
@@ -130,6 +132,8 @@ def main(argv,hc,sqlContext):
         variants.printSchema()
         variants.write.format("org.elasticsearch.spark.sql").options(**es_conf).save(configuration["elasticsearch"]["index_name"]+"/"+configuration["version"], mode='append')
 
+    # Counting step to check whether the number of variants in Spark corresponds to tht number of variants that
+    # have been uploaded to ElasticSearch
     if ("count" in step):
         if (nchroms == ""):
             usage()

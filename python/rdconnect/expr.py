@@ -18,6 +18,8 @@ annotationsExprs = {
     'pos': 'v.start',
     'ref': 'v.ref',
     #'multi': 'va.wasSplit',
+    # We need to check whether samples have been filtered out before performing any operation
+    # (in order to avoid NaN errors)
     'freqInt': 'if(!va.samples.isEmpty() && !va.samples.filter(x => x.dp > ' + MIN_DP + ').isEmpty()) %s else 0.0',
     # ---- Population fields ----
     'gnomad_af': 'orElse(vds.info.gnomAD_Ex_AF[%s],0.0)',

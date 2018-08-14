@@ -32,14 +32,14 @@ def create_index(host,port,index_name,version,num_shards,user,pwd):
                 ,"gp1_afr_af":{"type":"float","index":"false"}
                 ,"gp1_asn_af":{"type":"float","index":"false"}
                 ,"gp1_eur_af":{"type":"float","index":"false"}
-                ,"gp1_af":{"type":"float","null_value":0.0}
-                ,"exac":{"type":"float","null_value":0.0}
+                ,"gp1_af":{"type":"float","index":"false"}
+                ,"exac":{"type":"float","index":"true"}
                 ,"gmaf":{"type":"float","index":"false"}
                 ,"rd_freq":{"type":"float","index":"false"}
-                ,"gnomad_af":{"type":"float","null_value":0.0}
+                ,"gnomad_af":{"type":"float","index":"true"}
                 ,"gnomad_ac":{"type":"integer","index":"false"}
                 ,"gnomad_an":{"type":"integer","index":"false"}
-                ,"gnomad_af_popmax":{"type":"float"}
+                ,"gnomad_af_popmax":{"type":"float","index":"false"}
                 ,"gnomad_ac_popmax":{"type":"integer","index":"false"}
                 ,"gnomad_an_popmax":{"type":"integer","index":"false"}
                 ,"gnomad_filter": {"type": "keyword"}

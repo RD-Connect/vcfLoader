@@ -107,15 +107,20 @@ def main(argv,hc,sqlContext):
         variants= hc.read(destination+"/annotatedVEPdbnSFPCaddClinvar/"+fileName)
         annotations.annotateGnomADEx(hc,variants,utils.buildFileName(configuration["exomesGnomad_path"],chrom),destination+"/annotatedVEPdbnSFPCaddClinvarExGnomad/"+fileName)
 
+    if ("annotatedbSNP" in step):
+        print("step annotate dbSNP")
+        variants= hc.read(destination+"/annotatedVEPdbnSFPCaddClinvarExGnomad/"+fileName)
+        annotations.annotatesDbSNP(hc,variants,utils.buildFileName(configuration["dbSNP_path"],chrom),destination+"/annotatedVEPdbnSFPCaddClinvarExGnomadWGGnomaddbSNP/"+fileName)
+        
     if ("annotateExAC" in step):
         print("step annotate ExAC")
-        variants= hc.read(destination+"/annotatedVEPdbnSFPCaddClinvarExGnomad/"+fileName)
-        annotations.annotateExAC(hc,variants,utils.buildFileName(configuration["ExAC_path"],chrom),destination+"/annotatedVEPdbnSFPCaddClinvarExGnomadExAC/"+fileName)
+        variants= hc.read(destination+"/annotatedVEPdbnSFPCaddClinvarExGnomaddbSNP/"+fileName)
+        annotations.annotateExAC(hc,variants,utils.buildFileName(configuration["ExAC_path"],chrom),destination+"/annotatedVEPdbnSFPCaddClinvarExGnomaddbSNPExAC/"+fileName)
 
     # Transforming step. It sets all fields to the corresponding ElasticSearch format
     if ("transform" in step):
         print ("step transform")
-        annotated = hc.read(destination+"/annotatedVEPdbnSFPCaddClinvarExGnomadExAC/"+fileName)
+        annotated = hc.read(destination+"/annotatedVEPdbnSFPCaddClinvarExGnomaddbSNPExAC/"+fileName)
         transform.transform(annotated,destination,chrom)
 
     # Uploading step. It uploads all annotated variants to ElasticSearch

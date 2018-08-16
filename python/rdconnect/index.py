@@ -32,7 +32,7 @@ def create_index(host,port,index_name,version,num_shards,user,pwd):
                 ,"gp1_afr_af":{"type":"float","index":"false"}
                 ,"gp1_asn_af":{"type":"float","index":"false"}
                 ,"gp1_eur_af":{"type":"float","index":"false"}
-                ,"gp1_af":{"type":"float","index":"false"}
+                ,"gp1_af":{"type":"float","index":"true"}
                 ,"exac":{"type":"float","index":"true"}
                 ,"gmaf":{"type":"float","index":"false"}
                 ,"rd_freq":{"type":"float","index":"false"}

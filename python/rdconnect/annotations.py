@@ -132,6 +132,15 @@ def annotateClinvar(hc, variants, annotationPath, destinationPath):
     """
     annotateVCF(hc,variants,annotationPath,destinationPath,expr.annotationsClinvar())
 
+def annotateDbSNP(hc, variants, annotationPath, destinationPath):
+    """ Adds dbSNP annotations to variants.
+         :param HailContext hc: The Hail context
+         :param VariantDataset variants: The variants to annotate
+         :param string annotationPath: Path were the Clinvar annotation vcf can be found
+         :param string destinationPath: Path were the new annotated dataset can be found
+    """
+    annotateVCF(hc,variants,annotationPatj,destinationPath,expr.annotationsDbSNP())
+    
 def annotateGnomADEx(hc, variants, annotationPath, destinationPath):
     """ Adds gnomAD Ex annotations to a dataset. 
          :param HailContext hc: The Hail context

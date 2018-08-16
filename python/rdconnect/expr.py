@@ -50,10 +50,11 @@ annotationsExprs = {
     'clinvar_filter': "let clin_sigs = index(%s,type) in orElse(vds.info.CLNSIG.%s, vds.info.CLNSIGINCL.%s)",
     'clinvar_clnsigconf': """vds.info.CLNSIGCONF.mkString(',')""",
     # ---------------------------
-    # ---- VEP fields ----
-    'rs': 'va.vep.id',
-    'effs': 'orElse(%s,%s)'
+    # ---- VEP field ----
+    'effs': 'orElse(%s,%s)',
     # --------------------
+    # ---- dbSNP field ----
+    'rs = vds.rsid'
 }
 
 def truncateAtExpr(n,p):
@@ -202,6 +203,11 @@ def annotationsClinvar():
     # In order to annotate using annotate_variants_vds we need to provide a string expression, we can't pass an array of annotations
     # like we do with annotate_variants_expr
     return annotations
+
+def annotationsDbSNP():
+    global annotationsExprs
+    #Annotations dbSNP expressions
+    return "va.rs = " + annotationsExprs["rs"]
     
 def annotationsVEP():
     # Annotations VEP expressions

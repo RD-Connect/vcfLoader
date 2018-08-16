@@ -72,6 +72,6 @@ def create_index(host,port,index_name,version,num_shards,user,pwd):
                          ,"multi":{"type":"keyword","index":"false"}
                          ,"diploid":{"type":"keyword","index":"false"}}}}}}}
     """
-    #es = Elasticsearch(hosts=[host], http_auth=(user,pwd),)
-    #response = es.indices.create(index=index_name,ignore=400,body=data)
-    #print response
+    es = Elasticsearch(hosts=[host], http_auth=(user,pwd),)
+    response = es.indices.create(index=index_name,ignore=400,body=data)
+    print response

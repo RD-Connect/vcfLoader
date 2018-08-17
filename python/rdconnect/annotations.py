@@ -139,7 +139,7 @@ def annotateDbSNP(hc, variants, annotationPath, destinationPath):
          :param string annotationPath: Path were the Clinvar annotation vcf can be found
          :param string destinationPath: Path were the new annotated dataset can be found
     """
-    annotateVCF(hc,variants,annotationPatj,destinationPath,expr.annotationsDbSNP())
+    annotateVCF(hc,variants,annotationPath,destinationPath,expr.annotationsDbSNP())
     
 def annotateGnomADEx(hc, variants, annotationPath, destinationPath):
     """ Adds gnomAD Ex annotations to a dataset. 

@@ -22,29 +22,33 @@ class DbNSFPAnnotationsTests(BaseTestClass):
         # Importing variants from vcf
         variants = self.hc.import_vcf(self.config["sampleVcfPath"]).split_multi()
         # Writing temporal directory to store the sample vcf variant dataset
-        self.hc.import_vcf(self.config["dbNSFPTablePath"]).split_multi().write(self.config["dbNSFPVdsPath"],overwrite=True)
+        annotations.importDbNSFPTable(self.hc, self.config["dbNSFPTablePath"], self.config["dbNSFPKtPath"], self.config["num_partitions"])
         # Creating annotated variants with dbNSFP
-        annotations.annotateDbNSFP(self.hc,variants,self.config["dbNSFPVdsPath"],self.config["sampleVdsPath"])
+        annotations.annotateDbNSFP(self.hc,variants,self.config["dbNSFPKtPath"],self.config["sampleVdsPath"])
         # Defining specific configuration values for the test
         self.sample_path = self.config["sampleVdsPath"]
         self.results_path = self.config["dbNSFPTable"]
-        self.columns = ["v.contig", "v.start", "va.gerp_rs", "va.mt", "va.mutationtaster_pred", "phylop46way_placental", "polyphen2_hvar_pred", "polyphen2_hvar_score", "sift_pred", "sift_score"]
+        self.columns = ["v.contig", "v.start", "va.gerp_rs", "va.mt", "va.mutationtaster_pred", "va.phylop46way_placental", "va.polyphen2_hvar_pred", "va.polyphen2_hvar_score", "va.sift_pred", "va.sift_score", "va.gp1_asn_af", "va.gp1_eur_af", "va.gp1_afr_af", "va.gp1_af"]
         # Types for table schema
         self.types = { 'v.contig': expr.TString(),
-                  'v.start': expr.TInt(),
-                  'va.gerp_rs': expr.TString(),
-                  'va.mt': expr.TDouble(),
-                  'va.mutationtaster_pred': expr.TString(),
-                  'phylop46way_placental': expr.TString(),
-                  'polyphen2_hvar_pred': expr.TString(),
-                  'polyphen2_hvar_score': expr.TDouble(),
-                  'sift_pred': expr.TString(),
-                  'sift_score': expr.TDouble()
+                       'v.start': expr.TInt(),
+                       'va.gerp_rs': expr.TString(),
+                       'va.mt': expr.TDouble(),
+                       'va.mutationtaster_pred': expr.TString(),
+                       'va.phylop46way_placental': expr.TString(),
+                       'va.polyphen2_hvar_pred': expr.TString(),
+                       'va.polyphen2_hvar_score': expr.TDouble(),
+                       'va.sift_pred': expr.TString(),
+                       'va.sift_score': expr.TDouble(),
+                       "va.gp1_asn_af": expr.TDouble(),
+                       "va.gp1_eur_af": expr.TDouble(),
+                       "va.gp1_afr_af": expr.TDouble(),
+                       "va.gp1_af": expr.TDouble()
         }
         self.key = ["v.contig","v.start"]
         
     def tearDown(self):
         """ Removes temporal directories once the tests are done """
         # Calling the parent function
-        dirs = [self.config["dbNSFPVdsPath"], self.config["sampleVdsPath"]]
+        dirs = [self.config["dbNSFPKtPath"], self.config["sampleVdsPath"]]
         super(DbNSFPAnnotationsTests,self).tearDown(dirs)

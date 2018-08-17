@@ -54,7 +54,7 @@ annotationsExprs = {
     'effs': 'orElse(%s,%s)',
     # --------------------
     # ---- dbSNP field ----
-    'rs = vds.rsid'
+    'rs': 'vds.rsid'
 }
 
 def truncateAtExpr(n,p):

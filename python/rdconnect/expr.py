@@ -66,7 +66,7 @@ def truncateAtExpr(n,p):
     # In this case, the function we can use is pow. As an example, let x=0.432 be the number we want to truncate, and p=2
     # the precision. The result we'd expect is 0.43, and the operation that lets us obtain it is:
     # floor(0.432 * 100) / 100 (in Hail, // is the floor operator for fractions)
-    return """ (%s.toDouble() // (1/pow(10,%s))) / pow(10,%s)""" % (n,p,p)
+    return """ (%s.toDouble() // (1/pow(10,%s))) / pow(10,%s) """ % (n,p,p)
     
 def removeDotExpr(n,p):
     """ Number formatting and truncation for number expressed as strings in annotation files
@@ -132,18 +132,18 @@ def annotationsDbNSFP():
     # dbNSFP annotations expressions
     global annotationsExprs
     annotations = [
-        'va.gp1_asn_af = ' + annotationsExprs["gp1_asn_af"] % removeDotExpr("va.dbnsfp.Gp1_ASN_AF1000","4"),
-        'va.gp1_eur_af = ' + annotationsExprs["gp1_eur_af"] % removeDotExpr("va.dbnsfp.Gp1_EUR_AF1000","4"),
-        'va.gp1_afr_af = ' + annotationsExprs["gp1_afr_af"] % removeDotExpr("va.dbnsfp.Gp1_AFR_AF1000","4"),
-        'va.gp1_af = ' + annotationsExprs["gp1_af"] % removeDotExpr("va.dbnsfp.Gp1_AF1000","4"),
+        'va.gp1_asn_af = ' + annotationsExprs["gp1_asn_af"] % removeDotExpr("va.dbnsfp.Gp1_ASN_AF1000","6"),
+        'va.gp1_eur_af = ' + annotationsExprs["gp1_eur_af"] % removeDotExpr("va.dbnsfp.Gp1_EUR_AF1000","6"),
+        'va.gp1_afr_af = ' + annotationsExprs["gp1_afr_af"] % removeDotExpr("va.dbnsfp.Gp1_AFR_AF1000","6"),
+        'va.gp1_af = ' + annotationsExprs["gp1_af"] % removeDotExpr("va.dbnsfp.Gp1_AF1000","6"),
         'va.gerp_rs = ' + annotationsExprs["gerp_rs"],
-        'va.mt = ' + annotationsExprs["mt"] % removeDotExpr("x","1"),
+        'va.mt = ' + annotationsExprs["mt"] % removeDotExpr("x","4"),
         'va.mutationtaster_pred = ' + annotationsExprs["mutationtaster_pred"],
         'va.phylop46way_placental = ' + annotationsExprs["phylop46way_placental"],
         'va.polyphen2_hvar_pred = ' + annotationsExprs["polyphen2_hvar_pred"],
-        'va.polyphen2_hvar_score = ' + annotationsExprs["polyphen2_hvar_score"] % removeDotExpr("x","1"),
+        'va.polyphen2_hvar_score = ' + annotationsExprs["polyphen2_hvar_score"] % removeDotExpr("x","4"),
         'va.sift_pred = ' + annotationsExprs["sift_pred"],
-        'va.sift_score = ' + annotationsExprs["sift_score"] % removeDotExpr("x","0")
+        'va.sift_score = ' + annotationsExprs["sift_score"] % removeDotExpr("x","4")
     ]
     return annotations
 

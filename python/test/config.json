@@ -1,6 +1,7 @@
 {
     "sampleVcfPath" : "resources/data/sample.vcf",
     "sampleVdsPath" : "tmp/variants.vds",
+    "variantsTable" : "resources/results/variant_annotations_results.tsv",
     "clinvarVcfPath" : "resources/annotations/clinvar.reduced.vcf",
     "clinvarVdsPath" : "tmp/clinvar.reduced.vds",
     "clinvarTable" : "resources/results/clinvar_results.tsv",

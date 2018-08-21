@@ -229,7 +229,6 @@ def annotationsVEP():
     transcriptsExpr = effsExpr % ('transcript_consequences','x.gene_symbol','x.transcript_id','x.gene_id','"transcript"','""','x.hgvsc.replace(".*:","")','x.hgvsp.replace(".*:","")','x.exon','x.biotype','str(x.cds_start)')
     intergenicsExpr = effsExpr % ('intergenic_consequences','""','""','""','"intergenic_region"','"0"','""','""','""','""','""')
     annotations = [
-        'va.rs = ' + annotationsExprs["rs"],
         'va.effs = ' + annotationsExprs["effs"] % (transcriptsExpr,intergenicsExpr)
     ]
     return annotations

@@ -1,7 +1,7 @@
 ## Imports
 
 from pyspark import SparkConf, SparkContext
-from pyspark.sql import SQLContext
+from pyspark.sql import SQLContext, SparkSession
 from rdconnect import config, annotations, index, transform, utils
 from pyspark.sql.functions import lit
 from subprocess import call
@@ -35,7 +35,7 @@ def optionParser(argv):
     return chrom, nchroms, step
 
 # Main functionality. It runs the pipeline steps
-def main(argv,hc,sqlContext):
+def main(argv,hc,sqlContext,configuration):
     call(["ls", "-l"])
 
     # Command line options parsing
@@ -157,11 +157,13 @@ def main(argv,hc,sqlContext):
         current = sqlContext.read.load(destination+"/variants/chrom=" + str(chrom))
         diff = current.subtract(previous)
 
-
 if __name__ == "__main__":
-    # Configure OPTIONS
-    conf = SparkConf().setAppName(APP_NAME)
-    hc = hail.HailContext()
+    spark_conf = SparkConf().setAppName(APP_NAME)
+    main_conf = config.readConfig("config.json")
+    spark = SparkSession.builder.config(conf=spark_conf).getOrCreate()
+    spark.sparkContext._jsc.hadoopConfiguration().setInt("dfs.block.size",main_conf["dfs_block_size"])
+    spark.sparkContext._jsc.hadoopConfiguration().setInt("parquet.block.size",main_conf["dfs_block_size"])
+    hc = hail.HailContext(spark.sparkContext)
     sqlContext = SQLContext(hc.sc)
     # Execute Main functionality
-    main(sys.argv[1:],hc,sqlContext)
+    main(sys.argv[1:],hc,sqlContext,main_conf)

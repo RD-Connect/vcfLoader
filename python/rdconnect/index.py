@@ -1,6 +1,6 @@
 import json
 import urllib2
-#from elasticsearch import Elasticsearch
+from elasticsearch import Elasticsearch
 
 def create_index(host,port,index_name,version,num_shards,user,pwd):
     data="""

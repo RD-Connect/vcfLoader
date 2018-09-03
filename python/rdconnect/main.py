@@ -158,8 +158,8 @@ def main(argv,hc,sqlContext,configuration):
         diff = current.subtract(previous)
 
 if __name__ == "__main__":
-    spark_conf = SparkConf().setAppName(APP_NAME)
     main_conf = config.readConfig("config.json")
+    spark_conf = SparkConf().setAppName(APP_NAME).set('spark.executor.cores',main_conf["executor_cores"])
     spark = SparkSession.builder.config(conf=spark_conf).getOrCreate()
     spark.sparkContext._jsc.hadoopConfiguration().setInt("dfs.block.size",main_conf["dfs_block_size"])
     spark.sparkContext._jsc.hadoopConfiguration().setInt("parquet.block.size",main_conf["dfs_block_size"])

@@ -12,9 +12,9 @@ def create_index(host,port,index_name,version,num_shards,user,pwd):
                 ,"pos":{"type":"integer","index":"true"}
                 ,"ref":{"type":"keyword","index":"false"}
                 ,"alt":{"type":"keyword","index":"false"}
-                ,"indel":{"type":"keyword"}
+                ,"indel":{"type":"keyword","index":"true"}
                 ,"freqInt":{"type":"float"}
-                ,"rs":{"type":"keyword"}
+                ,"rs":{"type":"keyword", "index":"true"}
                 ,"cadd_phred":{"type":"float","index":"true"}
                 ,"gerp_rs":{"type":"keyword","index":"false"}
                 ,"mt":{"type":"float","index":"false"}

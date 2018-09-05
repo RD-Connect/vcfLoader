@@ -41,8 +41,6 @@ def optionParser(argv):
 def main(hc, sqlContext, configuration, chrom, nchroms, step):
     call(["ls", "-l"])
 
-    # Command line options parsing
-    chrom, nchroms, step = optionParser(argv)
     if (chrom == "" or step == ""):
         usage()
         sys.exit(2)

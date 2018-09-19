@@ -37,7 +37,20 @@ def importDbNSFPTable(hc, sourcePath, destinationPath, nPartitions):
         '1000Gp1_AFR_AF':'Gp1_AFR_AF1000',
         'ESP6500_EA_AF ':'ESP6500_EA_AF',
         'GERP++_RS':'GERP_RS'}) \
-         .select(['variant','Gp1_AF1000','Gp1_EUR_AF1000','Gp1_ASN_AF1000','Gp1_AFR_AF1000','GERP_RS','MutationTaster_score','MutationTaster_pred','phyloP46way_placental','Polyphen2_HDIV_pred','Polyphen2_HVAR_score','SIFT_pred','SIFT_score']) \
+         .select(['variant',
+                  'Gp1_AF1000',
+                  'Gp1_EUR_AF1000',
+                  'Gp1_ASN_AF1000',
+                  'Gp1_AFR_AF1000',
+                  'GERP_RS',
+                  'MutationTaster_score',
+                  'MutationTaster_pred',
+                  'phyloP46way_placental',
+                  'Polyphen2_HDIV_pred',
+                  'Polyphen2_HVAR_score',
+                  'SIFT_pred',
+                  'SIFT_score',
+                  'COSMIC_ID']) \
          .write(destinationPath,overwrite=True) 
     
 def importDBVcf(hc, sourcePath, destinationPath, nPartitions):

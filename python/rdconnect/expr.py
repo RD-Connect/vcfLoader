@@ -49,6 +49,7 @@ annotationsExprs = {
     'clinvar_clnsig': "let clin_sigs = index(%s,type) in orElse(vds.info.CLNSIG.%s, vds.info.CLNSIGINCL.%s).mkString('|')",
     'clinvar_filter': "let clin_sigs = index(%s,type) in orElse(vds.info.CLNSIG.%s, vds.info.CLNSIGINCL.%s)",
     'clinvar_clnsigconf': """vds.info.CLNSIGCONF.mkString(',')""",
+    'cosmic_id': 'orElse(va.dbnsfp.COSMIC_ID,".")',
     # ---------------------------
     # ---- VEP field ----
     'effs': 'orElse(%s,%s)',
@@ -143,7 +144,8 @@ def annotationsDbNSFP():
         'va.polyphen2_hvar_pred = ' + annotationsExprs["polyphen2_hvar_pred"],
         'va.polyphen2_hvar_score = ' + annotationsExprs["polyphen2_hvar_score"] % removeDotExpr("x","4"),
         'va.sift_pred = ' + annotationsExprs["sift_pred"],
-        'va.sift_score = ' + annotationsExprs["sift_score"] % removeDotExpr("x","4")
+        'va.sift_score = ' + annotationsExprs["sift_score"] % removeDotExpr("x","4"),
+        'va.cosmic_id = ' + annotationsExprs["cosmic_id"]
     ]
     return annotations
 

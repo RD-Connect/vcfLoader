@@ -2,9 +2,9 @@ import json
 import urllib2
 #from elasticsearch import Elasticsearch
 
-def create_index(host,port,index_name,version,num_shards,user,pwd):
+def create_index(host,port,index_name,version,num_shards,num_replicas,user,pwd):
     data="""
-          {"settings":{"index":{"number_of_shards":""" + num_shards + ""","number_of_replicas":0,"refresh_interval":"1000ms"}}
+          {"settings":{"index":{"number_of_shards":""" + num_shards + ""","number_of_replicas":""" + num_replicas + """, "refresh_interval":"1000ms"}}
             ,"mappings":{"""+"\"" + version + "\""+"""
             :{
             "properties":{

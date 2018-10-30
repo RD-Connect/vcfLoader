@@ -21,6 +21,7 @@ def optionParser(argv):
     # which chromosome to count)
     nchroms = ""
     cores = "4"
+    path = "."
     try:
         opts, args = getopt.getopt(argv,"c:p:s:n:co:",["chrom=","path=","step=","nchroms=","cores="])
     except getopt.GetoptError:
@@ -30,7 +31,7 @@ def optionParser(argv):
         if opt in ("-c", "--chrom"):
             chrom = arg
         elif opt in ("-p", "--path"):
-            step = arg
+            path = arg
         elif opt in ("-s", "--step"):
             step = arg
         elif opt in ("n", "--nchroms"):
@@ -40,7 +41,7 @@ def optionParser(argv):
     return chrom, path, nchroms, step, cores
 
 # Main functionality. It runs the pipeline steps
-def main(hc, sqlContext, configuration, chrom, path, nchroms, step):
+def main(hc, sqlContext, configuration, chrom, nchroms, step):
     call(["ls", "-l"])
 
     if (chrom == "" or step == ""):
@@ -170,4 +171,4 @@ if __name__ == "__main__":
     hc = hail.HailContext(spark.sparkContext)
     sqlContext = SQLContext(hc.sc)
     # Execute Main functionality
-    main(hc,sqlContext,main_conf,chrom,path,nchroms,step)
+    main(hc,sqlContext,main_conf,chrom,nchroms,step)

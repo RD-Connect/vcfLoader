@@ -45,7 +45,7 @@ def main(hc, sqlContext, configuration, chrom, nchroms, step):
         usage()
         sys.exit(2)
         
-    configuration = config.readConfig("config.json")
+    configuration = config.readConfig(configuration["config_path"])
     destination =  configuration["destination"] + "/" + configuration["version"]
     sourceFileName = utils.buildFileName(configuration["source_path"],chrom)
     fileName = "variantsRaw" + chrom + ".vds"

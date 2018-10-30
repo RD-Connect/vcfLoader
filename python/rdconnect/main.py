@@ -11,7 +11,7 @@ import hail
 APP_NAME = "vcfLoader"
 # Usage function
 def usage():
-    print("main.py (-c | --chrom) <chromosome_id> (-s | --step) <pipeline_step> (-n | --nchroms) <number_chromosomes_uploaded>")
+    print("main.py (-c | --chrom) <chromosome_id> (-s | --step) <pipeline_step> (-p | --path) <config_path> (-n | --nchroms) <number_chromosomes_uploaded>")
 
 # Command line arguments parser. It extracts the chromosome and the pipeline step to run
 def optionParser(argv):
@@ -21,21 +21,24 @@ def optionParser(argv):
     # which chromosome to count)
     nchroms = ""
     cores = "4"
+    path = "."
     try:
-        opts, args = getopt.getopt(argv,"c:s:n:co:",["chrom=","step=","nchroms=","cores="])
+        opts, args = getopt.getopt(argv,"c:p:s:n:co:",["chrom=","path=","step=","nchroms=","cores="])
     except getopt.GetoptError:
         usage()
         sys.exit(2)
     for opt, arg in opts:
         if opt in ("-c", "--chrom"):
             chrom = arg
+        elif opt in ("-p", "--path"):
+            path = arg
         elif opt in ("-s", "--step"):
             step = arg
         elif opt in ("n", "--nchroms"):
             nchroms = arg
         elif opt in ("-co", "--cores"):
             cores = arg
-    return chrom, nchroms, step, cores
+    return chrom, path, nchroms, step, cores
 
 # Main functionality. It runs the pipeline steps
 def main(hc, sqlContext, configuration, chrom, nchroms, step):
@@ -44,8 +47,7 @@ def main(hc, sqlContext, configuration, chrom, nchroms, step):
     if (chrom == "" or step == ""):
         usage()
         sys.exit(2)
-        
-    configuration = config.readConfig(configuration["config_path"])
+    
     destination =  configuration["destination"] + "/" + configuration["version"]
     sourceFileName = utils.buildFileName(configuration["source_path"],chrom)
     fileName = "variantsRaw" + chrom + ".vds"
@@ -160,8 +162,8 @@ def main(hc, sqlContext, configuration, chrom, nchroms, step):
 
 if __name__ == "__main__":
     # Command line options parsing
-    chrom, nchroms, step, cores = optionParser(sys.argv[1:])
-    main_conf = config.readConfig("config.json")
+    chrom, path, nchroms, step, cores = optionParser(sys.argv[1:])
+    main_conf = config.readConfig(path)
     spark_conf = SparkConf().setAppName(APP_NAME).set('spark.executor.cores',cores)
     spark = SparkSession.builder.config(conf=spark_conf).getOrCreate()
     spark.sparkContext._jsc.hadoopConfiguration().setInt("dfs.block.size",main_conf["dfs_block_size"])

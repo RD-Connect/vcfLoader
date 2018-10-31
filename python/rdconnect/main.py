@@ -132,6 +132,7 @@ def main(hc, sqlContext, configuration, chrom, nchroms, step):
         es_conf = {
             "es.net.http.auth.user": configuration["elasticsearch"]["user"],
             "es.net.http.auth.pass": configuration["elasticsearch"]["pwd"],
+            "es.host": configuration["elasticsearch"]["host"],
             "es.port": configuration["elasticsearch"]["port"]
         }
         # Getting annotated variants and adding the chromosome column

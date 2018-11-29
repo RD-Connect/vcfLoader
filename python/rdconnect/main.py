@@ -21,7 +21,7 @@ def optionParser(argv):
     # which chromosome to count)
     nchroms = ""
     cores = "4"
-    path = "cpnfig.json"
+    path = "config.json"
     try:
         opts, args = getopt.getopt(argv,"c:p:s:n:co:",["chrom=","path=","step=","nchroms=","cores="])
     except getopt.GetoptError:

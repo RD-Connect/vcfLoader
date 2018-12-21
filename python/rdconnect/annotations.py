@@ -105,7 +105,8 @@ def importDBVcf(hl, sourcePath, destinationPath, nPartitions):
           :param String nPartitions: Number of partitions
     """
     print("Annotation vcf source path is " + sourcePath)
-    hl.import_vcf(sourcePath,min_partitions=nPartitions).write(destinationPath,overwrite=True)
+    hl.split_multi(hl.import_vcf(sourcePath,min_partitions=nPartitions)) \
+      .write(destinationPath,overwrite=True)
 
 def annotateVCF(hc,variants,annotationPath,destinationPath,annotations):
     """ Adds annotations to variants based on an input vds
@@ -205,7 +206,10 @@ def annotateCADD(hc, variants, annotationPath, destinationPath):
          :param string annotationPath: Path were the CADD annotation vcf can be found
          :param string destinationPath: Path were the new annotated dataset can be found
     """
-    annotateVCF(hc,variants,annotationPath,destinationPath,expr.annotationsCADD())
+    cadd = hl.read_matrix_table(annotationPath) \
+             .key_rows_by("locus","alleles")
+    variants.annotate_rows(cadd_phred=cadd.rows()[mt.locus, mt.alleles].info.CADD13_PHRED) \
+            .write(destinationPath,overwrite=True))
                                    
 def annotateClinvar(hc, variants, annotationPath, destinationPath):
     """ Adds Clinvar annotations to variants.
@@ -223,7 +227,10 @@ def annotateDbSNP(hc, variants, annotationPath, destinationPath):
          :param string annotationPath: Path were the Clinvar annotation vcf can be found
          :param string destinationPath: Path were the new annotated dataset can be found
     """
-    annotateVCF(hc,variants,annotationPath,destinationPath,expr.annotationsDbSNP())
+    dbsnp = hl.read_matrix_table(annotationPath) \
+             .key_rows_by("locus","alleles")
+    variants.annotate_rows(rsid=dbsnp.rows()[mt.locus, mt.alleles].rsid) \
+            .write(destinationPath,overwrite=True))
     
 def annotateGnomADEx(hc, variants, annotationPath, destinationPath):
     """ Adds gnomAD Ex annotations to a dataset. 
@@ -243,4 +250,7 @@ def annotateExAC(hc, variants, annotationPath, destinationPath):
          :param string annotationPath: Path were the ExAC annotation vcf can be found
          :param string destinationPath: Path were the new annotated dataset can be found
     """
-    annotateVCFMulti(hc,variants,annotationPath,destinationPath,expr.annotationsExACMulti(),[])
+    exac = hl.read_matrix_table(annotationPath) \
+             .key_rows_by("locus","alleles")
+    variants..annotate_rows(exac=hl.cond(hl.is_defined(exac.rows()[mt.locus, mt.alleles].info.ExAC_AF[exac.rows()[mt.locus, mt.alleles].a_index-1]),truncateAt(exac.rows()[mt.locus, mt.alleles].info.ExAC_AF[exac.rows()[mt.locus, mt.alleles].a_index-1],"6"),0.0)) \
+            .write(destinationPath,overwrite=True))

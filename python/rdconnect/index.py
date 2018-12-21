@@ -74,4 +74,4 @@ def create_index(host,port,index_name,version,num_shards,num_replicas,user,pwd):
     """
     es = Elasticsearch(hosts=[host], http_auth=(user,pwd),)
     response = es.indices.create(index=index_name,ignore=400,body=data)
-    print response
+    print(response)

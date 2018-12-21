@@ -60,9 +60,17 @@ def main(hc, sqlContext, configuration, chrom, nchroms, step):
         print ("step to create index")
         index.create_index(configuration["elasticsearch"]["host"],configuration["elasticsearch"]["port"],configuration["elasticsearch"]["index_name"],configuration["version"],configuration["elasticsearch"]["num_shards"],configuration["elasticsearch"]["num_replicas"],configuration["elasticsearch"]["user"],configuration["elasticsearch"]["pwd"])
         
-    if ("loadVCF" in step):
+    if ("loadGermline" in step):
         print ("step loadVCF")
-        annotations.importVCF(hc,sourceFileName,destination+"/loaded/"+fileName,number_partitions)
+        annotations.importGermline(hc,sourceFileName,destination+"/loaded/"+fileName,number_partitions)
+
+    if ("loadSomatic" in step):
+        print ("step loadSomatics")
+        # Read somatic vcf file
+        somatic_paths = config.readFilesList(configuration["somatic_paths"])
+        loaded_path = destination+"/loadedSomatic/"+fileName
+        # Import and merge somatic files
+        annotations.importSomatic(hl,somatic_paths,destination+"/loadedSomatic/"+fileName,number_partitions)
 
     if ("loaddbNSFP" in step):
         print ("step loaddbNSFP")

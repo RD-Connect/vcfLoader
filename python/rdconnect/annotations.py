@@ -108,43 +108,6 @@ def importDBVcf(hl, sourcePath, destinationPath, nPartitions):
     hl.split_multi(hl.import_vcf(sourcePath,min_partitions=nPartitions)) \
       .write(destinationPath,overwrite=True)
 
-def annotateVCF(hc,variants,annotationPath,destinationPath,annotations):
-    """ Adds annotations to variants based on an input vds
-         :param HailContext hc: The Hail context
-         :param VariantDataset variants: The variants to annotate
-         :param string annotationPath: Path were the annotations can be found
-         :param string destinationPath: Path were the new annotated dataset can be found
-         :param string annotations: Array of annotations to add to the dataset
-    """
-    annotationsVds = hc.read(annotationPath).split_multi()
-    variants.annotate_variants_vds(annotationsVds,expr=annotations).write(destinationPath,overwrite=True)
-
-def annotateVCFMulti(hc, variants, annotationPath, destinationPath, annotationsMulti, annotations):
-    """ Adds annotations to variants that have multiallelic INFO fields.
-         :param HailContext hc: The Hail context
-         :param VariantDataset variants: The variants to annotate
-         :param string annotationPath: Path were the Clinvar annotation vcf can be found
-         :param string destinationPath: Path were the new annotated dataset can be found
-         :param string annotationsMulti: Array of annotations of fields that are not split when multiallelic variants are found
-         :param string annotations: Array of annotations to add to the dataset
-    """
-    annotationsVds = hc.read(annotationPath)
-    # Getting number of multiallelics
-    nMultiallelics = annotationsVds.summarize().multiallelics
-    annotationsVds = annotationsVds.split_multi()
-    index = '0'
-    # If there are multiallelics, the aIndex annotation is created by default in the dataset.
-    # This is used in Hail for INFO fields which are multiallelic, since the function 'split_multi'
-    # doesn't split the info field, and we need to use the aIndex in order to get the correct value.
-    if nMultiallelics:
-        index = 'vds.aIndex-1'
-    annotationsExpr = annotationsMulti[0] % index
-    for annotation in annotationsMulti[1:]:
-        annotationsExpr += "," + annotation % index
-    for annotation in annotations:
-        annotationsExpr += "," + annotation
-    variants.annotate_variants_vds(annotationsVds,expr=annotationsExpr).write(destinationPath,overwrite=True)
-
 def annotateVEP(hl, variants, destinationPath, vepPath, nPartitions):
     """ Adds VEP annotations to variants.
          :param HailContext hc: The Hail context
@@ -210,7 +173,41 @@ def annotateCADD(hc, variants, annotationPath, destinationPath):
              .key_rows_by("locus","alleles")
     variants.annotate_rows(cadd_phred=cadd.rows()[mt.locus, mt.alleles].info.CADD13_PHRED) \
             .write(destinationPath,overwrite=True))
-                                   
+
+def clinvar_filtering(annotation, is_filter_field):
+    clin_sigs = hl.dict([
+        ('Uncertain_significance', 'VUS'),
+        ('not_provided', 'NA'),
+        ('Benign', 'B'),
+        ('Likely_benign', 'LB'),
+        ('Likely_pathogenic', 'LP'),
+        ('Pathogenic', 'P'),
+        ('drug_response', 'Drug'),
+        ('histocompatibility', 'Histo'),
+        ('Conflicting_interpretations_of_pathogenicity', 'C'),
+        ('Affects', 'Other'),
+        ('risk_factor', 'Other'),
+        ('association', 'Other'),
+        ('protective', 'Other'),
+        ('other', 'Other')
+    ])
+    filtered = None
+    if is_filter_field:
+        filtered = hl.map(lambda z: hl.cond(clin_sigs.contains(z), hl.dict([('clnsig', clin_sigs[z])]), hl.dict([('clnsig','-1')])), annotation)
+        filtered = hl.filter(lambda e: e['clnsig'] != '-1', filtered)    
+    else: 
+        filtered = hl.map(lambda z: hl.cond(clin_sigs.contains(z), clin_sigs[z], '-1'), annotation)
+        filtered = hl.filter(lambda e: e != '-1', filtered)  
+    return filtered
+
+def clinvar_preprocess(annotation, is_filter_field):
+    preprocessed = hl.flatmap(lambda x: x.replace('\\\/',',')
+                                     .replace('\\\:',',') \
+                                     .replace('\\\[|]',',') \
+                                     .split(','), annotation)
+    preprocessed = hl.map(lambda y: hl.cond(y[0] == '_', y[1:], y), preprocessed)
+    return clinvar_filtering(preprocessed,is_filter_field)
+
 def annotateClinvar(hc, variants, annotationPath, destinationPath):
     """ Adds Clinvar annotations to variants.
          :param HailContext hc: The Hail context
@@ -218,7 +215,15 @@ def annotateClinvar(hc, variants, annotationPath, destinationPath):
          :param string annotationPath: Path were the Clinvar annotation vcf can be found
          :param string destinationPath: Path were the new annotated dataset can be found
     """
-    annotateVCF(hc,variants,annotationPath,destinationPath,expr.annotationsClinvar())
+    clinvar = hl.split_multi(hl.read_matrix_table(annotationPath)) \
+                .key_rows_by("locus","alleles")
+    variants.annotate_rows(
+        clinvar_id=hl.cond(hl.is_defined(clinvar.rows()[mt.locus, mt.alleles].info.CLNSIG[clinvar.rows()[mt.locus, mt.alleles].a_index-1]),clinvar.rows()[mt.locus, mt.alleles].rsid,clinvar.rows()[mt.locus, mt.alleles].info.CLNSIGINCL[0].split(':')[0]),
+        clinvar_clnsigconf=hl.delimit(clinvar.rows()[mt.locus, mt.alleles].info.CLNSIGCONF),
+        clinvar_clnsig=hl.cond(hl.is_defined(clinvar.rows()[mt.locus, mt.alleles].info.CLNSIG[clinvar.rows()[mt.locus, mt.alleles].a_index-1]),clinvar_preprocess(clinvar.rows()[mt.locus, mt.alleles].info.CLNSIG,False), clinvar_preprocess(clinvar.rows()[mt.locus, mt.alleles].info.CLNSIGINCL,False)),
+        clinvar_filter=hl.cond(hl.is_defined(clinvar.rows()[mt.locus, mt.alleles].info.CLNSIG[clinvar.rows()[mt.locus, mt.alleles].a_index-1]),clinvar_preprocess(clinvar.rows()[mt.locus, mt.alleles].info.CLNSIG,True), clinvar_preprocess(clinvar.rows()[mt.locus, mt.alleles].info.CLNSIGINCL,True))
+    ) \
+    .write(destinationPath,overwrite=True)
 
 def annotateDbSNP(hc, variants, annotationPath, destinationPath):
     """ Adds dbSNP annotations to variants.
@@ -227,10 +232,10 @@ def annotateDbSNP(hc, variants, annotationPath, destinationPath):
          :param string annotationPath: Path were the Clinvar annotation vcf can be found
          :param string destinationPath: Path were the new annotated dataset can be found
     """
-    dbsnp = hl.read_matrix_table(annotationPath) \
-             .key_rows_by("locus","alleles")
+    dbsnp = hl.split_multi(hl.read_matrix_table(annotationPath)) \
+              .key_rows_by("locus","alleles")
     variants.annotate_rows(rsid=dbsnp.rows()[mt.locus, mt.alleles].rsid) \
-            .write(destinationPath,overwrite=True))
+            .write(destinationPath,overwrite=True)
     
 def annotateGnomADEx(hc, variants, annotationPath, destinationPath):
     """ Adds gnomAD Ex annotations to a dataset. 
@@ -239,9 +244,19 @@ def annotateGnomADEx(hc, variants, annotationPath, destinationPath):
          :param string annotationPath: Path were the GnomAD Ex annotation vcf can be found
          :param string destinationPath: Path were the new annotated dataset can be found
     """
-    annotationsMulti = expr.annotationsGnomADMulti()
-    annotations = expr.annotationsGnomAD()
-    annotateVCFMulti(hc,variants,annotationPath,destinationPath,annotationsMulti,annotations)
+    gnomad = hl.split_multi(hl.read_matrix_table(annotationPath)) \
+             .key_rows_by("locus","alleles")
+    variants.annotate_rows(
+        gnomad_af=hl.cond(hl.is_defined(gnomad.rows()[mt.locus, mt.alleles].info.gnomAD_Ex_AF[gnomad.rows()[mt.locus, mt.alleles].a_index-1]),gnomad.rows()[mt.locus, mt.alleles].info.gnomAD_Ex_AF[gnomad.rows()[mt.locus, mt.alleles].a_index-1],0.0),
+        gnomad_ac=hl.cond(hl.is_defined(gnomad.rows()[mt.locus, mt.alleles].info.gnomAD_Ex_AC[gnomad.rows()[mt.locus, mt.alleles].a_index-1]),gnomad.rows()[mt.locus, mt.alleles].info.gnomAD_Ex_AC[gnomad.rows()[mt.locus, mt.alleles].a_index-1],0.0),
+        gnomad_an=hl.cond(hl.is_defined(gnomad.rows()[mt.locus, mt.alleles].info.gnomAD_Ex_AN),gnomad.rows()[mt.locus, mt.alleles].info.gnomAD_Ex_AN,0.0),
+        gnomad_af_popmax=hl.cond(hl.is_defined(gnomad.rows()[mt.locus, mt.alleles].info.gnomAD_Ex_AF_POPMAX[gnomad.rows()[mt.locus, mt.alleles].a_index-1]),gnomad.rows()[mt.locus, mt.alleles].info.gnomAD_Ex_AF_POPMAX[gnomad.rows()[mt.locus, mt.alleles].a_index-1],0.0),
+        gnomad_ac_popmax=hl.cond(hl.is_defined(gnomad.rows()[mt.locus, mt.alleles].info.gnomAD_Ex_AC_POPMAX[gnomad.rows()[mt.locus, mt.alleles].a_index-1]),gnomad.rows()[mt.locus, mt.alleles].info.gnomAD_Ex_AC_POPMAX[gnomad.rows()[mt.locus, mt.alleles].a_index-1],0.0),
+        gnomad_an_popmax=hl.cond(hl.is_defined(gnomad.rows()[mt.locus, mt.alleles].info.gnomAD_Ex_AN_POPMAX[gnomad.rows()[mt.locus, mt.alleles].a_index-1]),gnomad.rows()[mt.locus, mt.alleles].info.gnomAD_Ex_AN_POPMAX[gnomad.rows()[mt.locus, mt.alleles].a_index-1],0.0),
+        gnomad_filter=hl.cond(gnomad.rows()[mt.locus, mt.alleles].info.gnomAD_Ex_filterStats == 'Pass','PASS','non-PASS')
+)
+    ) \
+    .write(destinationPath,overwrite=True)
 
 def annotateExAC(hc, variants, annotationPath, destinationPath):
     """ Adds ExAC annotations to a dataset. 
@@ -250,7 +265,7 @@ def annotateExAC(hc, variants, annotationPath, destinationPath):
          :param string annotationPath: Path were the ExAC annotation vcf can be found
          :param string destinationPath: Path were the new annotated dataset can be found
     """
-    exac = hl.read_matrix_table(annotationPath) \
+    exac = hl.split_multi(l.read_matrix_table(annotationPath)) \
              .key_rows_by("locus","alleles")
     variants..annotate_rows(exac=hl.cond(hl.is_defined(exac.rows()[mt.locus, mt.alleles].info.ExAC_AF[exac.rows()[mt.locus, mt.alleles].a_index-1]),truncateAt(exac.rows()[mt.locus, mt.alleles].info.ExAC_AF[exac.rows()[mt.locus, mt.alleles].a_index-1],"6"),0.0)) \
             .write(destinationPath,overwrite=True))

@@ -13,11 +13,14 @@ def importGermline(hc, sourcePath, destinationPath, nPartitions):
         print ("writing vds to" + destinationPath)
         vcf = vcf.transmute_entries(sample=hl.set([hl.struct(sample=vcf.s,ad=vcf.AD,dp=vcf.DP,gt=vcf.GT,gq=vcf.GQ)])) \
                      .drop('rsid','qual','filters','info','old_locus','old_alleles')
-        vcf = vcf.annotate_rows(ref=vcf.alleles[0],
-                                alt=vcf.allleles[1],
-                                pos=vcf.locus.pos,
-                                indel=hl.is_indel(vcf.alleles[0],vcf.alleles[1]),
-                                samples_germline=hl.agg.collect_as_set(vcf.sample)) 
+        vcf.annotate_rows(ref=vcf.alleles[0],
+                          alt=vcf.alleles[1],
+                          pos=vcf.locus.pos,
+                          indel=hl.is_indel(vcf.alleles[0],vcf.alleles[1]),
+                          samples_germline=hl.agg.collect_as_set(vcf.sample)) \
+           .annotate_rows(freqInt = hl.cond((hl.len(annotated.samples_germline) > 0) | (hl.len(hl.filter(lambda x: x.dp > 8,annotated.samples_germline)) > 0),
+                                            truncateAt(hl.sum(hl.map(lambda x: x.gt.unphased_diploid_gt_index(),annotated.samples_germline))/hl.sum(hl.map(lambda x: 2,hl.filter(lambda x: x.dp > 8,annotated.samples_germline))),"6"), 0.0)) \
+           .drop("samples") \
            .write(destinationPath,overwrite=True)
         return True
     except ValueError:
@@ -53,7 +56,7 @@ def annotateSomatic(hl, dataset):
     dataset = dataset.transmute_entries(sample=hl.set([hl.struct(sample=dataset.s,ad=dataset.AD,dp=dataset.DP,gt=dataset.GT,nprogs=dataset.info.NPROGS,progs=dataset.info.PROGS)])) \
                      .drop('rsid','qual','filters','info','VAF','old_locus','old_alleles')
     dataset = dataset.annotate_rows(ref=dataset.alleles[0],
-                                    alt=dataset.allleles[1],
+                                    alt=dataset.alleles[1],
                                     pos=dataset.locus.pos,
                                     indel=hl.is_indel(annotated.alleles[0],annotated.alleles[1]),
                                     samples_somatic=hl.agg.collect_as_set(dataset.sample))
@@ -108,6 +111,38 @@ def importDBVcf(hl, sourcePath, destinationPath, nPartitions):
     hl.split_multi(hl.import_vcf(sourcePath,min_partitions=nPartitions)) \
       .write(destinationPath,overwrite=True)
 
+def transcript_annotations(annotations):
+    return hl.map(lambda x: 
+           hl.struct(
+               gene_name=x.gene_symbol,
+               effect_impact=x.impact,
+               transcript_id=x.transcript_id,
+               effect=hl.str(x.consequence_terms),
+               gene_id=x.gene_id,
+               functional_class='transcript',
+               amino_acid_length='',
+               codon_change='x.hgvsc.replace(".*:","")',
+               amino_acid_change='x.hgvsp.replace(".*:","")',
+               exon_rank='x.exon',
+               transcript_biotype='x.biotype',
+               gene_coding='str(x.cds_start)'),annotations)
+
+def intergenic_annotations(annotations):
+    return hl.map(lambda x: 
+           hl.struct(
+               gene_name='',
+               effect_impact=x.impact,
+               transcript_id='',
+               effect=hl.str(x.consequence_terms),
+               gene_id='',
+               functional_class='intergenic_region',
+               amino_acid_length='0',
+               codon_change='',
+               amino_acid_change='',
+               exon_rank='',
+               transcript_biotype='',
+               gene_coding=''),annotations)
+
 def annotateVEP(hl, variants, destinationPath, vepPath, nPartitions):
     """ Adds VEP annotations to variants.
          :param HailContext hc: The Hail context
@@ -120,21 +155,8 @@ def annotateVEP(hl, variants, destinationPath, vepPath, nPartitions):
     print("destination is "+destinationPath)
     varAnnotated = hl.vep(variants,vepPath)
     #hl.split_multi(varAnnotated) \
-    varAnnotated = varAnnotated.annotate(effs=hl.map(lambda x: 
-                                                     hl.struct(
-                                                         gene_name=x.gene_symbol,
-                                                         effect_impact=x.impact,
-                                                         transcript_id=x.transcript_id,
-                                                         effect=hl.str(x.consequence_terms),
-                                                         gene_id=x.gene_id,
-                                                         functional_class='transcript',
-                                                         amino_acid_length='',
-                                                         codon_change='x.hgvsc.replace(".*:","")',
-                                                         amino_acid_change='x.hgvsp.replace(".*:","")',
-                                                         exon_rank='x.exon',
-                                                         transcript_biotype='x.biotype',
-                                                         gene_coding='str(x.cds_start)'),varAnnotated.vep.transcript_consequences)) \
-      .write(destinationPath,overwrite=True)
+    varAnnotated = varAnnotated.annotate_rows(effs=hl.cond(hl.is_defined(annotated.vep.transcript_consequences),transcript_annotations(annotated.vep.transcript_consequences),intergenic_annotations(annotated.vep.intergenic_consequences))) \
+                               .write(destinationPath,overwrite=True)
 
 def truncateAt(n,precision):
     return hl.float(hl.format('%.' + precision + 'f',n))

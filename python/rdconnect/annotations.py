@@ -179,7 +179,8 @@ def annotateVEP(hl, variants, destinationPath, vepPath, nPartitions):
     print("destination is "+destinationPath)
     varAnnotated = hl.vep(variants,vepPath)
     #hl.split_multi(varAnnotated) \
-    varAnnotated.annotate(effs=hl.cond(hl.is_defined(varAnnotated.vep.transcript_consequences),transcript_annotations(hl,varAnnotated.vep.transcript_consequences),intergenic_annotations(hl,varAnnotated.vep.intergenic_consequences))) \
+    varAnnotated = varAnnotated.annotate(effs=hl.cond(hl.is_defined(varAnnotated.vep.transcript_consequences),transcript_annotations(hl,varAnnotated.vep.transcript_consequences),intergenic_annotations(hl,varAnnotated.vep.intergenic_consequences)))
+    varAnnotated.drop("vep") \
                 .write(destinationPath,overwrite=True)
 
 def mt_pred_annotations(hl, annotations):

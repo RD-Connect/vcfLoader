@@ -40,24 +40,40 @@ def importSomatic(hl, germline, file_paths, destination_path, num_partitions):
                 print("File path -> " + file_path)
                 dataset = hl.split_multi(hl.import_vcf(file_path,force_bgz=True,min_partitions=num_partitions))
                 dataset = annotateSomatic(hl,dataset)
-                merged = mergeSomatic(merged,dataset)
-            merged = merge(germline,merged)
+                merged = mergeSomatic(hl, merged,dataset)
+            merged = merge(hl, germline,merged)
             merged.write(destination_path,overwrite=True)
         except ValueError:
             print("Error in loading vcf")
     else:
         print("Empty file list")
 
-def mergeSomatic(dataset, other):
+def mergeSomatic(hl, dataset, other):
     tdataset = dataset.rows()
     tother = other.rows()
     joined = tdataset.join(tother,"outer")
-    return joined.transmute(samples_somatic=joined.samples_somatic.union(joined.samples_somatic_1))
+    return joined.transmute(
+        samples_somatic = joined.samples_somatic.union(joined.samples_somatic_1),
+        was_split = hl.or_else(joined.was_split,joined.was_split_1),
+        a_index = hl.or_else(joined.a_index,joined.a_index_1),
+        ref = hl.or_else(joined.ref,joined.ref_1),
+        alt = hl.or_else(joined.alt,joined.alt_1),
+        pos = hl.or_else(joined.pos,joined.pos_1),
+        indel = hl.or_else(joined.indel,joined.indel_1)
+    )
 
-def merge(germline, somatic):
+def merge(hl, germline, somatic):
     tgermline = germline.rows()
     tsomatic = somatic.rows()
-    return tgermline.join(tsomatic,"outer")
+    joined = tgermline.join(tsomatic,"outer")
+    return joined.transmute(
+        was_split = hl.or_else(joined.was_split,joined.was_split_1),
+        a_index = hl.or_else(joined.a_index,joined.a_index_1),
+        ref = hl.or_else(joined.ref,joined.ref_1),
+        alt = hl.or_else(joined.alt,joined.alt_1),
+        pos = hl.or_else(joined.pos,joined.pos_1),
+        indel = hl.or_else(joined.indel,joined.indel_1)
+    )
 
 def annotateSomatic(hl, dataset):
     dataset = dataset.transmute_entries(sample=hl.struct(sample=dataset.s,dp_avg=dataset.DP_avg,dp_ref_avg=dataset.DP_REF_avg,dp_alt_avg=dataset.DP_ALT_avg,vaf_avg=dataset.VAF_avg,gt=dataset.GT,nprogs=dataset.info.NPROGS,progs=dataset.info.PROGS)) \
@@ -104,9 +120,9 @@ def importDbNSFPTable(hl, sourcePath, destinationPath, nPartitions):
                          table.Polyphen2_HVAR_score,
                          table.SIFT_pred,
                          table.SIFT_score,
-                         table.COSMIC_ID) \
-                 .key_by(table.locus,table.alleles) \
-                 .write(destinationPath,overwrite=True) 
+                         table.COSMIC_ID) 
+    table.key_by(table.locus,table.alleles) \
+         .write(destinationPath,overwrite=True) 
     
 def importDBVcf(hl, sourcePath, destinationPath, nPartitions):
     """ Imports annotations vcfs
@@ -119,7 +135,7 @@ def importDBVcf(hl, sourcePath, destinationPath, nPartitions):
     hl.split_multi(hl.import_vcf(sourcePath,min_partitions=nPartitions)) \
       .write(destinationPath,overwrite=True)
 
-def transcript_annotations(annotations):
+def transcript_annotations(hl, annotations):
     return hl.map(lambda x: 
            hl.struct(
                gene_name=x.gene_symbol,
@@ -135,7 +151,7 @@ def transcript_annotations(annotations):
                transcript_biotype='x.biotype',
                gene_coding='str(x.cds_start)'),annotations)
 
-def intergenic_annotations(annotations):
+def intergenic_annotations(hl, annotations):
     return hl.map(lambda x: 
            hl.struct(
                gene_name='',
@@ -163,8 +179,33 @@ def annotateVEP(hl, variants, destinationPath, vepPath, nPartitions):
     print("destination is "+destinationPath)
     varAnnotated = hl.vep(variants,vepPath)
     #hl.split_multi(varAnnotated) \
-    varAnnotated = varAnnotated.annotate_rows(effs=hl.cond(hl.is_defined(annotated.vep.transcript_consequences),transcript_annotations(annotated.vep.transcript_consequences),intergenic_annotations(annotated.vep.intergenic_consequences))) \
-                               .write(destinationPath,overwrite=True)
+    varAnnotated.annotate(effs=hl.cond(hl.is_defined(varAnnotated.vep.transcript_consequences),transcript_annotations(hl,varAnnotated.vep.transcript_consequences),intergenic_annotations(hl,varAnnotated.vep.intergenic_consequences))) \
+                .write(destinationPath,overwrite=True)
+
+def mt_pred_annotations(hl, annotations):
+    arr = annotations.MutationTaster_pred.split(";")
+    return (hl.case()
+            .when(arr.contains("A"),"A")
+            .when(arr.contains("D"),"D")
+            .when(arr.contains("N"),"N")
+            .default(""))
+
+def polyphen_pred_annotations(hl, annotations):
+    arr = annotations.Polyphen2_HDIV_pred.split(";")
+    return (hl.case()
+            .when(arr.contains("D"),"D")
+            .when(arr.contains("P"),"P")
+            .when(arr.contains("B"),"B")
+            .default("")
+           )
+    
+def sift_pred_annotations(hl, annotations):
+    arr = annotations.SIFT_pred
+    return (hl.case()
+            .when(arr.contains("D"),"D")
+            .when(arr.contains("T"),"T")
+            .default("")
+           )
 
 def truncateAt(hl, n, precision):
     return hl.float(hl.format('%.' + precision + 'f',n))
@@ -180,16 +221,16 @@ def annotateDbNSFP(hl, variants, dbnsfpPath, destinationPath):
          :param string destinationPath: Path were the new annotated dataset can be found
     """
     dbnsfp = hl.read_table(dbnsfpPath)
-    variants.annotate_rows(
-        gerp_rs=table[variants.locus, variants.alleles].GERP_RS,
-        mt=hl.or_else(hl.max(table[variants.locus, variants.alleles].MutationTaster_score.split(";").map(lambda x:removeDot(hl,x,"4"))),0.0),
-        mutationtaster_pred=mt_pred_annotations(table[variants.locus, variants.alleles]),
-        phyloP46way_placental=removeDot(hl,table[variants.locus, variants.alleles].phyloP46way_placental,"4"),
-        polyphen2_hvar_pred=polyphen_pred_annotations(table[variants.locus, variants.alleles]),
-        polyphen2_hvar_score=hl.or_else(hl.max(table[variants.locus, variants.alleles].Polyphen2_HVAR_score.split(";").map(lambda x: removeDot(hl,x,"4"))),0.0),
-        sift_pred=sift_pred_annotations(table[variants.locus, variants.alleles]),
-        sift_score=hl.or_else(hl.max(table[variants.locus, variants.alleles].SIFT_score.split(";").map(lambda x: removeDot(hl,x,"4"))),0.0),
-        cosmic=table[variants.locus, variants.alleles].COSMIC_ID) \
+    variants.annotate(
+        gerp_rs=dbnsfp[variants.locus, variants.alleles].GERP_RS,
+        mt=hl.or_else(hl.max(dbnsfp[variants.locus, variants.alleles].MutationTaster_score.split(";").map(lambda x:removeDot(hl,x,"4"))),0.0),
+        mutationtaster_pred=mt_pred_annotations(hl,dbnsfp[variants.locus, variants.alleles]),
+        phyloP46way_placental=removeDot(hl,dbnsfp[variants.locus, variants.alleles].phyloP46way_placental,"4"),
+        polyphen2_hvar_pred=polyphen_pred_annotations(hl,dbnsfp[variants.locus, variants.alleles]),
+        polyphen2_hvar_score=hl.or_else(hl.max(dbnsfp[variants.locus, variants.alleles].Polyphen2_HVAR_score.split(";").map(lambda x: removeDot(hl,x,"4"))),0.0),
+        sift_pred=sift_pred_annotations(hl,dbnsfp[variants.locus, variants.alleles]),
+        sift_score=hl.or_else(hl.max(dbnsfp[variants.locus, variants.alleles].SIFT_score.split(";").map(lambda x: removeDot(hl,x,"4"))),0.0),
+        cosmic=dbnsfp[variants.locus, variants.alleles].COSMIC_ID) \
             .write(destinationPath,overwrite=True)
 
 def annotateCADD(hl, variants, annotationPath, destinationPath):
@@ -201,10 +242,10 @@ def annotateCADD(hl, variants, annotationPath, destinationPath):
     """
     cadd = hl.read_matrix_table(annotationPath) \
              .key_rows_by("locus","alleles")
-    variants.annotate_rows(cadd_phred=cadd.rows()[mt.locus, mt.alleles].info.CADD13_PHRED) \
+    variants.annotate(cadd_phred=cadd.rows()[variants.locus, variants.alleles].info.CADD13_PHRED) \
             .write(destinationPath,overwrite=True)
 
-def clinvar_filtering(annotation, is_filter_field):
+def clinvar_filtering(hl, annotation, is_filter_field):
     clin_sigs = hl.dict([
         ('Uncertain_significance', 'VUS'),
         ('not_provided', 'NA'),
@@ -230,13 +271,13 @@ def clinvar_filtering(annotation, is_filter_field):
         filtered = hl.filter(lambda e: e != '-1', filtered)  
     return filtered
 
-def clinvar_preprocess(annotation, is_filter_field):
+def clinvar_preprocess(hl, annotation, is_filter_field):
     preprocessed = hl.flatmap(lambda x: x.replace('\\\/',',')
                                      .replace('\\\:',',') \
                                      .replace('\\\[|]',',') \
                                      .split(','), annotation)
     preprocessed = hl.map(lambda y: hl.cond(y[0] == '_', y[1:], y), preprocessed)
-    return clinvar_filtering(preprocessed,is_filter_field)
+    return clinvar_filtering(hl,preprocessed,is_filter_field)
 
 def annotateClinvar(hl, variants, annotationPath, destinationPath):
     """ Adds Clinvar annotations to variants.
@@ -247,11 +288,11 @@ def annotateClinvar(hl, variants, annotationPath, destinationPath):
     """
     clinvar = hl.split_multi(hl.read_matrix_table(annotationPath)) \
                 .key_rows_by("locus","alleles")
-    variants.annotate_rows(
-        clinvar_id=hl.cond(hl.is_defined(clinvar.rows()[mt.locus, mt.alleles].info.CLNSIG[clinvar.rows()[mt.locus, mt.alleles].a_index-1]),clinvar.rows()[mt.locus, mt.alleles].rsid,clinvar.rows()[mt.locus, mt.alleles].info.CLNSIGINCL[0].split(':')[0]),
-        clinvar_clnsigconf=hl.delimit(clinvar.rows()[mt.locus, mt.alleles].info.CLNSIGCONF),
-        clinvar_clnsig=hl.cond(hl.is_defined(clinvar.rows()[mt.locus, mt.alleles].info.CLNSIG[clinvar.rows()[mt.locus, mt.alleles].a_index-1]),clinvar_preprocess(clinvar.rows()[mt.locus, mt.alleles].info.CLNSIG,False), clinvar_preprocess(clinvar.rows()[mt.locus, mt.alleles].info.CLNSIGINCL,False)),
-        clinvar_filter=hl.cond(hl.is_defined(clinvar.rows()[mt.locus, mt.alleles].info.CLNSIG[clinvar.rows()[mt.locus, mt.alleles].a_index-1]),clinvar_preprocess(clinvar.rows()[mt.locus, mt.alleles].info.CLNSIG,True), clinvar_preprocess(clinvar.rows()[mt.locus, mt.alleles].info.CLNSIGINCL,True))
+    variants.annotate(
+        clinvar_id=hl.cond(hl.is_defined(clinvar.rows()[variants.locus, variants.alleles].info.CLNSIG[clinvar.rows()[variants.locus, variants.alleles].a_index-1]),clinvar.rows()[variants.locus, variants.alleles].rsid,clinvar.rows()[variants.locus, variants.alleles].info.CLNSIGINCL[0].split(':')[0]),
+        clinvar_clnsigconf=hl.delimit(clinvar.rows()[variants.locus, variants.alleles].info.CLNSIGCONF),
+        clinvar_clnsig=hl.cond(hl.is_defined(clinvar.rows()[variants.locus, variants.alleles].info.CLNSIG[clinvar.rows()[variants.locus, variants.alleles].a_index-1]),clinvar_preprocess(hl,clinvar.rows()[variants.locus, variants.alleles].info.CLNSIG,False), clinvar_preprocess(hl,clinvar.rows()[variants.locus, variants.alleles].info.CLNSIGINCL,False)),
+        clinvar_filter=hl.cond(hl.is_defined(clinvar.rows()[variants.locus, variants.alleles].info.CLNSIG[clinvar.rows()[variants.locus, variants.alleles].a_index-1]),clinvar_preprocess(hl,clinvar.rows()[variants.locus, variants.alleles].info.CLNSIG,True), clinvar_preprocess(hl,clinvar.rows()[variants.locus, variants.alleles].info.CLNSIGINCL,True))
     ) \
     .write(destinationPath,overwrite=True)
 
@@ -264,7 +305,7 @@ def annotateDbSNP(hl, variants, annotationPath, destinationPath):
     """
     dbsnp = hl.split_multi(hl.read_matrix_table(annotationPath)) \
               .key_rows_by("locus","alleles")
-    variants.annotate_rows(rsid=dbsnp.rows()[mt.locus, mt.alleles].rsid) \
+    variants.annotate(rsid=dbsnp.rows()[variants.locus, variants.alleles].rsid) \
             .write(destinationPath,overwrite=True)
     
 def annotateGnomADEx(hl, variants, annotationPath, destinationPath):
@@ -276,14 +317,14 @@ def annotateGnomADEx(hl, variants, annotationPath, destinationPath):
     """
     gnomad = hl.split_multi(hl.read_matrix_table(annotationPath)) \
                .key_rows_by("locus","alleles")
-    variants.annotate_rows(
-        gnomad_af=hl.cond(hl.is_defined(gnomad.rows()[mt.locus, mt.alleles].info.gnomAD_Ex_AF[gnomad.rows()[mt.locus, mt.alleles].a_index-1]),gnomad.rows()[mt.locus, mt.alleles].info.gnomAD_Ex_AF[gnomad.rows()[mt.locus, mt.alleles].a_index-1],0.0),
-        gnomad_ac=hl.cond(hl.is_defined(gnomad.rows()[mt.locus, mt.alleles].info.gnomAD_Ex_AC[gnomad.rows()[mt.locus, mt.alleles].a_index-1]),gnomad.rows()[mt.locus, mt.alleles].info.gnomAD_Ex_AC[gnomad.rows()[mt.locus, mt.alleles].a_index-1],0.0),
-        gnomad_an=hl.cond(hl.is_defined(gnomad.rows()[mt.locus, mt.alleles].info.gnomAD_Ex_AN),gnomad.rows()[mt.locus, mt.alleles].info.gnomAD_Ex_AN,0.0),
-        gnomad_af_popmax=hl.cond(hl.is_defined(gnomad.rows()[mt.locus, mt.alleles].info.gnomAD_Ex_AF_POPMAX[gnomad.rows()[mt.locus, mt.alleles].a_index-1]),gnomad.rows()[mt.locus, mt.alleles].info.gnomAD_Ex_AF_POPMAX[gnomad.rows()[mt.locus, mt.alleles].a_index-1],0.0),
-        gnomad_ac_popmax=hl.cond(hl.is_defined(gnomad.rows()[mt.locus, mt.alleles].info.gnomAD_Ex_AC_POPMAX[gnomad.rows()[mt.locus, mt.alleles].a_index-1]),gnomad.rows()[mt.locus, mt.alleles].info.gnomAD_Ex_AC_POPMAX[gnomad.rows()[mt.locus, mt.alleles].a_index-1],0.0),
-        gnomad_an_popmax=hl.cond(hl.is_defined(gnomad.rows()[mt.locus, mt.alleles].info.gnomAD_Ex_AN_POPMAX[gnomad.rows()[mt.locus, mt.alleles].a_index-1]),gnomad.rows()[mt.locus, mt.alleles].info.gnomAD_Ex_AN_POPMAX[gnomad.rows()[mt.locus, mt.alleles].a_index-1],0.0),
-        gnomad_filter=hl.cond(gnomad.rows()[mt.locus, mt.alleles].info.gnomAD_Ex_filterStats == 'Pass','PASS','non-PASS')
+    variants.annotate(
+        gnomad_af=hl.cond(hl.is_defined(gnomad.rows()[variants.locus, variants.alleles].info.gnomAD_Ex_AF[gnomad.rows()[variants.locus, variants.alleles].a_index-1]),gnomad.rows()[variants.locus, variants.alleles].info.gnomAD_Ex_AF[gnomad.rows()[variants.locus, variants.alleles].a_index-1],0.0),
+        gnomad_ac=hl.cond(hl.is_defined(gnomad.rows()[variants.locus, variants.alleles].info.gnomAD_Ex_AC[gnomad.rows()[variants.locus, variants.alleles].a_index-1]),gnomad.rows()[variants.locus, variants.alleles].info.gnomAD_Ex_AC[gnomad.rows()[variants.locus, variants.alleles].a_index-1],0.0),
+        gnomad_an=hl.cond(hl.is_defined(gnomad.rows()[variants.locus, variants.alleles].info.gnomAD_Ex_AN),gnomad.rows()[variants.locus, variants.alleles].info.gnomAD_Ex_AN,0.0),
+        gnomad_af_popmax=hl.cond(hl.is_defined(gnomad.rows()[variants.locus, variants.alleles].info.gnomAD_Ex_AF_POPMAX[gnomad.rows()[variants.locus, variants.alleles].a_index-1]),gnomad.rows()[variants.locus, variants.alleles].info.gnomAD_Ex_AF_POPMAX[gnomad.rows()[variants.locus, variants.alleles].a_index-1],0.0),
+        gnomad_ac_popmax=hl.cond(hl.is_defined(gnomad.rows()[variants.locus, variants.alleles].info.gnomAD_Ex_AC_POPMAX[gnomad.rows()[variants.locus, variants.alleles].a_index-1]),gnomad.rows()[variants.locus, variants.alleles].info.gnomAD_Ex_AC_POPMAX[gnomad.rows()[variants.locus, variants.alleles].a_index-1],0.0),
+        gnomad_an_popmax=hl.cond(hl.is_defined(gnomad.rows()[variants.locus, variants.alleles].info.gnomAD_Ex_AN_POPMAX[gnomad.rows()[variants.locus, variants.alleles].a_index-1]),gnomad.rows()[variants.locus, variants.alleles].info.gnomAD_Ex_AN_POPMAX[gnomad.rows()[variants.locus, variants.alleles].a_index-1],0.0),
+        gnomad_filter=hl.cond(gnomad.rows()[variants.locus, variants.alleles].info.gnomAD_Ex_filterStats == 'Pass','PASS','non-PASS')
 ) \
             .write(destinationPath,overwrite=True)
     
@@ -294,7 +335,7 @@ def annotateExAC(hl, variants, annotationPath, destinationPath):
          :param string annotationPath: Path were the ExAC annotation vcf can be found
          :param string destinationPath: Path were the new annotated dataset can be found
     """
-    exac = hl.split_multi(l.read_matrix_table(annotationPath)) \
+    exac = hl.split_multi(hl.read_matrix_table(annotationPath)) \
              .key_rows_by("locus","alleles")
-    variants.annotate_rows(exac=hl.cond(hl.is_defined(exac.rows()[variants.locus, variants.alleles].info.ExAC_AF[exac.rows()[variants.locus, variants.alleles].a_index-1]),truncateAt(hl,exac.rows()[variants.locus, variants.alleles].info.ExAC_AF[exac.rows()[variants.locus, variants.alleles].a_index-1],"6"),0.0)) \
+    variants.annotate(exac=hl.cond(hl.is_defined(exac.rows()[variants.locus, variants.alleles].info.ExAC_AF[exac.rows()[variants.locus, variants.alleles].a_index-1]),truncateAt(hl,exac.rows()[variants.locus, variants.alleles].info.ExAC_AF[exac.rows()[variants.locus, variants.alleles].a_index-1],"6"),0.0)) \
              .write(destinationPath,overwrite=True)

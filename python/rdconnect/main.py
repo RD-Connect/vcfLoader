@@ -50,7 +50,7 @@ def main(sqlContext, configuration, chrom, nchroms, step):
     
     destination =  configuration["destination"] + "/" + configuration["version"]
     sourceFileName = utils.buildFileName(configuration["source_path"],chrom)
-    fileName = "variants" + chrom + ".mt"
+    fileName = "variants" + chrom + ".ht"
     number_partitions = configuration["number_of_partitions"]
 
     print("sourcefilename is "+sourceFileName)
@@ -62,14 +62,14 @@ def main(sqlContext, configuration, chrom, nchroms, step):
         
     if ("loadGermline" in step):
         print ("step loadVCF")
-        annotations.importGermline(hl,sourceFileName,destination+"/loaded/"+fileName,number_partitions)
+        annotations.importGermline(hl,sourceFileName,destination+"/loaded/"+"variants" + chrom + ".mt",number_partitions)
 
     if ("loadSomatic" in step):
         print ("step loadSomatics")
         # Read somatic vcf file
         somatic_paths = config.readFilesList(configuration["somatic_paths"])
         loaded_path = destination+"/loadedSomatic/"+fileName
-        germline = hl.read_matrix_table(destination+"/loaded/"+fileName)
+        germline = hl.read_matrix_table(destination+"/loaded/"+"variants" + chrom + ".mt")
         # Import and merge somatic files
         annotations.importSomatic(hl,germline,somatic_paths,destination+"/loadedSomatic/"+fileName,number_partitions)
 
@@ -93,40 +93,44 @@ def main(sqlContext, configuration, chrom, nchroms, step):
         print ("step load ExAC")
         annotations.importDBVcf(hl,utils.buildFileName(configuration["ExAC_Raw"],chrom),utils.buildFileName(configuration["ExAC_path"],chrom),number_partitions)
 
+    if ("loaddbSNP" in step):
+        print ("step load dbSNP")
+        annotations.importDBVcf(hl,utils.buildFileName(configuration["dbSNP_Raw"],chrom),utils.buildFileName(configuration["dbSNP_path"],chrom),number_partitions)
+
     if ("annotateVEP" in step):
         print ("step annotate VEP")
-        print ("source file is "+destination+"/loaded/"+fileName)
-        variants = hl.read(destination+"/loaded/"+fileName)
+        print ("source file is "+destination+"/loadedSomatic/"+fileName)
+        variants = hl.read_table(destination+"/loadedSomatic/"+fileName)
         annotations.annotateVEP(hl,variants,destination+"/annotatedVEP/"+fileName,configuration["vep"],number_partitions)
             
     if ("annotatedbNSFP" in step):
         print("step annotate dbNSFP")
-        variants = hl.read(destination+"/annotatedVEP/"+fileName)
+        variants = hl.read_table(destination+"/annotatedVEP/"+fileName)
         annotations.annotateDbNSFP(hl,variants,utils.buildFileName(configuration["dnNSFP_path"],chrom),destination+"/annotatedVEPdbnSFP/"+fileName)
 
     if ("annotatecadd" in step):
         print("step annotate dbcadd")
-        variants= hl.read(destination+"/annotatedVEPdbnSFP/"+fileName)
+        variants= hl.read_table(destination+"/annotatedVEPdbnSFP/"+fileName)
         annotations.annotateCADD(hl,variants,utils.buildFileName(configuration["cadd_path"],chrom),destination+"/annotatedVEPdbnSFPCadd/"+fileName)
 
     if ("annotateclinvar" in step):
         print("step annotate clinvar")
-        variants = hl.read(destination+"/annotatedVEPdbnSFPCadd/"+fileName)
+        variants = hl.read_table(destination+"/annotatedVEPdbnSFPCadd/"+fileName)
         annotations.annotateClinvar(hl,variants,utils.buildFileName(configuration["clinvar_path"],""),destination+"/annotatedVEPdbnSFPCaddClinvar/"+fileName)
 
     if ("annotateExomesGnomad" in step):
         print("step annotate exomes gnomad")
-        variants= hl.read(destination+"/annotatedVEPdbnSFPCaddClinvar/"+fileName)
+        variants= hl.read_table(destination+"/annotatedVEPdbnSFPCaddClinvar/"+fileName)
         annotations.annotateGnomADEx(hl,variants,utils.buildFileName(configuration["exomesGnomad_path"],chrom),destination+"/annotatedVEPdbnSFPCaddClinvarExGnomad/"+fileName)
 
     if ("annotatedbSNP" in step):
         print("step annotate dbSNP")
-        variants= hl.read(destination+"/annotatedVEPdbnSFPCaddClinvarExGnomad/"+fileName)
+        variants= hl.read_table(destination+"/annotatedVEPdbnSFPCaddClinvarExGnomad/"+fileName)
         annotations.annotateDbSNP(hl,variants,utils.buildFileName(configuration["dbSNP_path"],chrom),destination+"/annotatedVEPdbnSFPCaddClinvarExGnomaddbSNP/"+fileName)
         
     if ("annotateExAC" in step):
         print("step annotate ExAC")
-        variants= hl.read(destination+"/annotatedVEPdbnSFPCaddClinvarExGnomaddbSNP/"+fileName)
+        variants= hl.read_table(destination+"/annotatedVEPdbnSFPCaddClinvarExGnomaddbSNP/"+fileName)
         annotations.annotateExAC(hl,variants,utils.buildFileName(configuration["ExAC_path"],chrom),destination+"/annotatedVEPdbnSFPCaddClinvarExGnomaddbSNPExAC/"+fileName)
 
     # Transforming step. It sets all fields to the corresponding ElasticSearch format

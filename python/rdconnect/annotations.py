@@ -141,15 +141,15 @@ def transcript_annotations(hl, annotations):
                gene_name=x.gene_symbol,
                effect_impact=x.impact,
                transcript_id=x.transcript_id,
-               effect=hl.str(x.consequence_terms),
+               effect=hl.delimit(x.consequence_terms,","),
                gene_id=x.gene_id,
                functional_class='transcript',
                amino_acid_length='',
-               codon_change='x.hgvsc.replace(".*:","")',
-               amino_acid_change='x.hgvsp.replace(".*:","")',
-               exon_rank='x.exon',
-               transcript_biotype='x.biotype',
-               gene_coding='str(x.cds_start)'),annotations)
+               codon_change=x.hgvsc.replace(".*:",""),
+               amino_acid_change=x.hgvsp.replace(".*:",""),
+               exon_rank=x.exon,
+               transcript_biotype=x.biotype,
+               gene_coding=hl.str(x.cds_start)),annotations)
 
 def intergenic_annotations(hl, annotations):
     return hl.map(lambda x: 
@@ -157,7 +157,7 @@ def intergenic_annotations(hl, annotations):
                gene_name='',
                effect_impact=x.impact,
                transcript_id='',
-               effect=hl.str(x.consequence_terms),
+               effect=hl.delimit(x.consequence_terms,","),
                gene_id='',
                functional_class='intergenic_region',
                amino_acid_length='0',
@@ -178,7 +178,6 @@ def annotateVEP(hl, variants, destinationPath, vepPath, nPartitions):
     print("Running vep")
     print("destination is "+destinationPath)
     varAnnotated = hl.vep(variants,vepPath)
-    #hl.split_multi(varAnnotated) \
     varAnnotated = varAnnotated.annotate(effs=hl.cond(hl.is_defined(varAnnotated.vep.transcript_consequences),transcript_annotations(hl,varAnnotated.vep.transcript_consequences),intergenic_annotations(hl,varAnnotated.vep.intergenic_consequences)))
     varAnnotated.drop("vep") \
                 .write(destinationPath,overwrite=True)

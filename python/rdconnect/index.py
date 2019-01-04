@@ -60,7 +60,7 @@ def create_index(host,port,index_name,version,num_shards,num_replicas,user,pwd):
                          ,"gene_name":{"type":"keyword"}
                          ,"transcript_biotype":{"type":"keyword"}
                          ,"transcript_id":{"type":"keyword"}}}
-                ,"samples":{
+                ,"samples_germline":{
                      "type":"nested",
                      "properties":{
                          "dp":{"type":"float"}
@@ -69,8 +69,21 @@ def create_index(host,port,index_name,version,num_shards,num_replicas,user,pwd):
                          ,"gt":{"type":"keyword"}
                          ,"sample":{"type":"keyword"}
                          ,"multi":{"type":"keyword","index":"false"}
-                         ,"diploid":{"type":"keyword","index":"false"}}}}}}}
+                         ,"diploid":{"type":"keyword","index":"false"}}}
+                ,"samples_somatic":{
+                     "type":"nested",
+                     "properties":{
+                         "gt":{"type":"keyword"}
+                         ,"dp_tumor":{"type":"float"}
+                         ,"dp_control":{"type":"float"}
+                         ,"ad_tumor":{"type":"keyword"}
+                         ,"ad_control":{"type":"keyword"}
+                         ,"sample":{"type":"keyword"}
+                         ,"multi":{"type":"keyword","index":"false"}
+                         ,"nprogs":{"type":"integer","index":"true"}
+                         ,"progs":{"type":"keyword"}}}}}}}
     """
     es = Elasticsearch(hosts=[host], http_auth=(user,pwd),)
     response = es.indices.create(index=index_name,ignore=400,body=data)
     print(response)
+

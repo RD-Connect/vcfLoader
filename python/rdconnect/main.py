@@ -136,7 +136,7 @@ def main(sqlContext, configuration, chrom, nchroms, step):
     # Transforming step. It sets all fields to the corresponding ElasticSearch format
     if ("transform" in step):
         print ("step transform")
-        annotated = hl.read(destination+"/annotatedVEPdbnSFPCaddClinvarExGnomaddbSNPExAC/"+fileName)
+        annotated = hl.read_table(destination+"/annotatedVEPdbnSFPCaddClinvarExGnomaddbSNPExAC/"+fileName)
         transform.transform(annotated,destination,chrom)
 
     # Uploading step. It uploads all annotated variants to ElasticSearch
@@ -150,7 +150,7 @@ def main(sqlContext, configuration, chrom, nchroms, step):
         }
         # Getting annotated variants and adding the chromosome column
         variants = sqlContext.read.load(destination+"/variants/chrom="+chrom)\
-                                  .withcolumn("chrom",lit(chrom))
+                                  .withColumn("chrom",lit(chrom))
         variants.printSchema()
         variants.write.format("org.elasticsearch.spark.sql").options(**es_conf).save(configuration["elasticsearch"]["index_name"]+"/"+configuration["version"], mode='append')
 
@@ -165,14 +165,6 @@ def main(sqlContext, configuration, chrom, nchroms, step):
             variants = sqlContext.read.load(destination+"/variants/chrom=" + str(chrom))
             count += variants.count()
         print("\nTotal number of variants: " + str(count) + "\n")
-
-    if ("compare" in step):
-        if (previous == ""):
-            usage()
-            sys.exit(2)
-        previous = sqlContext.read.load(previous+"/variants/chrom=" + str(chrom))
-        current = sqlContext.read.load(destination+"/variants/chrom=" + str(chrom))
-        diff = current.subtract(previous)
 
 if __name__ == "__main__":
     # Command line options parsing

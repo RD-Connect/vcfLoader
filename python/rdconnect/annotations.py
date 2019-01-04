@@ -19,10 +19,10 @@ def importGermline(hl, sourcePath, destinationPath, nPartitions):
         vcf = vcf.annotate_rows(ref=vcf.alleles[0],
                           alt=vcf.alleles[1],
                           pos=vcf.locus.position,
-                          indel=hl.is_indel(vcf.alleles[0],vcf.alleles[1]),
+                          indel=hl.cond((hl.len(mt.alleles[0]) != (hl.len(mt.alleles[1]))) | (hl.len(mt.alleles[0]) != 1) | (hl.len(mt.alleles[0]) != 1), True, False),
                           samples_germline=hl.filter(lambda x: (x.dp > MIN_DP) & (x.gq > MIN_GQ),hl.agg.collect(vcf.sample))) 
         vcf.annotate_rows(freqInt = hl.cond((hl.len(vcf.samples_germline) > 0) | (hl.len(hl.filter(lambda x: x.dp > MIN_DP,vcf.samples_germline)) > 0),
-                                            truncateAt(hl,hl.sum(hl.map(lambda x: x.gt.unphased_diploid_gt_index(),vcf.samples_germline))/hl.sum(hl.map(lambda x: 2,hl.filter(lambda x: x.dp > 8,vcf.samples_germline))),"6"), 0.0)) \
+                                            truncateAt(hl,hl.sum(hl.map(lambda x: x.gt.unphased_diploid_gt_index(),vcf.samples_germline))/hl.sum(hl.map(lambda x: 2,hl.filter(lambda x: x.dp > MIN_DP,vcf.samples_germline))),"6"), 0.0)) \
            .drop("sample") \
            .write(destinationPath,overwrite=True)
         return True

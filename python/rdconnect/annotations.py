@@ -14,7 +14,12 @@ def importGermline(hl, sourcePath, destinationPath, nPartitions):
         print ("reading vcf from "+ sourcePath)
         vcf = hl.split_multi(hl.import_vcf(str(sourcePath),force_bgz=True,min_partitions=nPartitions))
         print ("writing vds to" + destinationPath)
-        vcf = vcf.transmute_entries(sample=hl.struct(sample=vcf.s,ad=vcf.AD,dp=vcf.DP,gt=vcf.GT,gq=vcf.GQ)) \
+        vcf = vcf.transmute_entries(sample=hl.struct(sample=vcf.s,
+                                                     ad=truncateAt(hl,vcf.AD[1]/hl.sum(vcf.AD),"2"),
+                                                     dp=vcf.DP,
+                                                     gtInt=vcf.GT,
+                                                     gt=hl.str(vcf.GT),
+                                                     gq=vcf.GQ)) \
                      .drop('rsid','qual','filters','info','old_locus','old_alleles')
         vcf = vcf.annotate_rows(ref=vcf.alleles[0],
                           alt=vcf.alleles[1],
@@ -22,7 +27,7 @@ def importGermline(hl, sourcePath, destinationPath, nPartitions):
                           indel=hl.cond((hl.len(vcf.alleles[0]) != (hl.len(vcf.alleles[1]))) | (hl.len(vcf.alleles[0]) != 1) | (hl.len(vcf.alleles[0]) != 1), True, False),
                           samples_germline=hl.filter(lambda x: (x.dp > MIN_DP) & (x.gq > MIN_GQ),hl.agg.collect(vcf.sample))) 
         vcf.annotate_rows(freqInt = hl.cond((hl.len(vcf.samples_germline) > 0) | (hl.len(hl.filter(lambda x: x.dp > MIN_DP,vcf.samples_germline)) > 0),
-                                            truncateAt(hl,hl.sum(hl.map(lambda x: x.gt.unphased_diploid_gt_index(),vcf.samples_germline))/hl.sum(hl.map(lambda x: 2,hl.filter(lambda x: x.dp > MIN_DP,vcf.samples_germline))),"6"), 0.0)) \
+                                            truncateAt(hl,hl.sum(hl.map(lambda x: x.gtInt.unphased_diploid_gt_index(),vcf.samples_germline))/hl.sum(hl.map(lambda x: 2,hl.filter(lambda x: x.dp > MIN_DP,vcf.samples_germline))),"6"), 0.0)) \
            .drop("sample") \
            .write(destinationPath,overwrite=True)
         return True
@@ -76,7 +81,7 @@ def merge(hl, germline, somatic):
     )
 
 def annotateSomatic(hl, dataset):
-    dataset = dataset.transmute_entries(sample=hl.struct(sample=dataset.s,dp_avg=dataset.DP_avg,dp_ref_avg=dataset.DP_REF_avg,dp_alt_avg=dataset.DP_ALT_avg,vaf_avg=dataset.VAF_avg,gt=dataset.GT,nprogs=dataset.info.NPROGS,progs=dataset.info.PROGS)) \
+    dataset = dataset.transmute_entries(sample=hl.struct(sample=dataset.s,dp_avg=dataset.DP_avg,dp_ref_avg=dataset.DP_REF_avg,dp_alt_avg=dataset.DP_ALT_avg,vaf_avg=dataset.VAF_avg,gt=hl.str(dataset.GT),nprogs=dataset.info.NPROGS,progs=dataset.info.PROGS)) \
                      .drop('rsid','qual','filters','info','old_locus','old_alleles')
     dataset = dataset.annotate_rows(ref=dataset.alleles[0],
                                     alt=dataset.alleles[1],

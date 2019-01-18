@@ -227,6 +227,10 @@ def annotateDbNSFP(hl, variants, dbnsfpPath, destinationPath):
     """
     dbnsfp = hl.read_table(dbnsfpPath)
     variants.annotate(
+        gp1_asn_af=hl.or_else(removeDot(hl,dbnsfp[variants.locus, variants.alleles].Gp1_ASN_AF1000,"6"), 0.0),
+        gp1_eur_af=hl.or_else(removeDot(hl,dbnsfp[variants.locus, variants.alleles].Gp1_EUR_AF1000,"6"), 0.0),
+        gp1_afr_af=hl.or_else(removeDot(hl,dbnsfp[variants.locus, variants.alleles].Gp1_AFR_AF1000,"6"), 0.0),
+        gp1_af=hl.or_else(removeDot(hl,dbnsfp[variants.locus, variants.alleles].Gp1_AF1000,"6"), 0.0),
         gerp_rs=dbnsfp[variants.locus, variants.alleles].GERP_RS,
         mt=hl.or_else(hl.max(dbnsfp[variants.locus, variants.alleles].MutationTaster_score.split(";").map(lambda x:removeDot(hl,x,"4"))),0.0),
         mutationtaster_pred=mt_pred_annotations(hl,dbnsfp[variants.locus, variants.alleles]),
@@ -235,7 +239,7 @@ def annotateDbNSFP(hl, variants, dbnsfpPath, destinationPath):
         polyphen2_hvar_score=hl.or_else(hl.max(dbnsfp[variants.locus, variants.alleles].Polyphen2_HVAR_score.split(";").map(lambda x: removeDot(hl,x,"4"))),0.0),
         sift_pred=sift_pred_annotations(hl,dbnsfp[variants.locus, variants.alleles]),
         sift_score=hl.or_else(hl.max(dbnsfp[variants.locus, variants.alleles].SIFT_score.split(";").map(lambda x: removeDot(hl,x,"4"))),0.0),
-        cosmic=dbnsfp[variants.locus, variants.alleles].COSMIC_ID) \
+        cosmic_id=dbnsfp[variants.locus, variants.alleles].COSMIC_ID) \
             .write(destinationPath,overwrite=True)
 
 def annotateCADD(hl, variants, annotationPath, destinationPath):
@@ -292,12 +296,13 @@ def annotateClinvar(hl, variants, annotationPath, destinationPath):
          :param string destinationPath: Path were the new annotated dataset can be found
     """
     clinvar = hl.split_multi(hl.read_matrix_table(annotationPath)) \
-                .key_rows_by("locus","alleles")
+                .rows() \
+                .key_by("locus","alleles")
     variants.annotate(
-        clinvar_id=hl.cond(hl.is_defined(clinvar.rows()[variants.locus, variants.alleles].info.CLNSIG[clinvar.rows()[variants.locus, variants.alleles].a_index-1]),clinvar.rows()[variants.locus, variants.alleles].rsid,clinvar.rows()[variants.locus, variants.alleles].info.CLNSIGINCL[0].split(':')[0]),
-        clinvar_clnsigconf=hl.delimit(clinvar.rows()[variants.locus, variants.alleles].info.CLNSIGCONF),
-        clinvar_clnsig=hl.cond(hl.is_defined(clinvar.rows()[variants.locus, variants.alleles].info.CLNSIG[clinvar.rows()[variants.locus, variants.alleles].a_index-1]),clinvar_preprocess(hl,clinvar.rows()[variants.locus, variants.alleles].info.CLNSIG,False), clinvar_preprocess(hl,clinvar.rows()[variants.locus, variants.alleles].info.CLNSIGINCL,False)),
-        clinvar_filter=hl.cond(hl.is_defined(clinvar.rows()[variants.locus, variants.alleles].info.CLNSIG[clinvar.rows()[variants.locus, variants.alleles].a_index-1]),clinvar_preprocess(hl,clinvar.rows()[variants.locus, variants.alleles].info.CLNSIG,True), clinvar_preprocess(hl,clinvar.rows()[variants.locus, variants.alleles].info.CLNSIGINCL,True))
+        clinvar_id=hl.cond(hl.is_defined(clinvar[variants.locus, variants.alleles].info.CLNSIG[clinvar[variants.locus, variants.alleles].a_index-1]),clinvar[variants.locus, variants.alleles].rsid,clinvar[variants.locus, variants.alleles].info.CLNSIGINCL[0].split(':')[0]),
+        clinvar_clnsigconf=hl.delimit(clinvar[variants.locus, variants.alleles].info.CLNSIGCONF),
+        clinvar_clnsig=hl.cond(hl.is_defined(clinvar[variants.locus, variants.alleles].info.CLNSIG[clinvar[variants.locus, variants.alleles].a_index-1]),clinvar_preprocess(hl,clinvar[variants.locus, variants.alleles].info.CLNSIG,False), clinvar_preprocess(hl,clinvar[variants.locus, variants.alleles].info.CLNSIGINCL,False)),
+        clinvar_filter=hl.cond(hl.is_defined(clinvar[variants.locus, variants.alleles].info.CLNSIG[clinvar[variants.locus, variants.alleles].a_index-1]),clinvar_preprocess(hl,clinvar[variants.locus, variants.alleles].info.CLNSIG,True), clinvar_preprocess(hl,clinvar[variants.locus, variants.alleles].info.CLNSIGINCL,True))
     ) \
     .write(destinationPath,overwrite=True)
 
@@ -321,15 +326,16 @@ def annotateGnomADEx(hl, variants, annotationPath, destinationPath):
          :param string destinationPath: Path were the new annotated dataset can be found
     """
     gnomad = hl.split_multi(hl.read_matrix_table(annotationPath)) \
-               .key_rows_by("locus","alleles")
+               .rows() \
+               .key_by("locus","alleles")
     variants.annotate(
-        gnomad_af=hl.cond(hl.is_defined(gnomad.rows()[variants.locus, variants.alleles].info.gnomAD_Ex_AF[gnomad.rows()[variants.locus, variants.alleles].a_index-1]),gnomad.rows()[variants.locus, variants.alleles].info.gnomAD_Ex_AF[gnomad.rows()[variants.locus, variants.alleles].a_index-1],0.0),
-        gnomad_ac=hl.cond(hl.is_defined(gnomad.rows()[variants.locus, variants.alleles].info.gnomAD_Ex_AC[gnomad.rows()[variants.locus, variants.alleles].a_index-1]),gnomad.rows()[variants.locus, variants.alleles].info.gnomAD_Ex_AC[gnomad.rows()[variants.locus, variants.alleles].a_index-1],0.0),
-        gnomad_an=hl.cond(hl.is_defined(gnomad.rows()[variants.locus, variants.alleles].info.gnomAD_Ex_AN),gnomad.rows()[variants.locus, variants.alleles].info.gnomAD_Ex_AN,0.0),
-        gnomad_af_popmax=hl.cond(hl.is_defined(gnomad.rows()[variants.locus, variants.alleles].info.gnomAD_Ex_AF_POPMAX[gnomad.rows()[variants.locus, variants.alleles].a_index-1]),gnomad.rows()[variants.locus, variants.alleles].info.gnomAD_Ex_AF_POPMAX[gnomad.rows()[variants.locus, variants.alleles].a_index-1],0.0),
-        gnomad_ac_popmax=hl.cond(hl.is_defined(gnomad.rows()[variants.locus, variants.alleles].info.gnomAD_Ex_AC_POPMAX[gnomad.rows()[variants.locus, variants.alleles].a_index-1]),gnomad.rows()[variants.locus, variants.alleles].info.gnomAD_Ex_AC_POPMAX[gnomad.rows()[variants.locus, variants.alleles].a_index-1],0.0),
-        gnomad_an_popmax=hl.cond(hl.is_defined(gnomad.rows()[variants.locus, variants.alleles].info.gnomAD_Ex_AN_POPMAX[gnomad.rows()[variants.locus, variants.alleles].a_index-1]),gnomad.rows()[variants.locus, variants.alleles].info.gnomAD_Ex_AN_POPMAX[gnomad.rows()[variants.locus, variants.alleles].a_index-1],0.0),
-        gnomad_filter=hl.cond(gnomad.rows()[variants.locus, variants.alleles].info.gnomAD_Ex_filterStats == 'Pass','PASS','non-PASS')
+        gnomad_af=hl.cond(hl.is_defined(gnomad[variants.locus, variants.alleles].info.gnomAD_Ex_AF[gnomad[variants.locus, variants.alleles].a_index-1]),gnomad[variants.locus, variants.alleles].info.gnomAD_Ex_AF[gnomad[variants.locus, variants.alleles].a_index-1],0.0),
+        gnomad_ac=hl.cond(hl.is_defined(gnomad[variants.locus, variants.alleles].info.gnomAD_Ex_AC[gnomad[variants.locus, variants.alleles].a_index-1]),gnomad[variants.locus, variants.alleles].info.gnomAD_Ex_AC[gnomad[variants.locus, variants.alleles].a_index-1],0.0),
+        gnomad_an=hl.cond(hl.is_defined(gnomad[variants.locus, variants.alleles].info.gnomAD_Ex_AN),gnomad[variants.locus, variants.alleles].info.gnomAD_Ex_AN,0.0),
+        gnomad_af_popmax=hl.cond(hl.is_defined(gnomad[variants.locus, variants.alleles].info.gnomAD_Ex_AF_POPMAX[gnomad[variants.locus, variants.alleles].a_index-1]),gnomad[variants.locus, variants.alleles].info.gnomAD_Ex_AF_POPMAX[gnomad[variants.locus, variants.alleles].a_index-1],0.0),
+        gnomad_ac_popmax=hl.cond(hl.is_defined(gnomad[variants.locus, variants.alleles].info.gnomAD_Ex_AC_POPMAX[gnomad[variants.locus, variants.alleles].a_index-1]),gnomad[variants.locus, variants.alleles].info.gnomAD_Ex_AC_POPMAX[gnomad[variants.locus, variants.alleles].a_index-1],0.0),
+        gnomad_an_popmax=hl.cond(hl.is_defined(gnomad[variants.locus, variants.alleles].info.gnomAD_Ex_AN_POPMAX[gnomad[variants.locus, variants.alleles].a_index-1]),gnomad[variants.locus, variants.alleles].info.gnomAD_Ex_AN_POPMAX[gnomad[variants.locus, variants.alleles].a_index-1],0.0),
+        gnomad_filter=hl.cond(gnomad[variants.locus, variants.alleles].info.gnomAD_Ex_filterStats == 'Pass','PASS','non-PASS')
 ) \
             .write(destinationPath,overwrite=True)
     

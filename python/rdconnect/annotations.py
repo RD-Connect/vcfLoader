@@ -53,12 +53,10 @@ def importSomatic(hl, germline, file_paths, destination_path, num_partitions):
     else:
         print("Empty file list")
 
-def mergeSomatic(hl, dataset, other):
-    tdataset = dataset.rows()
-    tother = other.rows()
+def mergeSomatic(hl, tdataset, tother):
     joined = tdataset.join(tother,"outer")
     return joined.transmute(
-        samples_somatic = joined.samples_somatic.union(joined.samples_somatic_1),
+        samples_somatic = joined.samples_somatic.extend(joined.samples_somatic_1),
         was_split = hl.or_else(joined.was_split,joined.was_split_1),
         a_index = hl.or_else(joined.a_index,joined.a_index_1),
         ref = hl.or_else(joined.ref,joined.ref_1),
@@ -69,7 +67,7 @@ def mergeSomatic(hl, dataset, other):
 
 def merge(hl, germline, somatic):
     tgermline = germline.rows()
-    tsomatic = somatic.rows()
+    tsomatic = somatic
     joined = tgermline.join(tsomatic,"outer")
     return joined.transmute(
         was_split = hl.or_else(joined.was_split,joined.was_split_1),
@@ -81,7 +79,7 @@ def merge(hl, germline, somatic):
     )
 
 def annotateSomatic(hl, dataset):
-    dataset = dataset.transmute_entries(sample=hl.struct(sample=dataset.s,dp_avg=dataset.DP_avg,dp_ref_avg=dataset.DP_REF_avg,dp_alt_avg=dataset.DP_ALT_avg,vaf_avg=dataset.VAF_avg,gt=hl.str(dataset.GT),nprogs=dataset.info.NPROGS,progs=dataset.info.PROGS)) \
+    dataset = dataset.transmute_entries(sample=hl.struct(sample=dataset.s,dp_avg=dataset.DP_avg,dp_ref_avg=dataset.DP_REF_avg,dp_alt_avg=dataset.DP_ALT_avg,vaf_avg=dataset.VAF_avg,gt=hl.str(dataset.GT),nprogs=dataset.info.NPROGS,progs=hl.delimit(dataset.info.PROGS,","))) \
                      .drop('rsid','qual','filters','info','old_locus','old_alleles')
     dataset = dataset.annotate_rows(ref=dataset.alleles[0],
                                     alt=dataset.alleles[1],
@@ -89,7 +87,7 @@ def annotateSomatic(hl, dataset):
                                     indel=hl.is_indel(dataset.alleles[0],dataset.alleles[1]),
                                     samples_somatic=hl.agg.collect(dataset.sample)) \
                      .drop("sample")
-    return dataset
+    return dataset.rows()
 
 def importDbNSFPTable(hl, sourcePath, destinationPath, nPartitions):
     """ Imports the dbNSFP annotation table

@@ -61,7 +61,7 @@ def main(sqlContext, configuration, chrom, nchroms, step):
         index.create_index(configuration["elasticsearch"]["host"],configuration["elasticsearch"]["port"],configuration["elasticsearch"]["index_name"],configuration["version"],configuration["elasticsearch"]["num_shards"],configuration["elasticsearch"]["num_replicas"],configuration["elasticsearch"]["user"],configuration["elasticsearch"]["pwd"])
         
     if ("loadGermline" in step):
-        print ("step loadVCF")
+        print ("step loadGermline")
         annotations.importGermline(hl,sourceFileName,destination+"/loaded/"+"variants" + chrom + ".mt",number_partitions)
 
     if ("loadSomatic" in step):

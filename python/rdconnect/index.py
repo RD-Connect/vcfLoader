@@ -1,5 +1,5 @@
 import json
-from elasticsearch import Elasticsearch
+#from elasticsearch import Elasticsearch
 
 def create_index(host,port,index_name,version,num_shards,num_replicas,user,pwd):
     data="""
@@ -83,7 +83,7 @@ def create_index(host,port,index_name,version,num_shards,num_replicas,user,pwd):
                          ,"nprogs":{"type":"integer","index":"true"}
                          ,"progs":{"type":"keyword"}}}}}}}
     """
-    es = Elasticsearch(hosts=[host], http_auth=(user,pwd),)
-    response = es.indices.create(index=index_name,ignore=400,body=data)
-    print(response)
+    #es = Elasticsearch(hosts=[host], http_auth=(user,pwd),)
+    #response = es.indices.create(index=index_name,ignore=400,body=data)
+    #print(response)
 

@@ -7,6 +7,7 @@ from pyspark.sql.functions import lit
 from subprocess import call
 import sys, getopt
 import hail as hl
+import os
 
 APP_NAME = "vcfLoader"
 # Usage function
@@ -168,6 +169,7 @@ def main(sqlContext, configuration, chrom, nchroms, step):
 
 if __name__ == "__main__":
     # Command line options parsing
+    os.environ['PYSPARK_PYTHON'] = '/usr/bin/python3.6'
     chrom, path, nchroms, step, cores = optionParser(sys.argv[1:])
     main_conf = config.readConfig(path)
     spark_conf = SparkConf().setAppName(APP_NAME).set('spark.executor.cores',cores)

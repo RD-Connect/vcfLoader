@@ -1,9 +1,9 @@
 {
     "sampleVcfPath" : "resources/data/sample.vcf",
-    "sampleVdsPath" : "tmp/variants.vds",
+    "samplePath" : "tmp/variants.kt",
     "variantsTable" : "resources/results/variant_annotations_results.tsv",
     "clinvarVcfPath" : "resources/annotations/clinvar.reduced.vcf",
-    "clinvarVdsPath" : "tmp/clinvar.reduced.vds",
+    "clinvarPath" : "tmp/clinvar.reduced.kt",
     "clinvarTable" : "resources/results/clinvar_results.tsv",
     "dbSNPVcfPath" : "resources/annotations/dbsnp.reduced.vcf",
     "dbSNPVdsPath" : "tmp/dbsnp.reduced.vds",

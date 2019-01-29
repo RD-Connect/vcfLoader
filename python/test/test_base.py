@@ -1,6 +1,6 @@
 import unittest
 from rdconnect import config
-from hail import HailContext
+import hail as hl
 from pyspark.sql import SparkSession, SQLContext
 import shutil
 import nose.tools
@@ -33,7 +33,8 @@ class BaseTestClass(unittest.TestCase):
                                  .config("spark.eventLog.enabled",False) \
                                  .getOrCreate()
         self.sc = self.spark.sparkContext
-        self.hc = HailContext(self.sc)
+        hl.init(self.sc)
+        self.hl = hl
         self.sqlContext = SQLContext(self.sc)
 
     def test(self):
@@ -46,7 +47,7 @@ class BaseTestClass(unittest.TestCase):
         # - Select specified columns and key by specified key (e.g. v.start)
         # - Filter out all rows with missing values (that way we can add result tables without modifying the
         #   existing ones for other tests)
-        annotated_table = self.hc.read(self.sample_path) \
+        annotated_table = self.hc.read_table(self.sample_path) \
                                  .variants_table() \
                                  .expand_types() \
                                  .flatten() \
@@ -61,7 +62,7 @@ class BaseTestClass(unittest.TestCase):
     def tearDown(self, tmp_dirs):
         """ Stopping Spark and Hail contexts """
         self.sc.stop()
-        self.hc.stop()
+        self.hl.stop()
         self.spark.stop()
         # Removing temporal directories (specified by each class that inherits from this one) 
         for directory in tmp_dirs:

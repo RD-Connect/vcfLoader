@@ -20,25 +20,18 @@ class ClinvarAnnotationsTests(BaseTestClass):
         # Calling the parent setUp function 
         super(ClinvarAnnotationsTests,self).setUp()
         # Importing variants from vcf
-        variants = self.hc.import_vcf(self.config["sampleVcfPath"]).split_multi()
+        variants = self.hl.split_multi(self.hl.import_vcf(self.config["sampleVcfPath"])).rows()
         # Writing temporal directory to store the sample vcf variant dataset
-        self.hc.import_vcf(self.config["clinvarVcfPath"]).split_multi().write(self.config["clinvarVdsPath"],overwrite=True)
+        self.hl.split_multi(self.hl.import_vcf(self.config["clinvarVcfPath"])).write(self.config["clinvarPath"],overwrite=True)
         # Creating annotated variants with Clinvar
-        annotations.annotateClinvar(self.hc,variants,self.config["clinvarVdsPath"],self.config["sampleVdsPath"])
+        annotations.annotateClinvar(self.hl,variants,self.config["clinvarPath"],self.config["samplePath"])
         # Defining specific configuration values for the test
-        self.sample_path = self.config["sampleVdsPath"]
+        self.sample_path = self.config["samplePath"]
         self.results_path = self.config["clinvarTable"]
         self.columns = ["v.contig", "v.start", "va.clinvar_id", "va.clinvar_clnsig", "va.clinvar_filter"]
-        # Types for table schema
-        self.types = { 'v.contig': expr.TString(),
-                  'v.start': expr.TInt(),
-                  'va.clinvar_clnsig': expr.TString(),
-                  'va.clinvar_filter': expr.TArray(expr.TStruct(["clnsig"],[expr.TString()])),
-                  'va.clinvar_id': expr.TString() }
-        self.key = ["v.contig","v.start"]
         
     def tearDown(self):
         """ Removes temporal directories once the tests are done """
         # Calling the parent function
-        dirs = [self.config["clinvarVdsPath"], self.config["sampleVdsPath"]]
+        dirs = [self.config["clinvarPath"], self.config["samplePath"]]
         super(ClinvarAnnotationsTests,self).tearDown(dirs)

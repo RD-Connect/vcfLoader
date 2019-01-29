@@ -29,6 +29,7 @@ def importGermline(hl, sourcePath, destinationPath, nPartitions):
         vcf.annotate_rows(freqInt = hl.cond((hl.len(vcf.samples_germline) > 0) | (hl.len(hl.filter(lambda x: x.dp > MIN_DP,vcf.samples_germline)) > 0),
                                             truncateAt(hl,hl.sum(hl.map(lambda x: x.gtInt.unphased_diploid_gt_index(),vcf.samples_germline))/hl.sum(hl.map(lambda x: 2,hl.filter(lambda x: x.dp > MIN_DP,vcf.samples_germline))),"6"), 0.0)) \
            .drop("sample") \
+           .rows() \
            .write(destinationPath,overwrite=True)
         return True
     except ValueError:
@@ -46,7 +47,7 @@ def importSomatic(hl, germline, file_paths, destination_path, num_partitions):
                 dataset = hl.split_multi(hl.import_vcf(file_path,force_bgz=True,min_partitions=num_partitions))
                 dataset = annotateSomatic(hl,dataset)
                 merged = mergeSomatic(hl, merged,dataset)
-            merged = merge(hl, germline,merged)
+            merged = merge(hl,germline,merged)
             merged.write(destination_path,overwrite=True)
         except ValueError:
             print("Error in loading vcf")
@@ -65,9 +66,7 @@ def mergeSomatic(hl, tdataset, tother):
         indel = hl.or_else(joined.indel,joined.indel_1)
     )
 
-def merge(hl, germline, somatic):
-    tgermline = germline.rows()
-    tsomatic = somatic
+def merge(hl, tgermline, tsomatic):
     joined = tgermline.join(tsomatic,"outer")
     return joined.transmute(
         was_split = hl.or_else(joined.was_split,joined.was_split_1),
@@ -345,6 +344,7 @@ def annotateExAC(hl, variants, annotationPath, destinationPath):
          :param string destinationPath: Path were the new annotated dataset can be found
     """
     exac = hl.split_multi(hl.read_matrix_table(annotationPath)) \
-             .key_rows_by("locus","alleles")
-    variants.annotate(exac=hl.cond(hl.is_defined(exac.rows()[variants.locus, variants.alleles].info.ExAC_AF[exac.rows()[variants.locus, variants.alleles].a_index-1]),truncateAt(hl,exac.rows()[variants.locus, variants.alleles].info.ExAC_AF[exac.rows()[variants.locus, variants.alleles].a_index-1],"6"),0.0)) \
+             .rows() \
+             .key_by("locus","alleles")
+    variants.annotate(exac=hl.cond(hl.is_defined(exac[variants.locus, variants.alleles].info.ExAC_AF[exac[variants.locus, variants.alleles].a_index-1]),truncateAt(hl,exac[variants.locus, variants.alleles].info.ExAC_AF[exac[variants.locus, variants.alleles].a_index-1],"6"),0.0)) \
              .write(destinationPath,overwrite=True)

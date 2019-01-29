@@ -62,14 +62,14 @@ def main(sqlContext, configuration, chrom, nchroms, step):
         
     if ("loadGermline" in step):
         print ("step loadGermline")
-        annotations.importGermline(hl,sourceFileName,destination+"/loaded/"+"variants" + chrom + ".mt",number_partitions)
+        annotations.importGermline(hl,sourceFileName,destination+"/loaded/"+"variants" + chrom + ".kt",number_partitions)
 
     if ("loadSomatic" in step):
         print ("step loadSomatics")
         # Read somatic vcf file
         somatic_paths = config.readFilesList(configuration["somatic_paths"])
         loaded_path = destination+"/loadedSomatic/"+fileName
-        germline = hl.read_matrix_table(destination+"/loaded/"+"variants" + chrom + ".mt")
+        germline = hl.read_table(destination+"/loaded/"+"variants" + chrom + ".kt")
         # Import and merge somatic files
         annotations.importSomatic(hl,germline,somatic_paths,destination+"/loadedSomatic/"+fileName,number_partitions)
 

@@ -1,7 +1,14 @@
 import json
 import requests
 
-def create_index(host,port,index_name,version,num_shards,num_replicas,user,pwd):
+def create_index(host,port,index_name,data,user,pwd):
+    url = "http://" + host + ":" + port + "/" + index_name
+    headers = {'Content-Type': 'application/json'}
+    response = requests.put(url,data=data,headers=headers,auth=(user,pwd))
+    print(response)
+
+
+def create_index_snv(host,port,index_name,version,num_shards,num_replicas,user,pwd):
     data="""
           {"settings":{"index":{"number_of_shards":""" + num_shards + ""","number_of_replicas":""" + num_replicas + """, "refresh_interval":"1000ms"}}
             ,"mappings":{"""+"\"" + version + "\""+"""
@@ -83,7 +90,24 @@ def create_index(host,port,index_name,version,num_shards,num_replicas,user,pwd):
                          ,"nprogs":{"type":"integer","index":"true"}
                          ,"progs":{"type":"keyword"}}}}}}}
     """
-    url = "http://" + host + ":" + port + "/" + index_name
-    headers = {'Content-Type': 'application/json'}
-    response = requests.put(url,data=data,headers=headers,auth=(user,pwd))
-    print(response)
+    create_index(host,port,index_name,data,user,pwd)
+
+
+def create_index_cnv(host,port,index_name,version,num_shards,num_replicas,user,pwd):
+    data="""
+          {"settings":{"index":{"number_of_shards":""" + num_shards + ""","number_of_replicas":""" + num_replicas + ""","refresh_interval":"1000ms"}}
+            ,"mappings":{"""+"\"" + version + "\""+"""
+            :{
+            "properties":{
+                "chrom":{"type":"integer","index":"true"}
+                ,"start":{"type":"integer","index":"true"}
+                ,"end":{"type":"integer","index":"false"} 
+                ,"type":{"type":"keyword","index":"false"}        
+                ,"cnt":{"type":"integer","index":"true"}  
+                ,"tool":{"type":"keyword","index":"true"}  
+                ,"genes":{"type":"keyword","index":"true"}
+                ,"bf":{"type":"float","index":"true"}
+                ,"DGV_coords":{"type":"keyword","index":"false"}
+                ,"sample_id":{"type": "keyword"}}}}}
+    """
+    create_index(host,port,index_name,data,user,pwd)

@@ -77,6 +77,37 @@ def merge(hl, tgermline, tsomatic):
         indel = hl.or_else(joined.indel,joined.indel_1)
     )
 
+def loadCNV(hl, sourcePath, destinationPath, nPartitions):
+    table = hl.import_table(sourcePath,min_partitions=nPartitions) \
+              .rename({
+                  'SAMPLE': 'sample_id',
+                  'chromosome': 'chrom',
+                  'BF': 'bf',
+                  'exons.hg19': 'genes',
+                  'Count': 'cnt',
+                  'DGV_goldstd_group': 'DGV_group',
+                  'DGV_goldstd_overlap': 'DGV_overlap',
+                  'DGV_goldstd_coordinates': 'DGV_coords',
+                  'Mim number': 'mim_number',
+                  'Phenotype': 'phenotype'
+                  })
+    table.select(
+        table.sample_id,
+        table.start,
+        table.end,
+        table.type,
+        table.cnt,
+        table.chrom,
+        table.bf,
+        table.DGV_group,
+        table.DGV_overlap,
+        table.DGV_coords,
+        table.genes,
+        table.mim_number,
+        table.phenotype
+    ) \
+    .write(destinationPath,overwrite=True) 
+
 def annotateSomatic(hl, dataset):
     dataset = dataset.transmute_entries(sample=hl.struct(sample=dataset.s,dp_avg=dataset.DP_avg,dp_ref_avg=dataset.DP_REF_avg,dp_alt_avg=dataset.DP_ALT_avg,vaf_avg=dataset.VAF_avg,gt=hl.str(dataset.GT),nprogs=dataset.info.NPROGS,progs=hl.delimit(dataset.info.PROGS,","))) \
                      .drop('rsid','qual','filters','info','old_locus','old_alleles')

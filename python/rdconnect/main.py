@@ -5,6 +5,7 @@ from pyspark.sql import SQLContext, SparkSession
 from rdconnect import config, annotations, index, transform, utils
 from pyspark.sql.functions import lit
 from subprocess import call
+from pyspark.sql.types import FloatType, IntegerType
 import sys, getopt
 import hail as hl
 
@@ -50,15 +51,22 @@ def main(sqlContext, configuration, chrom, nchroms, step):
     
     destination =  configuration["destination"] + "/" + configuration["version"]
     sourceFileName = utils.buildFileName(configuration["source_path"],chrom)
+    sourceFileNameCnv = configuration["source_path_cnv"]
     fileName = "variants" + chrom + ".ht"
+    fileNameCnv = "variants.ht"
     number_partitions = configuration["number_of_partitions"]
 
     print("sourcefilename is "+sourceFileName)
 
     # Pipeline steps
+        
     if ("createIndex" in step):
-        print ("step to create index")
-        index.create_index(configuration["elasticsearch"]["host"],configuration["elasticsearch"]["port"],configuration["elasticsearch"]["index_name"],configuration["version"],configuration["elasticsearch"]["num_shards"],configuration["elasticsearch"]["num_replicas"],configuration["elasticsearch"]["user"],configuration["elasticsearch"]["pwd"])
+        if ("createIndexCNV" in step):
+            print ("step to create index CNV")
+            index.create_index_cnv(configuration["elasticsearch"]["host"],configuration["elasticsearch"]["port"],configuration["elasticsearch"]["index_cnv_name"],configuration["version"],configuration["elasticsearch"]["num_shards"],configuration["elasticsearch"]["num_replicas"],configuration["elasticsearch"]["user"],configuration["elasticsearch"]["pwd"])
+        else:
+            print ("step to create index")
+            index.create_index_snv(configuration["elasticsearch"]["host"],configuration["elasticsearch"]["port"],configuration["elasticsearch"]["index_name"],configuration["version"],configuration["elasticsearch"]["num_shards"],configuration["elasticsearch"]["num_replicas"],configuration["elasticsearch"]["user"],configuration["elasticsearch"]["pwd"])
         
     if ("loadGermline" in step):
         print ("step loadGermline")
@@ -72,6 +80,10 @@ def main(sqlContext, configuration, chrom, nchroms, step):
         germline = hl.read_table(destination+"/loaded/"+"variants" + chrom + ".kt")
         # Import and merge somatic files
         annotations.importSomatic(hl,germline,somatic_paths,destination+"/loadedSomatic/"+fileName,number_partitions)
+
+    if ("loadCNV" in step):
+        print("step loadCNV")
+        annotations.loadCNV(hl,sourceFileNameCnv,destination+"/loadedCNV/"+fileNameCnv,number_partitions)
 
     if ("loaddbNSFP" in step):
         print ("step loaddbNSFP")
@@ -138,7 +150,7 @@ def main(sqlContext, configuration, chrom, nchroms, step):
         print ("step transform")
         annotated = hl.read_table(destination+"/annotatedVEPdbnSFPCaddClinvarExGnomaddbSNPExAC/"+fileName)
         transform.transform(annotated,destination,chrom)
-
+        
     # Uploading step. It uploads all annotated variants to ElasticSearch
     if ("toElastic" in step):
         print ("step to elastic")
@@ -148,11 +160,25 @@ def main(sqlContext, configuration, chrom, nchroms, step):
             "es.host": configuration["elasticsearch"]["host"],
             "es.port": configuration["elasticsearch"]["port"]
         }
-        # Getting annotated variants and adding the chromosome column
-        variants = sqlContext.read.load(destination+"/variants/chrom="+chrom)\
-                                  .withColumn("chrom",lit(chrom))
-        variants.printSchema()
-        variants.write.format("org.elasticsearch.spark.sql").options(**es_conf).save(configuration["elasticsearch"]["index_name"]+"/"+configuration["version"], mode='append')
+        index_name = configuration["elasticsearch"]["index_name"]
+        if ("toElasticCNV" in step):
+            print("step toElasticCNV")
+            variants = hl.read_table(destination+"/loadedCNV/"+fileNameCnv).to_spark()
+            variants = variants.withColumn("chrom", variants["chrom"].cast(FloatType())) \
+                               .withColumn("start", variants["start"].cast(IntegerType())) \
+                               .withColumn("end", variants["end"].cast(IntegerType())) \
+                               .withColumn("cnt", variants["cnt"].cast(IntegerType())) \
+                               .withColumn("bf", variants["bf"].cast(FloatType())) \
+                               .withColumn("mim_number", variants["mim_number"].cast(FloatType())) 
+            index_name = configuration["elasticsearch"]["index_cnv_name"]
+            variants.printSchema()  
+        else:
+            # Getting annotated variants and adding the chromosome column
+            variants = sqlContext.read.load(destination+"/variants/chrom="+chrom)\
+                                      .withColumn("chrom",lit(chrom))
+            variants.printSchema()
+        variants.write.format("org.elasticsearch.spark.sql").options(**es_conf).save(index_name+"/"+configuration["version"], mode='append')
+        
 
     # Counting step to check whether the number of variants in Spark corresponds to tht number of variants that
     # have been uploaded to ElasticSearch

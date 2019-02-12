@@ -99,7 +99,7 @@ def create_index_cnv(host,port,index_name,version,num_shards,num_replicas,user,p
             ,"mappings":{"""+"\"" + version + "\""+"""
             :{
             "properties":{
-                "chrom":{"type":"integer","index":"true"}
+                "chrom":{"type":"keyword","index":"true"}
                 ,"start":{"type":"integer","index":"true"}
                 ,"end":{"type":"integer","index":"false"} 
                 ,"type":{"type":"keyword","index":"false"}        

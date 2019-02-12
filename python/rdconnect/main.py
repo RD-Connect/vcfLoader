@@ -164,12 +164,11 @@ def main(sqlContext, configuration, chrom, nchroms, step):
         if ("toElasticCNV" in step):
             print("step toElasticCNV")
             variants = hl.read_table(destination+"/loadedCNV/"+fileNameCnv).to_spark()
-            variants = variants.withColumn("chrom", variants["chrom"].cast(FloatType())) \
-                               .withColumn("start", variants["start"].cast(IntegerType())) \
+            variants = variants.withColumn("start", variants["start"].cast(IntegerType())) \
                                .withColumn("end", variants["end"].cast(IntegerType())) \
                                .withColumn("cnt", variants["cnt"].cast(IntegerType())) \
                                .withColumn("bf", variants["bf"].cast(FloatType())) \
-                               .withColumn("mim_number", variants["mim_number"].cast(FloatType())) 
+                               .withColumn("mim_number", variants["mim_number"].cast(IntegerType())) 
             index_name = configuration["elasticsearch"]["index_cnv_name"]
             variants.printSchema()  
         else:

@@ -164,7 +164,8 @@ def main(sqlContext, configuration, chrom, nchroms, step):
         if ("toElasticCNV" in step):
             print("step toElasticCNV")
             variants = hl.read_table(destination+"/loadedCNV/"+fileNameCnv).to_spark()
-            variants = variants.withColumn("start", variants["start"].cast(IntegerType())) \
+            variants = variants.withColumn("chrom", variants["chrom"].cast(IntegerType())) \
+                               .withColumn("start", variants["start"].cast(IntegerType())) \
                                .withColumn("end", variants["end"].cast(IntegerType())) \
                                .withColumn("cnt", variants["cnt"].cast(IntegerType())) \
                                .withColumn("bf", variants["bf"].cast(FloatType())) \

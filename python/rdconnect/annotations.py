@@ -77,6 +77,16 @@ def merge(hl, tgermline, tsomatic):
         indel = hl.or_else(joined.indel,joined.indel_1)
     )
 
+def annotateChrom(hl,chrom):
+    print("chrom to int function")
+    print(chrom)
+    return (hl.case()
+                    .when(chrom == "MT", "23")
+                    .when(chrom == "X", "24")
+                    .when(chrom == "Y", "25")
+                    .when(chrom == "All", "")
+                    .default(chrom))
+
 def loadCNV(hl, sourcePath, destinationPath, nPartitions):
     table = hl.import_table(sourcePath,min_partitions=nPartitions) \
               .rename({
@@ -91,7 +101,7 @@ def loadCNV(hl, sourcePath, destinationPath, nPartitions):
                   'Mim number': 'mim_number',
                   'Phenotype': 'phenotype'
                   })
-    table.select(
+    table = table.select(
         table.sample_id,
         table.start,
         table.end,
@@ -105,8 +115,9 @@ def loadCNV(hl, sourcePath, destinationPath, nPartitions):
         table.genes,
         table.mim_number,
         table.phenotype
-    ) \
-    .write(destinationPath,overwrite=True) 
+    ) 
+    table.annotate(chrom=annotateChrom(hl,table.chrom)) \
+         .write(destinationPath,overwrite=True) 
 
 def annotateSomatic(hl, dataset):
     dataset = dataset.transmute_entries(sample=hl.struct(sample=dataset.s,dp_avg=dataset.DP_avg,dp_ref_avg=dataset.DP_REF_avg,dp_alt_avg=dataset.DP_ALT_avg,vaf_avg=dataset.VAF_avg,gt=hl.str(dataset.GT),nprogs=dataset.info.NPROGS,progs=hl.delimit(dataset.info.PROGS,","))) \

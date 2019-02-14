@@ -105,9 +105,13 @@ def create_index_cnv(host,port,index_name,version,num_shards,num_replicas,user,p
                 ,"type":{"type":"keyword","index":"false"}        
                 ,"cnt":{"type":"integer","index":"true"}  
                 ,"tool":{"type":"keyword","index":"true"}  
-                ,"genes":{"type":"keyword","index":"true"}
                 ,"bf":{"type":"float","index":"true"}
                 ,"DGV_coords":{"type":"keyword","index":"false"}
-                ,"sample_id":{"type": "keyword"}}}}}
+                ,"sample_id":{"type": "keyword"}
+                ,"genes":{
+                     "type":"nested",
+                     "properties":{
+                        "gene_name":{"type":"keyword"}
+                      }}}}}}
     """
     create_index(host,port,index_name,data,user,pwd)

@@ -116,7 +116,8 @@ def loadCNV(hl, sourcePath, destinationPath, nPartitions):
         table.mim_number,
         table.phenotype
     ) 
-    table.annotate(chrom=annotateChrom(hl,table.chrom)) \
+    table.annotate(chrom=annotateChrom(hl,table.chrom),
+                   genes=table.genes.split(",").map(lambda x: hl.struct(gene_name=x))) \
          .write(destinationPath,overwrite=True) 
 
 def annotateSomatic(hl, dataset):
@@ -161,7 +162,7 @@ def importDbNSFPTable(hl, sourcePath, destinationPath, nPartitions):
                          table.MutationTaster_pred,
                          table.phyloP46way_placental,
                          table.Polyphen2_HDIV_pred,
-                         table.Polyphen2_HVAR_score,
+                          table.Polyphen2_HVAR_score,
                          table.SIFT_pred,
                          table.SIFT_score,
                          table.COSMIC_ID) 

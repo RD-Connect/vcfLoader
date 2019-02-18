@@ -53,6 +53,8 @@ def importSomatic(hl, germline, file_paths, destination_path, num_partitions):
             print("Error in loading vcf")
     else:
         print("Empty file list")
+        germline.write(destination_path,overwrite=True)
+        
 
 def mergeSomatic(hl, tdataset, tother):
     joined = tdataset.join(tother,"outer")

@@ -75,7 +75,9 @@ def main(sqlContext, configuration, chrom, nchroms, step):
     if ("loadSomatic" in step):
         print ("step loadSomatics")
         # Read somatic vcf file
-        somatic_paths = config.readFilesList(configuration["somatic_paths"])
+        sc = hl.spark_context()
+        somatic_paths = sc.textFile(configuration["somatic_paths"]).collect()
+        print("Somatic paths -> " + str(somatic_paths))
         loaded_path = destination+"/loadedSomatic/"+fileName
         germline = hl.read_table(destination+"/loaded/"+"variants" + chrom + ".kt")
         # Import and merge somatic files

@@ -77,7 +77,6 @@ def main(sqlContext, configuration, chrom, nchroms, step):
         # Read somatic vcf file
         sc = hl.spark_context()
         somatic_paths = sc.textFile(configuration["somatic_paths"]).collect()
-        print("Somatic paths -> " + str(somatic_paths))
         loaded_path = destination+"/loadedSomatic/"+fileName
         germline = hl.read_table(destination+"/loaded/"+"variants" + chrom + ".kt")
         # Import and merge somatic files
@@ -159,9 +158,10 @@ def main(sqlContext, configuration, chrom, nchroms, step):
         es_conf = {
             "es.net.http.auth.user": configuration["elasticsearch"]["user"],
             "es.net.http.auth.pass": configuration["elasticsearch"]["pwd"],
-            "es.host": configuration["elasticsearch"]["host"],
+            "es.nodes": configuration["elasticsearch"]["host"],
             "es.port": configuration["elasticsearch"]["port"]
         }
+        print("ES conf -> " + str(es_conf))
         index_name = configuration["elasticsearch"]["index_name"]
         if ("toElasticCNV" in step):
             print("step toElasticCNV")

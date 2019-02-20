@@ -179,7 +179,7 @@ def importDBVcf(hl, sourcePath, destinationPath, nPartitions):
           :param String nPartitions: Number of partitions
     """
     print("Annotation vcf source path is " + sourcePath)
-    hl.split_multi(hl.import_vcf(sourcePath,min_partitions=nPartitions)) \
+    hl.import_vcf(sourcePath,min_partitions=nPartitions,skip_invalid_loci=True) \
       .write(destinationPath,overwrite=True)
 
 def transcript_annotations(hl, annotations):
@@ -291,7 +291,7 @@ def annotateCADD(hl, variants, annotationPath, destinationPath):
          :param string annotationPath: Path were the CADD annotation vcf can be found
          :param string destinationPath: Path were the new annotated dataset can be found
     """
-    cadd = hl.read_matrix_table(annotationPath) \
+    cadd = hl.split_multi(hl.read_matrix_table(annotationPath)) \
              .key_rows_by("locus","alleles")
     variants.annotate(cadd_phred=cadd.rows()[variants.locus, variants.alleles].info.CADD13_PHRED) \
             .write(destinationPath,overwrite=True)
@@ -356,8 +356,9 @@ def annotateDbSNP(hl, variants, annotationPath, destinationPath):
          :param string destinationPath: Path were the new annotated dataset can be found
     """
     dbsnp = hl.read_matrix_table(annotationPath) \
-              .key_rows_by("locus","alleles")
-    variants.annotate(rsid=dbsnp.rows()[variants.locus, variants.alleles].rsid) \
+              .rows() \
+              .key_by("locus","alleles")
+    variants.annotate(rsid=dbsnp[variants.locus, variants.alleles].rsid) \
             .write(destinationPath,overwrite=True)
     
 def annotateGnomADEx(hl, variants, annotationPath, destinationPath):

@@ -20,7 +20,7 @@ def importGermline(hl, sourcePath, destinationPath, nPartitions):
                                                      gtInt=vcf.GT,
                                                      gt=hl.str(vcf.GT),
                                                      gq=vcf.GQ)) \
-                     .drop('rsid','qual','filters','info','old_locus','old_alleles')
+                     .drop('rsid','qual','filters','info')
         vcf = vcf.annotate_rows(ref=vcf.alleles[0],
                           alt=vcf.alleles[1],
                           pos=vcf.locus.position,

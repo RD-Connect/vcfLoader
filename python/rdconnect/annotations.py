@@ -12,7 +12,7 @@ def importGermline(hl, sourcePath, destinationPath, nPartitions):
     """
     try:
         print ("reading vcf from "+ sourcePath)
-        vcf = hl.split_multi(hl.import_vcf(str(sourcePath),force_bgz=True,min_partitions=nPartitions))
+        vcf = hl.split_multi_hts(hl.import_vcf(str(sourcePath),force_bgz=True,min_partitions=nPartitions))
         print ("writing vds to" + destinationPath)
         vcf = vcf.transmute_entries(sample=hl.struct(sample=vcf.s,
                                                      ad=truncateAt(hl,vcf.AD[1]/hl.sum(vcf.AD),"2"),
@@ -40,11 +40,11 @@ def importSomatic(hl, germline, file_paths, destination_path, num_partitions):
     nFiles = len(file_paths)
     if(nFiles > 0) :
         try:
-            merged = hl.split_multi(hl.import_vcf(file_paths[0],force_bgz=True,min_partitions=num_partitions))
+            merged = hl.split_multi_hts(hl.import_vcf(file_paths[0],force_bgz=True,min_partitions=num_partitions))
             merged = annotateSomatic(hl,merged)
             for file_path in file_paths[1:]:
                 print("File path -> " + file_path)
-                dataset = hl.split_multi(hl.import_vcf(file_path,force_bgz=True,min_partitions=num_partitions))
+                dataset = hl.split_multi_hts(hl.import_vcf(file_path,force_bgz=True,min_partitions=num_partitions))
                 dataset = annotateSomatic(hl,dataset)
                 merged = mergeSomatic(hl, merged,dataset)
             merged = merge(hl,germline,merged)
@@ -291,7 +291,7 @@ def annotateCADD(hl, variants, annotationPath, destinationPath):
          :param string annotationPath: Path were the CADD annotation vcf can be found
          :param string destinationPath: Path were the new annotated dataset can be found
     """
-    cadd = hl.split_multi(hl.read_matrix_table(annotationPath)) \
+    cadd = hl.split_multi_hts(hl.read_matrix_table(annotationPath)) \
              .key_rows_by("locus","alleles")
     variants.annotate(cadd_phred=cadd.rows()[variants.locus, variants.alleles].info.CADD13_PHRED) \
             .write(destinationPath,overwrite=True)
@@ -337,7 +337,7 @@ def annotateClinvar(hl, variants, annotationPath, destinationPath):
          :param string annotationPath: Path were the Clinvar annotation vcf can be found
          :param string destinationPath: Path were the new annotated dataset can be found
     """
-    clinvar = hl.split_multi(hl.read_matrix_table(annotationPath)) \
+    clinvar = hl.split_multi_hts(hl.read_matrix_table(annotationPath)) \
                 .rows() \
                 .key_by("locus","alleles")
     variants.annotate(
@@ -368,7 +368,7 @@ def annotateGnomADEx(hl, variants, annotationPath, destinationPath):
          :param string annotationPath: Path were the GnomAD Ex annotation vcf can be found
          :param string destinationPath: Path were the new annotated dataset can be found
     """
-    gnomad = hl.split_multi(hl.read_matrix_table(annotationPath)) \
+    gnomad = hl.split_multi_hts(hl.read_matrix_table(annotationPath)) \
                .rows() \
                .key_by("locus","alleles")
     variants.annotate(
@@ -389,7 +389,7 @@ def annotateExAC(hl, variants, annotationPath, destinationPath):
          :param string annotationPath: Path were the ExAC annotation vcf can be found
          :param string destinationPath: Path were the new annotated dataset can be found
     """
-    exac = hl.split_multi(hl.read_matrix_table(annotationPath)) \
+    exac = hl.split_multi_hts(hl.read_matrix_table(annotationPath)) \
              .rows() \
              .key_by("locus","alleles")
     variants.annotate(exac=hl.cond(hl.is_defined(exac[variants.locus, variants.alleles].info.ExAC_AF[exac[variants.locus, variants.alleles].a_index-1]),truncateAt(hl,exac[variants.locus, variants.alleles].info.ExAC_AF[exac[variants.locus, variants.alleles].a_index-1],"6"),0.0)) \

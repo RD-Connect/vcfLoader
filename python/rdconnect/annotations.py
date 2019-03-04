@@ -124,7 +124,7 @@ def loadCNV(hl, sourcePath, destinationPath, nPartitions):
 
 def annotateSomatic(hl, dataset):
     dataset = dataset.transmute_entries(sample=hl.struct(sample=dataset.s,dp_avg=dataset.DP_avg,dp_ref_avg=dataset.DP_REF_avg,dp_alt_avg=dataset.DP_ALT_avg,vaf_avg=dataset.VAF_avg,gt=hl.str(dataset.GT),nprogs=dataset.info.NPROGS,progs=hl.delimit(dataset.info.PROGS,","))) \
-                     .drop('rsid','qual','filters','info','old_locus','old_alleles')
+                     .drop('rsid','qual','filters','info')
     dataset = dataset.annotate_rows(ref=dataset.alleles[0],
                                     alt=dataset.alleles[1],
                                     pos=dataset.locus.position,

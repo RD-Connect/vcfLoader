@@ -55,7 +55,7 @@ def main(sqlContext, configuration, chrom, nchroms, step):
     fileName = "variants" + chrom + ".ht"
     fileNameCnv = "variants.ht"
     number_partitions = configuration["number_of_partitions"]
-    current_dir = ""
+    current_dir = destination+"/loaded/"+"variants" + chrom + ".kt"
 
     print("sourcefilename is "+sourceFileName)
 

@@ -55,7 +55,7 @@ def main(sqlContext, configuration, chrom, nchroms, step):
     fileName = "variants" + chrom + ".ht"
     fileNameCnv = "variants.ht"
     number_partitions = configuration["number_of_partitions"]
-    current_dir = destination+"/loaded/"+"variants" + chrom + ".kt"
+    current_dir = configuration["origin_path"]
 
     print("sourcefilename is "+sourceFileName)
 
@@ -71,7 +71,7 @@ def main(sqlContext, configuration, chrom, nchroms, step):
         
     if ("loadGermline" in step):
         print ("step loadGermline")
-        annotations.importGermline(hl,sourceFileName,destination+"/loaded/"+"variants" + chrom + ".kt",number_partitions)
+        annotations.importGermline(hl,current_dir,sourceFileName,destination+"/loaded/"+"variants" + chrom + ".kt",number_partitions)
         current_dir = destination+"/loaded/"+"variants" + chrom + ".kt"
 
     if ("loadSomatic" in step):
@@ -79,11 +79,9 @@ def main(sqlContext, configuration, chrom, nchroms, step):
         # Read somatic vcf file
         sc = hl.spark_context()
         somatic_paths = sc.textFile(utils.buildFileName(configuration["somatic_paths"],chrom)).collect()
-        print(str(somatic_paths))
         loaded_path = destination+"/loadedSomatic/"+fileName
-        germline = hl.read_table(current_dir)
         # Import and merge somatic files
-        annotations.importSomatic(hl,germline,somatic_paths,destination+"/loadedSomatic/"+fileName,number_partitions)
+        annotations.importSomatic(hl,current_dir,somatic_paths,destination+"/loadedSomatic/"+fileName,number_partitions)
         current_dir = destination+"/loadedSomatic/"+fileName
 
     if ("loadCNV" in step):

@@ -3,7 +3,7 @@ from rdconnect import utils, expr
 MIN_DP = 7
 MIN_GQ = 19
 
-def importGermline(hl, sourcePath, destinationPath, nPartitions):
+def importGermline(hl, originPath, sourcePath, destinationPath, nPartitions):
     """ Imports input vcf and annotates it with general annotations (samples, freqInt, pos, alt, ref)
           :param HailContext hl: The Hail context
           :param String sourcePath: Annotation table path
@@ -26,17 +26,20 @@ def importGermline(hl, sourcePath, destinationPath, nPartitions):
                           pos=vcf.locus.position,
                           indel=hl.cond((hl.len(vcf.alleles[0]) != (hl.len(vcf.alleles[1]))) | (hl.len(vcf.alleles[0]) != 1) | (hl.len(vcf.alleles[0]) != 1), True, False),
                           samples_germline=hl.filter(lambda x: (x.dp > MIN_DP) & (x.gq > MIN_GQ),hl.agg.collect(vcf.sample))) 
-        vcf.annotate_rows(freqInt = hl.cond((hl.len(vcf.samples_germline) > 0) | (hl.len(hl.filter(lambda x: x.dp > MIN_DP,vcf.samples_germline)) > 0),
+        vcf = vcf.annotate_rows(freqInt = hl.cond((hl.len(vcf.samples_germline) > 0) | (hl.len(hl.filter(lambda x: x.dp > MIN_DP,vcf.samples_germline)) > 0),
                                             truncateAt(hl,hl.sum(hl.map(lambda x: x.gtInt.unphased_diploid_gt_index(),vcf.samples_germline))/hl.sum(hl.map(lambda x: 2,hl.filter(lambda x: x.dp > MIN_DP,vcf.samples_germline))),"6"), 0.0)) \
-           .drop("sample") \
-           .rows() \
-           .write(destinationPath,overwrite=True)
+                 .drop("sample") \
+                 .rows() 
+        if (originPath != ""):
+            somatic = hl.read_table(originPath)
+            vcf = merge(hl,vcf,somatic)
+        vcf.write(destinationPath,overwrite=True)
         return True
     except ValueError:
         print (ValueError)
         return "Error in importing vcf"
 
-def importSomatic(hl, germline, file_paths, destination_path, num_partitions):
+def importSomatic(hl, originPath, file_paths, destination_path, num_partitions):
     nFiles = len(file_paths)
     if(nFiles > 0) :
         try:
@@ -46,14 +49,18 @@ def importSomatic(hl, germline, file_paths, destination_path, num_partitions):
                 print("File path -> " + file_path)
                 dataset = hl.split_multi_hts(hl.import_vcf(file_path,force_bgz=True,min_partitions=num_partitions))
                 dataset = annotateSomatic(hl,dataset)
-                merged = mergeSomatic(hl, merged,dataset)
-            merged = merge(hl,germline,merged)
+                merged = mergeSomatic(hl,merged,dataset)
+            if (originPath != ""):
+                germline = hl.read_table(originPath)
+                merged = merge(hl,germline,merged)
             merged.write(destination_path,overwrite=True)
         except ValueError:
             print("Error in loading vcf")
     else:
         print("Empty file list")
-        germline.write(destination_path,overwrite=True)
+        if (originPath != ""):
+            germline = hl.read_table(originPath)
+            germline.write(destination_path,overwrite=True)
         
 
 def mergeSomatic(hl, tdataset, tother):

@@ -71,8 +71,8 @@ def main(sqlContext, configuration, chrom, nchroms, step):
         
     if ("loadGermline" in step):
         print ("step loadGermline")
-        annotations.importGermline(hl,current_dir,sourceFileName,destination+"/loaded/"+"variants" + chrom + ".kt",number_partitions)
-        current_dir = destination+"/loaded/"+"variants" + chrom + ".kt"
+        annotations.importGermline(hl,current_dir,sourceFileName,destination+"/loaded/"+fileName,number_partitions)
+        current_dir = destination+"/loaded/"+"variants" + chrom + ".ht"
 
     if ("loadSomatic" in step):
         print ("step loadSomatics")

@@ -51,7 +51,6 @@ def main(sqlContext, configuration, chrom, nchroms, step):
     
     destination =  configuration["destination"] + "/" + configuration["version"]
     sourceFileName = utils.buildFileName(configuration["source_path"],chrom)
-    sourceFileNameCnv = configuration["source_path_cnv"]
     fileName = "variants" + chrom + ".ht"
     fileNameCnv = "variants.ht"
     number_partitions = configuration["number_of_partitions"]
@@ -86,7 +85,7 @@ def main(sqlContext, configuration, chrom, nchroms, step):
 
     if ("loadCNV" in step):
         print("step loadCNV")
-        annotations.loadCNV(hl,sourceFileNameCnv,destination+"/loadedCNV/"+fileNameCnv,number_partitions)
+        annotations.loadCNV(hl,configuration["source_path_cnv"],destination+"/loadedCNV/"+fileNameCnv,number_partitions)
 
     if ("loaddbNSFP" in step):
         print ("step loaddbNSFP")

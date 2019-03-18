@@ -75,6 +75,7 @@ def main(sqlContext, configuration, chrom, nchroms, step):
 
     if ("loadSomatic" in step):
         print ("step loadSomatics")
+        print ("Somatics list path: " + utils.buildFileName(configuration["somatic_paths"],chrom))
         # Read somatic vcf file
         sc = hl.spark_context()
         somatic_paths = sc.textFile(utils.buildFileName(configuration["somatic_paths"],chrom)).collect()

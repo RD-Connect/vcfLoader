@@ -330,9 +330,9 @@ def clinvar_filtering(hl, annotation, is_filter_field):
     return filtered
 
 def clinvar_preprocess(hl, annotation, is_filter_field):
-    preprocessed = hl.flatmap(lambda x: x.replace('\\\/',',')
-                                     .replace('\\\:',',') \
-                                     .replace('\\\[|]',',') \
+    preprocessed = hl.flatmap(lambda x: x.replace('\\/',',')
+                                     .replace('\\:',',') \
+                                     .replace('\\|',',') \
                                      .split(','), annotation)
     preprocessed = hl.map(lambda y: hl.cond(y[0] == '_', y[1:], y), preprocessed)
     return clinvar_filtering(hl,preprocessed,is_filter_field)
@@ -350,7 +350,7 @@ def annotateClinvar(hl, variants, annotationPath, destinationPath):
     variants.annotate(
         clinvar_id=hl.cond(hl.is_defined(clinvar[variants.locus, variants.alleles].info.CLNSIG[clinvar[variants.locus, variants.alleles].a_index-1]),clinvar[variants.locus, variants.alleles].rsid,clinvar[variants.locus, variants.alleles].info.CLNSIGINCL[0].split(':')[0]),
         clinvar_clnsigconf=hl.delimit(clinvar[variants.locus, variants.alleles].info.CLNSIGCONF),
-        clinvar_clnsig=hl.cond(hl.is_defined(clinvar[variants.locus, variants.alleles].info.CLNSIG[clinvar[variants.locus, variants.alleles].a_index-1]),clinvar_preprocess(hl,clinvar[variants.locus, variants.alleles].info.CLNSIG,False), clinvar_preprocess(hl,clinvar[variants.locus, variants.alleles].info.CLNSIGINCL,False)),
+        clinvar_clnsig=hl.cond(hl.is_defined(clinvar[variants.locus, variants.alleles].info.CLNSIG[clinvar[variants.locus, variants.alleles].a_index-1]),hl.delimit(clinvar_preprocess(hl,clinvar[variants.locus, variants.alleles].info.CLNSIG,False),"|"), hl.delimit(clinvar_preprocess(hl,clinvar[variants.locus, variants.alleles].info.CLNSIGINCL,False),"|")),
         clinvar_filter=hl.cond(hl.is_defined(clinvar[variants.locus, variants.alleles].info.CLNSIG[clinvar[variants.locus, variants.alleles].a_index-1]),clinvar_preprocess(hl,clinvar[variants.locus, variants.alleles].info.CLNSIG,True), clinvar_preprocess(hl,clinvar[variants.locus, variants.alleles].info.CLNSIGINCL,True))
     ) \
     .write(destinationPath,overwrite=True)

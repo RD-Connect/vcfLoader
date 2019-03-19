@@ -39,21 +39,30 @@ def importGermline(hl, originPath, sourcePath, destinationPath, nPartitions):
         print (ValueError)
         return "Error in importing vcf"
 
-def importSomatic(hl, originPath, file_paths, destination_path, num_partitions):
+def importSomatic(hl, originPath, file_paths, destination_path, destination_filename, batch_size, num_partitions):
     nFiles = len(file_paths)
     if(nFiles > 0) :
         try:
+            size = 1
+            batch_count = 0
             merged = hl.split_multi_hts(hl.import_vcf(file_paths[0],force_bgz=True,min_partitions=num_partitions))
             merged = annotateSomatic(hl,merged)
+            tmp_filename = "batch%s.ht"
             for file_path in file_paths[1:]:
-                print("File path -> " + file_path)
+                if (size == batch_size):
+                    tmp_path = destination_path + "/" + tmp_filename % batch_count
+                    merged.write(tmp_path)
+                    merged = hl.read_table(tmp_path)
+                    size = 0
+                    batch_count += 1
                 dataset = hl.split_multi_hts(hl.import_vcf(file_path,force_bgz=True,min_partitions=num_partitions))
                 dataset = annotateSomatic(hl,dataset)
                 merged = mergeSomatic(hl,merged,dataset)
+                size += 1
             if (originPath != ""):
                 germline = hl.read_table(originPath)
                 merged = merge(hl,germline,merged)
-            merged.write(destination_path,overwrite=True)
+            merged.write(destination_path + "/" + destination_filename,overwrite=True)
         except ValueError:
             print("Error in loading vcf")
     else:

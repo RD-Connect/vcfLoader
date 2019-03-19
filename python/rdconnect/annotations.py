@@ -49,6 +49,7 @@ def importSomatic(hl, originPath, file_paths, destination_path, destination_file
             merged = annotateSomatic(hl,merged)
             tmp_filename = "batch%s.ht"
             for file_path in file_paths[1:]:
+                print("File path: " + file_path)
                 if (size == batch_size):
                     print("Writting batch " + str(batch_count) + " of size " + str(size))
                     tmp_path = destination_path + "/" + tmp_filename % batch_count

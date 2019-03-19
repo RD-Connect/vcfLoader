@@ -50,6 +50,7 @@ def importSomatic(hl, originPath, file_paths, destination_path, destination_file
             tmp_filename = "batch%s.ht"
             for file_path in file_paths[1:]:
                 if (size == batch_size):
+                    print("Writting batch " + str(batch_count) + " of size " + str(size))
                     tmp_path = destination_path + "/" + tmp_filename % batch_count
                     merged.write(tmp_path)
                     merged = hl.read_table(tmp_path)

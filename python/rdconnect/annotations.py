@@ -54,7 +54,7 @@ def importSomatic(hl, originPath, filePaths, destinationPath, nPartitions):
         try:
             merged = hl.split_multi_hts(hl.import_vcf(filePaths[0],force_bgz=True,min_partitions=nPartitions))
             merged = annotateSomatic(hl,merged)
-            merged.persist()
+            merged = merged.persist()
             for filePath in filePaths[1:]:
                 print("File path: " + filePath)
                 dataset = hl.split_multi_hts(hl.import_vcf(filePath,force_bgz=True,min_partitions=nPartitions))
@@ -310,7 +310,7 @@ def annotateCADD(hl, variants, annotationPath, destinationPath):
     """
     cadd = hl.split_multi_hts(hl.read_matrix_table(annotationPath)) \
              .key_rows_by("locus","alleles")
-    variants.annotate(cadd_phred=cadd.rows()[variants.locus, variants.alleles].info.CADD13_PHRED) \
+    variants.annotate(cadd_phred=cadd.rows()[variants.locus, variants.alleles].info.CADD13_PHRED[[cadd[variants.locus, variants.alleles].a_index-1]) \
             .write(destinationPath,overwrite=True)
 
 def clinvar_filtering(hl, annotation, is_filter_field):

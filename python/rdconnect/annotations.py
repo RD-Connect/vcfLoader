@@ -54,7 +54,7 @@ def importSomatic(hl, originPath, filePaths, destinationPath, nPartitions):
         try:
             merged = hl.split_multi_hts(hl.import_vcf(filePaths[0],force_bgz=True,min_partitions=nPartitions))
             merged = annotateSomatic(hl,merged)
-            merged = merged.persist()
+            merged = merged.persist("DISK_ONLY")
             for filePath in filePaths[1:]:
                 print("File path: " + filePath)
                 dataset = hl.split_multi_hts(hl.import_vcf(filePath,force_bgz=True,min_partitions=nPartitions))

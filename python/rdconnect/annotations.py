@@ -6,8 +6,9 @@ MIN_GQ = 19
 def importGermline(hl, originPath, sourcePath, destinationPath, nPartitions):
     """ Imports input vcf and annotates it with general annotations (samples, freqInt, pos, alt, ref)
           :param HailContext hl: The Hail context
+          :param String originPath: Origin path of the somatic variants previously uploaded (if any)
           :param String sourcePath: Annotation table path
-          :param String destinationPath: Path where the loaded annotation table will be put
+          :param String destinationPath: Path where the loaded variants will be stored
           :param String nPartitions: Number of partitions
     """
     try:
@@ -39,23 +40,30 @@ def importGermline(hl, originPath, sourcePath, destinationPath, nPartitions):
         print (ValueError)
         return "Error in importing vcf"
 
-def importSomatic(hl, originPath, file_paths, destination_path, num_partitions):
-    nFiles = len(file_paths)
+def importSomatic(hl, originPath, filePaths, destinationPath, nPartitions):
+    """ Imports somatic variants by merging different individual vcf files. It also merges
+        germline variants already uploaded with somatic variants.
+          :param HailContext hl: The Hail context
+          :param String originPath: Origin path of the germline variants previously uploaded (if any)
+          :param List[String] filePaths: List of file paths where somatic variants are located
+          :param String destinationPath: Path where the loaded variants will be stored
+          :param String numPartitions: Number of partitions
+   """
+    nFiles = len(filePaths)
     if(nFiles > 0) :
         try:
-            merged = hl.split_multi_hts(hl.import_vcf(file_paths[0],force_bgz=True,min_partitions=num_partitions))
+            merged = hl.split_multi_hts(hl.import_vcf(filePaths[0],force_bgz=True,min_partitions=nPartitions))
             merged = annotateSomatic(hl,merged)
             merged.persist()
-            for file_path in file_paths[1:]:
-                print("File path: " + file_path)
-                dataset = hl.split_multi_hts(hl.import_vcf(file_path,force_bgz=True,min_partitions=num_partitions))
+            for filePath in filePaths[1:]:
+                print("File path: " + filePath)
+                dataset = hl.split_multi_hts(hl.import_vcf(filePath,force_bgz=True,min_partitions=nPartitions))
                 dataset = annotateSomatic(hl,dataset)
                 merged = mergeSomatic(hl,merged,dataset)
-                merged.persist()
             if (originPath != ""):
                 germline = hl.read_table(originPath)
                 merged = merge(hl,germline,merged)
-            merged.write(destination_path,overwrite=True)
+            merged.write(destinationPath,overwrite=True)
             merged.unpersist()
         except ValueError:
             print("Error in loading vcf")
@@ -63,8 +71,7 @@ def importSomatic(hl, originPath, file_paths, destination_path, num_partitions):
         print("Empty file list")
         if (originPath != ""):
             germline = hl.read_table(originPath)
-            germline.write(destination_path,overwrite=True)
-        
+            germline.write(destinationPath,overwrite=True)
 
 def mergeSomatic(hl, tdataset, tother):
     joined = tdataset.join(tother,"outer")

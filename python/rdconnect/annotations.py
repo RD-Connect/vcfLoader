@@ -16,7 +16,7 @@ def importGermline(hl, originPath, sourcePath, destinationPath, nPartitions):
         vcf = hl.split_multi_hts(hl.import_vcf(str(sourcePath),force_bgz=True,min_partitions=nPartitions))
         print ("writing vds to" + destinationPath)
         vcf = vcf.transmute_entries(sample=hl.struct(sample=vcf.s,
-                                                     ad=truncateAt(hl,vcf.AD[1]/hl.sum(vcf.AD),"2"),
+                                                     ad=truncateAt(hl,vcf.AD[1]/hl.sum(vcf.AD),"3"),
                                                      dp=vcf.DP,
                                                      gtInt=vcf.GT,
                                                      gt=hl.str(vcf.GT),

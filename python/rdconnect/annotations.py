@@ -309,8 +309,9 @@ def annotateCADD(hl, variants, annotationPath, destinationPath):
          :param string destinationPath: Path were the new annotated dataset can be found
     """
     cadd = hl.split_multi_hts(hl.read_matrix_table(annotationPath)) \
-             .key_rows_by("locus","alleles")
-    variants.annotate(cadd_phred=cadd.rows()[variants.locus, variants.alleles].info.CADD13_PHRED[cadd[variants.locus, variants.alleles].a_index-1]) \
+             .key_rows_by("locus","alleles") \
+             .rows()
+    variants.annotate(cadd_phred=cadd[variants.locus, variants.alleles].info.CADD13_PHRED[cadd[variants.locus, variants.alleles].a_index-1]) \
             .write(destinationPath,overwrite=True)
 
 def clinvar_filtering(hl, annotation, is_filter_field):

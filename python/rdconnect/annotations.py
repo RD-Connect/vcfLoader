@@ -39,7 +39,7 @@ def importGermline(hl, originPath, sourcePath, destinationPath, nPartitions):
         print (ValueError)
         return "Error in importing vcf"
 
-def importSomatic(hl, originPath, file_paths, destination_path, destination_filename, batch_size, num_partitions):
+def importSomatic(hl, originPath, file_paths, destination_path, batch_size, num_partitions):
     nFiles = len(file_paths)
     if(nFiles > 0) :
         try:
@@ -47,14 +47,11 @@ def importSomatic(hl, originPath, file_paths, destination_path, destination_file
             batch_count = 0
             merged = hl.split_multi_hts(hl.import_vcf(file_paths[0],force_bgz=True,min_partitions=num_partitions))
             merged = annotateSomatic(hl,merged)
-            tmp_filename = "batch%s.ht"
             for file_path in file_paths[1:]:
                 print("File path: " + file_path)
                 if (size == batch_size):
                     print("Writting batch " + str(batch_count) + " of size " + str(size))
-                    tmp_path = destination_path + "/" + tmp_filename % batch_count
-                    merged.write(tmp_path)
-                    merged = hl.read_table(tmp_path)
+                    #merged = merged.checkpoint(destination_path)
                     size = 0
                     batch_count += 1
                 dataset = hl.split_multi_hts(hl.import_vcf(file_path,force_bgz=True,min_partitions=num_partitions))
@@ -64,7 +61,7 @@ def importSomatic(hl, originPath, file_paths, destination_path, destination_file
             if (originPath != ""):
                 germline = hl.read_table(originPath)
                 merged = merge(hl,germline,merged)
-            merged.write(destination_path + "/" + destination_filename,overwrite=True)
+            merged.write(destination_path,overwrite=True)
         except ValueError:
             print("Error in loading vcf")
     else:
@@ -75,6 +72,11 @@ def importSomatic(hl, originPath, file_paths, destination_path, destination_file
         
 
 def mergeSomatic(hl, tdataset, tother):
+    """ Merges somatic variants into a single dataset
+        :param HailContext hl:
+        :param Table tdataset: Table with the previosuly merged variants
+        :param Table other: Table to merge with the previously merged tables
+    """
     joined = tdataset.join(tother,"outer")
     return joined.transmute(
         samples_somatic = joined.samples_somatic.extend(joined.samples_somatic_1),
@@ -311,7 +313,7 @@ def annotateCADD(hl, variants, annotationPath, destinationPath):
     """
     cadd = hl.split_multi_hts(hl.read_matrix_table(annotationPath)) \
              .key_rows_by("locus","alleles")
-    variants.annotate(cadd_phred=cadd.rows()[variants.locus, variants.alleles].info.CADD13_PHRED) \
+    variants.annotate(cadd_phred=cadd.rows()[variants.locus, variants.alleles].info.CADD13_PHRED[cadd[variants.locus, variants.alleles].a_index-1]) \
             .write(destinationPath,overwrite=True)
 
 def clinvar_filtering(hl, annotation, is_filter_field):
@@ -373,10 +375,10 @@ def annotateDbSNP(hl, variants, annotationPath, destinationPath):
          :param string annotationPath: Path were the Clinvar annotation vcf can be found
          :param string destinationPath: Path were the new annotated dataset can be found
     """
-    dbsnp = hl.read_matrix_table(annotationPath) \
+    dbsnp = hl.split_multi(hl.read_matrix_table(annotationPath)) \
               .rows() \
               .key_by("locus","alleles")
-    variants.annotate(rsid=dbsnp[variants.locus, variants.alleles].rsid) \
+    variants.annotate(rsid=dbsnp[variants.locus, variants.alleles].rsid[dbsnp[variants.locus, variants.alleles].a_index-1]) \
             .write(destinationPath,overwrite=True)
     
 def annotateGnomADEx(hl, variants, annotationPath, destinationPath):

@@ -40,22 +40,37 @@ def importGermline(hl, originPath, sourcePath, destinationPath, nPartitions):
         print (ValueError)
         return "Error in importing vcf"
 
-def importSomatic(hl, originPath, file_paths, destination_path, batch_size, num_partitions):
+def importSomaticFile(hl, file_path, num_partitions):
+    print(file_path)
+    dataset = hl.split_multi_hts(hl.import_vcf(file_path,force_bgz=True,min_partitions=num_partitions)) 
+    return annotateSomatic(hl,dataset)
+    
+def importSomatic(hl, originPath, file_paths, destination_path, num_partitions):
     nFiles = len(file_paths)
     if(nFiles > 0) :
         try:
-            merged = hl.split_multi_hts(hl.import_vcf(filePaths[0],force_bgz=True,min_partitions=nPartitions))
-            merged = annotateSomatic(hl,merged)
-            for file_path in file_paths[1:]:
-                print("File path: " + file_path)
-                if (size == batch_size):
-                    print("Writting batch " + str(batch_count) + " of size " + str(size))
-                    #merged = merged.checkpoint(destination_path)
-                    size = 0
-                    batch_count += 1
-                dataset = hl.split_multi_hts(hl.import_vcf(file_path,force_bgz=True,min_partitions=num_partitions))
-                dataset = annotateSomatic(hl,dataset)
-                merged = mergeSomatic(hl,merged,dataset)
+            tables = [None] * len(file_paths)
+            iteration = 0
+            while (len(tables) > 1):
+                tmp = []
+                iteration += 1
+                print("Iteration ----> " + str(iteration))
+                for i in range(0, len(tables), 2):
+                    iNext = i+1
+                    if (iteration > 1): 
+                        if (iNext < len(tables)):
+                            tmp.append(mergeSomatic(hl,tables[i],tables[i+1]))
+                        else:
+                            tmp.append(tables[i])
+                    else:
+                        table = importSomaticFile(hl,file_paths[i],num_partitions)
+                        if (iNext < len(tables)):
+                            tableNext = importSomaticFile(hl,file_paths[i+1],num_partitions)
+                            tmp.append(mergeSomatic(hl,table,tableNext))
+                        else:
+                            tmp.append(table)
+                tables = tmp
+            merged = tables[0]
             if (originPath != ""):
                 germline = hl.read_table(originPath)
                 merged = merge(hl,germline,merged)
@@ -158,7 +173,7 @@ def importDbNSFPTable(hl, sourcePath, destinationPath, nPartitions):
           :param String nPartitions: Number of partitions
     """
     print("Annotation dbNSFP table path is " + sourcePath)
-    table = hl.import_table(sourcePath,min_partitions=nPartitions) \
+    table = hl.split_multi_hts(hl.import_table(sourcePath,min_partitions=nPartitions)) \
               .rename({
                   '#chr': 'chr',
                   'pos(1-coor)': 'pos',
@@ -185,7 +200,7 @@ def importDbNSFPTable(hl, sourcePath, destinationPath, nPartitions):
                          table.SIFT_pred,
                          table.SIFT_score,
                          table.COSMIC_ID) 
-    table.key_by(table.locus,table.alleles) \
+    table.key_by("locus","alleles") \
          .write(destinationPath,overwrite=True) 
     
 def importDBVcf(hl, sourcePath, destinationPath, nPartitions):
@@ -196,7 +211,9 @@ def importDBVcf(hl, sourcePath, destinationPath, nPartitions):
           :param String nPartitions: Number of partitions
     """
     print("Annotation vcf source path is " + sourcePath)
-    hl.import_vcf(sourcePath,min_partitions=nPartitions,skip_invalid_loci=True) \
+    hl.split_multi_hts(hl.import_vcf(sourcePath,min_partitions=nPartitions,skip_invalid_loci=True)) \
+      .rows() \
+      .key_by("locus","alleles") \
       .write(destinationPath,overwrite=True)
 
 def transcript_annotations(hl, annotations):
@@ -309,8 +326,8 @@ def annotateCADD(hl, variants, annotationPath, destinationPath):
          :param string destinationPath: Path were the new annotated dataset can be found
     """
     cadd = hl.split_multi_hts(hl.read_matrix_table(annotationPath)) \
-             .key_rows_by("locus","alleles") \
-             .rows()
+             .rows() \
+             .key_by("locus","alleles") 
     variants.annotate(cadd_phred=cadd[variants.locus, variants.alleles].info.CADD13_PHRED[cadd[variants.locus, variants.alleles].a_index-1]) \
             .write(destinationPath,overwrite=True)
 
@@ -355,9 +372,7 @@ def annotateClinvar(hl, variants, annotationPath, destinationPath):
          :param string annotationPath: Path were the Clinvar annotation vcf can be found
          :param string destinationPath: Path were the new annotated dataset can be found
     """
-    clinvar = hl.split_multi_hts(hl.read_matrix_table(annotationPath)) \
-                .rows() \
-                .key_by("locus","alleles")
+    clinvar = hl.read_table(annotationPath) 
     variants.annotate(
         clinvar_id=hl.cond(hl.is_defined(clinvar[variants.locus, variants.alleles].info.CLNSIG[clinvar[variants.locus, variants.alleles].a_index-1]),clinvar[variants.locus, variants.alleles].rsid,clinvar[variants.locus, variants.alleles].info.CLNSIGINCL[0].split(':')[0]),
         clinvar_clnsigconf=hl.delimit(clinvar[variants.locus, variants.alleles].info.CLNSIGCONF),
@@ -373,10 +388,7 @@ def annotateDbSNP(hl, variants, annotationPath, destinationPath):
          :param string annotationPath: Path were the Clinvar annotation vcf can be found
          :param string destinationPath: Path were the new annotated dataset can be found
     """
-    dbsnp = hl.split_multi(hl.read_matrix_table(annotationPath)) \
-              .rows() \
-              .key_by("locus","alleles") 
-            
+    dbsnp = hl.read_table(annotationPath)
     variants.annotate(rsid=dbsnp[variants.locus, variants.alleles].rsid[dbsnp[variants.locus, variants.alleles].a_index-1]) \
             .write(destinationPath,overwrite=True)
     
@@ -387,9 +399,7 @@ def annotateGnomADEx(hl, variants, annotationPath, destinationPath):
          :param string annotationPath: Path were the GnomAD Ex annotation vcf can be found
          :param string destinationPath: Path were the new annotated dataset can be found
     """
-    gnomad = hl.split_multi_hts(hl.read_matrix_table(annotationPath)) \
-               .rows() \
-               .key_by("locus","alleles")
+    gnomad = hl.read_matrix_table(annotationPath)
     variants.annotate(
         gnomad_af=hl.cond(hl.is_defined(gnomad[variants.locus, variants.alleles].info.gnomAD_Ex_AF[gnomad[variants.locus, variants.alleles].a_index-1]),gnomad[variants.locus, variants.alleles].info.gnomAD_Ex_AF[gnomad[variants.locus, variants.alleles].a_index-1],0.0),
         gnomad_ac=hl.cond(hl.is_defined(gnomad[variants.locus, variants.alleles].info.gnomAD_Ex_AC[gnomad[variants.locus, variants.alleles].a_index-1]),gnomad[variants.locus, variants.alleles].info.gnomAD_Ex_AC[gnomad[variants.locus, variants.alleles].a_index-1],0.0),
@@ -408,8 +418,6 @@ def annotateExAC(hl, variants, annotationPath, destinationPath):
          :param string annotationPath: Path were the ExAC annotation vcf can be found
          :param string destinationPath: Path were the new annotated dataset can be found
     """
-    exac = hl.split_multi_hts(hl.read_matrix_table(annotationPath)) \
-             .rows() \
-             .key_by("locus","alleles")
+    exac = hl.read_matrix_table(annotationPath)
     variants.annotate(exac=hl.cond(hl.is_defined(exac[variants.locus, variants.alleles].info.ExAC_AF[exac[variants.locus, variants.alleles].a_index-1]),truncateAt(hl,exac[variants.locus, variants.alleles].info.ExAC_AF[exac[variants.locus, variants.alleles].a_index-1],"6"),0.0)) \
              .write(destinationPath,overwrite=True)

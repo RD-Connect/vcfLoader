@@ -80,7 +80,7 @@ def main(sqlContext, configuration, chrom, nchroms, step):
         sc = hl.spark_context()
         somatic_paths = sc.textFile(utils.buildFileName(configuration["somatic_paths"],chrom)).collect()
         # Import and merge somatic files
-        annotations.importSomatic(hl,current_dir,somatic_paths,destination+"/loadedSomatic/"+fileName,configuration["batch_count"],number_partitions)
+        annotations.importSomatic(hl,current_dir,somatic_paths,destination+"/loadedSomatic/"+fileName,number_partitions)
         current_dir = destination+"/loadedSomatic/"+fileName
 
     if ("loadCNV" in step):

@@ -375,7 +375,8 @@ def annotateDbSNP(hl, variants, annotationPath, destinationPath):
     """
     dbsnp = hl.split_multi(hl.read_matrix_table(annotationPath)) \
               .rows() \
-              .key_by("locus","alleles")
+              .key_by("locus","alleles") \
+              .distinct()
     variants.annotate(rsid=dbsnp[variants.locus, variants.alleles].rsid[dbsnp[variants.locus, variants.alleles].a_index-1]) \
             .write(destinationPath,overwrite=True)
     

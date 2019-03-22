@@ -211,9 +211,12 @@ def importDBVcf(hl, sourcePath, destinationPath, nPartitions):
           :param String nPartitions: Number of partitions
     """
     print("Annotation vcf source path is " + sourcePath)
-    hl.split_multi_hts(hl.import_vcf(sourcePath,min_partitions=nPartitions,skip_invalid_loci=True)) \
-      .rows() \
-      .key_by("locus","alleles") \
+    annotation_file = hl.import_vcf(sourcePath,min_partitions=nPartitions,skip_invalid_loci=True) \
+                        .rows() \
+                        .key_by("locus","alleles") \
+                        .distinct() 
+    hl.split_multi_hts(annotation_file) \
+      .distinct() \
       .write(destinationPath,overwrite=True)
 
 def transcript_annotations(hl, annotations):
@@ -325,9 +328,7 @@ def annotateCADD(hl, variants, annotationPath, destinationPath):
          :param string annotationPath: Path were the CADD annotation vcf can be found
          :param string destinationPath: Path were the new annotated dataset can be found
     """
-    cadd = hl.split_multi_hts(hl.read_matrix_table(annotationPath)) \
-             .rows() \
-             .key_by("locus","alleles") 
+    cadd = hl.read_table(annotationPath)
     variants.annotate(cadd_phred=cadd[variants.locus, variants.alleles].info.CADD13_PHRED[cadd[variants.locus, variants.alleles].a_index-1]) \
             .write(destinationPath,overwrite=True)
 
@@ -399,7 +400,7 @@ def annotateGnomADEx(hl, variants, annotationPath, destinationPath):
          :param string annotationPath: Path were the GnomAD Ex annotation vcf can be found
          :param string destinationPath: Path were the new annotated dataset can be found
     """
-    gnomad = hl.read_matrix_table(annotationPath)
+    gnomad = hl.read_table(annotationPath)
     variants.annotate(
         gnomad_af=hl.cond(hl.is_defined(gnomad[variants.locus, variants.alleles].info.gnomAD_Ex_AF[gnomad[variants.locus, variants.alleles].a_index-1]),gnomad[variants.locus, variants.alleles].info.gnomAD_Ex_AF[gnomad[variants.locus, variants.alleles].a_index-1],0.0),
         gnomad_ac=hl.cond(hl.is_defined(gnomad[variants.locus, variants.alleles].info.gnomAD_Ex_AC[gnomad[variants.locus, variants.alleles].a_index-1]),gnomad[variants.locus, variants.alleles].info.gnomAD_Ex_AC[gnomad[variants.locus, variants.alleles].a_index-1],0.0),
@@ -418,6 +419,6 @@ def annotateExAC(hl, variants, annotationPath, destinationPath):
          :param string annotationPath: Path were the ExAC annotation vcf can be found
          :param string destinationPath: Path were the new annotated dataset can be found
     """
-    exac = hl.read_matrix_table(annotationPath)
+    exac = hl.read_table(annotationPath)
     variants.annotate(exac=hl.cond(hl.is_defined(exac[variants.locus, variants.alleles].info.ExAC_AF[exac[variants.locus, variants.alleles].a_index-1]),truncateAt(hl,exac[variants.locus, variants.alleles].info.ExAC_AF[exac[variants.locus, variants.alleles].a_index-1],"6"),0.0)) \
              .write(destinationPath,overwrite=True)

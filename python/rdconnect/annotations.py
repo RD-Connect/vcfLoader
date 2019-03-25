@@ -391,7 +391,7 @@ def annotateDbSNP(hl, variants, annotationPath, destinationPath):
     dbsnp = hl.read_matrix_table(annotationPath) \
               .rows() \
               .key_by("locus","alleles")
-    variants.annotate(rsid=dbsnp[variants.locus, variants.alleles].rsid[dbsnp[variants.locus, variants.alleles].a_index-1]) \
+    variants.annotate(rsid=dbsnp[variants.locus, variants.alleles].rsid) \
             .write(destinationPath,overwrite=True)
     
 def annotateGnomADEx(hl, variants, annotationPath, destinationPath):

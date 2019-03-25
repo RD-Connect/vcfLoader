@@ -388,7 +388,7 @@ def annotateDbSNP(hl, variants, annotationPath, destinationPath):
          :param string annotationPath: Path were the Clinvar annotation vcf can be found
          :param string destinationPath: Path were the new annotated dataset can be found
     """
-    dbsnp = hl.split_multi(hl.read_matrix_table(annotationPath)) \
+    dbsnp = hl.read_matrix_table(annotationPath) \
               .rows() \
               .key_by("locus","alleles")
     variants.annotate(rsid=dbsnp[variants.locus, variants.alleles].rsid[dbsnp[variants.locus, variants.alleles].a_index-1]) \

@@ -257,7 +257,8 @@ def annotateVEP(hl, variants, destinationPath, vepPath, nPartitions):
     print("Running vep")
     print("destination is "+destinationPath)
     varAnnotated = hl.vep(variants,vepPath)
-    varAnnotated = varAnnotated.annotate(effs=hl.cond(hl.is_defined(varAnnotated.vep.transcript_consequences),transcript_annotations(hl,varAnnotated.vep.transcript_consequences),intergenic_annotations(hl,varAnnotated.vep.intergenic_consequences)))
+    varAnnotated = varAnnotated.annotate(effs=hl.cond(hl.is_defined(varAnnotated.vep.transcript_consequences),transcript_annotations(hl,varAnnotated.vep.transcript_consequences),intergenic_annotations(hl,varAnnotated.vep.intergenic_consequences)),
+                                         rsid = varAnnotated.vep.id)
     varAnnotated.drop("vep") \
                 .write(destinationPath,overwrite=True)
 
@@ -379,19 +380,6 @@ def annotateClinvar(hl, variants, annotationPath, destinationPath):
         clinvar_clnsig=hl.cond(hl.is_defined(clinvar[variants.locus, variants.alleles].info.CLNSIG[clinvar[variants.locus, variants.alleles].a_index-1]),hl.delimit(clinvar_preprocess(hl,clinvar[variants.locus, variants.alleles].info.CLNSIG,False),"|"), hl.delimit(clinvar_preprocess(hl,clinvar[variants.locus, variants.alleles].info.CLNSIGINCL,False),"|")),
         clinvar_filter=hl.cond(hl.is_defined(clinvar[variants.locus, variants.alleles].info.CLNSIG[clinvar[variants.locus, variants.alleles].a_index-1]),clinvar_preprocess(hl,clinvar[variants.locus, variants.alleles].info.CLNSIG,True), clinvar_preprocess(hl,clinvar[variants.locus, variants.alleles].info.CLNSIGINCL,True))
     ) \
-            .write(destinationPath,overwrite=True)
-
-def annotateDbSNP(hl, variants, annotationPath, destinationPath):
-    """ Adds dbSNP annotations to variants.
-         :param HailContext hl: The Hail context
-         :param VariantDataset variants: The variants to annotate
-         :param string annotationPath: Path were the Clinvar annotation vcf can be found
-         :param string destinationPath: Path were the new annotated dataset can be found
-    """
-    dbsnp = hl.read_matrix_table(annotationPath) \
-              .rows() \
-              .key_by("locus","alleles")
-    variants.annotate(rsid=dbsnp[variants.locus, variants.alleles].rsid) \
             .write(destinationPath,overwrite=True)
     
 def annotateGnomADEx(hl, variants, annotationPath, destinationPath):

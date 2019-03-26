@@ -351,7 +351,7 @@ def clinvar_filtering(hl, annotation, is_filter_field):
     ])
     filtered = None
     if is_filter_field:
-        filtered = hl.map(lambda z: hl.cond(clin_sigs.contains(z), hl.struct(clnsig=clin_sigs[z]), hl.struct(clnsig="-1"), annotation)
+        filtered = hl.map(lambda z: hl.cond(clin_sigs.contains(z), hl.struct(clnsig=clin_sigs[z]), hl.struct(clnsig="-1")), annotation)
         filtered = hl.filter(lambda e: e['clnsig'] != '-1', filtered)    
     else: 
         filtered = hl.map(lambda z: hl.cond(clin_sigs.contains(z), clin_sigs[z], '-1'), annotation)

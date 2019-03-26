@@ -16,7 +16,7 @@ def importGermline(hl, originPath, sourcePath, destinationPath, nPartitions):
         vcf = hl.split_multi_hts(hl.import_vcf(str(sourcePath),force_bgz=True,min_partitions=nPartitions))
         print ("writing vds to" + destinationPath)
         vcf = vcf.transmute_entries(sample=hl.struct(sample=vcf.s,
-                                                     ad=truncateAt(hl,vcf.AD[1]/hl.sum(vcf.AD),"3"),
+                                                     ad=truncateAt(hl,vcf.AD[1]/hl.sum(vcf.AD),"2"),
                                                      dp=vcf.DP,
                                                      gtInt=vcf.GT,
                                                      gt=hl.str(vcf.GT),
@@ -287,8 +287,10 @@ def sift_pred_annotations(hl, annotations):
             .default("")
            )
 
-def truncateAt(hl, n, precision):
-    return hl.float(hl.format('%.' + precision + 'f',n))
+def truncateAt(hl, n, p):
+    #return hl.eval((hl.float(n) // (1/(10 ** p))) / (10 ** p))
+    #return hl.float(hl.format('%.' + precision + 'f',n))
+    return hl.float(hl.int((10 ** hl.int(p) * n))) / (10 ** hl.int(p))
     
 def removeDot(hl, n, precision):
     return hl.cond(n.startswith('.'),0.0,truncateAt(hl,hl.float(n),precision))

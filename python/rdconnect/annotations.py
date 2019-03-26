@@ -258,7 +258,7 @@ def annotateVEP(hl, variants, destinationPath, vepPath, nPartitions):
     print("destination is "+destinationPath)
     varAnnotated = hl.vep(variants,vepPath)
     varAnnotated = varAnnotated.annotate(effs=hl.cond(hl.is_defined(varAnnotated.vep.transcript_consequences),transcript_annotations(hl,varAnnotated.vep.transcript_consequences),intergenic_annotations(hl,varAnnotated.vep.intergenic_consequences)),
-                                         rsid = varAnnotated.vep.id)
+                                         rs = varAnnotated.vep.id)
     varAnnotated.drop("vep") \
                 .write(destinationPath,overwrite=True)
 

@@ -9,7 +9,7 @@ def importGermline(hl, originPath, sourcePath, destinationPath, nPartitions):
           :param String originPath: Origin path of the somatic variants previously uploaded (if any)
           :param String sourcePath: Annotation table path
           :param String destinationPath: Path where the loaded variants will be stored
-          :param String nPartitions: Number of partitions
+          :param String nPartitions: Number of partitions when importing the file
     """
     try:
         print ("reading vcf from "+ sourcePath)
@@ -41,14 +41,28 @@ def importGermline(hl, originPath, sourcePath, destinationPath, nPartitions):
         return "Error in importing vcf"
 
 def importSomaticFile(hl, file_path, num_partitions):
-    print(file_path)
+    """ Imports a single somatic vcf file
+        :param HailContext hl: The Hail context
+        :param String file_path: Path from which to import the file
+        :param Int num_partitions: Number of partitions when importing the file
+    """
     dataset = hl.split_multi_hts(hl.import_vcf(file_path,force_bgz=True,min_partitions=num_partitions)) 
     return annotateSomatic(hl,dataset)
     
 def importSomatic(hl, originPath, file_paths, destination_path, num_partitions):
+    """ Imports a set of somatic files and merges them into a table. It also merges them with 
+        previously imported germline samples, if any.
+        :param HailContext hl: The hail context
+        :param String originPath: Origin path from which to import previously imported germline samples, if any
+        :param String file_paths: List of file paths from which to import the files
+        :param String destination_path: Path where the loaded variants will be stored
+        :param Int num_partitions: Number of partitions when importing the file
+    """
     nFiles = len(file_paths)
     if(nFiles > 0) :
         try:
+            print(file_paths)
+            print(len(file_paths))
             tables = [None] * len(file_paths)
             iteration = 0
             while (len(tables) > 1):
@@ -112,6 +126,10 @@ def merge(hl, tgermline, tsomatic):
     )
 
 def annotateChrom(hl,chrom):
+    """ Converts input string chromosomes to their integer representation
+        :param Hailcontext hl: The Hail context
+        :param String chrom: String representation of a single chromosome
+    """
     print("chrom to int function")
     print(chrom)
     return (hl.case()
@@ -122,6 +140,12 @@ def annotateChrom(hl,chrom):
                     .default(chrom))
 
 def loadCNV(hl, sourcePath, destinationPath, nPartitions):
+    """ Load CNV data from a tabular formatted input
+        :param HailContext hl: The Hail context
+        :param String sourcePath: The source path from which to import the CNVs
+        :param destinationPath: Path where the loaded variants will be stored
+        :param nPartitions: Number of partitions when importing the file
+    """
     table = hl.import_table(sourcePath,min_partitions=nPartitions) \
               .rename({
                   'SAMPLE': 'sample_id',
@@ -155,6 +179,10 @@ def loadCNV(hl, sourcePath, destinationPath, nPartitions):
          .write(destinationPath,overwrite=True) 
 
 def annotateSomatic(hl, dataset):
+    """ Annotates a somatic vcf file with its variant and samples information
+        :param HailContext hl: The hail context
+        :param HailTable dataset: The Hail table formatted variants to annotate
+    """
     dataset = dataset.transmute_entries(sample=hl.struct(sample=dataset.s,dp_avg=dataset.DP_avg,dp_ref_avg=dataset.DP_REF_avg,dp_alt_avg=dataset.DP_ALT_avg,vaf_avg=dataset.VAF_avg,gt=hl.str(dataset.GT),nprogs=dataset.info.NPROGS,progs=hl.delimit(dataset.info.PROGS,","))) \
                      .drop('rsid','qual','filters','info')
     dataset = dataset.annotate_rows(ref=dataset.alleles[0],
@@ -196,7 +224,7 @@ def importDbNSFPTable(hl, sourcePath, destinationPath, nPartitions):
                          table.MutationTaster_pred,
                          table.phyloP46way_placental,
                          table.Polyphen2_HDIV_pred,
-                          table.Polyphen2_HVAR_score,
+                         table.Polyphen2_HVAR_score,
                          table.SIFT_pred,
                          table.SIFT_score,
                          table.COSMIC_ID) 
@@ -215,6 +243,10 @@ def importDBVcf(hl, sourcePath, destinationPath, nPartitions):
 .write(destinationPath,overwrite=True)
 
 def transcript_annotations(hl, annotations):
+    """ Transcript level annotations for VEP 
+        :param Hailcontext hl: The Hail context
+        :param HailTable: Previously annotated data (variant level)
+    """
     return hl.map(lambda x: 
            hl.struct(
                gene_name=x.gene_symbol,
@@ -231,6 +263,10 @@ def transcript_annotations(hl, annotations):
                gene_coding=hl.str(x.cds_start)),annotations)
 
 def intergenic_annotations(hl, annotations):
+    """ Transcript level annotations for VEP 
+        :param Hailcontext hl: The Hail context
+        :param HailTable: Previously annotated data (variant level)
+    """
     return hl.map(lambda x: 
            hl.struct(
                gene_name='',
@@ -263,6 +299,10 @@ def annotateVEP(hl, variants, destinationPath, vepPath, nPartitions):
                 .write(destinationPath,overwrite=True)
 
 def mt_pred_annotations(hl, annotations):
+    """ Annotations for dbNSFP
+        :param Hailcontext hl: The Hail context
+        :param HailTable: Previously annotated data (variant level)
+    """
     arr = annotations.MutationTaster_pred.split(";")
     return (hl.case()
             .when(arr.contains("A"),"A")
@@ -271,6 +311,10 @@ def mt_pred_annotations(hl, annotations):
             .default(""))
 
 def polyphen_pred_annotations(hl, annotations):
+    """ Annotations for dbNSFP
+        :param Hailcontext hl: The Hail context
+        :param HailTable: Previously annotated data (variant level)
+    """
     arr = annotations.Polyphen2_HDIV_pred.split(";")
     return (hl.case()
             .when(arr.contains("D"),"D")
@@ -280,6 +324,10 @@ def polyphen_pred_annotations(hl, annotations):
            )
     
 def sift_pred_annotations(hl, annotations):
+    """ Annotations for dbNSFP
+        :param Hailcontext hl: The Hail context
+        :param HailTable: Previously annotated data (variant level)
+    """
     arr = annotations.SIFT_pred
     return (hl.case()
             .when(arr.contains("D"),"D")
@@ -288,11 +336,19 @@ def sift_pred_annotations(hl, annotations):
            )
 
 def truncateAt(hl, n, p):
-    #return hl.eval((hl.float(n) // (1/(10 ** p))) / (10 ** p))
-    #return hl.float(hl.format('%.' + precision + 'f',n))
+    """ Formats a input number to 'p' decimals
+        :param Hailcontext hl: The Hail context
+        :param String n: Number to format
+        :param String p: Decimal precision
+    """
     return hl.float(hl.int((10 ** hl.int(p) * n))) / (10 ** hl.int(p))
     
 def removeDot(hl, n, precision):
+    """ Formats an input number to 'p' decimals, or sets it to 0 if it's a dot annotation
+        :param HailContext h: The Hail context
+        :param String n: Number to format
+        :param String p: Decimal precision
+    """
     return hl.cond(n.startswith('.'),0.0,truncateAt(hl,hl.float(n),precision))
 
 def annotateDbNSFP(hl, variants, dbnsfpPath, destinationPath):
@@ -333,6 +389,11 @@ def annotateCADD(hl, variants, annotationPath, destinationPath):
             .write(destinationPath,overwrite=True)
 
 def clinvar_filtering(hl, annotation, is_filter_field):
+    """ Returns the clinvar annotations to apply
+        :param HailContext hl: The Hail context
+        :param Annotation annotation: Annotations to apply
+        :param Boolean is_filter_field: Whether the annotations is for Clinvar filtering or informative
+    """
     clin_sigs = hl.dict([
         ('Uncertain_significance', 'VUS'),
         ('not_provided', 'NA'),
@@ -359,6 +420,11 @@ def clinvar_filtering(hl, annotation, is_filter_field):
     return filtered
 
 def clinvar_preprocess(hl, annotation, is_filter_field):
+    """ Preprocesses a Clinvar annotation expression
+        :param Hailcontext hl: The Hail context
+        :param Annotation annotation: Annotations to apply
+        :param Boolean is_filter_field: Whether the annotations is for Clinvar filtering or informative
+    """
     preprocessed = hl.flatmap(lambda x: x.replace('\\/',',')
                                      .replace('\\:',',') \
                                      .replace('\\|',',') \

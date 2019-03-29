@@ -65,25 +65,28 @@ def importSomatic(hl, originPath, file_paths, destination_path, num_partitions):
             print(len(file_paths))
             tables = [None] * len(file_paths)
             iteration = 0
-            while (len(tables) > 1):
-                tmp = []
-                iteration += 1
-                print("Iteration ----> " + str(iteration))
-                for i in range(0, len(tables), 2):
-                    iNext = i+1
-                    if (iteration > 1): 
-                        if (iNext < len(tables)):
-                            tmp.append(mergeSomatic(hl,tables[i],tables[i+1]))
+            if (len(tables) == 1):
+                tables[0] = importSomaticFile(hl,file_paths[i],num_partitions)
+            else:
+                while (len(tables) > 1):
+                    tmp = []
+                    iteration += 1
+                    print("Iteration ----> " + str(iteration))
+                    for i in range(0, len(tables), 2):
+                        iNext = i+1
+                        if (iteration > 1): 
+                            if (iNext < len(tables)):
+                                tmp.append(mergeSomatic(hl,tables[i],tables[i+1]))
+                            else:
+                                tmp.append(tables[i])
                         else:
-                            tmp.append(tables[i])
-                    else:
-                        table = importSomaticFile(hl,file_paths[i],num_partitions)
-                        if (iNext < len(tables)):
-                            tableNext = importSomaticFile(hl,file_paths[i+1],num_partitions)
-                            tmp.append(mergeSomatic(hl,table,tableNext))
-                        else:
-                            tmp.append(table)
-                tables = tmp
+                            table = importSomaticFile(hl,file_paths[i],num_partitions)
+                            if (iNext < len(tables)):
+                                tableNext = importSomaticFile(hl,file_paths[i+1],num_partitions)
+                                tmp.append(mergeSomatic(hl,table,tableNext))
+                            else:
+                                tmp.append(table)
+                    tables = tmp
             merged = tables[0]
             if (originPath != ""):
                 germline = hl.read_table(originPath)
@@ -105,7 +108,10 @@ def mergeSomatic(hl, tdataset, tother):
     """
     joined = tdataset.join(tother,"outer")
     return joined.transmute(
-        samples_somatic = joined.samples_somatic.extend(joined.samples_somatic_1),
+        samples_somatic = hl.cond(hl.is_defined(joined.samples_somatic) & hl.is_defined(joined.samples_somatic_1),
+                joined.samples_somatic.extend(joined.samples_somatic_1),
+                hl.or_else(joined.samples_somatic,joined.samples_somatic_1)
+               ),
         was_split = hl.or_else(joined.was_split,joined.was_split_1),
         a_index = hl.or_else(joined.a_index,joined.a_index_1),
         ref = hl.or_else(joined.ref,joined.ref_1),
@@ -183,7 +189,13 @@ def annotateSomatic(hl, dataset):
         :param HailContext hl: The hail context
         :param HailTable dataset: The Hail table formatted variants to annotate
     """
-    dataset = dataset.transmute_entries(sample=hl.struct(sample=dataset.s,dp_avg=dataset.DP_avg,dp_ref_avg=dataset.DP_REF_avg,dp_alt_avg=dataset.DP_ALT_avg,vaf_avg=dataset.VAF_avg,gt=hl.str(dataset.GT),nprogs=dataset.info.NPROGS,progs=hl.delimit(dataset.info.PROGS,","))) \
+    dataset = dataset.transmute_entries(sample=hl.struct(sample=dataset.s,
+                                                         dp_avg=dataset.DP_avg,
+                                                         dp_ref_avg=dataset.DP_REF_avg,
+                                                         dp_alt_avg=dataset.DP_ALT_avg,
+                                                         vaf_avg=dataset.VAF_avg,gt=hl.str(dataset.GT),
+                                                         nprogs=dataset.info.NPROGS,
+                                                         progs=hl.delimit(dataset.info.PROGS,","))) \
                      .drop('rsid','qual','filters','info')
     dataset = dataset.annotate_rows(ref=dataset.alleles[0],
                                     alt=dataset.alleles[1],

@@ -154,28 +154,23 @@ def loadCNV(hl, sourcePath, destinationPath, nPartitions):
     """
     table = hl.import_table(sourcePath,min_partitions=nPartitions) \
               .rename({
-                  'SAMPLE': 'sample_id',
                   'chromosome': 'chrom',
                   'BF': 'bf',
                   'exons.hg19': 'genes',
-                  'Count': 'cnt',
-                  'DGV_goldstd_group': 'DGV_group',
-                  'DGV_goldstd_overlap': 'DGV_overlap',
-                  'DGV_goldstd_coordinates': 'DGV_coords',
                   'Mim number': 'mim_number',
                   'Phenotype': 'phenotype'
                   })
     table = table.select(
-        table.sample_id,
+        table.sample,
         table.start,
         table.end,
         table.type,
-        table.cnt,
+        table.count,
         table.chrom,
         table.bf,
-        table.DGV_group,
-        table.DGV_overlap,
-        table.DGV_coords,
+        table.DGV_goldstd_group,
+        table.DGV_goldstd_overlap,
+        table.DGV_goldstd_coordinates,
         table.genes,
         table.mim_number,
         table.phenotype

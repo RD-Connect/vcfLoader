@@ -154,6 +154,7 @@ def loadCNV(hl, sourcePath, destinationPath, nPartitions):
     """
     table = hl.import_table(sourcePath,min_partitions=nPartitions) \
               .rename({
+                  'sample' : 'sample_id',
                   'chromosome': 'chrom',
                   'BF': 'bf',
                   'exons.hg19': 'genes',
@@ -161,7 +162,7 @@ def loadCNV(hl, sourcePath, destinationPath, nPartitions):
                   'Phenotype': 'phenotype'
                   })
     table = table.select(
-        table.sample,
+        table.sample_id,
         table.start,
         table.end,
         table.type,

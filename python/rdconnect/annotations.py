@@ -66,7 +66,7 @@ def importSomatic(hl, originPath, file_paths, destination_path, num_partitions):
             tables = [None] * len(file_paths)
             iteration = 0
             if (len(tables) == 1):
-                tables[0] = importSomaticFile(hl,file_paths[i],num_partitions)
+                tables[0] = importSomaticFile(hl,file_paths[0],num_partitions)
             else:
                 while (len(tables) > 1):
                     tmp = []
@@ -190,6 +190,7 @@ def annotateSomatic(hl, dataset):
         :param HailTable dataset: The Hail table formatted variants to annotate
     """
     dataset = dataset.transmute_entries(sample=hl.struct(sample=dataset.s,
+                                                         gtInt=dataset.GT,
                                                          dp_avg=dataset.DP_avg,
                                                          dp_ref_avg=dataset.DP_REF_avg,
                                                          dp_alt_avg=dataset.DP_ALT_avg,
@@ -203,6 +204,8 @@ def annotateSomatic(hl, dataset):
                                     indel=hl.is_indel(dataset.alleles[0],dataset.alleles[1]),
                                     samples_somatic=hl.agg.collect(dataset.sample)) \
                      .drop("sample")
+    dataset = dataset.annotate_rows(freqIntSomatic = hl.cond((hl.len(dataset.samples_somatic) > 0) | (hl.len(hl.filter(lambda x: x.dp_avg > MIN_DP,dataset.samples_somatic)) > 0),
+                                            truncateAt(hl,hl.sum(hl.map(lambda x: x.gtInt.unphased_diploid_gt_index(),dataset.samples_somatic))/hl.sum(hl.map(lambda x: 2,hl.filter(lambda x: x.dp_avg > MIN_DP,dataset.samples_somatic))),"6"), 0.0))
     return dataset.rows()
 
 def importDbNSFPTable(hl, sourcePath, destinationPath, nPartitions):

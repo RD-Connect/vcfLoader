@@ -173,7 +173,7 @@ def loadCNV(hl, sourcePath, destinationPath, nPartitions):
         table.bf,
         table.DGV_group,
         table.DGV_overlap,
-        table.DGV_coordinates,
+        table.DGV_coords,
         table.genes,
         table.mim_number,
         table.phenotype

@@ -117,7 +117,8 @@ def mergeSomatic(hl, tdataset, tother):
         ref = hl.or_else(joined.ref,joined.ref_1),
         alt = hl.or_else(joined.alt,joined.alt_1),
         pos = hl.or_else(joined.pos,joined.pos_1),
-        indel = hl.or_else(joined.indel,joined.indel_1)
+        indel = hl.or_else(joined.indel,joined.indel_1),
+        freqIntSomatic = hl.or_else(joined.freqIntSomatic,joined.freqIntSomatic_1)
     )
 
 def merge(hl, tgermline, tsomatic):

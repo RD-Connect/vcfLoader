@@ -254,7 +254,7 @@ def importDBVcf(hl, sourcePath, destinationPath, nPartitions):
     """
     print("Annotation vcf source path is " + sourcePath)
     hl.import_vcf(sourcePath,min_partitions=nPartitions,skip_invalid_loci=True) \
-.write(destinationPath,overwrite=True)
+      .write(destinationPath,overwrite=True)
 
 def transcript_annotations(hl, annotations):
     """ Transcript level annotations for VEP 

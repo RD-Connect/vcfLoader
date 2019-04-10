@@ -36,28 +36,6 @@ class BaseTestClass(unittest.TestCase):
         hl.init(self.sc)
         self.hl = hl
         self.sqlContext = SQLContext(self.sc)
-
-    def test(self):
-        """ Runs a general test with specific parameters from each test that inherits from this class. """
-        """ The test reads the annotated table and compares it to the expected one (both in KeyTable format) """
-        # Reading annotated VDS and parsing it into a KeyTable. The steps to follow are:
-        # - Get variants table
-        # - Expand variant types (otherwise we just get the 'v' type, instead of the chrom, position, etc)
-        # - Flatten struct types (so we can select the columns with 'va._'. Otherwise, we can just access 'va')
-        # - Select specified columns and key by specified key (e.g. v.start)
-        # - Filter out all rows with missing values (that way we can add result tables without modifying the
-        #   existing ones for other tests)
-        annotated_table = self.hc.read_table(self.sample_path) \
-                                 .variants_table() \
-                                 .expand_types() \
-                                 .flatten() \
-                                 .select(self.columns) \
-                                 .filter(" && ".join(map(lambda value: "!isMissing(`" + value + "`)", self.columns))) \
-                                 .key_by(self.key)
-        annotated_table.show()
-        expected_table = self.hc.import_table(self.results_path, types=self.types).key_by(self.key)
-        expected_table.show()
-        self.assertTrue(annotated_table.same(expected_table))
         
     def tearDown(self, tmp_dirs):
         """ Stopping Spark and Hail contexts """

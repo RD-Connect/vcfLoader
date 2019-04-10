@@ -1,4 +1,9 @@
 {
+    "origin_path": "",
+    "germline_source_path": "resources/data/germline.vcf",
+    "germline_dest_path": "tmp/germline_variants.ht",
+    "somatic_list_path": "resources/data/somatics.list",
+    "somatic_dest_path": "tmp/somatic_variants.ht",
     "sampleVcfPath" : "resources/data/sample.vcf",
     "samplePath" : "tmp/variants.kt",
     "variantsTable" : "resources/results/variant_annotations_results.tsv",

@@ -244,6 +244,14 @@ def importDbNSFPTable(hl, sourcePath, destinationPath, nPartitions):
                          table.COSMIC_ID) 
     table.key_by("locus","alleles") \
          .write(destinationPath,overwrite=True) 
+
+def importCGITable(hl, sourcePath, destinationPath, nPartitions):
+    print("Annotation CGI table path is " + sourcePath)
+    table = hl.import_table(sourcePath,min_partitions=nPartitions) \
+              .rename({"#CHRM": "chr"})
+    table.annotate(locus=hl.locus(table.chr,hl.int(table.POS)), alleles=[table.REF,table.ALT]) \
+         .key_by("locus","alleles") \
+         .write(destinationPath,overwrite=True) 
     
 def importDBVcf(hl, sourcePath, destinationPath, nPartitions):
     """ Imports annotations vcfs
@@ -497,3 +505,31 @@ def annotateExAC(hl, variants, annotationPath, destinationPath):
              .key_by("locus","alleles")
     variants.annotate(exac=hl.cond(hl.is_defined(exac[variants.locus, variants.alleles].info.ExAC_AF[exac[variants.locus, variants.alleles].a_index-1]),truncateAt(hl,exac[variants.locus, variants.alleles].info.ExAC_AF[exac[variants.locus, variants.alleles].a_index-1],"6"),0.0)) \
             .write(destinationPath,overwrite=True)
+
+def CGIFilter(hl, filter_field):
+    return (hl.case()
+            .when(filter_field.contains("known"),"K")
+            .when(filter_field.contains("tier 1"),"P1")
+            .when(filter_field.contains("tier 2"),"P2")
+            .when(filter_field == "predicted passenger","PP")
+            .or_missing())
+
+    
+def annotateCGI(hl, variants, CGIPath, destinationPath):
+    """ Adds CGI annotations to variants.
+         :param HailContext hl: The Hail context
+         :param VariantDataset variants: The variants to annotate
+         :param string CGIPath: Path were the CGI table can be found
+         :param string destinationPath: Path were the new annotated dataset can be found
+    """
+    cgi = hl.read_table(CGIPath)
+    variants.annotate(
+        gene=cgi[variants.locus, variants.alleles].gene,
+        transcript=cgi[variants.locus, variants.alleles].transcript,
+        driver_gene=cgi[variants.locus, variants.alleles].driver_gene,
+        driver_statement=cgi[variants.locus, variants.alleles].driver_statement,
+        onco_filter=CGIFilter(hl,cgi[variants.locus, variants.alleles].driver_statement),
+        known_oncogenic_source=cgi[variants.locus, variants.alleles].known_oncogenic_source,
+        known_oncogenic_reference=cgi[variants.locus, variants.alleles].known_oncogenic_reference
+    ) \
+        .write(destinationPath,overwrite=True)

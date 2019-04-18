@@ -53,6 +53,13 @@ def create_index_snv(host,port,index_name,version,num_shards,num_replicas,user,p
                      "type":"nested",
                      "properties": {
                          "clnsig":{"type":"keyword"}}}
+                ,"gene":{"type":"keyword"}
+                ,"transcript":{"type":"keyword"}
+                ,"driver_gene":{"type":"keyword"}
+                ,"driver_statement":{"type":"keyword"}
+                ,"known_oncogenic_source":{"type":"keyword"}
+                ,"known_oncogenic_reference":{"type":"keyword"}
+                ,"onco_filter":{"type":"keyword"}
                 ,"effs":{
                      "type":"nested",
                      "properties":{

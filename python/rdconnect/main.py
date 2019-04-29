@@ -163,6 +163,7 @@ def main(sqlContext, configuration, chrom, nchroms, step):
             "es.nodes": configuration["elasticsearch"]["host"],
             "es.port": configuration["elasticsearch"]["port"]
         }
+        print(es_conf)
         index_name = configuration["elasticsearch"]["index_name"]
         if ("toElasticCNV" in step):
             print("step toElasticCNV")

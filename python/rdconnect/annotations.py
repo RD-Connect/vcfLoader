@@ -2,6 +2,7 @@ from rdconnect import utils, expr
 
 MIN_DP = 7
 MIN_GQ = 19
+SAMPLES_CNV = 939
 
 def importGermline(hl, originPath, sourcePath, destinationPath, nPartitions):
     """ Imports input vcf and annotates it with general annotations (samples, freqInt, pos, alt, ref)
@@ -153,17 +154,7 @@ def loadCNV(hl, sourcePath, destinationPath, nPartitions):
         :param destinationPath: Path where the loaded variants will be stored
         :param nPartitions: Number of partitions when importing the file
     """
-    table = hl.import_table(sourcePath,min_partitions=nPartitions) \
-              .rename({
-                  'chromosome': 'chrom',
-                  'BF': 'bf',
-                  'exons.hg19': 'genes',
-                  'DGV_goldstd_group': 'DGV_group',
-                  'DGV_goldstd_overlap': 'DGV_overlap',
-                  'DGV_goldstd_coordinates': 'DGV_coords',
-                  'Mim number': 'mim_number',
-                  'Phenotype': 'phenotype'
-                  })
+    table = hl.import_table(sourcePath,min_partitions=nPartitions) 
     table = table.select(
         table.sample_id,
         table.start,
@@ -172,15 +163,19 @@ def loadCNV(hl, sourcePath, destinationPath, nPartitions):
         table.cnt,
         table.chrom,
         table.bf,
-        table.DGV_group,
-        table.DGV_overlap,
-        table.DGV_coords,
+        table.DGV_goldstd_overlap,
+        table.DGV_goldstd_coordinates,
         table.genes,
-        table.mim_number,
-        table.phenotype
+        table.omim_number,
+        table.omim_phenotype,
+        table.reads_expected,
+        table.reads_observed,
+        table.reads_ratio
     ) 
     table.annotate(chrom=annotateChrom(hl,table.chrom),
-                   genes=table.genes.split(",").map(lambda x: hl.struct(gene_name=x))) \
+                   genes=table.genes.split(",").map(lambda x: hl.struct(gene_name=x)),
+                   intFreqCNV=truncateAt(hl,hl.float(hl.int(table.cnt)/SAMPLES_CNV),"2"),
+                   length=hl.abs(hl.int(table.end)-hl.int(table.start))) \
          .write(destinationPath,overwrite=True) 
 
 def annotateSomatic(hl, dataset):
@@ -526,7 +521,7 @@ def annotateCGI(hl, variants, CGIPath, destinationPath):
     variants.annotate(
         gene=cgi[variants.locus, variants.alleles].gene,
         transcript=cgi[variants.locus, variants.alleles].transcript,
-        driver_gene=cgi[variants.locus, variants.alleles].driver_gene,
+        protein_change=cgi[variants.locus, variants.alleles].protein_change,
         driver_statement=cgi[variants.locus, variants.alleles].driver_statement,
         onco_filter=CGIFilter(hl,cgi[variants.locus, variants.alleles].driver_statement),
         known_oncogenic_source=cgi[variants.locus, variants.alleles].known_oncogenic_source,

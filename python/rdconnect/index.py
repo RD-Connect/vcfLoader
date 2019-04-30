@@ -109,14 +109,13 @@ def create_index_cnv(host,port,index_name,version,num_shards,num_replicas,user,p
                 "chrom":{"type":"integer","index":"true"}
                 ,"start":{"type":"integer","index":"true"}
                 ,"end":{"type":"integer","index":"false"} 
-                ,"cnt":{"type":"integer","index":"true"}
                 ,"type":{"type":"keyword","index":"false"}        
                 ,"cnt":{"type":"integer","index":"true"}  
                 ,"tool":{"type":"keyword","index":"true"}  
                 ,"bf":{"type":"float","index":"true"}
                 ,"DGV_goldstd_overlap":{"type":"keyword","index":"false"}
                 ,"DGV_goldstd_coordinates":{"type":"keyword","index":"false"}
-                ,"sample_id":{"type": "keyword"}
+                ,"sample_id":{"type": "keyword","index":"true"}
                 ,"omim_number":{"type":"integer", "index":"false"}
                 ,"omim_phenotype":{"type":"keyword"}
                 ,"reads_expected":{"type":"integer","index":"false"}

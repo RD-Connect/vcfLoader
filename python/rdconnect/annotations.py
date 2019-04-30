@@ -174,7 +174,7 @@ def loadCNV(hl, sourcePath, destinationPath, nPartitions):
     ) 
     table.annotate(chrom=annotateChrom(hl,table.chrom),
                    genes=table.genes.split(",").map(lambda x: hl.struct(gene_name=x)),
-                   intFreqCNV=truncateAt(hl,hl.float(hl.int(table.cnt)/SAMPLES_CNV),"2"),
+                   intFreqCNV=truncateAt(hl,hl.float(hl.int(table.cnt)/SAMPLES_CNV),"6"),
                    length=hl.abs(hl.int(table.end)-hl.int(table.start))) \
          .write(destinationPath,overwrite=True) 
 

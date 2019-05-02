@@ -524,6 +524,7 @@ def annotateCGI(hl, variants, CGIPath, destinationPath):
         protein_change=cgi[variants.locus, variants.alleles].protein_change,
         driver_statement=cgi[variants.locus, variants.alleles].driver_statement,
         onco_filter=CGIFilter(hl,cgi[variants.locus, variants.alleles].driver_statement),
+        consequence=cgi[variants.locus, variants.alleles].consequence,
         known_oncogenic_source=cgi[variants.locus, variants.alleles].known_oncogenic_source,
         known_oncogenic_reference=cgi[variants.locus, variants.alleles].known_oncogenic_reference
     ) \

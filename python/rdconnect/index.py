@@ -60,6 +60,7 @@ def create_index_snv(host,port,index_name,version,num_shards,num_replicas,user,p
                 ,"known_oncogenic_source":{"type":"keyword"}
                 ,"known_oncogenic_reference":{"type":"keyword"}
                 ,"onco_filter":{"type":"keyword"}
+                ,"consequence":{"type":"keyword"}
                 ,"effs":{
                      "type":"nested",
                      "properties":{

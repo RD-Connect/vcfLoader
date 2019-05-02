@@ -111,6 +111,12 @@ def main(sqlContext, configuration, chrom, nchroms, step):
         print ("step load CGI")
         annotations.importCGITable(hl,utils.buildFileName(configuration["CGI_Raw"],""),utils.buildFileName(configuration["CGI_path"],""),number_partitions)
 
+    if ("annotateCGI" in step):
+        print("step annotate CGI")
+        variants= hl.read_table(current_dir)
+        annotations.annotateCGI(hl,variants,utils.buildFileName(configuration["CGI_path"],chrom),destination+"/annotatedCGI/"+fileName)
+        current_dir = destination+"/annotatedCGI/"+fileName
+        
     if ("annotateVEP" in step):
         print ("step annotate VEP")
         print ("source file is "+ current_dir)
@@ -141,17 +147,11 @@ def main(sqlContext, configuration, chrom, nchroms, step):
         print("step annotate ExAC")
         variants= hl.read_table(destination+"/annotatedVEPdbnSFPCaddClinvarExGnomad/"+fileName)
         annotations.annotateExAC(hl,variants,utils.buildFileName(configuration["ExAC_path"],chrom),destination+"/annotatedVEPdbnSFPCaddClinvarExGnomadExAC/"+fileName)
-
-    if ("annotateCGI" in step):
-        print("step annotate CGI")
-        variants= hl.read_table(destination+"/annotatedVEPdbnSFPCaddClinvarExGnomadExAC/"+fileName)
-        annotations.annotateCGI(hl,variants,utils.buildFileName(configuration["CGI_path"],chrom),destination+"/annotatedCGI/"+fileName)
-        current_dir = destination+"/annotatedCGI/"+fileName
         
     # Transforming step. It sets all fields to the corresponding ElasticSearch format
     if ("transform" in step):
         print ("step transform")
-        annotated = hl.read_table(destination+"/annotatedCGI/"+fileName)
+        annotated = hl.read_table(destination+"/annotatedVEPdbnSFPCaddClinvarExGnomad/"+fileName)
         transform.transform(annotated,destination,chrom)
         
     # Uploading step. It uploads all annotated variants to ElasticSearch

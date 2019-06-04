@@ -151,7 +151,7 @@ def main(sqlContext, configuration, chrom, nchroms, step):
     # Transforming step. It sets all fields to the corresponding ElasticSearch format
     if ("transform" in step):
         print ("step transform")
-        annotated = hl.read_table(destination+"/annotatedVEPdbnSFPCaddClinvarExGnomad/"+fileName)
+        annotated = hl.read_table(destination+"/annotatedVEPdbnSFPCaddClinvarExGnomadExAC/"+fileName)
         transform.transform(annotated,destination,chrom)
         
     # Uploading step. It uploads all annotated variants to ElasticSearch

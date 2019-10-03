@@ -1,0 +1,115 @@
+##fileformat=VCFv4.2
+##FILTER=<ID=PASS,Description="All filters passed">
+##contig=<ID=1,length=249250621>
+##contig=<ID=2,length=243199373>
+##contig=<ID=3,length=198022430>
+##contig=<ID=4,length=191154276>
+##contig=<ID=5,length=180915260>
+##contig=<ID=6,length=171115067>
+##contig=<ID=7,length=159138663>
+##contig=<ID=8,length=146364022>
+##contig=<ID=9,length=141213431>
+##contig=<ID=10,length=135534747>
+##contig=<ID=11,length=135006516>
+##contig=<ID=12,length=133851895>
+##contig=<ID=13,length=115169878>
+##contig=<ID=14,length=107349540>
+##contig=<ID=15,length=102531392>
+##contig=<ID=16,length=90354753>
+##contig=<ID=17,length=81195210>
+##contig=<ID=18,length=78077248>
+##contig=<ID=19,length=59128983>
+##contig=<ID=20,length=63025520>
+##contig=<ID=21,length=48129895>
+##contig=<ID=22,length=51304566>
+##contig=<ID=X,length=155270560>
+##contig=<ID=Y,length=59373566>
+##contig=<ID=MT,length=16569>
+##contig=<ID=GL000207.1,length=4262>
+##contig=<ID=GL000226.1,length=15008>
+##contig=<ID=GL000229.1,length=19913>
+##contig=<ID=GL000231.1,length=27386>
+##contig=<ID=GL000210.1,length=27682>
+##contig=<ID=GL000239.1,length=33824>
+##contig=<ID=GL000235.1,length=34474>
+##contig=<ID=GL000201.1,length=36148>
+##contig=<ID=GL000247.1,length=36422>
+##contig=<ID=GL000245.1,length=36651>
+##contig=<ID=GL000197.1,length=37175>
+##contig=<ID=GL000203.1,length=37498>
+##contig=<ID=GL000246.1,length=38154>
+##contig=<ID=GL000249.1,length=38502>
+##contig=<ID=GL000196.1,length=38914>
+##contig=<ID=GL000248.1,length=39786>
+##contig=<ID=GL000244.1,length=39929>
+##contig=<ID=GL000238.1,length=39939>
+##contig=<ID=GL000202.1,length=40103>
+##contig=<ID=GL000234.1,length=40531>
+##contig=<ID=GL000232.1,length=40652>
+##contig=<ID=GL000206.1,length=41001>
+##contig=<ID=GL000240.1,length=41933>
+##contig=<ID=GL000236.1,length=41934>
+##contig=<ID=GL000241.1,length=42152>
+##contig=<ID=GL000243.1,length=43341>
+##contig=<ID=GL000242.1,length=43523>
+##contig=<ID=GL000230.1,length=43691>
+##contig=<ID=GL000237.1,length=45867>
+##contig=<ID=GL000233.1,length=45941>
+##contig=<ID=GL000204.1,length=81310>
+##contig=<ID=GL000198.1,length=90085>
+##contig=<ID=GL000208.1,length=92689>
+##contig=<ID=GL000191.1,length=106433>
+##contig=<ID=GL000227.1,length=128374>
+##contig=<ID=GL000228.1,length=129120>
+##contig=<ID=GL000214.1,length=137718>
+##contig=<ID=GL000221.1,length=155397>
+##contig=<ID=GL000209.1,length=159169>
+##contig=<ID=GL000218.1,length=161147>
+##contig=<ID=GL000220.1,length=161802>
+##contig=<ID=GL000213.1,length=164239>
+##contig=<ID=GL000211.1,length=166566>
+##contig=<ID=GL000199.1,length=169874>
+##contig=<ID=GL000217.1,length=172149>
+##contig=<ID=GL000216.1,length=172294>
+##contig=<ID=GL000215.1,length=172545>
+##contig=<ID=GL000205.1,length=174588>
+##contig=<ID=GL000219.1,length=179198>
+##contig=<ID=GL000224.1,length=179693>
+##contig=<ID=GL000223.1,length=180455>
+##contig=<ID=GL000195.1,length=182896>
+##contig=<ID=GL000212.1,length=186858>
+##contig=<ID=GL000222.1,length=186861>
+##contig=<ID=GL000200.1,length=187035>
+##contig=<ID=GL000193.1,length=189789>
+##contig=<ID=GL000194.1,length=191469>
+##contig=<ID=GL000225.1,length=211173>
+##contig=<ID=GL000192.1,length=547496>
+##contig=<ID=NC_007605,length=171823>
+##reference=file:///seq/references/Homo_sapiens_assembly19/v1/Homo_sapiens_assembly19.fasta
+##INFO=<ID=AF,Number=A,Type=Float,Description="Allele Frequency, for each ALT allele, in the same order as listed">
+##INFO=<ID=AC_POPMAX,Number=A,Type=String,Description="AC in the population with the max AF">
+##INFO=<ID=AN_POPMAX,Number=A,Type=String,Description="AN in the population with the max AF">
+##INFO=<ID=ExAC_AF,Number=A,Type=Float,Description="Allele Frequency, for each ALT allele, in the same order as listed">
+##INFO=<ID=ExAC_AF_POPMAX,Number=A,Type=Float,Description="Highest AF in all ExAC populations">
+##INFO=<ID=ExAC_AF_filterStatus,Number=1,Type=String,Description="Filter status of a variant in ExAC db">
+##/project/production/DAT/data_2016/ExAC_extended/ExAC_0.3_extended_2vcf.plCmd="/project/production/DAT/data_2016/ExAC_extended/ExAC_0.3_extended_2vcf.pl -i /project/production/DAT/data_2016/src/ExAC_0.3.1/ExAC.r0.3.1.sites.vep.vcf.gz -o -"
+##/project/production/DAT/data_2016/ExAC_extended/ExAC_0.3_extended_2vcf.plVersion="1.0.0 - 20161123"
+##Hardfiltered=Variants with FILTER value different from PASS
+##bcftools_viewVersion=1.3.1+htslib-1.3.1
+##bcftools_viewCommand=view -r 1 -O z -o 1.ExAC_extended.vcf.gz allchr.ExAC_extended.vcf.gz
+#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO
+1	69360	.	C	T	.	VQSRTrancheSNP99.60to99.80	ExAC_AF=3.979e-05;ExAC_AF_POPMAX=0.0001932;ExAC_AF_filterStatus=Filtered
+1	69395	.	G	A	.	VQSRTrancheSNP99.60to99.80	ExAC_AF=2.267e-05;ExAC_AF_POPMAX=.;ExAC_AF_filterStatus=Filtered
+1	69409	.	A	G	.	VQSRTrancheSNP99.60to99.80	ExAC_AF=9.669e-05;ExAC_AF_POPMAX=0.0007227;ExAC_AF_filterStatus=Filtered
+1	69428	rs140739101	T	G	.	PASS	ExAC_AF=0.022;ExAC_AF_POPMAX=0.04058;ExAC_AF_filterStatus=Pass
+1	69438	.	T	C	.	VQSRTrancheSNP99.60to99.80	ExAC_AF=3.865e-05;ExAC_AF_POPMAX=9.682e-05;ExAC_AF_filterStatus=Filtered
+1	69453	rs142004627	G	A	.	VQSRTrancheSNP99.90to99.95	ExAC_AF=0.0001181;ExAC_AF_POPMAX=0.0006026;ExAC_AF_filterStatus=Filtered
+1	69474	.	T	G	.	VQSRTrancheSNP99.60to99.80	ExAC_AF=9.893e-06;ExAC_AF_POPMAX=0.0001257;ExAC_AF_filterStatus=Filtered
+1	69478	.	T	C	.	VQSRTrancheSNP99.80to99.90	ExAC_AF=1.001e-05;ExAC_AF_POPMAX=0.0001189;ExAC_AF_filterStatus=Filtered
+1	69486	.	C	T	.	VQSRTrancheSNP99.60to99.80	ExAC_AF=1.035e-05;ExAC_AF_POPMAX=2.428e-05;ExAC_AF_filterStatus=Filtered
+1	69487	.	G	A	.	VQSRTrancheSNP99.60to99.80	ExAC_AF=2.105e-05;ExAC_AF_POPMAX=0.0002538;ExAC_AF_filterStatus=Filtered
+1	69489	.	A	C	.	VQSRTrancheSNP99.60to99.80	ExAC_AF=0.0001052;ExAC_AF_POPMAX=0.0007212;ExAC_AF_filterStatus=Filtered
+1	69496	rs150690004	G	A	.	VQSRTrancheSNP99.60to99.80	ExAC_AF=0.0006729;ExAC_AF_POPMAX=0.005937;ExAC_AF_filterStatus=Filtered
+1	69502	.	A	G	.	VQSRTrancheSNP99.80to99.90	ExAC_AF=1.134e-05;ExAC_AF_POPMAX=8.05e-05;ExAC_AF_filterStatus=Filtered
+1	69508	.	G	T	.	VQSRTrancheSNP99.80to99.90	ExAC_AF=2.274e-05;ExAC_AF_POPMAX=5.135e-05;ExAC_AF_filterStatus=Filtered
+1	69509	.	T	G	.	VQSRTrancheSNP99.90to99.95	ExAC_AF=0.0002046;ExAC_AF_POPMAX=7.793e-05;ExAC_AF_filterStatus=Filtered

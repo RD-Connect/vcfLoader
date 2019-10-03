@@ -1,0 +1,11 @@
+v.contig	v.start	va.clinvar_id	va.clinvar_clnsig	va.clinvar_filter
+1	949523	183381	P	[{"clnsig":"P"}]
+1	955619	210112	C	[{"clnsig":"C"}]
+1	1464679	225696	P|LP	[{"clnsig":"P"},{"clnsig":"LP"}]
+1	6027365	235474	B|LB	[{"clnsig":"B"},{"clnsig":"LB"}]
+1	7869953	242410	P	[{"clnsig":"P"}]
+1	8021910	446717	P	[{"clnsig":"P"}]
+1	25627552	202166	NA|NA	[{"clnsig":"NA"},{"clnsig":"NA"}]
+1	32669645	1326	VUS|Other	[{"clnsig":"VUS"},{"clnsig":"Other"}]
+2	49189921	16247	B|Drug|Other	[{"clnsig":"B"},{"clnsig":"Drug"},{"clnsig":"Other"}]
+7	55241707	16611	P|LP|Drug	[{"clnsig":"P"},{"clnsig":"LP"},{"clnsig":"Drug"}]

@@ -1,0 +1,176 @@
+##fileformat=VCFv4.2
+##FORMAT=<ID=BQ_ALT_mus,Number=1,Type=Integer,Description="Not provided in original VCF header">
+##FORMAT=<ID=BQ_REF_mus,Number=1,Type=Integer,Description="Not provided in original VCF header">
+##FORMAT=<ID=BQ_mut,Number=A,Type=Float,Description="Average base quality for reads supporting alleles. From mutect">
+##FORMAT=<ID=DP_ALT_avg,Number=1,Type=Integer,Description="Read depth of alt allele, AVERAGE from all programs">
+##FORMAT=<ID=DP_ALT_cav,Number=1,Type=Integer,Description="Read depth of alt allele in caveman">
+##FORMAT=<ID=DP_ALT_g4m2,Number=1,Type=Integer,Description="Read depth of alt allele in gatk4m2">
+##FORMAT=<ID=DP_ALT_lan,Number=1,Type=Integer,Description="Read depth of alt allele in lancet">
+##FORMAT=<ID=DP_ALT_mus,Number=1,Type=Integer,Description="Read depth of alt allele in muse">
+##FORMAT=<ID=DP_ALT_mut,Number=1,Type=Integer,Description="Read depth of alt allele in mutect">
+##FORMAT=<ID=DP_ALT_pin,Number=1,Type=Integer,Description="Read depth of alt allele in caveman">
+##FORMAT=<ID=DP_ALT_pla,Number=1,Type=Integer,Description="Read depth of alt allele in mutect">
+##FORMAT=<ID=DP_ALT_str,Number=1,Type=Integer,Description="Read depth of alt allele in strelka">
+##FORMAT=<ID=DP_ALT_sva,Number=1,Type=Integer,Description="Read depth of alt allele in muse">
+##FORMAT=<ID=DP_REF_avg,Number=1,Type=Integer,Description="Read depth of ref allele, AVERAGE from all programs">
+##FORMAT=<ID=DP_REF_cav,Number=1,Type=Integer,Description="Read depth of ref allele in caveman">
+##FORMAT=<ID=DP_REF_g4m2,Number=1,Type=Integer,Description="Read depth of ref allele in gatk4m2">
+##FORMAT=<ID=DP_REF_lan,Number=1,Type=Integer,Description="Read depth of ref allele in lancet">
+##FORMAT=<ID=DP_REF_mus,Number=1,Type=Integer,Description="Read depth of ref allele in muse">
+##FORMAT=<ID=DP_REF_mut,Number=1,Type=Integer,Description="Read depth of ref allele in mutect">
+##FORMAT=<ID=DP_REF_pin,Number=1,Type=Integer,Description="Read depth of ref allele in caveman">
+##FORMAT=<ID=DP_REF_pla,Number=1,Type=Integer,Description="Read depth of ref allele in mutect">
+##FORMAT=<ID=DP_REF_str,Number=1,Type=Integer,Description="Read depth of ref allele in strelka">
+##FORMAT=<ID=DP_REF_sva,Number=1,Type=Integer,Description="Read depth of ref allele in muse">
+##FORMAT=<ID=DP_avg,Number=1,Type=Integer,Description="Approximate read depth, AVERAGE values (sum of alt and ref allelic depths)">
+##FORMAT=<ID=DP_std,Number=1,Type=Float,Description="Standard deviation of DP (sum of alt and ref allelic depths)">
+##FORMAT=<ID=GOF_pla,Number=.,Type=Float,Description="Goodness of fit value">
+##FORMAT=<ID=GQ_pla,Number=.,Type=Integer,Description="Genotype quality as phred score">
+##FORMAT=<ID=GT,Number=1,Type=String,Description="Genotype">
+##FORMAT=<ID=LO_sva,Number=1,Type=Float,Description="Log-odds that this variant is real vs artifact">
+##FORMAT=<ID=LR_sva,Number=1,Type=Float,Description="Log-odds that this variant is AF=0 vs AF>=0.5">
+##FORMAT=<ID=MBQ_g4m2,Number=A,Type=Float,Description="median base quality. From gatk4m2">
+##FORMAT=<ID=MMQ_g4m2,Number=A,Type=Float,Description="median mapping quality. From gatk4m2">
+##FORMAT=<ID=VAF_avg,Number=1,Type=Float,Description="Variant allele frequency, AVERAGE (alt allele / DP)">
+##FORMAT=<ID=VAF_cav,Number=1,Type=Float,Description="VAF in caveman">
+##FORMAT=<ID=VAF_g4m2,Number=1,Type=Float,Description="VAF in g4atkm2">
+##FORMAT=<ID=VAF_lan,Number=1,Type=Float,Description="Read depth of alt allele in lancet">
+##FORMAT=<ID=VAF_mus,Number=1,Type=Float,Description="VAF in muse">
+##FORMAT=<ID=VAF_mut,Number=1,Type=Float,Description="VAF in mutect">
+##FORMAT=<ID=VAF_pin,Number=1,Type=Float,Description="VAF in caveman">
+##FORMAT=<ID=VAF_pla,Number=1,Type=Float,Description="VAF in mutect">
+##FORMAT=<ID=VAF_str,Number=1,Type=Float,Description="VAF in strelka">
+##FORMAT=<ID=VAF_sva,Number=1,Type=Float,Description="VAF in muse">
+##INFO=<ID=ASMD_cav,Number=1,Type=Float,Description="A soft flag median alignement score of reads showing the variant allele. From caveman">
+##INFO=<ID=CLPM_cav,Number=1,Type=Float,Description="A soft flag median number of soft clipped bases in variant supporting reads. From caveman">
+##INFO=<ID=FETS_lan,Number=1,Type=Float,Description="Read depth of alt allele in lancet">
+##INFO=<ID=FILTER_cav,Number=.,Type=String,Description="FILTER from caveman">
+##INFO=<ID=FILTER_g4m2,Number=.,Type=String,Description="FILTER from gatk4m2">
+##INFO=<ID=FILTER_lan,Number=.,Type=String,Description="FILTER from strelka">
+##INFO=<ID=FILTER_mus,Number=.,Type=String,Description="FILTER from muse">
+##INFO=<ID=FILTER_mut,Number=.,Type=String,Description="FILTER from mutect">
+##INFO=<ID=FILTER_pin,Number=.,Type=String,Description="FILTER from pindel">
+##INFO=<ID=FILTER_pla,Number=.,Type=String,Description="FILTER from platypus">
+##INFO=<ID=FILTER_str,Number=.,Type=String,Description="FILTER from strelka">
+##INFO=<ID=FILTER_sva,Number=.,Type=String,Description="FILTER from svaba">
+##INFO=<ID=HP_pla,Number=1,Type=Integer,Description="Homopolymer run length around variant locus">
+##INFO=<ID=IC_str,Number=1,Type=Integer,Description="Number of times RU repeats in the indel allele">
+##INFO=<ID=IHP_str,Number=1,Type=Integer,Description="Largest reference interrupted homopolymer length intersecting with the indel">
+##INFO=<ID=IN_PON_g4m2,Number=0,Type=Flag,Description="site found in panel of normals. From gatk4m2">
+##INFO=<ID=LOD_sva,Number=1,Type=Float,Description="Log of the odds that variant is real vs artifact">
+##INFO=<ID=MAPQ_sva,Number=1,Type=Integer,Description="Mapping quality (BWA-MEM) of the assembled contig">
+##INFO=<ID=MMLQ_pla,Number=1,Type=Float,Description="Median minimum base quality for bases around variant">
+##INFO=<ID=MQ0_str,Number=1,Type=Integer,Description="Total Mapping Quality Zero Reads">
+##INFO=<ID=MQ_pla,Number=.,Type=Float,Description="Root mean square of mapping qualities of reads at the variant position">
+##INFO=<ID=MQ_str,Number=1,Type=Float,Description="RMS Mapping Quality">
+##INFO=<ID=NPROGS,Number=1,Type=Integer,Description="Number of programs that detected the variant">
+##INFO=<ID=PROGS,Number=.,Type=String,Description="Programs that detected the variant">
+##INFO=<ID=QD_pla,Number=1,Type=Float,Description="Variant-quality/read-depth for this variant">
+##INFO=<ID=QUAL_pin,Number=1,Type=Integer,Description="Not provided in original VCF header">
+##INFO=<ID=RC_str,Number=1,Type=Integer,Description="Number of times RU repeats in the reference allele">
+##INFO=<ID=REPSEQ_sva,Number=1,Type=String,Description="Repeat sequence near the variant">
+##INFO=<ID=RU_str,Number=1,Type=String,Description="Smallest repeating sequence unit in inserted or deleted sequence">
+##INFO=<ID=S1_pin,Number=1,Type=Integer,Description="S1">
+##INFO=<ID=S2_pin,Number=1,Type=Float,Description="S2">
+##INFO=<ID=SB_lan,Number=1,Type=Float,Description="Read depth of alt allele in lancet">
+##INFO=<ID=SomaticEVS_str,Number=1,Type=Float,Description="Somatic Empirical Variant Score (EVS) expressing the phred-scaled probability of the call being a false positive observation.">
+##contig=<ID=1,length=249250621>
+##contig=<ID=2,length=243199373>
+##contig=<ID=3,length=198022430>
+##contig=<ID=4,length=191154276>
+##contig=<ID=5,length=180915260>
+##contig=<ID=6,length=171115067>
+##contig=<ID=7,length=159138663>
+##contig=<ID=8,length=146364022>
+##contig=<ID=9,length=141213431>
+##contig=<ID=10,length=135534747>
+##contig=<ID=11,length=135006516>
+##contig=<ID=12,length=133851895>
+##contig=<ID=13,length=115169878>
+##contig=<ID=14,length=107349540>
+##contig=<ID=15,length=102531392>
+##contig=<ID=16,length=90354753>
+##contig=<ID=17,length=81195210>
+##contig=<ID=18,length=78077248>
+##contig=<ID=19,length=59128983>
+##contig=<ID=20,length=63025520>
+##contig=<ID=21,length=48129895>
+##contig=<ID=22,length=51304566>
+##contig=<ID=X,length=155270560>
+##contig=<ID=Y,length=59373566>
+##contig=<ID=MT,length=16569>
+##contig=<ID=GL000207.1,length=4262>
+##contig=<ID=GL000226.1,length=15008>
+##contig=<ID=GL000229.1,length=19913>
+##contig=<ID=GL000231.1,length=27386>
+##contig=<ID=GL000210.1,length=27682>
+##contig=<ID=GL000239.1,length=33824>
+##contig=<ID=GL000235.1,length=34474>
+##contig=<ID=GL000201.1,length=36148>
+##contig=<ID=GL000247.1,length=36422>
+##contig=<ID=GL000245.1,length=36651>
+##contig=<ID=GL000197.1,length=37175>
+##contig=<ID=GL000203.1,length=37498>
+##contig=<ID=GL000246.1,length=38154>
+##contig=<ID=GL000249.1,length=38502>
+##contig=<ID=GL000196.1,length=38914>
+##contig=<ID=GL000248.1,length=39786>
+##contig=<ID=GL000244.1,length=39929>
+##contig=<ID=GL000238.1,length=39939>
+##contig=<ID=GL000202.1,length=40103>
+##contig=<ID=GL000234.1,length=40531>
+##contig=<ID=GL000232.1,length=40652>
+##contig=<ID=GL000206.1,length=41001>
+##contig=<ID=GL000240.1,length=41933>
+##contig=<ID=GL000236.1,length=41934>
+##contig=<ID=GL000241.1,length=42152>
+##contig=<ID=GL000243.1,length=43341>
+##contig=<ID=GL000242.1,length=43523>
+##contig=<ID=GL000230.1,length=43691>
+##contig=<ID=GL000237.1,length=45867>
+##contig=<ID=GL000233.1,length=45941>
+##contig=<ID=GL000204.1,length=81310>
+##contig=<ID=GL000198.1,length=90085>
+##contig=<ID=GL000208.1,length=92689>
+##contig=<ID=GL000191.1,length=106433>
+##contig=<ID=GL000227.1,length=128374>
+##contig=<ID=GL000228.1,length=129120>
+##contig=<ID=GL000214.1,length=137718>
+##contig=<ID=GL000221.1,length=155397>
+##contig=<ID=GL000209.1,length=159169>
+##contig=<ID=GL000218.1,length=161147>
+##contig=<ID=GL000220.1,length=161802>
+##contig=<ID=GL000213.1,length=164239>
+##contig=<ID=GL000211.1,length=166566>
+##contig=<ID=GL000199.1,length=169874>
+##contig=<ID=GL000217.1,length=172149>
+##contig=<ID=GL000216.1,length=172294>
+##contig=<ID=GL000215.1,length=172545>
+##contig=<ID=GL000205.1,length=174588>
+##contig=<ID=GL000219.1,length=179198>
+##contig=<ID=GL000224.1,length=179693>
+##contig=<ID=GL000223.1,length=180455>
+##contig=<ID=GL000195.1,length=182896>
+##contig=<ID=GL000212.1,length=186858>
+##contig=<ID=GL000222.1,length=186861>
+##contig=<ID=GL000200.1,length=187035>
+##contig=<ID=GL000193.1,length=189789>
+##contig=<ID=GL000194.1,length=191469>
+##contig=<ID=GL000225.1,length=211173>
+##contig=<ID=GL000192.1,length=547496>
+##contig=<ID=NC_007605,length=171823>
+##contig=<ID=hs37d5,length=35477943>
+##normal_sample=EPC1002_02_01
+##reference=file:///gpfs/scratch/bsc96/bsc96452/PERIS/insilicos/reference_data/core_ref_GRCh37d5/genome.fa
+##tumor_sample=EPC1002_01_01
+#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO	FORMAT	EPC1002_01_01	EPC1002_02_01
+1	1124076	.	C	G	.	PASS	ASMD_cav=96;CLPM_cav=0;FILTER_cav=PASS;NPROGS=1;PROGS=caveman	GT:DP_ALT_avg:DP_ALT_cav:DP_REF_avg:DP_REF_cav:DP_avg:DP_std:VAF_avg:VAF_cav	0/1:2:2:0:0:2:0.00:1.0000:1.0000	0/0:0:0:6:6:6:0.00
+1	1588744	.	AGCG	A	.	PASS	FILTER_sva=PASS;LOD_sva=56.22;MAPQ_sva=29;NPROGS=1;PROGS=svaba;REPSEQ_sva=TT	GT:DP_ALT_avg:DP_ALT_sva:DP_REF_avg:DP_REF_sva:DP_avg:DP_std:LO_sva:LR_sva:VAF_avg:VAF_sva	0/1:26:26:135:135:161:0.00:56.22:-42.16:0.1615:0.1615	0/0:5:5:99:99:104:0.00:8.047:11.7
+1	2776092	.	A	AG	.	PASS	FILTER_str=PASS;IC_str=2;IHP_str=3;MQ0_str=14;MQ_str=23.64;NPROGS=1;PROGS=strelka;RC_str=1;RU_str=G;SomaticEVS_str=6.65	GT:DP_ALT_avg:DP_ALT_str:DP_REF_avg:DP_REF_str:DP_avg:DP_std:VAF_avg:VAF_str	0/1:2:2:1:1:3:0.00:0.6667:0.6667	0/0:0:0:5:5:5:0.00
+1	3761308	.	C	A	.	PASS	FILTER_mus=PASS;FILTER_str=PASS;MQ0_str=0;MQ_str=58.68;NPROGS=2;PROGS=muse,strelka;SomaticEVS_str=8.32	GT:BQ_ALT_mus:BQ_REF_mus:DP_ALT_avg:DP_ALT_mus:DP_ALT_str:DP_REF_avg:DP_REF_mus:DP_REF_str:DP_avg:DP_std:VAF_avg:VAF_mus:VAF_str	0/1:34:38:9:9:9:16:16:16:25:0.00:0.3600:0.3600:0.3600	0/0:0:36:0:0:0:13:13:13:13:0.00
+1	15251076	.	C	T	.	PASS	FILTER_str=PASS;MQ0_str=0;MQ_str=60;NPROGS=1;PROGS=strelka;SomaticEVS_str=7.56	GT:DP_ALT_avg:DP_ALT_str:DP_REF_avg:DP_REF_str:DP_avg:DP_std:VAF_avg:VAF_str	0/1:2:2:3:3:5:0.00:0.4000:0.4000	0/0:0:0:9:9:9:0.00
+1	15906509	.	A	G	.	PASS	ASMD_cav=96;CLPM_cav=0;FETS_lan=130.437;FILTER_cav=PASS;FILTER_g4m2=PASS;FILTER_lan=PASS;FILTER_mus=PASS;FILTER_str=PASS;IN_PON_g4m2;MQ0_str=0;MQ_str=60;NPROGS=5;PROGS=caveman,gatk4m2,lancet,muse,strelka;SB_lan=59.6358;SomaticEVS_str=18.77	GT:BQ_ALT_mus:BQ_REF_mus:DP_ALT_avg:DP_ALT_cav:DP_ALT_g4m2:DP_ALT_lan:DP_ALT_mus:DP_ALT_str:DP_REF_avg:DP_REF_cav:DP_REF_g4m2:DP_REF_lan:DP_REF_mus:DP_REF_str:DP_avg:DP_std:MBQ_g4m2:MMQ_g4m2:VAF_avg:VAF_cav:VAF_g4m2:VAF_lan:VAF_mus:VAF_str	0/1:39:38:56:57:55:52:58:57:116:91:88:216:91:91:172:48.45:40:60:0.3256:0.3851:0.3846:0.1940:0.3893:0.3851	0/0:0:36:0:0:0:0:0:0:138:126:122:189:127:126:138:25.56:0:0
+1	16343297	.	C	T	.	PASS	FETS_lan=11.8244;FILTER_lan=PASS;NPROGS=1;PROGS=lancet;SB_lan=15.933	GT:DP_ALT_avg:DP_ALT_lan:DP_REF_avg:DP_REF_lan:DP_avg:DP_std:VAF_avg:VAF_lan	0/1:8:8:40:40:48:0.00:0.1667:0.1667	0/0:0:0:18:18:18:0.00
+1	16891158	.	A	C	.	PASS	FILTER_mus=PASS;NPROGS=1;PROGS=muse	GT:BQ_ALT_mus:BQ_REF_mus:DP_ALT_avg:DP_ALT_mus:DP_REF_avg:DP_REF_mus:DP_avg:DP_std:VAF_avg:VAF_mus	0/1:39:34:7:7:11:11:18:0.00:0.3889:0.3889	0/0:0:32:0:0:8:8:8:0.00
+1	16950449	.	A	G	.	PASS	FILTER_str=PASS;MQ0_str=0;MQ_str=51.75;NPROGS=1;PROGS=strelka;SomaticEVS_str=7.27	GT:DP_ALT_avg:DP_ALT_str:DP_REF_avg:DP_REF_str:DP_avg:DP_std:VAF_avg:VAF_str	0/1:3:3:7:7:10:0.00:0.3000:0.3000	0/0:0:0:13:13:13:0.00
+1	17030795	.	G	A	.	PASS	FILTER_str=PASS;MQ0_str=0;MQ_str=60;NPROGS=1;PROGS=strelka;SomaticEVS_str=7.12	GT:DP_ALT_avg:DP_ALT_str:DP_REF_avg:DP_REF_str:DP_avg:DP_std:VAF_avg:VAF_str	0/1:6:6:29:29:35:0.00:0.1714:0.1714	0/0:1:1:22:22:23:0.00

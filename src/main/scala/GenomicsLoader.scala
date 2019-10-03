@@ -69,7 +69,7 @@ object GenomicsLoader {
       files=files1 ::: files2
     }*/
     val prefix= configuration.getString("preFix")
-    val files=fileReader(configuration.getString("sampleFile")).map(x=>prefix+"/"+x(1)).toList
+
     var chromList  = (configuration.getStringList("chromList") ).toList
     val index=configuration.getString("index")
     val elasticsearchHost = configuration.getString("elasticsearchHost")
@@ -80,172 +80,17 @@ object GenomicsLoader {
     //val pipeline=List("toElastic")
     var pipeline = configuration.getStringList("pipeline").toList
 
-   /* if (args.length>0){
-      if (args(0) == "--pipeline") pipeline= args(1).split(",").toList
-      if (args(0) == "--chrom") pipeline= args(1).split(",").toList
-
-    }*/
-
-    //preprocessing configuraiotn data
-    val chromBands = sizePartition until 270000001 by sizePartition toList
-    val due = chromBands.map(x => (x - sizePartition, x))
-
-    if (args.length>0){
-      if (args.length>3){
-        if (args(2) == "--pipeline") pipeline= args(3).split(",").toList
-      }
-      if (args(0) == "--chrom") chromList= args(1).split(",").toList
-
-    }
-    println("-------------------------------------pipeline is "+pipeline)
-    println("-------------------------------------chrom is "+chromList)
-    println("-------------------------------------desitnation is "+destination)
 
 
+    val columnsRenamed = Seq("contig", "start","ref","altAlleles","transcript_consequences","samples")
+    case class AltAlleles(ref:String,alt:String)
+    case class Intergenic_Consequences(allele_num:Int, consequence_terms:Array[String],impact:String,minimised:Int,variant_allele:String)
+    case class variant( contig:String, start:Int, ref :String, variantType:String, altAlleles:Array[AltAlleles], intergenic_consequences:Intergenic_Consequences)
+    case class Domain(db:String, name:String)
+    case class Transcript_Consequences(allele_num:String,amino_acids:String, biotype:String, canonical:Int,ccds:String,cdna_start:Int, cdna_end:Int, cds_end:Int,dcs_start:Int, codonds:String, consequence_terms:Array[String], distance:Int, domains:Domain, exon:String,gene_id:String,gene_pheno:String)
+    val variants=sqlContext.read.load("hdfs://rdhdfs1:27000/test/multisample/output/1.1.0/grouped/var18DF")
+    val variantsDF=variants.select("`v.contig`","`v.start`","`v.ref`","`v.altAlleles`","`va.info.VariantType`","`va.vep.intergenic_consequences`").toDF(columnsRenamed: _*).as[variant]
+    val variantsDF1= variantsDF.select("contig", "start","ref","altAlleles","VariantType","transcript_consequences.allele_num","transcript_consequences.amino_acids").as[variant]
+}
 
-
-    if (pipeline.contains("load")) {
-      splitUpload(files,100,sc, origin, chromList,destination,repartitions,checkPointDir)
-    }
-    for (ch <- chromList) yield {
-
-
-
-
-      if (pipeline.contains("parser")) {
-
-        val loaded= if (configuration.getString("alreadyLoaded")!="") configuration.getString("alreadyLoaded")
-        else destination
-        println ("loaded path  is"+loaded)
-        var rawData = sqlContext.load(loaded+"/loaded/chrom="+ch)
-        for (band <- due) yield {
-          steps.Parser.main(sqlContext, rawData, destination + "/parsedSamples/",ch, band,repartitions)
-        }
-      }
-      if (pipeline.contains("umd.get")) {
-        val parsedSample = sqlContext.load(destination + "/parsedSamples/chrom="+ch)
-        steps.umd.prepareInput(sqlContext, parsedSample, destination + "/umd",ch)
-
-      }
-      if (pipeline.contains("umd.parse")) {
-        steps.umd.parseUMD(sc, originUMD, destination + "/umdAnnotated",ch)
-
-      }
-      if (pipeline.contains("umd.join")) {
-        val umdAnnotated= if (configuration.getString("umdAnnotated")!="") configuration.getString("umdAnnotated")
-        else destination
-        val parsedSample = sqlContext.load(destination + "/parsedSamples/chrom="+ch)
-        val UMDannotation = sqlContext.load(umdAnnotated + "/umdAnnotated").select("pos","ref","alt","umd","chrom")
-          .withColumnRenamed("pos","posUMD")
-          .withColumnRenamed("chrom","chromUMD")
-          .withColumnRenamed("ref","refUMD")
-          .withColumnRenamed("alt","altUMD")
-
-        steps.umd.annotated(sqlContext, parsedSample,UMDannotation, destination + "/effectsUMD",ch)
-
-      }
-      /*if (pipeline.contains("rawData")) {
-        val rawData = sqlContext.load(destination + "/loaded")
-        for (ch <- chromList) yield {
-          steps.toSample.main(sc, rawData, ch, destination + "/rawSamples", chromBands)
-        }
-      }*/
-      if (pipeline.contains("interception")) {
-        //val rawSample = sqlContext.load(destination + "/rawSamples")
-        val rawSample = sqlContext.load(destination + "/parsedSamples")
-        for ( band <- due) yield {
-          steps.toRange.main(sc, rawSample, ch.toString, destination + "/ranges", band, repartitions)
-        }
-      }
-      if (pipeline.contains("swap")) {
-        //val rawSample = sqlContext.load(destination + "/rawSamples")
-        val rawSample = sqlContext.load(destination + "/parsedSamples")
-        for (band <- due) yield {
-          steps.intersectSwap(sc, rawSample, ch.toString, destination + "/rangesSwap", band, repartitions)
-        }
-      }
-      if (pipeline.contains("sampleGroup")) {
-        val rawSample = sqlContext.load(destination + "/parsedSamples/chrom="+ch)
-        val rawRange = sqlContext.load(destination + "/rangesSwap/chrom="+ch)
-        steps.toSampleGrouped.main(sqlContext, rawSample, rawRange, destination + "/samples", ch.toString, (0, 0))
-
-      }
-      if (pipeline.contains("effectsGroupUMD")) {
-        val umdAnnotated = sqlContext.load(destination + "/effectsUMD/chrom="+ch)
-        for ( band <- due) yield {
-          steps.toEffectsGrouped.main(sqlContext, umdAnnotated, destination + "/EffectsFinal", ch.toString, band)
-        }
-      }
-      if (pipeline.contains("variants")) {
-        val Annotations = sqlContext.load(destination + "/EffectsFinal")
-          .withColumnRenamed("_1","pos2")
-          .withColumnRenamed("_2","ref2")
-          .withColumnRenamed("_3","alt2")
-          .withColumnRenamed("_4","indel2")
-          .withColumnRenamed("_5","effs")
-          .withColumnRenamed("_6","populations")
-          .withColumnRenamed("_7","predictions")
-
-
-
-        val Samples = sqlContext.load(destination + "/samples")
-          .withColumnRenamed("_1","pos")
-          .withColumnRenamed("_2","ref")
-          .withColumnRenamed("_3","alt")
-          .withColumnRenamed("_4","indel")
-          .withColumnRenamed("_5","samples")
-
-        steps.toVariant.main(sc, Samples, Annotations, destination + "/variants", ch.toString, (0, 0))
-
-      }
-
-      if (pipeline.contains("deleteIndex")) {
-        Elastic.Data.mapping(sc,index, version, elasticsearchHost, elasticsearchIPPort.toInt, "delete")
-      }
-      if (pipeline.contains("createIndex")) {
-        Elastic.Data.mapping(sc,index, version, elasticsearchHost, elasticsearchIPPort.toInt, "create")
-      }
-      if (pipeline.contains("toElastic")) {
-        val variants = sqlContext.load(destination + "/variants")
-        variants.registerTempTable("variants")
-        val esnodes= elasticsearchHost+":"+elasticsearchIPPort
-        variants.filter(variants("chrom")===ch.toString).saveToEs(index+"/"+version,Map("es.nodes"-> esnodes))
-      }
-
-
-    }
-
-
-  }
-  def nameCreator(skip:Int,number:Int)={
-    val names = Range(skip+1,number+1).map(num=> {
-      num.toString.length match {
-        case 1 => "E00000"+num.toString
-        case 2 => "E0000"+num.toString
-        case 3 => "E000"+num.toString
-
-      }
-    })
-    names
-  }
-
-  import scala.io.Source
-  def fileReader(filePath:String)= {
-    val fileLines = Source.fromFile(filePath).getLines.toList.filter(line => !line.startsWith("#")).map(line=> line.split("\t"))
-    fileLines
-  }
-
-  //    split(files,100,sc, origin, chromList,destination,repartitions,checkPointDir)
-  //load files by bacth of size
-  //otherwise run into a spark error
-  def splitUpload(files:List[String],size:Int,sc : org.apache.spark.SparkContext,origin:String,chromList:List[String],destination:String,repartitions:Int,checkPointDir:String)=
-  {
-    var cycles = files.length/size
-    Range(0,cycles+1).map(x=>
-    {
-      //println(files.drop(size*x).take(size))
-      steps.gzToParquet.main(sc, origin, chromList, files.drop(size*x).take(size), destination + "/loaded",repartitions,checkPointDir)
-    }
-    )
-  }
 }

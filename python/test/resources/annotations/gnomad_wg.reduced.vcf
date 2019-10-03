@@ -1,0 +1,115 @@
+##fileformat=VCFv4.2
+##FILTER=<ID=PASS,Description="All filters passed">
+##INFO=<ID=gnomAD_WG_AC,Number=A,Type=Integer,Description="Allele count in genotypes, for each ALT allele, in the same order as listed">
+##INFO=<ID=gnomAD_WG_AF,Number=A,Type=Float,Description="Allele Frequency among genotypes, for each ALT allele, in the same order as listed">
+##INFO=<ID=gnomAD_WG_AN,Number=1,Type=Integer,Description="Total number of alleles in called genotypes">
+##INFO=<ID=gnomAD_WG_AF_raw,Number=A,Type=Float,Description="Allele frequency before filtering low-confidence genotypes, for each ALT allele, in the same order as listed">
+##INFO=<ID=gnomAD_WG_GC,Number=G,Type=Integer,Description="Count of individuals for each genotype">
+##INFO=<ID=gnomAD_WG_STAR_AC,Number=1,Type=Integer,Description="AC of deletions spanning this position">
+##INFO=<ID=gnomAD_WG_STAR_AC_raw,Number=1,Type=Integer,Description="Allele counts of deletions spanning this position before filtering low-confidence genotypes">
+##INFO=<ID=gnomAD_WG_STAR_Hom,Number=1,Type=Integer,Description="Count of individuals homozygous for a deletion spanning this position">
+##INFO=<ID=gnomAD_WG_AC_POPMAX,Number=A,Type=Integer,Description="AC in the population with the max AF">
+##INFO=<ID=gnomAD_WG_AN_POPMAX,Number=A,Type=Integer,Description="AN in the population with the max AF">
+##INFO=<ID=gnomAD_WG_AF_POPMAX,Number=A,Type=Float,Description="Maximum Allele Frequency across populations (excluding OTH)">
+##INFO=<ID=gnomAD_WG_filterStats,Number=1,Type=String,Description="Filter status of a variant in gnomAD r2.0.1">
+##FILTER=<ID=RF,Description="Failed random forests filters (SNV cutoff 0.4, indels cutoff 0.4)">
+##FILTER=<ID=AC0,Description="Allele Count is zero (i.e. no high-confidence genotype (GQ >= 20, DP >= 10, AB => 0.2 for het calls))">
+##FILTER=<ID=InbreedingCoeff,Description="InbreedingCoeff < -0.3">
+##FILTER=<ID=LCR,Description="In a low complexity region">
+##FILTER=<ID=SEGDUP,Description="In a segmental duplication region">
+##contig=<ID=1,length=249250621>
+##contig=<ID=2,length=243199373>
+##contig=<ID=3,length=198022430>
+##contig=<ID=4,length=191154276>
+##contig=<ID=5,length=180915260>
+##contig=<ID=6,length=171115067>
+##contig=<ID=7,length=159138663>
+##contig=<ID=8,length=146364022>
+##contig=<ID=9,length=141213431>
+##contig=<ID=10,length=135534747>
+##contig=<ID=11,length=135006516>
+##contig=<ID=12,length=133851895>
+##contig=<ID=13,length=115169878>
+##contig=<ID=14,length=107349540>
+##contig=<ID=15,length=102531392>
+##contig=<ID=16,length=90354753>
+##contig=<ID=17,length=81195210>
+##contig=<ID=18,length=78077248>
+##contig=<ID=19,length=59128983>
+##contig=<ID=20,length=63025520>
+##contig=<ID=21,length=48129895>
+##contig=<ID=22,length=51304566>
+##contig=<ID=X,length=155270560>
+##contig=<ID=Y,length=59373566>
+##contig=<ID=MT,length=16569>
+##contig=<ID=GL000207.1,length=4262>
+##contig=<ID=GL000226.1,length=15008>
+##contig=<ID=GL000229.1,length=19913>
+##contig=<ID=GL000231.1,length=27386>
+##contig=<ID=GL000210.1,length=27682>
+##contig=<ID=GL000239.1,length=33824>
+##contig=<ID=GL000235.1,length=34474>
+##contig=<ID=GL000201.1,length=36148>
+##contig=<ID=GL000247.1,length=36422>
+##contig=<ID=GL000245.1,length=36651>
+##contig=<ID=GL000197.1,length=37175>
+##contig=<ID=GL000203.1,length=37498>
+##contig=<ID=GL000246.1,length=38154>
+##contig=<ID=GL000249.1,length=38502>
+##contig=<ID=GL000196.1,length=38914>
+##contig=<ID=GL000248.1,length=39786>
+##contig=<ID=GL000244.1,length=39929>
+##contig=<ID=GL000238.1,length=39939>
+##contig=<ID=GL000202.1,length=40103>
+##contig=<ID=GL000234.1,length=40531>
+##contig=<ID=GL000232.1,length=40652>
+##contig=<ID=GL000206.1,length=41001>
+##contig=<ID=GL000240.1,length=41933>
+##contig=<ID=GL000236.1,length=41934>
+##contig=<ID=GL000241.1,length=42152>
+##contig=<ID=GL000243.1,length=43341>
+##contig=<ID=GL000242.1,length=43523>
+##contig=<ID=GL000230.1,length=43691>
+##contig=<ID=GL000237.1,length=45867>
+##contig=<ID=GL000233.1,length=45941>
+##contig=<ID=GL000204.1,length=81310>
+##contig=<ID=GL000198.1,length=90085>
+##contig=<ID=GL000208.1,length=92689>
+##contig=<ID=GL000191.1,length=106433>
+##contig=<ID=GL000227.1,length=128374>
+##contig=<ID=GL000228.1,length=129120>
+##contig=<ID=GL000214.1,length=137718>
+##contig=<ID=GL000221.1,length=155397>
+##contig=<ID=GL000209.1,length=159169>
+##contig=<ID=GL000218.1,length=161147>
+##contig=<ID=GL000220.1,length=161802>
+##contig=<ID=GL000213.1,length=164239>
+##contig=<ID=GL000211.1,length=166566>
+##contig=<ID=GL000199.1,length=169874>
+##contig=<ID=GL000217.1,length=172149>
+##contig=<ID=GL000216.1,length=172294>
+##contig=<ID=GL000215.1,length=172545>
+##contig=<ID=GL000205.1,length=174588>
+##contig=<ID=GL000219.1,length=179198>
+##contig=<ID=GL000224.1,length=179693>
+##contig=<ID=GL000223.1,length=180455>
+##contig=<ID=GL000195.1,length=182896>
+##contig=<ID=GL000212.1,length=186858>
+##contig=<ID=GL000222.1,length=186861>
+##contig=<ID=GL000200.1,length=187035>
+##contig=<ID=GL000193.1,length=189789>
+##contig=<ID=GL000194.1,length=191469>
+##contig=<ID=GL000225.1,length=211173>
+##contig=<ID=GL000192.1,length=547496>
+##contig=<ID=NC_007605,length=171823>
+##reference=file:///seq/references/Homo_sapiens_assembly19/v1/Homo_sapiens_assembly19.fasta
+#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO
+1	15085	.	C	T,A	1661.38	RF	gnomAD_WG_AF=6.75174e-05,0.00027007;gnomAD_WG_AF_raw=0.000323164,0.000387797;gnomAD_WG_AC=2,8;gnomAD_WG_AN=29622;gnomAD_WG_GC=14801,2,0,8,0,0;gnomAD_WG_AF_POPMAX=0.000114837,0.00496894;gnomAD_WG_AN_POPMAX=8708,1610;gnomAD_WG_AC_POPMAX=1,8;gnomAD_WG_filterStats=RF
+1	15086	.	G	A	104.93	RF;AC0	gnomAD_WG_AF=0;gnomAD_WG_AF_raw=9.69431e-05;gnomAD_WG_AC=0;gnomAD_WG_AN=29648;gnomAD_WG_GC=14824,0,0;gnomAD_WG_AF_POPMAX=.;gnomAD_WG_AN_POPMAX=.;gnomAD_WG_AC_POPMAX=.;gnomAD_WG_filterStats=RF|AC0
+1	15089	rs533985096	C	T	2140.55	RF	gnomAD_WG_AF=0.000135071;gnomAD_WG_AF_raw=0.00109848;gnomAD_WG_AC=4;gnomAD_WG_AN=29614;gnomAD_WG_GC=14803,4,0;gnomAD_WG_AF_POPMAX=0.000619579;gnomAD_WG_AN_POPMAX=1614;gnomAD_WG_AC_POPMAX=1;gnomAD_WG_filterStats=RF
+1	15090	.	G	A	275.52	RF	gnomAD_WG_AF=3.36905e-05;gnomAD_WG_AF_raw=0.000193836;gnomAD_WG_AC=1;gnomAD_WG_AN=29682;gnomAD_WG_GC=14840,1,0;gnomAD_WG_AF_POPMAX=7.18701e-05;gnomAD_WG_AN_POPMAX=13914;gnomAD_WG_AC_POPMAX=1;gnomAD_WG_filterStats=RF
+1	15092	.	T	A	245.58	PASS	gnomAD_WG_AF=3.36632e-05;gnomAD_WG_AF_raw=3.23039e-05;gnomAD_WG_AC=1;gnomAD_WG_AN=29706;gnomAD_WG_GC=14852,1,0;gnomAD_WG_AF_POPMAX=0.000618047;gnomAD_WG_AN_POPMAX=1618;gnomAD_WG_AC_POPMAX=1;gnomAD_WG_filterStats=Pass
+1	15093	.	G	A	61.58	RF	gnomAD_WG_AF=3.36632e-05;gnomAD_WG_AF_raw=3.23018e-05;gnomAD_WG_AC=1;gnomAD_WG_AN=29706;gnomAD_WG_GC=14852,1,0;gnomAD_WG_AF_POPMAX=0.000618047;gnomAD_WG_AN_POPMAX=1618;gnomAD_WG_AC_POPMAX=1;gnomAD_WG_filterStats=RF
+1	15094	rs11491118	A	G	6644.18	RF	gnomAD_WG_AF=0.000817865;gnomAD_WG_AF_raw=0.0102087;gnomAD_WG_AC=23;gnomAD_WG_AN=28122;gnomAD_WG_GC=14038,23,0;gnomAD_WG_AF_POPMAX=0.00276625;gnomAD_WG_AN_POPMAX=1446;gnomAD_WG_AC_POPMAX=4;gnomAD_WG_filterStats=RF
+1	15098	.	CCT	C	496.19	RF;AC0	gnomAD_WG_AF=0;gnomAD_WG_AF_raw=9.68992e-05;gnomAD_WG_AC=0;gnomAD_WG_AN=29728;gnomAD_WG_GC=14864,0,0;gnomAD_WG_AF_POPMAX=.;gnomAD_WG_AN_POPMAX=.;gnomAD_WG_AC_POPMAX=.;gnomAD_WG_filterStats=RF|AC0
+1	15101	.	GT	G,CT	337.42	RF;AC0	gnomAD_WG_AF=0,0;gnomAD_WG_AF_raw=3.22893e-05,3.22893e-05;gnomAD_WG_AC=0,0;gnomAD_WG_AN=29744;gnomAD_WG_GC=14872,0,0,0,0,0;gnomAD_WG_AF_POPMAX=.,.;gnomAD_WG_AN_POPMAX=.,.;gnomAD_WG_AC_POPMAX=.,.;gnomAD_WG_filterStats=RF|AC0

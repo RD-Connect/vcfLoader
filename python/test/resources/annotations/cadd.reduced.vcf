@@ -1,0 +1,188 @@
+##fileformat=VCFv4.2
+##FILTER=<ID=PASS,Description="All filters passed">
+##contig=<ID=1,length=249250621>
+##contig=<ID=2,length=243199373>
+##contig=<ID=3,length=198022430>
+##contig=<ID=4,length=191154276>
+##contig=<ID=5,length=180915260>
+##contig=<ID=6,length=171115067>
+##contig=<ID=7,length=159138663>
+##contig=<ID=8,length=146364022>
+##contig=<ID=9,length=141213431>
+##contig=<ID=10,length=135534747>
+##contig=<ID=11,length=135006516>
+##contig=<ID=12,length=133851895>
+##contig=<ID=13,length=115169878>
+##contig=<ID=14,length=107349540>
+##contig=<ID=15,length=102531392>
+##contig=<ID=16,length=90354753>
+##contig=<ID=17,length=81195210>
+##contig=<ID=18,length=78077248>
+##contig=<ID=19,length=59128983>
+##contig=<ID=20,length=63025520>
+##contig=<ID=21,length=48129895>
+##contig=<ID=22,length=51304566>
+##contig=<ID=X,length=155270560>
+##contig=<ID=Y,length=59373566>
+##contig=<ID=MT,length=16569>
+##contig=<ID=GL000207.1,length=4262>
+##contig=<ID=GL000226.1,length=15008>
+##contig=<ID=GL000229.1,length=19913>
+##contig=<ID=GL000231.1,length=27386>
+##contig=<ID=GL000210.1,length=27682>
+##contig=<ID=GL000239.1,length=33824>
+##contig=<ID=GL000235.1,length=34474>
+##contig=<ID=GL000201.1,length=36148>
+##contig=<ID=GL000247.1,length=36422>
+##contig=<ID=GL000245.1,length=36651>
+##contig=<ID=GL000197.1,length=37175>
+##contig=<ID=GL000203.1,length=37498>
+##contig=<ID=GL000246.1,length=38154>
+##contig=<ID=GL000249.1,length=38502>
+##contig=<ID=GL000196.1,length=38914>
+##contig=<ID=GL000248.1,length=39786>
+##contig=<ID=GL000244.1,length=39929>
+##contig=<ID=GL000238.1,length=39939>
+##contig=<ID=GL000202.1,length=40103>
+##contig=<ID=GL000234.1,length=40531>
+##contig=<ID=GL000232.1,length=40652>
+##contig=<ID=GL000206.1,length=41001>
+##contig=<ID=GL000240.1,length=41933>
+##contig=<ID=GL000236.1,length=41934>
+##contig=<ID=GL000241.1,length=42152>
+##contig=<ID=GL000243.1,length=43341>
+##contig=<ID=GL000242.1,length=43523>
+##contig=<ID=GL000230.1,length=43691>
+##contig=<ID=GL000237.1,length=45867>
+##contig=<ID=GL000233.1,length=45941>
+##contig=<ID=GL000204.1,length=81310>
+##contig=<ID=GL000198.1,length=90085>
+##contig=<ID=GL000208.1,length=92689>
+##contig=<ID=GL000191.1,length=106433>
+##contig=<ID=GL000227.1,length=128374>
+##contig=<ID=GL000228.1,length=129120>
+##contig=<ID=GL000214.1,length=137718>
+##contig=<ID=GL000221.1,length=155397>
+##contig=<ID=GL000209.1,length=159169>
+##contig=<ID=GL000218.1,length=161147>
+##contig=<ID=GL000220.1,length=161802>
+##contig=<ID=GL000213.1,length=164239>
+##contig=<ID=GL000211.1,length=166566>
+##contig=<ID=GL000199.1,length=169874>
+##contig=<ID=GL000217.1,length=172149>
+##contig=<ID=GL000216.1,length=172294>
+##contig=<ID=GL000215.1,length=172545>
+##contig=<ID=GL000205.1,length=174588>
+##contig=<ID=GL000219.1,length=179198>
+##contig=<ID=GL000224.1,length=179693>
+##contig=<ID=GL000223.1,length=180455>
+##contig=<ID=GL000195.1,length=182896>
+##contig=<ID=GL000212.1,length=186858>
+##contig=<ID=GL000222.1,length=186861>
+##contig=<ID=GL000200.1,length=187035>
+##contig=<ID=GL000193.1,length=189789>
+##contig=<ID=GL000194.1,length=191469>
+##contig=<ID=GL000225.1,length=211173>
+##contig=<ID=GL000192.1,length=547496>
+##contig=<ID=NC_007605,length=171823>
+##reference=file:///project/production/Indexes/samtools/hsapiens.hs37d5.fasta
+##INFO=<ID=CADD13_PHRED,Number=A,Type=Float,Description="CADD phred-like score. This is phred-like rank score based on whole genome CADD raw scores">
+##bcftools_viewVersion=1.3.1+htslib-1.3.1
+##bcftools_viewCommand=view -r 1 -O z -o 1.CADD13ge10.vcf.gz allchr.CADD13ge10.vcf.gz
+#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO
+1	10019	.	TA	T	.	.	CADD13_PHRED=11.25
+1	10039	.	A	C	.	.	CADD13_PHRED=10.74
+1	10043	.	T	A	.	.	CADD13_PHRED=10.11
+1	10051	.	A	G	.	.	CADD13_PHRED=22.34
+1	10055	.	T	A	.	.	CADD13_PHRED=10.6
+1	10055	.	T	TA	.	.	CADD13_PHRED=12.5
+1	10063	.	A	C	.	.	CADD13_PHRED=10.08
+1	10077	.	C	G	.	.	CADD13_PHRED=11.87
+1	10108	.	C	T	.	.	CADD13_PHRED=30.2
+1	10109	.	A	T	.	.	CADD13_PHRED=25.4
+1	10128	.	A	AC	.	.	CADD13_PHRED=22.56
+1	13380	.	C	G	.	.	CADD13_PHRED=10.8
+1	13382	.	C	G	.	.	CADD13_PHRED=11.5
+1	13385	.	G	A,T	.	.	CADD13_PHRED=10.65
+1	13387	.	C	G	.	.	CADD13_PHRED=36.88
+1	13393	.	C	G	.	.	CADD13_PHRED=10.85
+1	13395	.	T	C	.	.	CADD13_PHRED=45.2
+1	13397	.	C	T	.	.	CADD13_PHRED=11.23
+1	13401	.	A	G	.	.	CADD13_PHRED=10.82
+1	13402	.	G	C	.	.	CADD13_PHRED=9.63
+1	13404	.	G	C,T	.	.	CADD13_PHRED=10.52
+1	13405	.	C	G	.	.	CADD13_PHRED=11.47
+1	13656	.	CAG	C	.	.	CADD13_PHRED=11.47
+1	15085	.	C	T,A	.	.	CADD13_PHRED=15.56
+1	15086	.	G	A	.	.	CADD13_PHRED=15.25
+1	15089	.	C	T	.	.	CADD13_PHRED=16.85
+1	15090	.	G	A	.	.	CADD13_PHRED=17.23
+1	15092	.	T	A	.	.	CADD13_PHRED=17.56
+1	15093	.	G	A	.	.	CADD13_PHRED=18.56
+1	15094	.	A	G	.	.	CADD13_PHRED=18.45
+1	15098	.	CCT	C	.	.	CADD13_PHRED=14.56
+1	15101	.	GT	G,CT	.	.	CADD13_PHRED=12.8
+1	15211	.	T	G	.	.	CADD13_PHRED=12.8
+1	69360	.	C	T	.	.	CADD13_PHRED=16.24
+1	69395	.	G	A	.	.	CADD13_PHRED=16.36
+1	69409	.	A	G	.	.	CADD13_PHRED=19.21
+1	69428	.	T	G	.	.	CADD13_PHRED=22.36
+1	69438	.	T	C	.	.	CADD13_PHRED=23.56
+1	69453	.	G	A	.	.	CADD13_PHRED=27.56
+1	69474	.	T	G	.	.	CADD13_PHRED=28.54
+1	69478	.	T	C	.	.	CADD13_PHRED=12.02
+1	69486	.	C	T	.	.	CADD13_PHRED=11.32
+1	69487	.	G	A	.	.	CADD13_PHRED=10.56
+1	69489	.	A	C	.	.	CADD13_PHRED=10.84
+1	69496	.	G	A	.	.	CADD13_PHRED=22.54
+1	69502	.	A	G	.	.	CADD13_PHRED=23.65
+1	69508	.	G	T	.	.	CADD13_PHRED=26.48
+1	69509	.	T	G	.	.	CADD13_PHRED=37.32
+1	949523	.	C	T	.	.	CADD13_PHRED=35.24
+1	955619	.	G	C	.	.	CADD13_PHRED=24.35
+1	1464679	.	C	T	.	.	CADD13_PHRED=15.26
+1	6027365	.	C	T	.	.	CADD13_PHRED=35.24
+1	7869953	.	C	G	.	.	CADD13_PHRED=15.48
+1	8021910	.	G	GGTGCTGGACGGTGTCCCT	.	.	CADD13_PHRED=16.34
+1	25627552	.	C	G	.	.	CADD13_PHRED=16.25
+1	32669645	.	C	T	.	.	CADD13_PHRED=34.26
+2	49189921	.	C	T	.	.	CADD13_PHRED=22.63
+7	55241707	.	G	T	.	.	CADD13_PHRED=33.21
+10	94018	.	T	C	.	.	CADD13_PHRED=11.25
+10	94026	.	G	A	.	.	CADD13_PHRED=10.22
+10	94545	.	C	T	.	.	CADD13_PHRED=10.35
+10	282897	.	C	T	.	.	CADD13_PHRED=32.87
+10	292927	.	C	A	.	.	CADD13_PHRED=33.65
+10	294953	.	A	G	.	.	CADD13_PHRED=22.54
+10	323006	.	G	GT	.	.	CADD13_PHRED=20.35
+10	329188	.	G	T	.	.	CADD13_PHRED=24.56
+10	412449	.	A	G	.	.	CADD13_PHRED=24.10
+10	416988	.	C	T	.	.	CADD13_PHRED=12.53
+10	429977	.	G	A	.	.	CADD13_PHRED=12.41
+10	435880	.	G	C	.	.	CADD13_PHRED=36.41
+10	459011	.	A	ACCT	.	.	CADD13_PHRED=36.25
+10	512035	.	A	G	.	.	CADD13_PHRED=36.52
+10	512078	.	T	A	.	.	CADD13_PHRED=39.21
+10	512308	.	C	T	.	.	CADD13_PHRED=39.62
+10	512324	.	C	T	.	.	CADD13_PHRED=39.57
+10	512464	.	A	C	.	.	CADD13_PHRED=38.26
+10	512548	.	T	C	.	.	CADD13_PHRED=38.65
+10	512741	.	G	A	.	.	CADD13_PHRED=38.21
+10	512916	.	G	A	.	.	CADD13_PHRED=38.54
+10	513474	.	AAAAATAAAT	A	.	.	CADD13_PHRED=34.26
+10	513476	.	AAAT	A,*	.	.	CADD13_PHRED=34.25
+10	513505	.	TA	T,TAA,TAAA	.	.	CADD13_PHRED=34.21
+10	513522	.	G	A	.	.	CADD13_PHRED=33.21
+10	514032	.	G	C	.	.	CADD13_PHRED=33.25
+10	514138	.	C	T	.	.	CADD13_PHRED=33.68
+10	515255	.	AT	A	.	.	CADD13_PHRED=33.2
+10	515299	.	G	C	.	.	CADD13_PHRED=30.52
+10	515870	.	C	T	.	.	CADD13_PHRED=30.15
+10	517451	.	C	G	.	.	CADD13_PHRED=30.69
+10	517942	.	G	T	.	.	CADD13_PHRED=30.54
+10	518156	.	C	A	.	.	CADD13_PHRED=30.22
+10	518199	.	G	A	.	.	CADD13_PHRED=35.11
+10	518547	.	ACT	A	.	.	CADD13_PHRED=10.66
+10	519058	.	T	C	.	.	CADD13_PHRED=18.63
+10	519164	.	G	C	.	.	CADD13_PHRED=18.52
+10	519463	.	G	A	.	.	CADD13_PHRED=18.97

@@ -82,6 +82,7 @@ object GenomicsLoader {
 
 
 
+
     val columnsRenamed = Seq("contig", "start","ref","altAlleles","transcript_consequences","samples")
     case class AltAlleles(ref:String,alt:String)
     case class Intergenic_Consequences(allele_num:Int, consequence_terms:Array[String],impact:String,minimised:Int,variant_allele:String)

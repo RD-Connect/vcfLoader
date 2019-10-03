@@ -69,6 +69,7 @@ object GenomicsLoader {
       files=files1 ::: files2
     }*/
     val prefix= configuration.getString("preFix")
+
     var chromList  = (configuration.getStringList("chromList") ).toList
     val index=configuration.getString("index")
     val elasticsearchHost = configuration.getString("elasticsearchHost")
@@ -91,4 +92,5 @@ object GenomicsLoader {
     val variantsDF=variants.select("`v.contig`","`v.start`","`v.ref`","`v.altAlleles`","`va.info.VariantType`","`va.vep.intergenic_consequences`").toDF(columnsRenamed: _*).as[variant]
     val variantsDF1= variantsDF.select("contig", "start","ref","altAlleles","VariantType","transcript_consequences.allele_num","transcript_consequences.amino_acids").as[variant]
 }
+
 }

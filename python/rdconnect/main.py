@@ -67,7 +67,11 @@ def main(sqlContext, configuration, chrom, nchroms, step):
         else:
             print ("step to create index")
             index.create_index_snv(configuration["elasticsearch"]["host"],configuration["elasticsearch"]["port"],configuration["elasticsearch"]["index_name"],configuration["version"],configuration["elasticsearch"]["num_shards"],configuration["elasticsearch"]["num_replicas"],configuration["elasticsearch"]["user"],configuration["elasticsearch"]["pwd"])
-        
+
+    if ("loadInternalFreq" in step):
+        print ("step importInternalFreq")
+        annotations.importInternalFreq(hl, sourceFileName, destination + "/internal_freq/" + fileName, number_partitions)
+            
     if ("loadGermline" in step):
         print ("step loadGermline")
         annotations.importGermline(hl,current_dir,sourceFileName,destination+"/loaded/"+fileName,number_partitions)
@@ -110,6 +114,12 @@ def main(sqlContext, configuration, chrom, nchroms, step):
     if ("loadCGI" in step):
         print ("step load CGI")
         annotations.importCGITable(hl,utils.buildFileName(configuration["CGI_Raw"],""),utils.buildFileName(configuration["CGI_path"],""),number_partitions)
+
+    if ("annotateInternalFreq" in step):
+        print ("step annotate Internal Allele Frequency")
+        print ("source file is "+ current_dir)
+        variants = hl.read_table(current_dir)
+        annotations.annotateInternalFreq(hl, variants, destination + "/annotateInternalFreq/" + fileName)
 
     if ("annotateCGI" in step):
         print("step annotate CGI")

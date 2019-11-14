@@ -4,6 +4,40 @@ MIN_DP = 7
 MIN_GQ = 19
 SAMPLES_CNV = 939
 
+def importInternalFreq(hl, originPath, destinationPath, nPartitions):
+    """ Function to compute the internal allele frequency of a given multi-sample
+    VCF. It impots the VCF from originPath and extracts the internal allele 
+    frequency and saves the annotation at the destinationPath.
+        :param HailContext hl: The Hail context.
+        :param String originPath: Origin path of the previous somatic variants.
+        :param String destinationPath: Path where the annotation will be stored.
+        :param String nPartitions: Number of partitions when importing the file.
+    """
+    vcf = hl.import_vcf(originPath, force_bgz = True, array_elements_required = False, min_partitions = 2)
+    vcf = hl.split_multi_hts(vcf)
+    vcf_2 = x1_d.transmute_entries(sample = hl.struct(
+        sample = vcf.s,
+        ad = vcf.AD[1] / hl.sum(vcf.AD),
+        dp = vcf.DP,
+        gtInt = vcf.GT,
+        gt = hl.str(vcf.GT),
+        gq = vcf.GQ
+    ))
+    vcf_2 = vcf_2.annotate_rows(
+        samples_germline = hl.filter(lambda x: (x.dp > MIN_DP) & (x.gq > MIN_GQ), hl.agg.collect(vcf_2.sample))
+    )
+    vcf_2 = vcf_2.annotate_rows(
+        freqIntGermline = hl.cond(
+            (hl.len(vcf_2.samples_germline) > 0) | (hl.len(hl.filter(lambda x: x.dp > MIN_DP, vcf_2.samples_germline)) > 0),
+            hl.sum(hl.map(lambda x: x.gtInt.unphased_diploid_gt_index(), vcf_2.samples_germline)) / hl.sum(hl.map(lambda x: 2, hl.filter(lambda x: x.dp > MIN_DP, vcf_2.samples_germline))), 0.0
+        ),
+        num = hl.sum(hl.map(lambda x: x.gtInt.unphased_diploid_gt_index(), vcf_2.samples_germline)),
+        dem = hl.sum(hl.map(lambda x: 2, hl.filter(lambda x: x.dp > MIN_DP, vcf_2.samples_germline)))
+    )
+    vcf_3 = vcf_2.drop('rsid','qual','filters','info', 'sample', 'samples_germline')\
+        .rows()
+    vcf_3.key_by(vcf_3.locus, vcf_3.alleles).distinct().write(destinationPath, overwrite = True)
+
 def importGermline(hl, originPath, sourcePath, destinationPath, nPartitions):
     """ Imports input vcf and annotates it with general annotations (samples, freqInt, pos, alt, ref)
           :param HailContext hl: The Hail context

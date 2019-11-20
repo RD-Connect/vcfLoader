@@ -13,7 +13,7 @@ def importInternalFreq(hl, originPath, destinationPath, nPartitions):
         :param String destinationPath: Path where the annotation will be stored.
         :param String nPartitions: Number of partitions when importing the file.
     """
-    print('[importInternalFreq] - originPath: {0}'.formt(originPath))
+    print('[importInternalFreq] - originPath: {0}'.format(originPath))
     vcf = hl.import_vcf(originPath, force_bgz = True, array_elements_required = False, min_partitions = 2)
     vcf = hl.split_multi_hts(vcf)
     vcf_2 = x1_d.transmute_entries(sample = hl.struct(
@@ -493,7 +493,7 @@ def annotateInternalFreq(hl, variants, annotationPath, destinationPath):
          :param string annotationPath: Path were the Internal Allele Frequency was annotated
          :param string destinationPath: Path were the new annotated dataset will be saved
     """
-    print('[annotateInternalFreq] - annotationPath: {0}'.formt(annotationPath))
+    print('[annotateInternalFreq] - annotationPath: {0}'.format(annotationPath))
     int_freq = hl.split_multi_hts(hl.read_matrix_table(annotationPath)) \
         .rows() \
         .key_by("locus","alleles")
@@ -502,7 +502,7 @@ def annotateInternalFreq(hl, variants, annotationPath, destinationPath):
         internalFreqNum = hl.cond(hl.is_defined(int_freq[variants.locus, variants.alleles].num), int_freq[variants.locus, variants.alleles].num, -1),
         internalFreqDem = hl.cond(hl.is_defined(int_freq[variants.locus, variants.alleles].dem), int_freq[variants.locus, variants.alleles].dem, -1),
     ).write(destinationPath, overwrite = True)
-    print('[annotateInternalFreq] - destinationPath: {0}'.formt(destinationPath))
+    print('[annotateInternalFreq] - destinationPath: {0}'.format(destinationPath))
 
 def annotateClinvar(hl, variants, annotationPath, destinationPath):
     """ Adds Clinvar annotations to variants.

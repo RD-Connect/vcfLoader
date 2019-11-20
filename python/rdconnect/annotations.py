@@ -16,7 +16,7 @@ def importInternalFreq(hl, originPath, destinationPath, nPartitions):
     print('[importInternalFreq] - originPath: {0}'.format(originPath))
     vcf = hl.import_vcf(originPath, force_bgz = True, array_elements_required = False, min_partitions = 2)
     vcf = hl.split_multi_hts(vcf)
-    vcf_2 = x1_d.transmute_entries(sample = hl.struct(
+    vcf_2 = vcf.transmute_entries(sample = hl.struct(
         sample = vcf.s,
         ad = vcf.AD[1] / hl.sum(vcf.AD),
         dp = vcf.DP,

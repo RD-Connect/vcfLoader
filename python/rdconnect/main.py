@@ -8,6 +8,8 @@ from subprocess import call
 from pyspark.sql.types import FloatType, IntegerType
 import sys, getopt
 import hail as hl
+import datetime
+
 
 APP_NAME = "vcfLoader"
 # Usage function
@@ -43,6 +45,9 @@ def optionParser(argv):
 
 # Main functionality. It runs the pipeline steps
 def main(sqlContext, configuration, chrom, nchroms, step):
+    now = datetime.datetime.now()
+    print('Staring PIPELINE at {}/{}/{} {}:{}:{}'.format(now.year,now.month,now.day,now.hour,now.minute,now.second,))
+
     call(["ls", "-l"])
 
     if (chrom == "" or step == ""):

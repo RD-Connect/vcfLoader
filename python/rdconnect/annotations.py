@@ -38,7 +38,7 @@ def importInternalFreq(hl, originPath, destinationPath, nPartitions):
     vcf_3 = vcf_2.drop('rsid','qual','filters','info', 'sample', 'samples_germline')\
         .rows()
     vcf_3.key_by(vcf_3.locus, vcf_3.alleles).distinct().write(destinationPath, overwrite = True)
-    print('[importInternalFreq] - destinationPath: {0}'.formt(destinationPath))
+    print('[importInternalFreq] - destinationPath: {0}'.format(destinationPath))
 
 
 def importGermline(hl, originPath, sourcePath, destinationPath, nPartitions):

@@ -122,9 +122,10 @@ def main(sqlContext, configuration, chrom, nchroms, step):
 
     if ("annotateInternalFreq" in step):
         print ("step annotate Internal Allele Frequency")
-        print ("source file is "+ current_dir)
+        print ("source file is " + current_dir)
+        print ("current intFreq file is " + configuration["intFreq"] +"/" + fileName)
         variants = hl.read_table(current_dir)
-        annotations.annotateInternalFreq(hl, variants, destination + "/annotateInternalFreq/" + fileName)
+        annotations.annotateInternalFreq(hl, variants, configuration["intFreq"] +"/" + fileName, destination + "/annotateInternalFreq/" + fileName)
         current_dir = destination + "/annotateInternalFreq/" + fileName
 
     if ("annotateCGI" in step):

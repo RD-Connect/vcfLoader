@@ -494,14 +494,16 @@ def annotateInternalFreq(hl, variants, annotationPath, destinationPath):
          :param string destinationPath: Path were the new annotated dataset will be saved
     """
     print('[annotateInternalFreq] - annotationPath: {0}'.format(annotationPath))
-    int_freq = hl.split_multi_hts(hl.read_matrix_table(annotationPath)) \
-        .rows() \
-        .key_by("locus","alleles")
+    # int_freq = hl.split_multi_hts(hl.read_matrix_table(annotationPath)) \
+    #     .rows() \
+    #     .key_by("locus","alleles")
+    int_freq = hl.read_table(annotationPath).key_by("locus","alleles")
     variants.annotate(
         internalFreq = hl.cond(hl.is_defined(int_freq[variants.locus, variants.alleles].freqIntGermline), int_freq[variants.locus, variants.alleles].freqIntGermline, -1),
         internalFreqNum = hl.cond(hl.is_defined(int_freq[variants.locus, variants.alleles].num), int_freq[variants.locus, variants.alleles].num, -1),
         internalFreqDem = hl.cond(hl.is_defined(int_freq[variants.locus, variants.alleles].dem), int_freq[variants.locus, variants.alleles].dem, -1),
-    ).write(destinationPath, overwrite = True)
+    )
+    variants.write(destinationPath, overwrite = True)
     print('[annotateInternalFreq] - destinationPath: {0}'.format(destinationPath))
 
 def annotateClinvar(hl, variants, annotationPath, destinationPath):

@@ -168,6 +168,7 @@ def main(sqlContext, configuration, chrom, nchroms, step):
     # Transforming step. It sets all fields to the corresponding ElasticSearch format
     if ("transform" in step):
         print ("step transform")
+        print ("loading from " + destination+"/annotatedVEPdbnSFPCaddClinvarExGnomadExAC/"+fileName)
         annotated = hl.read_table(destination+"/annotatedVEPdbnSFPCaddClinvarExGnomadExAC/"+fileName)
         transform.transform(annotated,destination,chrom)
         

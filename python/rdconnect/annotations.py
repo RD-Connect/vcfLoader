@@ -96,11 +96,14 @@ def importSomatic(hl, originPath, file_paths, destination_path, num_partitions):
         :param String destination_path: Path where the loaded variants will be stored
         :param Int num_partitions: Number of partitions when importing the file
     """
+    print('[INFO]: Starting process "importSomatic"')
     nFiles = len(file_paths)
+    print('[INFO]:   . Total number of files to process: {0}'.format(nFiles))
+    print('[INFO]:   . First and last file: {0} / {1}'.format(file_paths[0], file_paths[nFiles - 1]))
     if(nFiles > 0) :
         try:
-            print(file_paths)
-            print(len(file_paths))
+            # print(file_paths)
+            # print(len(file_paths))
             tables = [None] * len(file_paths)
             iteration = 0
             if (len(tables) == 1):
@@ -127,8 +130,12 @@ def importSomatic(hl, originPath, file_paths, destination_path, num_partitions):
                     tables = tmp
             merged = tables[0]
             if (originPath != ""):
-                germline = hl.read_table(originPath)
-                merged = merge(hl,germline,merged)
+                try:
+                    germline = hl.read_table(originPath)
+                    merged = merge(hl,germline,merged)
+                except Exception:
+                    print('[ERR]: An error was encountered when loading and merging origin content. Was it from germline?')
+                    raise Exception
             merged.write(destination_path,overwrite=True)
         except ValueError:
             print("Error in loading vcf")

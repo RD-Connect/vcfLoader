@@ -50,9 +50,11 @@ def importGermline(hl, originPath, sourcePath, destinationPath, nPartitions):
           :param String nPartitions: Number of partitions when importing the file
     """
     try:
-        print ("reading vcf from "+ sourcePath)
+        print ("[INFO]: Loading VCF file from '{}'".format(sourcePath))
         vcf = hl.split_multi_hts(hl.import_vcf(str(sourcePath),force_bgz=True,min_partitions=nPartitions))
-        print ("writing vds to" + destinationPath)
+        x = [y.get('s') for y in vcf.col.collect()]
+        print ("[INFO]:   . Experiments in loaded VCF: {}".format(len(x)))
+        print ("[INFO]:   . First and last sample: {} // {}".format(x[0], x[len(x) - 1]))
         vcf = vcf.transmute_entries(sample=hl.struct(sample=vcf.s,
                                                      ad=truncateAt(hl,vcf.AD[1]/hl.sum(vcf.AD),"2"),
                                                      dp=vcf.DP,
@@ -72,6 +74,7 @@ def importGermline(hl, originPath, sourcePath, destinationPath, nPartitions):
         if (originPath != ""):
             somatic = hl.read_table(originPath)
             vcf = merge(hl,vcf,somatic)
+        print ("[INFO]: Output VCF file will be saved to '{}'".format(destinationPath))
         vcf.key_by(vcf.locus,vcf.alleles).distinct().write(destinationPath,overwrite=True)
         return True
     except ValueError:

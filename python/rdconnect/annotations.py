@@ -51,6 +51,7 @@ def importGermline(hl, originPath, sourcePath, destinationPath, nPartitions):
     """
     try:
         print ("[INFO]: Loading VCF file from '{}'".format(sourcePath))
+        # vcf = hl.split_multi_hts(hl.import_vcf(str(sourcePath), force_bgz = True, min_partitions = nPartitions))
         vcf = hl.split_multi_hts(hl.import_vcf(str(sourcePath), array_elements_required = False, force_bgz = True, min_partitions = nPartitions))
         x = [y.get('s') for y in vcf.col.collect()]
         print ("[INFO]:   . Experiments in loaded VCF: {}".format(len(x)))

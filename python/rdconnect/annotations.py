@@ -73,9 +73,10 @@ def importGermline(hl, originPath, sourcePath, destinationPath, nPartitions):
                  .drop("sample") \
                  .rows() 
         if (originPath != ""):
+            print ("[INFO]:   . Provided origin path '{}' to be loaded and merged.".format(originPath))
             somatic = hl.read_table(originPath)
             vcf = merge(hl,vcf,somatic)
-        print ("[INFO]: Output VCF file will be saved to '{}'".format(destinationPath))
+        print ("[INFO]:   . Output VCF file will be saved to '{}'".format(destinationPath))
         vcf.key_by(vcf.locus,vcf.alleles).distinct().write(destinationPath,overwrite=True)
         return True
     except ValueError:

@@ -14,7 +14,7 @@ import datetime
 APP_NAME = "vcfLoader"
 # Usage function
 def usage():
-    print("main.py (-c | --chrom) <chromosome_id> (-s | --step) <pipeline_step> (-p | --path) <config_path> (-n | --nchroms) <number_chromosomes_uploaded>")
+    print("main.py (-c | --chrom) <chromosome_id> (-s | --step) <pipeline_step> (-p | --path) <config_path> (-n | --nchroms) <number_chromosomes_uploaded> (-s | --somatic_data)")
 
 # Command line arguments parser. It extracts the chromosome and the pipeline step to run
 def optionParser(argv):
@@ -25,6 +25,7 @@ def optionParser(argv):
     nchroms = ""
     cores = "4"
     path = "config.json"
+    somaticFlag = False
     try:
         opts, args = getopt.getopt(argv,"c:p:s:n:co:",["chrom=","path=","step=","nchroms=","cores="])
     except getopt.GetoptError:
@@ -41,10 +42,12 @@ def optionParser(argv):
             nchroms = arg
         elif opt in ("-co", "--cores"):
             cores = arg
-    return chrom, path, nchroms, step, cores
+        elif opt in ("-s", "--somatic_data"):
+            somaticFlag = True
+    return chrom, path, nchroms, step, cores, somaticFlag
 
 # Main functionality. It runs the pipeline steps
-def main(sqlContext, configuration, chrom, nchroms, step):
+def main(sqlContext, configuration, chrom, nchroms, step, somaticFlag):
     now = datetime.datetime.now()
     print('Staring PIPELINE at {}/{}/{} {}:{}:{}'.format(now.year,now.month,now.day,now.hour,now.minute,now.second,))
 
@@ -138,39 +141,39 @@ def main(sqlContext, configuration, chrom, nchroms, step):
         print ("step annotate VEP")
         print ("source file is "+ current_dir)
         variants = hl.read_table(current_dir)
-        annotations.annotateVEP(hl,variants,destination+"/annotatedVEP/"+fileName,configuration["vep"],number_partitions)
+        annotations.annotateVEP(hl,variants, utils.buildDestinationVEP(destination, fileName, somaticFlag), configuration["vep"], number_partitions)
             
     if ("annotatedbNSFP" in step):
         print("step annotate dbNSFP")
         variants = hl.read_table(destination+"/annotatedVEP/"+fileName)
-        annotations.annotateDbNSFP(hl,variants,utils.buildFileName(configuration["dnNSFP_path"],chrom),destination+"/annotatedVEPdbnSFP/"+fileName)
+        annotations.annotateDbNSFP(hl, variants, utils.buildFileName(configuration["dnNSFP_path"], chrom), utils.buildDestinationNSFP(destination, fileName, somaticFlag))
 
     if ("annotatecadd" in step):
         print("step annotate dbcadd")
         variants= hl.read_table(destination+"/annotatedVEPdbnSFP/"+fileName)
-        annotations.annotateCADD(hl,variants,utils.buildFileName(configuration["cadd_path"],chrom),destination+"/annotatedVEPdbnSFPCadd/"+fileName)
+        annotations.annotateCADD(hl, variants, utils.buildFileName(configuration["cadd_path"], chrom), utils.buildDestinationCADD(destination, fileName, somaticFlag))
 
     if ("annotateclinvar" in step):
         print("step annotate clinvar")
         variants = hl.read_table(destination+"/annotatedVEPdbnSFPCadd/"+fileName)
-        annotations.annotateClinvar(hl,variants,utils.buildFileName(configuration["clinvar_path"],""),destination+"/annotatedVEPdbnSFPCaddClinvar/"+fileName)
+        annotations.annotateClinvar(hl, variants, utils.buildFileName(configuration["clinvar_path"],""), utils.buildDestinationClinvar(destination, fileName, somaticFlag))
 
     if ("annotateExomesGnomad" in step):
         print("step annotate exomes gnomad")
         variants= hl.read_table(destination+"/annotatedVEPdbnSFPCaddClinvar/"+fileName)
-        annotations.annotateGnomADEx(hl,variants,utils.buildFileName(configuration["exomesGnomad_path"],chrom),destination+"/annotatedVEPdbnSFPCaddClinvarExGnomad/"+fileName)
+        annotations.annotateGnomADEx(hl, variants, utils.buildFileName(configuration["exomesGnomad_path"], chrom), utils.buildDestinationGnomADEx(destination, fileName, somaticFlag))
         
     if ("annotateExAC" in step):
         print("step annotate ExAC")
         variants= hl.read_table(destination+"/annotatedVEPdbnSFPCaddClinvarExGnomad/"+fileName)
-        annotations.annotateExAC(hl,variants,utils.buildFileName(configuration["ExAC_path"],chrom),destination+"/annotatedVEPdbnSFPCaddClinvarExGnomadExAC/"+fileName)
+        annotations.annotateExAC(hl, variants,utils.buildFileName(configuration["ExAC_path"], chrom), utils.buildDestinationExAC(destination, fileName, somaticFlag))
         
     # Transforming step. It sets all fields to the corresponding ElasticSearch format
     if ("transform" in step):
         print ("step transform")
-        print ("loading from " + destination+"/annotatedVEPdbnSFPCaddClinvarExGnomadExAC/"+fileName)
-        annotated = hl.read_table(destination+"/annotatedVEPdbnSFPCaddClinvarExGnomadExAC/"+fileName)
-        transform.transform(annotated,destination,chrom)
+        print ("loading from " + destination + "/annotatedVEPdbnSFPCaddClinvarExGnomadExAC/" + fileName)
+        annotated = hl.read_table(destination + "/annotatedVEPdbnSFPCaddClinvarExGnomadExAC/" + fileName)
+        transform.transform(annotated, utils.buildDestinationTransform(destination, somaticFlag), chrom)
         
     # Uploading step. It uploads all annotated variants to ElasticSearch
     if ("toElastic" in step):
@@ -217,7 +220,7 @@ def main(sqlContext, configuration, chrom, nchroms, step):
 
 if __name__ == "__main__":
     # Command line options parsing
-    chrom, path, nchroms, step, cores = optionParser(sys.argv[1:])
+    chrom, path, nchroms, step, cores, somaticFlag = optionParser(sys.argv[1:])
     main_conf = config.readConfig(path)
     spark_conf = SparkConf().setAppName(APP_NAME).set('spark.executor.cores',cores)
     spark = SparkSession.builder.config(conf=spark_conf).getOrCreate()
@@ -226,4 +229,4 @@ if __name__ == "__main__":
     hl.init(spark.sparkContext)
     sqlContext = SQLContext(hl.spark_context())
     # Execute Main functionality
-    main(sqlContext,main_conf,chrom,nchroms,step)
+    main(sqlContext, main_conf, chrom,n chroms, step, somaticFlag)

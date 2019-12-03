@@ -229,4 +229,4 @@ if __name__ == "__main__":
     hl.init(spark.sparkContext)
     sqlContext = SQLContext(hl.spark_context())
     # Execute Main functionality
-    main(sqlContext, main_conf, chrom,n chroms, step, somaticFlag)
+    main(sqlContext, main_conf, chrom, nchroms, step, somaticFlag)

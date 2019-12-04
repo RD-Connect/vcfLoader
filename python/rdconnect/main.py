@@ -133,6 +133,8 @@ def main(sqlContext, configuration, chrom, nchroms, step, somaticFlag):
 
     if ("annotateCGI" in step):
         print("step annotate CGI")
+        print("current_dir: {}".format(current_dir))
+        print(" - {}".format(utils.buildFileName(configuration["CGI_path"],chrom)))
         variants= hl.read_table(current_dir)
         annotations.annotateCGI(hl,variants,utils.buildFileName(configuration["CGI_path"],chrom),destination+"/annotatedCGI/"+fileName)
         current_dir = destination+"/annotatedCGI/"+fileName

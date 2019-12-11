@@ -43,7 +43,7 @@ def optionParser(argv):
         elif opt in ("-co", "--cores"):
             cores = arg
         elif opt in ("-d", "--somatic_data"):
-            if arg.lower() = 'yes':
+            if arg.lower() == 'yes':
                 somaticFlag = True
             else:
                 somaticFlag = False

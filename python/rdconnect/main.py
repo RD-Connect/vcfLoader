@@ -68,6 +68,7 @@ def main(sqlContext, configuration, chrom, nchroms, step, somaticFlag):
     current_dir = utils.buildFileName(configuration["origin_path"],chrom)
 
     print('-' * 20)
+    print('[INFO] args: {}'.format(' / '.join(args)))
     print('[INFO] destination: {}'.format(destination))
     print('[INFO] sourceFileName: {}'.format(sourceFileName))
     print('[INFO] fileName: {}'.format(fileName))

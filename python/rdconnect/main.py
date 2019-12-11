@@ -27,7 +27,7 @@ def optionParser(argv):
     path = "config.json"
     somaticFlag = False
     try:
-        opts, args = getopt.getopt(argv, "c:p:s:n:co:d", ["chrom=", "path=", "step=", "nchroms=", "cores=", "somatic_data"])
+        opts, args = getopt.getopt(argv, "c:p:s:n:co:d:", ["chrom=", "path=", "step=", "nchroms=", "cores=", "somatic_data="])
     except getopt.GetoptError:
         usage()
         sys.exit(2)
@@ -43,7 +43,10 @@ def optionParser(argv):
         elif opt in ("-co", "--cores"):
             cores = arg
         elif opt in ("-d", "--somatic_data"):
-            somaticFlag = True
+            if arg.lower() = 'yes':
+                somaticFlag = True
+            else:
+                somaticFlag = False
     return chrom, path, nchroms, step, cores, somaticFlag
 
 # Main functionality. It runs the pipeline steps
@@ -64,7 +67,18 @@ def main(sqlContext, configuration, chrom, nchroms, step, somaticFlag):
     number_partitions = configuration["number_of_partitions"]
     current_dir = utils.buildFileName(configuration["origin_path"],chrom)
 
-    print("sourcefilename is "+sourceFileName)
+    print('-' * 20)
+    print('[INFO] destination: {}'.format(destination))
+    print('[INFO] sourceFileName: {}'.format(sourceFileName))
+    print('[INFO] fileName: {}'.format(fileName))
+    print('[INFO] fileNameCnv: {}'.format(fileNameCnv))
+    print('[INFO] number_partitions: {}'.format(number_partitions))
+    print('[INFO] current_dir: {}'.format(current_dir))
+    print('[INFO] chrom: {}'.format(chrom))
+    print('[INFO] nchroms: {}'.format(nchroms))
+    print('[INFO] step: {}'.format(step))
+    print('[INFO] somaticFlag: {}'.format(somaticFlag))
+    print('-' * 20)
 
     # Pipeline steps
         

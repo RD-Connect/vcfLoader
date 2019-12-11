@@ -63,3 +63,8 @@ def buildDestinationTransform(destination, somatic = False):
     else:
         return destination+"/variants_somatic"
 
+def buildOriginToElastic(destination, chrom, somatic = False):
+    if not somatic:
+        return destination+"/variants/chrom="+chrom
+    else:
+        return destination+"/variants_somatic/chrom="+chrom

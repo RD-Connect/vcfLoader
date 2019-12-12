@@ -81,6 +81,14 @@ def main(sqlContext, configuration, chrom, nchroms, step, somaticFlag):
     print('[INFO] somaticFlag: {}'.format(somaticFlag))
     print('-' * 20)
 
+    if ("loadGermline" in step and somaticFlag):
+        print('[ERROR]: Selected option "loadGermline" but set "somaticFlag"')
+        return 1
+
+    if ("loadSomatic" in step and not somaticFlag):
+        print('[ERROR]: Selected option "loadSomatic" but not set "somaticFlag"')
+        return 2
+
     # Pipeline steps
         
     if ("createIndex" in step):

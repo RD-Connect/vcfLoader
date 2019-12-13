@@ -52,6 +52,7 @@ def optionParser(argv):
 
 # Main functionality. It runs the pipeline steps
 def main(sqlContext, configuration, chrom, nchroms, step, somaticFlag):
+    somaticFlag = True
     now = datetime.datetime.now()
     print('Staring PIPELINE at {}/{}/{} {}:{}:{}'.format(now.year,now.month,now.day,now.hour,now.minute,now.second,))
 

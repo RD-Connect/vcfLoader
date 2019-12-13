@@ -230,12 +230,12 @@ def main(sqlContext, configuration, chrom, nchroms, step, somaticFlag):
             index_name = configuration["elasticsearch"]["index_cnv_name"]
             variants.printSchema()  
         else:
-            print('[DEMO {}'.format(utils.buildOriginToElastic(destination, chrom, somaticFlag)))
+            print('[INFO] Read from: {}'.format(utils.buildOriginToElastic(destination, chrom, somaticFlag)))
             # Getting annotated variants and adding the chromosome column
             variants = sqlContext.read.load(utils.buildOriginToElastic(destination, chrom, somaticFlag))\
                                       .withColumn("chrom",lit(chrom))
             variants.printSchema()
-        #variants.write.format("org.elasticsearch.spark.sql").options(**es_conf).save(index_name+"/"+configuration["elasticsearch"]["type"], mode='append')
+        variants.write.format("org.elasticsearch.spark.sql").options(**es_conf).save(index_name+"/"+configuration["elasticsearch"]["type"], mode='append')
         
 
     # Counting step to check whether the number of variants in Spark corresponds to tht number of variants that

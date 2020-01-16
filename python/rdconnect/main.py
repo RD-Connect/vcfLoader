@@ -172,35 +172,35 @@ def main(sqlContext, configuration, chrom, nchroms, step, somaticFlag):
     if ("annotatedbNSFP" in step):
         print("step annotate dbNSFP (output: {})".format(utils.buildDestinationNSFP(destination, fileName, somaticFlag)))
         #variants = hl.read_table(destination+"/annotatedVEP/"+fileName)
-        variants = hl.read_table(current_dir)
+        variants = hl.read_table(current_dir + "/" + fileName)
         annotations.annotateDbNSFP(hl, variants, utils.buildFileName(configuration["dnNSFP_path"], chrom), utils.buildDestinationNSFP(destination, fileName, somaticFlag))
         current_dir = utils.buildDestinationNSFP(destination, fileName, somaticFlag)
 
     if ("annotatecadd" in step):
         print("step annotate dbcadd (output: {})".format(utils.buildDestinationCADD(destination, fileName, somaticFlag)))
         #variants= hl.read_table(destination+"/annotatedVEPdbnSFP/"+fileName)
-        variants= hl.read_table(current_dir)
+        variants= hl.read_table(current_dir + "/" + fileName)
         annotations.annotateCADD(hl, variants, utils.buildFileName(configuration["cadd_path"], chrom), utils.buildDestinationCADD(destination, fileName, somaticFlag))
         current_dir = utils.buildDestinationCADD(destination, fileName, somaticFlag)
 
     if ("annotateclinvar" in step):
         print("step annotate clinvar (output: {})".format(utils.buildDestinationClinvar(destination, fileName, somaticFlag)))
         #variants = hl.read_table(destination+"/annotatedVEPdbnSFPCadd/"+fileName)
-        variants = hl.read_table(current_dir)
+        variants = hl.read_table(current_dir + "/" + fileName)
         annotations.annotateClinvar(hl, variants, utils.buildFileName(configuration["clinvar_path"],""), utils.buildDestinationClinvar(destination, fileName, somaticFlag))
         current_dir = utils.buildDestinationClinvar(destination, fileName, somaticFlag)
 
     if ("annotateExomesGnomad" in step):
         print("step annotate exomes gnomad (output: {})".format(utils.buildDestinationGnomADEx(destination, fileName, somaticFlag)))
         #variants= hl.read_table(destination+"/annotatedVEPdbnSFPCaddClinvar/"+fileName)
-        variants= hl.read_table(current_dir)
+        variants= hl.read_table(current_dir + "/" + fileName)
         annotations.annotateGnomADEx(hl, variants, utils.buildFileName(configuration["exomesGnomad_path"], chrom), utils.buildDestinationGnomADEx(destination, fileName, somaticFlag))
         current_dir = utils.buildDestinationGnomADEx(destination, fileName, somaticFlag)
         
     if ("annotateExAC" in step):
         print("step annotate ExAC (output: {})".format(utils.buildDestinationExAC(destination, fileName, somaticFlag)))
         #variants= hl.read_table(destination+"/annotatedVEPdbnSFPCaddClinvarExGnomad/"+fileName)
-        variants= hl.read_table(current_dir)
+        variants= hl.read_table(current_dir + "/" + fileName)
         annotations.annotateExAC(hl, variants,utils.buildFileName(configuration["ExAC_path"], chrom), utils.buildDestinationExAC(destination, fileName, somaticFlag))
         current_dir = utils.buildDestinationExAC(destination, fileName, somaticFlag)
         

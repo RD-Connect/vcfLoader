@@ -55,18 +55,18 @@ def main(sqlContext, configuration, chrom, nchroms, step, somaticFlag):
     now = datetime.datetime.now()
     print('Staring PIPELINE at {}/{}/{} {}:{}:{}'.format(now.year,now.month,now.day,now.hour,now.minute,now.second,))
 
-    call(["ls", "-l"])
+    #call(["ls", "-l"])
 
     if (chrom == "" or step == ""):
         usage()
         sys.exit(2)
     
     destination =  configuration["destination"] + "/" + configuration["version"]
-    sourceFileName = utils.buildFileName(configuration["source_path"],chrom)
+    sourceFileName = utils.buildFileName(configuration["source_path"], chrom)
     fileName = "variants" + chrom + ".ht"
     fileNameCnv = "variants.ht"
     number_partitions = configuration["number_of_partitions"]
-    current_dir = utils.buildFileName(configuration["origin_path"],chrom)
+    current_dir = utils.buildFileName(configuration["origin_path"], chrom)
 
     print('-' * 20)
     print('[INFO] destination: {}'.format(destination))
@@ -160,43 +160,49 @@ def main(sqlContext, configuration, chrom, nchroms, step, somaticFlag):
         print(" - {}".format(utils.buildFileName(configuration["CGI_path"],chrom)))
         variants= hl.read_table(current_dir)
         annotations.annotateCGI(hl,variants,utils.buildFileName(configuration["CGI_path"],chrom),destination+"/annotatedCGI/"+fileName)
-        current_dir = destination+"/annotatedCGI/"+fileName
+        current_dir = destination + "/annotatedCGI/" + fileName
         
     if ("annotateVEP" in step):
         print ("step annotate VEP (output: {})".format(utils.buildDestinationVEP(destination, fileName, somaticFlag)))
         print ("source file is "+ current_dir)
         variants = hl.read_table(current_dir)
         annotations.annotateVEP(hl,variants, utils.buildDestinationVEP(destination, fileName, somaticFlag), configuration["vep"], number_partitions)
+        current_dir = utils.buildDestinationVEP(destination, fileName, somaticFlag)
             
     if ("annotatedbNSFP" in step):
         print("step annotate dbNSFP (output: {})".format(utils.buildDestinationNSFP(destination, fileName, somaticFlag)))
         #variants = hl.read_table(destination+"/annotatedVEP/"+fileName)
-        variants = hl.read_table(utils.buildDestinationVEP(destination, fileName, somaticFlag))
+        variants = hl.read_table(current_dir)
         annotations.annotateDbNSFP(hl, variants, utils.buildFileName(configuration["dnNSFP_path"], chrom), utils.buildDestinationNSFP(destination, fileName, somaticFlag))
+        current_dir = utils.buildDestinationNSFP(destination, fileName, somaticFlag)
 
     if ("annotatecadd" in step):
         print("step annotate dbcadd (output: {})".format(utils.buildDestinationCADD(destination, fileName, somaticFlag)))
         #variants= hl.read_table(destination+"/annotatedVEPdbnSFP/"+fileName)
-        variants= hl.read_table(utils.buildDestinationNSFP(destination, fileName, somaticFlag))
+        variants= hl.read_table(current_dir)
         annotations.annotateCADD(hl, variants, utils.buildFileName(configuration["cadd_path"], chrom), utils.buildDestinationCADD(destination, fileName, somaticFlag))
+        current_dir = utils.buildDestinationCADD(destination, fileName, somaticFlag)
 
     if ("annotateclinvar" in step):
         print("step annotate clinvar (output: {})".format(utils.buildDestinationClinvar(destination, fileName, somaticFlag)))
         #variants = hl.read_table(destination+"/annotatedVEPdbnSFPCadd/"+fileName)
-        variants = hl.read_table(utils.buildDestinationCADD(destination, fileName, somaticFlag))
+        variants = hl.read_table(current_dir)
         annotations.annotateClinvar(hl, variants, utils.buildFileName(configuration["clinvar_path"],""), utils.buildDestinationClinvar(destination, fileName, somaticFlag))
+        current_dir = utils.buildDestinationClinvar(destination, fileName, somaticFlag)
 
     if ("annotateExomesGnomad" in step):
         print("step annotate exomes gnomad (output: {})".format(utils.buildDestinationGnomADEx(destination, fileName, somaticFlag)))
         #variants= hl.read_table(destination+"/annotatedVEPdbnSFPCaddClinvar/"+fileName)
-        variants= hl.read_table(utils.buildDestinationClinvar(destination, fileName, somaticFlag))
+        variants= hl.read_table(current_dir)
         annotations.annotateGnomADEx(hl, variants, utils.buildFileName(configuration["exomesGnomad_path"], chrom), utils.buildDestinationGnomADEx(destination, fileName, somaticFlag))
+        current_dir = utils.buildDestinationGnomADEx(destination, fileName, somaticFlag)
         
     if ("annotateExAC" in step):
         print("step annotate ExAC (output: {})".format(utils.buildDestinationExAC(destination, fileName, somaticFlag)))
         #variants= hl.read_table(destination+"/annotatedVEPdbnSFPCaddClinvarExGnomad/"+fileName)
-        variants= hl.read_table(utils.buildDestinationGnomADEx(destination, fileName, somaticFlag))
+        variants= hl.read_table(current_dir)
         annotations.annotateExAC(hl, variants,utils.buildFileName(configuration["ExAC_path"], chrom), utils.buildDestinationExAC(destination, fileName, somaticFlag))
+        current_dir = utils.buildDestinationExAC(destination, fileName, somaticFlag)
         
     # Transforming step. It sets all fields to the corresponding ElasticSearch format
     if ("transform" in step):
@@ -229,7 +235,6 @@ def main(sqlContext, configuration, chrom, nchroms, step, somaticFlag):
             index_name = configuration["elasticsearch"]["index_cnv_name"]
             variants.printSchema()  
         else:
-            print('[INFO] Read from: {}'.format(utils.buildOriginToElastic(destination, chrom, somaticFlag)))
             # Getting annotated variants and adding the chromosome column
             variants = sqlContext.read.load(utils.buildOriginToElastic(destination, chrom, somaticFlag))\
                                       .withColumn("chrom",lit(chrom))

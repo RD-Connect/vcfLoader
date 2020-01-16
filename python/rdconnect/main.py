@@ -185,7 +185,7 @@ def main(sqlContext, configuration, chrom, nchroms, step, somaticFlag):
             current_dir = current_dir + "/" + fileName
         print ("source file: {}".format(current_dir))
         #variants= hl.read_table(destination+"/annotatedVEPdbnSFP/"+fileName)
-        variants = hl.read_table(current_dir + "/" + fileName)
+        variants = hl.read_table(current_dir)
         annotations.annotateCADD(hl, variants, utils.buildFileName(configuration["cadd_path"], chrom), utils.buildDestinationCADD(destination, fileName, somaticFlag))
         current_dir = utils.buildDestinationCADD(destination, fileName, somaticFlag)
 
@@ -195,7 +195,7 @@ def main(sqlContext, configuration, chrom, nchroms, step, somaticFlag):
             current_dir = current_dir + "/" + fileName
         print ("source file: {}".format(current_dir))
         #variants = hl.read_table(destination+"/annotatedVEPdbnSFPCadd/"+fileName)
-        variants = hl.read_table(current_dir + "/" + fileName)
+        variants = hl.read_table(current_dir)
         annotations.annotateClinvar(hl, variants, utils.buildFileName(configuration["clinvar_path"],""), utils.buildDestinationClinvar(destination, fileName, somaticFlag))
         current_dir = utils.buildDestinationClinvar(destination, fileName, somaticFlag)
 
@@ -205,7 +205,7 @@ def main(sqlContext, configuration, chrom, nchroms, step, somaticFlag):
             current_dir = current_dir + "/" + fileName
         print ("source file: {}".format(current_dir))
         #variants= hl.read_table(destination+"/annotatedVEPdbnSFPCaddClinvar/"+fileName)
-        variants = hl.read_table(current_dir + "/" + fileName)
+        variants = hl.read_table(current_dir)
         annotations.annotateGnomADEx(hl, variants, utils.buildFileName(configuration["exomesGnomad_path"], chrom), utils.buildDestinationGnomADEx(destination, fileName, somaticFlag))
         current_dir = utils.buildDestinationGnomADEx(destination, fileName, somaticFlag)
         
@@ -215,7 +215,7 @@ def main(sqlContext, configuration, chrom, nchroms, step, somaticFlag):
             current_dir = current_dir + "/" + fileName
         print ("source file: {}".format(current_dir))
         #variants= hl.read_table(destination+"/annotatedVEPdbnSFPCaddClinvarExGnomad/"+fileName)
-        variants = hl.read_table(current_dir + "/" + fileName)
+        variants = hl.read_table(current_dir)
         annotations.annotateExAC(hl, variants,utils.buildFileName(configuration["ExAC_path"], chrom), utils.buildDestinationExAC(destination, fileName, somaticFlag))
         #current_dir = utils.buildDestinationExAC(destination, fileName, somaticFlag)
         

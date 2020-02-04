@@ -2,7 +2,7 @@
 
 from pyspark import SparkConf, SparkContext
 from pyspark.sql import SQLContext, SparkSession
-from rdconnect import config, annotations, index, transform, utils
+from rdconnect import config, annotations, index, transform, utils, tracking
 from pyspark.sql.functions import lit
 from subprocess import call
 from pyspark.sql.types import FloatType, IntegerType
@@ -270,7 +270,22 @@ def main(sqlContext, configuration, chrom, nchroms, step, somaticFlag):
                                       .withColumn("chrom",lit(chrom))
             variants.printSchema()
         variants.write.format("org.elasticsearch.spark.sql").options(**es_conf).save(idx_name+"/"+configuration["elasticsearch"]["type"], mode='append')
-        
+    
+    # Uploading step. It uploads all annotated variants to ElasticSearch
+    if ("updateDataTracking" in step): 
+        host = configuration["elasticsearch"]["host"]
+        port = configuration["elasticsearch"]["port"]
+        user = configuration["elasticsearch"]["user"]
+        psw = configuration["elasticsearch"]["pwd"]
+        idx_name = configuration["elasticsearch"]["index_name"]
+        num_shards = configuration["elasticsearch"]["num_shards"]
+        num_repl = configuration["elasticsearch"]["num_replicas"]
+        if not 'main_project' in configuration["elasticsearch"].keys():
+            raise Exception('Update the current version of the configuration file. It misses the key "main_project" in "elasticsearch" section.')
+        project = configuration["elasticsearch"]["main_project"]
+        print('[WARNING]: The SNV index name will be used to annotate the tracking data table ("{}").'.format(idx_name))
+        tracking.update_data_last_index(host, port, num_shards, num_repl, user, psw, project,idx_name)
+
 
     # Counting step to check whether the number of variants in Spark corresponds to tht number of variants that
     # have been uploaded to ElasticSearch

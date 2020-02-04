@@ -20,3 +20,51 @@ def oneFile(chrom):
 
 def buildFileName(name,chrom):
     return name.replace("chromosome",chrom)
+
+def buildDestinationVEP(destination, fileName, somatic = False):
+    if not somatic:
+        return destination+"/annotatedVEP/"+fileName
+    else:
+        return destination+"/annotatedVEP_somatic/"+fileName
+
+def buildDestinationNSFP(destination, fileName, somatic = False):
+    if not somatic:
+        return destination+"/annotatedVEPdbnSFP/"+fileName
+    else:
+        return destination+"/annotatedVEPdbnSFP_somatic/"+fileName
+
+def buildDestinationCADD(destination, fileName, somatic = False):
+    if not somatic:
+        return destination+"/annotatedVEPdbnSFPCadd/"+fileName
+    else:
+        return destination+"/annotatedVEPdbnSFPCadd_somatic/"+fileName
+
+def buildDestinationClinvar(destination, fileName, somatic = False):
+    if not somatic:
+        return destination+"/annotatedVEPdbnSFPCaddClinvar/"+fileName
+    else:
+        return destination+"/annotatedVEPdbnSFPCaddClinvar_somatic/"+fileName
+
+def buildDestinationGnomADEx(destination, fileName, somatic = False):
+    if not somatic:
+        return destination+"/annotatedVEPdbnSFPCaddClinvarExGnomad/"+fileName
+    else:
+        return destination+"/annotatedVEPdbnSFPCaddClinvarExGnomad_somatic/"+fileName
+
+def buildDestinationExAC(destination, fileName, somatic = False):
+    if not somatic:
+        return destination+"/annotatedVEPdbnSFPCaddClinvarExGnomadExAC/"+fileName
+    else:
+        return destination+"/annotatedVEPdbnSFPCaddClinvarExGnomadExAC_somatic/"+fileName
+
+def buildDestinationTransform(destination, somatic = False):
+    if not somatic:
+        return destination+"/variants"
+    else:
+        return destination+"/variants_somatic"
+
+def buildOriginToElastic(destination, chrom, somatic = False):
+    if not somatic:
+        return destination+"/variants/chrom="+chrom
+    else:
+        return destination+"/variants_somatic/chrom="+chrom

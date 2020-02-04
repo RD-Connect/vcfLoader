@@ -4,6 +4,43 @@ MIN_DP = 7
 MIN_GQ = 19
 SAMPLES_CNV = 939
 
+def importInternalFreq(hl, originPath, destinationPath, nPartitions):
+    """ Function to compute the internal allele frequency of a given multi-sample
+    VCF. It impots the VCF from originPath and extracts the internal allele 
+    frequency and saves the annotation at the destinationPath.
+        :param HailContext hl: The Hail context.
+        :param String originPath: Origin path of the previous somatic variants.
+        :param String destinationPath: Path where the annotation will be stored.
+        :param String nPartitions: Number of partitions when importing the file.
+    """
+    print('[importInternalFreq] - originPath: {0}'.format(originPath))
+    vcf = hl.import_vcf(originPath, force_bgz = True, array_elements_required = False, min_partitions = 2)
+    vcf = hl.split_multi_hts(vcf)
+    vcf_2 = vcf.transmute_entries(sample = hl.struct(
+        sample = vcf.s,
+        ad = vcf.AD[1] / hl.sum(vcf.AD),
+        dp = vcf.DP,
+        gtInt = vcf.GT,
+        gt = hl.str(vcf.GT),
+        gq = vcf.GQ
+    ))
+    vcf_2 = vcf_2.annotate_rows(
+        samples_germline = hl.filter(lambda x: (x.dp > MIN_DP) & (x.gq > MIN_GQ), hl.agg.collect(vcf_2.sample))
+    )
+    vcf_2 = vcf_2.annotate_rows(
+        freqIntGermline = hl.cond(
+            (hl.len(vcf_2.samples_germline) > 0) | (hl.len(hl.filter(lambda x: x.dp > MIN_DP, vcf_2.samples_germline)) > 0),
+            hl.sum(hl.map(lambda x: x.gtInt.unphased_diploid_gt_index(), vcf_2.samples_germline)) / hl.sum(hl.map(lambda x: 2, hl.filter(lambda x: x.dp > MIN_DP, vcf_2.samples_germline))), 0.0
+        ),
+        num = hl.sum(hl.map(lambda x: x.gtInt.unphased_diploid_gt_index(), vcf_2.samples_germline)),
+        dem = hl.sum(hl.map(lambda x: 2, hl.filter(lambda x: x.dp > MIN_DP, vcf_2.samples_germline)))
+    )
+    vcf_3 = vcf_2.drop('rsid','qual','filters','info', 'sample', 'samples_germline')\
+        .rows()
+    vcf_3.key_by(vcf_3.locus, vcf_3.alleles).distinct().write(destinationPath, overwrite = True)
+    print('[importInternalFreq] - destinationPath: {0}'.format(destinationPath))
+
+
 def importGermline(hl, originPath, sourcePath, destinationPath, nPartitions):
     """ Imports input vcf and annotates it with general annotations (samples, freqInt, pos, alt, ref)
           :param HailContext hl: The Hail context
@@ -13,9 +50,12 @@ def importGermline(hl, originPath, sourcePath, destinationPath, nPartitions):
           :param String nPartitions: Number of partitions when importing the file
     """
     try:
-        print ("reading vcf from "+ sourcePath)
-        vcf = hl.split_multi_hts(hl.import_vcf(str(sourcePath),force_bgz=True,min_partitions=nPartitions))
-        print ("writing vds to" + destinationPath)
+        print ("[INFO]: Loading VCF file from '{}'".format(sourcePath))
+        # vcf = hl.split_multi_hts(hl.import_vcf(str(sourcePath), force_bgz = True, min_partitions = nPartitions))
+        vcf = hl.split_multi_hts(hl.import_vcf(str(sourcePath), array_elements_required = False, force_bgz = True, min_partitions = nPartitions))
+        x = [y.get('s') for y in vcf.col.collect()]
+        print ("[INFO]:   . Experiments in loaded VCF: {}".format(len(x)))
+        print ("[INFO]:   . First and last sample: {} // {}".format(x[0], x[len(x) - 1]))
         vcf = vcf.transmute_entries(sample=hl.struct(sample=vcf.s,
                                                      ad=truncateAt(hl,vcf.AD[1]/hl.sum(vcf.AD),"2"),
                                                      dp=vcf.DP,
@@ -33,8 +73,10 @@ def importGermline(hl, originPath, sourcePath, destinationPath, nPartitions):
                  .drop("sample") \
                  .rows() 
         if (originPath != ""):
+            print ("[INFO]:   . Provided origin path '{}' to be loaded and merged.".format(originPath))
             somatic = hl.read_table(originPath)
             vcf = merge(hl,vcf,somatic)
+        print ("[INFO]:   . Output VCF file will be saved to '{}'".format(destinationPath))
         vcf.key_by(vcf.locus,vcf.alleles).distinct().write(destinationPath,overwrite=True)
         return True
     except ValueError:
@@ -59,11 +101,14 @@ def importSomatic(hl, originPath, file_paths, destination_path, num_partitions):
         :param String destination_path: Path where the loaded variants will be stored
         :param Int num_partitions: Number of partitions when importing the file
     """
+    print('[INFO]: Starting process "importSomatic"')
     nFiles = len(file_paths)
+    print('[INFO]:   . Total number of files to process: {0}'.format(nFiles))
+    print('[INFO]:   . First and last file: {0} / {1}'.format(file_paths[0], file_paths[nFiles - 1]))
     if(nFiles > 0) :
         try:
-            print(file_paths)
-            print(len(file_paths))
+            # print(file_paths)
+            # print(len(file_paths))
             tables = [None] * len(file_paths)
             iteration = 0
             if (len(tables) == 1):
@@ -90,8 +135,12 @@ def importSomatic(hl, originPath, file_paths, destination_path, num_partitions):
                     tables = tmp
             merged = tables[0]
             if (originPath != ""):
-                germline = hl.read_table(originPath)
-                merged = merge(hl,germline,merged)
+                try:
+                    germline = hl.read_table(originPath)
+                    merged = merge(hl,germline,merged)
+                except Exception:
+                    print('[ERR]: An error was encountered when loading and merging origin content. Was it from germline?')
+                    raise Exception
             merged.write(destination_path,overwrite=True)
         except ValueError:
             print("Error in loading vcf")
@@ -448,6 +497,26 @@ def clinvar_preprocess(hl, annotation, is_filter_field):
                                      .split(','), annotation)
     preprocessed = hl.map(lambda y: hl.cond(y[0] == '_', y[1:], y), preprocessed)
     return clinvar_filtering(hl,preprocessed,is_filter_field)
+
+def annotateInternalFreq(hl, variants, annotationPath, destinationPath):
+    """ Adds Internal Allele Frequency annotations to variants.
+         :param HailContext hl: The Hail context
+         :param VariantDataset variants: The variants to annotate
+         :param string annotationPath: Path were the Internal Allele Frequency was annotated
+         :param string destinationPath: Path were the new annotated dataset will be saved
+    """
+    print('[annotateInternalFreq] - annotationPath: {0}'.format(annotationPath))
+    # int_freq = hl.split_multi_hts(hl.read_matrix_table(annotationPath)) \
+    #     .rows() \
+    #     .key_by("locus","alleles")
+    int_freq = hl.read_table(annotationPath).key_by("locus","alleles")
+    variants.annotate(
+        internalFreq = hl.cond(hl.is_defined(int_freq[variants.locus, variants.alleles].freqIntGermline), int_freq[variants.locus, variants.alleles].freqIntGermline, 0.0),
+        internalFreqNum = hl.cond(hl.is_defined(int_freq[variants.locus, variants.alleles].num), int_freq[variants.locus, variants.alleles].num, 0.0),
+        internalFreqDem = hl.cond(hl.is_defined(int_freq[variants.locus, variants.alleles].dem), int_freq[variants.locus, variants.alleles].dem, 0.0),
+    )
+    variants.write(destinationPath, overwrite = True)
+    print('[annotateInternalFreq] - destinationPath: {0}'.format(destinationPath))
 
 def annotateClinvar(hl, variants, annotationPath, destinationPath):
     """ Adds Clinvar annotations to variants.

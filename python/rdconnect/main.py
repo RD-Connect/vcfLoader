@@ -8,11 +8,13 @@ from subprocess import call
 from pyspark.sql.types import FloatType, IntegerType
 import sys, getopt
 import hail as hl
+import datetime
+
 
 APP_NAME = "vcfLoader"
 # Usage function
 def usage():
-    print("main.py (-c | --chrom) <chromosome_id> (-s | --step) <pipeline_step> (-p | --path) <config_path> (-n | --nchroms) <number_chromosomes_uploaded>")
+    print("main.py (-c | --chrom) <chromosome_id> (-s | --step) <pipeline_step> (-p | --path) <config_path> (-n | --nchroms) <number_chromosomes_uploaded> (-d | --somatic_data)")
 
 # Command line arguments parser. It extracts the chromosome and the pipeline step to run
 def optionParser(argv):
@@ -23,8 +25,10 @@ def optionParser(argv):
     nchroms = ""
     cores = "4"
     path = "config.json"
+    somaticFlag = False
     try:
-        opts, args = getopt.getopt(argv,"c:p:s:n:co:",["chrom=","path=","step=","nchroms=","cores="])
+        opts, args = getopt.getopt(argv, "c:p:s:n:co:d:", ["chrom=", "path=", "step=", "nchroms=", "cores=", "somatic_data="])
+        print('[INFO] args: {}'.format(' / '.join(args)))
     except getopt.GetoptError:
         usage()
         sys.exit(2)
@@ -39,35 +43,66 @@ def optionParser(argv):
             nchroms = arg
         elif opt in ("-co", "--cores"):
             cores = arg
-    return chrom, path, nchroms, step, cores
+        elif opt in ("-d", "--somatic_data"):
+            if arg.lower() == 'yes':
+                somaticFlag = True
+            else:
+                somaticFlag = False
+    return chrom, path, nchroms, step, cores, somaticFlag
 
 # Main functionality. It runs the pipeline steps
-def main(sqlContext, configuration, chrom, nchroms, step):
-    call(["ls", "-l"])
+def main(sqlContext, configuration, chrom, nchroms, step, somaticFlag):
+    now = datetime.datetime.now()
+    print('Staring PIPELINE at {}/{}/{} {}:{}:{}'.format(now.year,now.month,now.day,now.hour,now.minute,now.second,))
+
+    #call(["ls", "-l"])
 
     if (chrom == "" or step == ""):
         usage()
         sys.exit(2)
     
     destination =  configuration["destination"] + "/" + configuration["version"]
-    sourceFileName = utils.buildFileName(configuration["source_path"],chrom)
+    sourceFileName = utils.buildFileName(configuration["source_path"], chrom)
     fileName = "variants" + chrom + ".ht"
     fileNameCnv = "variants.ht"
     number_partitions = configuration["number_of_partitions"]
-    current_dir = utils.buildFileName(configuration["origin_path"],chrom)
+    current_dir = utils.buildFileName(configuration["origin_path"], chrom)
 
-    print("sourcefilename is "+sourceFileName)
+    print('-' * 20)
+    print('[INFO] destination: {}'.format(destination))
+    print('[INFO] sourceFileName: {}'.format(sourceFileName))
+    print('[INFO] fileName: {}'.format(fileName))
+    print('[INFO] fileNameCnv: {}'.format(fileNameCnv))
+    print('[INFO] number_partitions: {}'.format(number_partitions))
+    print('[INFO] current_dir: {}'.format(current_dir))
+    print('[INFO] chrom: {}'.format(chrom))
+    print('[INFO] nchroms: {}'.format(nchroms))
+    print('[INFO] step: {}'.format(step))
+    print('[INFO] somaticFlag: {}'.format(somaticFlag))
+    print('-' * 20)
+
+    if ("loadGermline" in step and somaticFlag):
+        print('[ERROR]: Selected option "loadGermline" but set "somaticFlag"')
+        return 1
+
+    if ("loadSomatic" in step and not somaticFlag):
+        print('[ERROR]: Selected option "loadSomatic" but not set "somaticFlag"')
+        return 2
 
     # Pipeline steps
         
     if ("createIndex" in step):
         if ("createIndexCNV" in step):
             print ("step to create index CNV")
-            index.create_index_cnv(configuration["elasticsearch"]["host"],configuration["elasticsearch"]["port"],configuration["elasticsearch"]["index_cnv_name"],configuration["version"],configuration["elasticsearch"]["num_shards"],configuration["elasticsearch"]["num_replicas"],configuration["elasticsearch"]["user"],configuration["elasticsearch"]["pwd"])
+            index.create_index_cnv(configuration["elasticsearch"]["host"],configuration["elasticsearch"]["port"],configuration["elasticsearch"]["index_cnv_name"],configuration["elasticsearch"]["type"],configuration["elasticsearch"]["num_shards"],configuration["elasticsearch"]["num_replicas"],configuration["elasticsearch"]["user"],configuration["elasticsearch"]["pwd"])
         else:
             print ("step to create index")
-            index.create_index_snv(configuration["elasticsearch"]["host"],configuration["elasticsearch"]["port"],configuration["elasticsearch"]["index_name"],configuration["version"],configuration["elasticsearch"]["num_shards"],configuration["elasticsearch"]["num_replicas"],configuration["elasticsearch"]["user"],configuration["elasticsearch"]["pwd"])
-        
+            index.create_index_snv(configuration["elasticsearch"]["host"],configuration["elasticsearch"]["port"],configuration["elasticsearch"]["index_name"],configuration["elasticsearch"]["type"],configuration["elasticsearch"]["num_shards"],configuration["elasticsearch"]["num_replicas"],configuration["elasticsearch"]["user"],configuration["elasticsearch"]["pwd"])
+    
+    if ("loadInternalFreq" in step):
+        print ("step importInternalFreq")
+        annotations.importInternalFreq(hl, sourceFileName, destination + "/internal_freq/" + fileName, number_partitions)
+
     if ("loadGermline" in step):
         print ("step loadGermline")
         annotations.importGermline(hl,current_dir,sourceFileName,destination+"/loaded/"+fileName,number_partitions)
@@ -111,48 +146,85 @@ def main(sqlContext, configuration, chrom, nchroms, step):
         print ("step load CGI")
         annotations.importCGITable(hl,utils.buildFileName(configuration["CGI_Raw"],""),utils.buildFileName(configuration["CGI_path"],""),number_partitions)
 
+    if ("annotateInternalFreq" in step):
+        print ("step annotate Internal Allele Frequency")
+        print ("source file is " + current_dir)
+        print ("current intFreq file is " + configuration["intFreq"] +"/" + fileName)
+        variants = hl.read_table(current_dir)
+        annotations.annotateInternalFreq(hl, variants, configuration["intFreq"] +"/" + fileName, destination + "/annotateInternalFreq/" + fileName)
+        current_dir = destination + "/annotateInternalFreq/" + fileName
+
     if ("annotateCGI" in step):
         print("step annotate CGI")
+        print("current_dir: {}".format(current_dir))
+        print(" - {}".format(utils.buildFileName(configuration["CGI_path"],chrom)))
         variants= hl.read_table(current_dir)
         annotations.annotateCGI(hl,variants,utils.buildFileName(configuration["CGI_path"],chrom),destination+"/annotatedCGI/"+fileName)
-        current_dir = destination+"/annotatedCGI/"+fileName
+        current_dir = destination + "/annotatedCGI/" + fileName
         
     if ("annotateVEP" in step):
-        print ("step annotate VEP")
-        print ("source file is "+ current_dir)
+        print ("step annotate VEP (output: {})".format(utils.buildDestinationVEP(destination, fileName, somaticFlag)))
+        print ("source file is " + current_dir)
         variants = hl.read_table(current_dir)
-        annotations.annotateVEP(hl,variants,destination+"/annotatedVEP/"+fileName,configuration["vep"],number_partitions)
+        annotations.annotateVEP(hl,variants, utils.buildDestinationVEP(destination, fileName, somaticFlag), configuration["vep"], number_partitions)
+        current_dir = utils.buildDestinationVEP(destination, fileName, somaticFlag)
             
     if ("annotatedbNSFP" in step):
-        print("step annotate dbNSFP")
-        variants = hl.read_table(destination+"/annotatedVEP/"+fileName)
-        annotations.annotateDbNSFP(hl,variants,utils.buildFileName(configuration["dnNSFP_path"],chrom),destination+"/annotatedVEPdbnSFP/"+fileName)
+        print("step annotate dbNSFP (output: {})".format(utils.buildDestinationNSFP(destination, fileName, somaticFlag)))
+        if not current_dir.endswith(fileName):
+            current_dir = current_dir + "/" + fileName
+        print ("source file: {}".format(current_dir))
+        #variants = hl.read_table(destination+"/annotatedVEP/"+fileName)
+        variants = hl.read_table(current_dir)
+        annotations.annotateDbNSFP(hl, variants, utils.buildFileName(configuration["dnNSFP_path"], chrom), utils.buildDestinationNSFP(destination, fileName, somaticFlag))
+        current_dir = utils.buildDestinationNSFP(destination, fileName, somaticFlag)
 
     if ("annotatecadd" in step):
-        print("step annotate dbcadd")
-        variants= hl.read_table(destination+"/annotatedVEPdbnSFP/"+fileName)
-        annotations.annotateCADD(hl,variants,utils.buildFileName(configuration["cadd_path"],chrom),destination+"/annotatedVEPdbnSFPCadd/"+fileName)
+        print("step annotate dbcadd (output: {})".format(utils.buildDestinationCADD(destination, fileName, somaticFlag)))
+        if not current_dir.endswith(fileName):
+            current_dir = current_dir + "/" + fileName
+        print ("source file: {}".format(current_dir))
+        #variants= hl.read_table(destination+"/annotatedVEPdbnSFP/"+fileName)
+        variants = hl.read_table(current_dir)
+        annotations.annotateCADD(hl, variants, utils.buildFileName(configuration["cadd_path"], chrom), utils.buildDestinationCADD(destination, fileName, somaticFlag))
+        current_dir = utils.buildDestinationCADD(destination, fileName, somaticFlag)
 
     if ("annotateclinvar" in step):
-        print("step annotate clinvar")
-        variants = hl.read_table(destination+"/annotatedVEPdbnSFPCadd/"+fileName)
-        annotations.annotateClinvar(hl,variants,utils.buildFileName(configuration["clinvar_path"],""),destination+"/annotatedVEPdbnSFPCaddClinvar/"+fileName)
+        print("step annotate clinvar (output: {})".format(utils.buildDestinationClinvar(destination, fileName, somaticFlag)))
+        if not current_dir.endswith(fileName):
+            current_dir = current_dir + "/" + fileName
+        print ("source file: {}".format(current_dir))
+        #variants = hl.read_table(destination+"/annotatedVEPdbnSFPCadd/"+fileName)
+        variants = hl.read_table(current_dir)
+        annotations.annotateClinvar(hl, variants, utils.buildFileName(configuration["clinvar_path"],""), utils.buildDestinationClinvar(destination, fileName, somaticFlag))
+        current_dir = utils.buildDestinationClinvar(destination, fileName, somaticFlag)
 
     if ("annotateExomesGnomad" in step):
-        print("step annotate exomes gnomad")
-        variants= hl.read_table(destination+"/annotatedVEPdbnSFPCaddClinvar/"+fileName)
-        annotations.annotateGnomADEx(hl,variants,utils.buildFileName(configuration["exomesGnomad_path"],chrom),destination+"/annotatedVEPdbnSFPCaddClinvarExGnomad/"+fileName)
+        print("step annotate exomes gnomad (output: {})".format(utils.buildDestinationGnomADEx(destination, fileName, somaticFlag)))
+        if not current_dir.endswith(fileName):
+            current_dir = current_dir + "/" + fileName
+        print ("source file: {}".format(current_dir))
+        #variants= hl.read_table(destination+"/annotatedVEPdbnSFPCaddClinvar/"+fileName)
+        variants = hl.read_table(current_dir)
+        annotations.annotateGnomADEx(hl, variants, utils.buildFileName(configuration["exomesGnomad_path"], chrom), utils.buildDestinationGnomADEx(destination, fileName, somaticFlag))
+        current_dir = utils.buildDestinationGnomADEx(destination, fileName, somaticFlag)
         
     if ("annotateExAC" in step):
-        print("step annotate ExAC")
-        variants= hl.read_table(destination+"/annotatedVEPdbnSFPCaddClinvarExGnomad/"+fileName)
-        annotations.annotateExAC(hl,variants,utils.buildFileName(configuration["ExAC_path"],chrom),destination+"/annotatedVEPdbnSFPCaddClinvarExGnomadExAC/"+fileName)
+        print("step annotate ExAC (output: {})".format(utils.buildDestinationExAC(destination, fileName, somaticFlag)))
+        if not current_dir.endswith(fileName):
+            current_dir = current_dir + "/" + fileName
+        print ("source file: {}".format(current_dir))
+        #variants= hl.read_table(destination+"/annotatedVEPdbnSFPCaddClinvarExGnomad/"+fileName)
+        variants = hl.read_table(current_dir)
+        annotations.annotateExAC(hl, variants,utils.buildFileName(configuration["ExAC_path"], chrom), utils.buildDestinationExAC(destination, fileName, somaticFlag))
+        #current_dir = utils.buildDestinationExAC(destination, fileName, somaticFlag)
         
     # Transforming step. It sets all fields to the corresponding ElasticSearch format
     if ("transform" in step):
-        print ("step transform")
-        annotated = hl.read_table(destination+"/annotatedVEPdbnSFPCaddClinvarExGnomadExAC/"+fileName)
-        transform.transform(annotated,destination,chrom)
+        print ("step transform (output: {})".format(utils.buildDestinationTransform(destination, somaticFlag)))
+        print ("loading from " + utils.buildDestinationExAC(destination, fileName, somaticFlag))
+        annotated = hl.read_table(utils.buildDestinationExAC(destination, fileName, somaticFlag))
+        transform.transform(annotated, utils.buildDestinationTransform(destination, somaticFlag), chrom)
         
     # Uploading step. It uploads all annotated variants to ElasticSearch
     if ("toElastic" in step):
@@ -179,10 +251,10 @@ def main(sqlContext, configuration, chrom, nchroms, step):
             variants.printSchema()  
         else:
             # Getting annotated variants and adding the chromosome column
-            variants = sqlContext.read.load(destination+"/variants/chrom="+chrom)\
+            variants = sqlContext.read.load(utils.buildOriginToElastic(destination, chrom, somaticFlag))\
                                       .withColumn("chrom",lit(chrom))
             variants.printSchema()
-        variants.write.format("org.elasticsearch.spark.sql").options(**es_conf).save(index_name+"/"+configuration["version"], mode='append')
+        variants.write.format("org.elasticsearch.spark.sql").options(**es_conf).save(index_name+"/"+configuration["elasticsearch"]["type"], mode='append')
         
 
     # Counting step to check whether the number of variants in Spark corresponds to tht number of variants that
@@ -199,7 +271,7 @@ def main(sqlContext, configuration, chrom, nchroms, step):
 
 if __name__ == "__main__":
     # Command line options parsing
-    chrom, path, nchroms, step, cores = optionParser(sys.argv[1:])
+    chrom, path, nchroms, step, cores, somaticFlag = optionParser(sys.argv[1:])
     main_conf = config.readConfig(path)
     spark_conf = SparkConf().setAppName(APP_NAME).set('spark.executor.cores',cores)
     spark = SparkSession.builder.config(conf=spark_conf).getOrCreate()
@@ -208,4 +280,4 @@ if __name__ == "__main__":
     hl.init(spark.sparkContext)
     sqlContext = SQLContext(hl.spark_context())
     # Execute Main functionality
-    main(sqlContext,main_conf,chrom,nchroms,step)
+    main(sqlContext, main_conf, chrom, nchroms, step, somaticFlag)

@@ -236,8 +236,6 @@ def main(sqlContext, configuration, chrom, nchroms, step, somaticFlag):
             "es.port": configuration["elasticsearch"]["port"]
         }
         #print(es_conf)
-        index.create_index_cnv(configuration["elasticsearch"]["host"],configuration["elasticsearch"]["port"],configuration["elasticsearch"]["index_cnv_name"],configuration["elasticsearch"]["type"],configuration["elasticsearch"]["num_shards"],configuration["elasticsearch"]["num_replicas"],configuration["elasticsearch"]["user"],configuration["elasticsearch"]["pwd"])
-        index_name = configuration["elasticsearch"]["index_name"]
 
         host = configuration["elasticsearch"]["host"]
         port = configuration["elasticsearch"]["port"]
@@ -246,8 +244,8 @@ def main(sqlContext, configuration, chrom, nchroms, step, somaticFlag):
 
         if ("toElasticCNV" in step):
             print("step toElasticCNV")
-            index = configuration["elasticsearch"]["index_cnv_name"]
-            if not index.index_exists(host, port, index, user, psw):
+            idx_name = configuration["elasticsearch"]["index_cnv_name"]
+            if not index.index_exists(host, port, idx_name, user, psw):
                 raise Exception('Trying to perform a "toElasticCNV" operation without creating the index')
 
 
@@ -263,8 +261,8 @@ def main(sqlContext, configuration, chrom, nchroms, step, somaticFlag):
             variants.printSchema()  
         else:
             print("step toElastic")
-            index = configuration["elasticsearch"]["index_name"]
-            if not index.index_exists(host, port, index, user, psw):
+            idx_name = configuration["elasticsearch"]["index_name"]
+            if not index.index_exists(host, port, idx_name, user, psw):
                 raise Exception('Trying to perform a "toElastic" operation without creating the index')
 
             # Getting annotated variants and adding the chromosome column

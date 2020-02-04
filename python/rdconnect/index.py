@@ -1,6 +1,10 @@
 import json
 import requests
 
+def index_exists(host, port, index_name, user, pwd):
+    sts = requests.head('http://{}:{}/{}'.format(host, port, index_name), auth=(user, pwd)).status_code
+    return sts == 200
+
 def create_index(host,port,index_name,data,user,pwd):
     url = "http://" + host + ":" + port + "/" + index_name
     headers = {'Content-Type': 'application/json'}
@@ -10,7 +14,7 @@ def create_index(host,port,index_name,data,user,pwd):
 
 def create_index_snv(host,port,index_name,version,num_shards,num_replicas,user,pwd):
     data="""
-          {"settings":{"index":{"number_of_shards":""" + num_shards + ""","number_of_replicas":""" + num_replicas + """, "refresh_interval":"1000ms"}}
+          {"settings":{"index":{"number_of_shards":""" + num_shards + ""","number_of_replicas":""" + num_replicas + """, "refresh_interval":"-1"}}
             ,"mappings":{"""+"\"" + version + "\""+"""
             :{
             "properties":{
@@ -103,7 +107,7 @@ def create_index_snv(host,port,index_name,version,num_shards,num_replicas,user,p
 
 def create_index_cnv(host,port,index_name,version,num_shards,num_replicas,user,pwd):
     data="""
-          {"settings":{"index":{"number_of_shards":""" + num_shards + ""","number_of_replicas":""" + num_replicas + ""","refresh_interval":"1000ms"}}
+          {"settings":{"index":{"number_of_shards":""" + num_shards + ""","number_of_replicas":""" + num_replicas + ""","refresh_interval":"-1"}}
             ,"mappings":{"""+"\"" + version + "\""+"""
             :{
             "properties":{

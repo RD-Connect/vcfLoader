@@ -236,9 +236,19 @@ def main(sqlContext, configuration, chrom, nchroms, step, somaticFlag):
             "es.port": configuration["elasticsearch"]["port"]
         }
         #print(es_conf)
-        index_name = configuration["elasticsearch"]["index_name"]
+
+        host = configuration["elasticsearch"]["host"]
+        port = configuration["elasticsearch"]["port"]
+        user = configuration["elasticsearch"]["user"]
+        psw = configuration["elasticsearch"]["pwd"]
+
         if ("toElasticCNV" in step):
             print("step toElasticCNV")
+            idx_name = configuration["elasticsearch"]["index_cnv_name"]
+            if not index.index_exists(host, port, idx_name, user, psw):
+                raise Exception('Trying to perform a "toElasticCNV" operation without creating the index')
+
+
             variants = hl.read_table(destination+"/loadedCNV/"+fileNameCnv).to_spark()
             variants = variants.withColumn("chrom", variants["chrom"].cast(IntegerType())) \
                                .withColumn("start", variants["start"].cast(IntegerType())) \
@@ -247,14 +257,19 @@ def main(sqlContext, configuration, chrom, nchroms, step, somaticFlag):
                                .withColumn("bf", variants["bf"].cast(FloatType())) \
                                .withColumn("omim_number", variants["omim_number"].cast(IntegerType())) \
                                .withColumn("tool",lit("ExomeDepth"))
-            index_name = configuration["elasticsearch"]["index_cnv_name"]
+            #index_name = configuration["elasticsearch"]["index_cnv_name"]
             variants.printSchema()  
         else:
+            print("step toElastic")
+            idx_name = configuration["elasticsearch"]["index_name"]
+            if not index.index_exists(host, port, idx_name, user, psw):
+                raise Exception('Trying to perform a "toElastic" operation without creating the index')
+
             # Getting annotated variants and adding the chromosome column
             variants = sqlContext.read.load(utils.buildOriginToElastic(destination, chrom, somaticFlag))\
                                       .withColumn("chrom",lit(chrom))
             variants.printSchema()
-        variants.write.format("org.elasticsearch.spark.sql").options(**es_conf).save(index_name+"/"+configuration["elasticsearch"]["type"], mode='append')
+        variants.write.format("org.elasticsearch.spark.sql").options(**es_conf).save(idx_name+"/"+configuration["elasticsearch"]["type"], mode='append')
         
 
     # Counting step to check whether the number of variants in Spark corresponds to tht number of variants that

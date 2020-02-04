@@ -39,7 +39,7 @@ def update_data_last_index(host, port, num_shards, num_replicas, user, pwd, data
 		# If last entry
 	elif response.status_code == 200 and cnt['total'] == 1:
 		url = "http://{}:{}/data_tracking/1.0.0/{}".format(host, port, cnt['hits'][0]['_id'])
-		data = "{ \"platform\": \"" + data_project + "\", \"index\": \"" + data_index2 + "\" }"
+		data = "{ \"platform\": \"" + data_project + "\", \"index\": \"" + data_index + "\" }"
 		response = requests.post(url, data = data, headers = headers) #, auth = (user,pwd))
 		if response.status_code != 200:
 			raise Exception('Obtained status code "{}" when updating content.'.format(response.status_code))	

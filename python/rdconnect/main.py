@@ -257,7 +257,7 @@ def main(sqlContext, configuration, chrom, nchroms, step, somaticFlag):
                                .withColumn("bf", variants["bf"].cast(FloatType())) \
                                .withColumn("omim_number", variants["omim_number"].cast(IntegerType())) \
                                .withColumn("tool",lit("ExomeDepth"))
-            index_name = configuration["elasticsearch"]["index_cnv_name"]
+            #index_name = configuration["elasticsearch"]["index_cnv_name"]
             variants.printSchema()  
         else:
             print("step toElastic")
@@ -269,7 +269,7 @@ def main(sqlContext, configuration, chrom, nchroms, step, somaticFlag):
             variants = sqlContext.read.load(utils.buildOriginToElastic(destination, chrom, somaticFlag))\
                                       .withColumn("chrom",lit(chrom))
             variants.printSchema()
-        variants.write.format("org.elasticsearch.spark.sql").options(**es_conf).save(index_name+"/"+configuration["elasticsearch"]["type"], mode='append')
+        variants.write.format("org.elasticsearch.spark.sql").options(**es_conf).save(idx_name+"/"+configuration["elasticsearch"]["type"], mode='append')
         
 
     # Counting step to check whether the number of variants in Spark corresponds to tht number of variants that

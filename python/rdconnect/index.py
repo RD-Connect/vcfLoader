@@ -1,6 +1,10 @@
 import json
 import requests
 
+def index_exists(host, port, index_name):
+    sts = requests.head('http://{}:{}/{}'.format(host, port, index_name)).status_code
+    return sts == 200
+
 def create_index(host,port,index_name,data,user,pwd):
     url = "http://" + host + ":" + port + "/" + index_name
     headers = {'Content-Type': 'application/json'}

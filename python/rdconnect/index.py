@@ -1,8 +1,8 @@
 import json
 import requests
 
-def index_exists(host, port, index_name):
-    sts = requests.head('http://{}:{}/{}'.format(host, port, index_name)).status_code
+def index_exists(host, port, index_name, user, pwd):
+    sts = requests.head('http://{}:{}/{}'.format(host, port, index_name), auth=(user, pwd)).status_code
     return sts == 200
 
 def create_index(host,port,index_name,data,user,pwd):

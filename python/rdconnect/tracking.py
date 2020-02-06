@@ -46,8 +46,8 @@ def update_samples_data_management(initial_vcf, data_token):
 	vcf = hl.split_multi_hts(hl.import_vcf(str(initial_vcf), array_elements_required = False, force_bgz = True, min_partitions = 2))
 	full_samples = [y.get('s') for y in vcf.col.collect()]
 
-	print ("[INFO]:   . Experiments in loaded VCF: {}".format(len(x)))
-	print ("[INFO]:   . First and last sample: {} // {}".format(x[0], x[len(x) - 1]))
+	print ("[INFO]:   . Experiments in loaded VCF: {}".format(len(full_samples)))
+	print ("[INFO]:   . First and last sample: {} // {}".format(full_samples[0], full_samples[len(full_samples) - 1]))
 
 	for sam in full_samples:
 		response = requests.post(url + sample, headers = headers)

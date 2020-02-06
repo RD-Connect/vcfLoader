@@ -61,6 +61,4 @@ def update_samples_data_management(initial_vcf, index_name, data_ip, data_url, d
 		q_url = url + sam
 		response = requests.post(q_url, data = data, headers = headers, verify = False)
 		if response.status_code != 200:
-			print(response.status_code)
-			print(response.text)
 			raise Exception('[ERROR]   . Information for sample "{}" could not be updated.'.format(sam))

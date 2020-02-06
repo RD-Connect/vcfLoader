@@ -51,9 +51,14 @@ def update_samples_data_management(initial_vcf, index_name, data_url, data_token
 	print('[INFO]:   . First and last sample: {} // {}'.format(full_samples[0], full_samples[len(full_samples) - 1]))
 	print('[INFO]:   . Provided URL for data-management: {}'.format(data_url))
 	print('[INFO]:   . Provided token for data-management: {}'.format(data_token))
+	print('[INFO]:   . Provided update content: ""'.format(data))
 
 	for sam in full_samples:
-		response = requests.post(data_url + sam, data = data, headers = headers)
+		url = data_url + sam
+		print(url)
+		print(data)
+		print(headers)
+		response = requests.post(url, data = data, headers = headers)
 		if response.status_code != 200:
 			print(response.status_code)
 			print(response.text)

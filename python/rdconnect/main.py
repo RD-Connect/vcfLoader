@@ -290,9 +290,10 @@ def main(sqlContext, configuration, chrom, nchroms, step, somaticFlag):
         initial_vcf = utils.buildFileName(configuration["source_path"], chrom)
         data_url = configuration["datamanagement"]["url"]
         data_token = configuration["datamanagement"]["token"]
-        tracking.update_samples_data_management(initial_vcf, data_url, data_token)
+        index_name = configuration["elasticsearch"]["index_name"]
+        tracking.update_samples_data_management(initial_vcf, index_name, data_url, data_token)
 
-    # Counting step to check whether the number of variants in Spark corresponds to tht number of variants that
+    # Counting step to check whether the number of variants in Spark corresponds to the number of variants that
     # have been uploaded to ElasticSearch
     if ("count" in step):
         if (nchroms == ""):

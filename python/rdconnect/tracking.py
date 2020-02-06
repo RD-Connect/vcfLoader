@@ -55,14 +55,14 @@ def update_samples_data_management(initial_vcf, index_name, data_ip, data_url, d
 	print('[INFO]:   . Provided UL for data-management: {}'.format(data_url))
 	print('[INFO]:   . Provided token for data-management: {}'.format(data_token))
 	print('[INFO]:   . Provided update content: "{}"'.format(str(data)))
-	print('[INFO]:   . Creates query URL for data-management: {}'.format(url))
+	print('[INFO]:   . Created query URL for data-management: {}'.format(url))
 
 	for sam in full_samples:
 		q_url = url + sam
 		print(url)
 		print(data)
 		print(headers)
-		response = requests.post(q_url, data = data, headers = headers)
+		response = requests.post(q_url, data = data, headers = headers, verify = False)
 		if response.status_code != 200:
 			print(response.status_code)
 			print(response.text)

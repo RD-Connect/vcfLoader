@@ -271,7 +271,7 @@ def main(sqlContext, configuration, chrom, nchroms, step, somaticFlag):
             variants.printSchema()
         variants.write.format("org.elasticsearch.spark.sql").options(**es_conf).save(idx_name+"/"+configuration["elasticsearch"]["type"], mode='append')
     
-    # Uploading step. It uploads all annotated variants to ElasticSearch
+    # [WORK IN PROGRESS] It till update a secondary index to maintain a revision of the last index per project
     if ("updateDataTracking" in step): 
         host = configuration["elasticsearch"]["host"]
         port = configuration["elasticsearch"]["port"]
@@ -286,13 +286,13 @@ def main(sqlContext, configuration, chrom, nchroms, step, somaticFlag):
         print('[WARNING]: The SNV index name will be used to annotate the tracking data table ("{}").'.format(idx_name))
         tracking.update_data_last_index(host, port, num_shards, num_repl, user, psw, project,idx_name)
 
+    # Updates the index fields of the data-management for each experiment in the original VCF
     if ("updateDataManagement" in step):
         initial_vcf = utils.buildFileName(configuration["source_path"], chrom)
         data_ip = configuration["datamanagement"]["ip"]
         data_url = configuration["datamanagement"]["host"]
         data_token = configuration["datamanagement"]["token"]
         index_name = configuration["elasticsearch"]["index_name"]
-
         tracking.update_samples_data_management(initial_vcf, index_name, data_ip, data_url, data_token)
 
     # Counting step to check whether the number of variants in Spark corresponds to the number of variants that

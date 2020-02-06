@@ -59,9 +59,6 @@ def update_samples_data_management(initial_vcf, index_name, data_ip, data_url, d
 
 	for sam in full_samples:
 		q_url = url + sam
-		print(url)
-		print(data)
-		print(headers)
 		response = requests.post(q_url, data = data, headers = headers, verify = False)
 		if response.status_code != 200:
 			print(response.status_code)

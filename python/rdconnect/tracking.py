@@ -39,7 +39,7 @@ def update_data_last_index(host, port, num_shards, num_replicas, user, pwd, data
 	else:
 		raise Exception('Obtained status code "{}"'.format(response.status_code))
 
-def update_samples_data_management(initial_vcf, data_url data_token):
+def update_samples_data_management(initial_vcf, data_url, data_token):
 	#url = "https://platform.rd-connect.eu/datamanagement/api/statusbyexperiment/?experiment="
 	headers = { 'accept': 'application/json', 'Content-Type': 'application/json', 'Authorization': 'Token ' + data_token }
 

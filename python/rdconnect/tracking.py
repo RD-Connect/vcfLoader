@@ -23,7 +23,7 @@ def update_data_last_index(host, port, num_shards, num_replicas, user, pwd, data
 		data = "{ \"platform\": \"" + data_project + "\", \"index\": \"" + data_index + "\" }"
 		response = requests.post(url, data = data, headers = headers, auth = (user,pwd))
 		if response.status_code != 201:
-			raise Exception('Obtained status code "{}" when inserting content.'.format(response.status_code))	
+			raise Exception('Obtained status code "{}" when inserting content.'.format(response.status_code))
 	# If last entry
 	elif response.status_code == 200 and cnt['total'] == 1:
 		url = "http://{}:{}/data_tracking/1.0.0/{}".format(host, port, cnt['hits'][0]['_id'])
@@ -37,3 +37,19 @@ def update_data_last_index(host, port, num_shards, num_replicas, user, pwd, data
 	else:
 		raise Exception('Obtained status code "{}"'.format(response.status_code))
 
+def update_samples_data_management(initial_vcf, data_token):
+	url = "https://platform.rd-connect.eu/datamanagement/api/statusbyexperiment/?experiment="
+	headers = { 'accept': 'application/json', 'Content-Type': 'application/json', 'Authorization': 'Token ' + data_token }
+
+	vcf = hl.split_multi_hts(hl.import_vcf(str(initial_vcf), array_elements_required = False, force_bgz = True, min_partitions = 2))
+	full_samples = [y.get('s') for y in vcf.col.collect()]
+
+	print ("[INFO]:   . Experiments in loaded VCF: {}".format(len(x)))
+	print ("[INFO]:   . First and last sample: {} // {}".format(x[0], x[len(x) - 1]))
+
+	for sam in full_samples:
+		response = requests.post(url + sample, headers = headers)
+		if response.status_code != 200:
+			print(response.status_code)
+			print(response.text)
+			raise Exception('[ERROR]   . Information for sample "{}" could not be updated.'.format(sam))

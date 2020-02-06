@@ -50,7 +50,7 @@ def update_samples_data_management(initial_vcf, data_token):
 	print ("[INFO]:   . First and last sample: {} // {}".format(full_samples[0], full_samples[len(full_samples) - 1]))
 
 	for sam in full_samples:
-		response = requests.post(url + sample, headers = headers)
+		response = requests.post(url + sam, headers = headers)
 		if response.status_code != 200:
 			print(response.status_code)
 			print(response.text)

@@ -1,6 +1,8 @@
 import json
 import requests
+import hail as hl
 from rdconnect import index
+
 
 def update_data_last_index(host, port, num_shards, num_replicas, user, pwd, data_project, data_index): 
 	if not index.index_exists(host, port, "data_tracking", user, pwd):

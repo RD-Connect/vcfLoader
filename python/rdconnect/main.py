@@ -287,7 +287,7 @@ def main(sqlContext, configuration, chrom, nchroms, step, somaticFlag):
         tracking.update_data_last_index(host, port, num_shards, num_repl, user, psw, project,idx_name)
 
     if ("updateDataManagement" in step):
-        initial_vcf = utils.buildFileName(configuration["origin_path"], chrom)
+        initial_vcf = utils.buildFileName(configuration["source_path"], chrom)
         data_token = configuration["datamanagement"]["token"]
         tracking.update_samples_data_management(initial_vcf, data_token)
 

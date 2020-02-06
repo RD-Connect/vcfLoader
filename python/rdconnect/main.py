@@ -286,6 +286,10 @@ def main(sqlContext, configuration, chrom, nchroms, step, somaticFlag):
         print('[WARNING]: The SNV index name will be used to annotate the tracking data table ("{}").'.format(idx_name))
         tracking.update_data_last_index(host, port, num_shards, num_repl, user, psw, project,idx_name)
 
+    if ("updateDataManagement" in step):
+        initial_vcf = utils.buildFileName(configuration["origin_path"], chrom)
+        data_token = configuration["datamanagement"]["token"]
+        tracking.update_samples_data_management(initial_vcf, data_token)
 
     # Counting step to check whether the number of variants in Spark corresponds to tht number of variants that
     # have been uploaded to ElasticSearch

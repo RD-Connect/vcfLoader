@@ -96,16 +96,16 @@ def main(sqlContext, configuration, chrom, nchroms, step, somaticFlag):
             gvcf_store_path=configuration["gvcf_store_path"]
         if (os.path.normpath(new_gvcf_store_path)==os.path.normpath(gvcf_store_path)):
             print("error old store and new store are the same ")
-            break
-        new_gvcf_store_path = configuration["new_gvcf_store_path"]
+        else:
+            new_gvcf_store_path = configuration["new_gvcf_store_path"]
 
-        token=configuration["combine"]["token"]
-        url_project=configuration["combine"]["url_project"]
-        group=configuration["combine"]["group"]
-        chrom="2"
-        prefix_hdfs=configuration["combine"]["prefix_hdfs"]
-        sourceFilesName=combine.get_experiment_by_group(group,url_project,token,prefix_hdfs,chrom)
-        combine.load_gvcf(hl, sourceFilesName, chrom, new_gvcf_store_path, gvcf_store_path)
+            token=configuration["combine"]["token"]
+            url_project=configuration["combine"]["url_project"]
+            group=configuration["combine"]["group"]
+            chrom="2"
+            prefix_hdfs=configuration["combine"]["prefix_hdfs"]
+            sourceFilesName=combine.get_experiment_by_group(group,url_project,token,prefix_hdfs,chrom)
+            combine.load_gvcf(hl, sourceFilesName, chrom, new_gvcf_store_path, gvcf_store_path)
 
     # Pipeline steps
         

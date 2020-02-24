@@ -92,12 +92,13 @@ def main(sqlContext, configuration, chrom, nchroms, step, somaticFlag):
     if ("gVCFtoSparseMatrix" in step):
         print ("step gVCFtoSparseMatrix")
         gvcf_store_path="None"
+        new_gvcf_store_path = configuration["new_gvcf_store_path"]
         if "gvcf_store_path" in configuration:
             gvcf_store_path=configuration["gvcf_store_path"]
         if (os.path.normpath(new_gvcf_store_path)==os.path.normpath(gvcf_store_path)):
             print("error old store and new store are the same ")
         else:
-            new_gvcf_store_path = configuration["new_gvcf_store_path"]
+            
 
             token=configuration["combine"]["token"]
             url_project=configuration["combine"]["url_project"]

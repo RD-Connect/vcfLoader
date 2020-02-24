@@ -2,14 +2,14 @@
 
 from pyspark import SparkConf, SparkContext
 from pyspark.sql import SQLContext, SparkSession
-from rdconnect import config, annotations, index, transform, utils
+from rdconnect import config, annotations, index, transform, utils,combine
 from pyspark.sql.functions import lit
 from subprocess import call
 from pyspark.sql.types import FloatType, IntegerType
 import sys, getopt
 import hail as hl
 import datetime
-
+import os
 
 APP_NAME = "vcfLoader"
 # Usage function
@@ -88,6 +88,24 @@ def main(sqlContext, configuration, chrom, nchroms, step, somaticFlag):
     if ("loadSomatic" in step and not somaticFlag):
         print('[ERROR]: Selected option "loadSomatic" but not set "somaticFlag"')
         return 2
+#(hl,files,chrom,destinationPath,gvcf_store_path)
+   if ("gVCFtoSparseMatrix" in step):
+        print ("step gVCFtoSparseMatrix")
+        gvcf_store_path="None"
+        if "gvcf_store_path" in configuration:
+            gvcf_store_path=configuration["gvcf_store_path"]
+        if (os.path.normpath(new_gvcf_store_path)==os.path.normpath(gvcf_store_path)):
+            print("error old store and new store are the same ")
+            break
+        new_gvcf_store_path = configuration["new_gvcf_store_path"]
+
+        token=configuration["combine"]["token"]
+        url_project=configuration["combine"]["url_project"]
+        group=configuration["combine"]["group"]
+        chrom="2"
+        prefix_hdfs=configuration["combine"]["prefix_hdfs"]
+        sourceFilesName=combine.get_experiment_by_group(group,url_project,token,prefix_hdfs,chrom)
+        combine.load_gvcf(hl, sourceFilesName, chrom, new_gvcf_store_path, gvcf_store_path)
 
     # Pipeline steps
         

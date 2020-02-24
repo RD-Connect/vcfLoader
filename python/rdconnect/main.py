@@ -106,6 +106,7 @@ def main(sqlContext, configuration, chrom, nchroms, step, somaticFlag):
             chrom="2"
             prefix_hdfs=configuration["combine"]["prefix_hdfs"]
             sourceFilesName=combine.get_experiment_by_group(group,url_project,token,prefix_hdfs,chrom)
+            print(sourceFilesName[0])
             combine.load_gvcf(hl, sourceFilesName, chrom, new_gvcf_store_path, gvcf_store_path)
 
     # Pipeline steps

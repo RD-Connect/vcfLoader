@@ -91,7 +91,7 @@ def main(sqlContext, configuration, chrom, nchroms, step, somaticFlag):
 #(hl,files,chrom,destinationPath,gvcf_store_path)
     if ("gVCFtoSparseMatrix" in step):
         print ("step gVCFtoSparseMatrix")
-        gvcf_store_path="None"
+        gvcf_store_path=None
         new_gvcf_store_path = configuration["new_gvcf_store_path"]
         if "gvcf_store_path" in configuration:
             gvcf_store_path=configuration["gvcf_store_path"]

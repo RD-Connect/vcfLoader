@@ -9,7 +9,7 @@ from pyspark.sql.types import FloatType, IntegerType
 import sys, getopt
 import hail as hl
 import datetime
-import os
+import os,json,requests
 
 APP_NAME = "vcfLoader"
 # Usage function

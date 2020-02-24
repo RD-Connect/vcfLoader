@@ -1,5 +1,5 @@
 import hail as hl
-import os
+import os,requests,json
 from hail.experimental.vcf_combiner import *
 from rdconnect import utils
 def resource(filename):

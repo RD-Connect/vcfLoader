@@ -95,7 +95,7 @@ def main(sqlContext, configuration, chrom, nchroms, step, somaticFlag):
         new_gvcf_store_path = configuration["new_gvcf_store_path"]
         if "gvcf_store_path" in configuration:
             gvcf_store_path=configuration["gvcf_store_path"]
-        if (os.path.normpath(new_gvcf_store_path)==os.path.normpath(gvcf_store_path)):
+        if ( not (gvcf_store_path is None) and  os.path.normpath(new_gvcf_store_path)==os.path.normpath(gvcf_store_path)):
             print("error old store and new store are the same ")
         else:
             

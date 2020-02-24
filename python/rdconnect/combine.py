@@ -65,5 +65,5 @@ def get_experiment_by_group(group,url_project,token,prefix_hdfs,chrom):
             break
         if (is_exp_uploaded(url_project,exp["RD_Connect_ID_Experiment"],headers)):
             counter=counter+1
-            response.append(build_path("hdfs://rdhdfs1:27000/test/rdconnect",exp["Owner"],exp["RD_Connect_ID_Experiment"],chrom))
+            response.append(build_path(prefix_hdfs,exp["Owner"],exp["RD_Connect_ID_Experiment"],chrom))
     return response

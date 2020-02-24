@@ -38,7 +38,7 @@ def load_gvcf(hl,files,chrom,destinationPath,gvcf_store_path):
 
 #check if an experiment has been uploaded to hdfs
 def build_path(prefix,group,exp,chrom):
-    return prefix+"/"+group+"/"+exp+"/"+utils.buildFileName(exp+".chromosome.g.vcf.gz",chrom)
+    return prefix+"/"+group+"/"+exp+"/"+utils.buildFileName(exp+".chromosome.g.vcf.bgz",chrom)
 
 def is_exp_uploaded(url_project,experiment,headers):
     url=url_project+"/datamanagement/api/statusbyexperiment/?experiment="+experiment

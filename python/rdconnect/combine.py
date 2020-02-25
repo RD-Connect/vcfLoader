@@ -61,7 +61,7 @@ def get_experiment_by_group(group,url_project,token,prefix_hdfs,chrom):
     response=[]
     counter=0
     for exp in data:
-        if counter==10:
+        if counter==100:
             break
         if (is_exp_uploaded(url_project,exp["RD_Connect_ID_Experiment"],headers)):
             counter=counter+1

@@ -103,7 +103,6 @@ def main(sqlContext, configuration, chrom, nchroms, step, somaticFlag):
             token=configuration["combine"]["token"]
             url_project=configuration["combine"]["url_project"]
             group=configuration["combine"]["group"]
-            chrom="2"
             prefix_hdfs=configuration["combine"]["prefix_hdfs"]
             sourceFilesName=combine.get_experiment_by_group(group,url_project,token,prefix_hdfs,chrom)
             print(sourceFilesName[0])

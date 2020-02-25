@@ -51,6 +51,8 @@ def load_gvcf(hl,files,chrom,destinationPath,gvcf_store_path,partitions):
         gvcf_store= hl.read_matrix_table(gvcf_store_path)
         comb = combine_gvcfs([gvcf_store]+vcfs)
     comb.write(destinationPath, overwrite = True)
+    comb._force_count_rows()
+
 
 #check if an experiment has been uploaded to hdfs
 def build_path(prefix,group,exp,chrom):

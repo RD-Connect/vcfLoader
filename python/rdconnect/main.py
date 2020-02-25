@@ -91,6 +91,12 @@ def main(sqlContext, configuration, chrom, nchroms, step, somaticFlag):
 #(hl,files,chrom,destinationPath,gvcf_store_path)
     if ("gVCFtoSparseMatrix" in step):
         print ("step gVCFtoSparseMatrix")
+        max_items_batch=100
+        partitions_chromosome=20
+        if ('partitions_chromosome' in configuration):
+            partitions_chromosome=configuration["combine"]['partitions_chromosome']
+        if ('max_items_batch' in configuration):
+            max_items_batch=configuration["combine"]['max_items_batch']
         gvcf_store_path=None
         new_gvcf_store_path = configuration["new_gvcf_store_path"]
         if "gvcf_store_path" in configuration:
@@ -104,9 +110,9 @@ def main(sqlContext, configuration, chrom, nchroms, step, somaticFlag):
             url_project=configuration["combine"]["url_project"]
             group=configuration["combine"]["group"]
             prefix_hdfs=configuration["combine"]["prefix_hdfs"]
-            sourceFilesName=combine.get_experiment_by_group(group,url_project,token,prefix_hdfs,chrom)
+            sourceFilesName=combine.get_experiment_by_group(group,url_project,token,prefix_hdfs,chrom,max_items_batch)
             print(sourceFilesName[0])
-            combine.load_gvcf(hl, sourceFilesName, chrom, new_gvcf_store_path+"/chrom-"+chrom, gvcf_store_path,20)
+            combine.load_gvcf(hl, sourceFilesName, chrom, new_gvcf_store_path+"/chrom-"+chrom, gvcf_store_path,partitions_chromosome)
 
     # Pipeline steps
         

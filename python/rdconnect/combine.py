@@ -69,7 +69,7 @@ def is_exp_uploaded(url_project,experiment,headers):
         return False
 
 #get a lit of file paths for a group
-def get_experiment_by_group(group,url_project,token,prefix_hdfs,chrom):
+def get_experiment_by_group(group,url_project,token,prefix_hdfs,chrom,max_items_batch):
     headers = {'Authorization': token}
     url=url_project+"/datamanagement/api/samplebygroup/?format=json&group="+group+"&user=dpiscia&owner=False"
     resp=requests.get(url,headers=headers, verify=False)
@@ -77,7 +77,7 @@ def get_experiment_by_group(group,url_project,token,prefix_hdfs,chrom):
     response=[]
     counter=0
     for exp in data:
-        if counter==100:
+        if counter==max_items_batch:
             break
         if (is_exp_uploaded(url_project,exp["RD_Connect_ID_Experiment"],headers)):
             counter=counter+1

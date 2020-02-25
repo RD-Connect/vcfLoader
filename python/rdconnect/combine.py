@@ -17,8 +17,10 @@ def get_intervals(chrom,max_pos,partitions):
         end=item*quantity
         if item==len(range(1,partitions+1)):
             end=max_pos
+        if start==0:
+            start=1
         print(str(start)+" / "+str(end))
-        intervals.append( hl.Interval(hl.Locus(str(chrom),start),hl.Locus(str(chrom),end), includes_end=True)   )
+        intervals.append( hl.Interval(hl.Locus(str(chrom),start),hl.Locus(str(chrom),end-1), includes_end=True)   )
     return intervals
 #return {'chrom': 20, 
 #'interval': Interval(start=Locus(contig=20, position=1, reference_genome=GRCh37), 

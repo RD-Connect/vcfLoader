@@ -33,7 +33,7 @@ def get_interval_by_chrom(chrom,partitions):
                 return(interval)
 
 
-def load_gvcf(hl,files,chrom,destinationPath,gvcf_store_path):
+def load_gvcf(hl,files,chrom,destinationPath,gvcf_store_path,partitions):
     interval= get_interval_by_chrom(chrom,partitions)
     vcfs = [transform_gvcf(mt.annotate_rows(info=mt.info.annotate(
         MQ_DP=hl.null(hl.tint32),

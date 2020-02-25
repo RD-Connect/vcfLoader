@@ -6,12 +6,26 @@ def resource(filename):
     return os.path.join(filename)
 
 
+
+def get_intervals(chrom,max_pos,partitions):
+    quantity=max_pos//partitions
+    intervals=[]
+    for item in range(1,partitions+1):
+        
+            
+        start=(item-1)*quantity
+        end=item*quantity
+        if item==len(range(1,partitions+1)):
+            end=max_pos
+        print(str(start)+" / "+str(end))
+        intervals.append( hl.Interval(hl.Locus(str(chrom),start),hl.Locus(str(chrom),end), includes_end=True)   )
+    return intervals
 #return {'chrom': 20, 
 #'interval': Interval(start=Locus(contig=20, position=1, reference_genome=GRCh37), 
 #end=Locus(contig=20, position=62965366, reference_genome=GRCh37),
 #includes_start=True, includes_end=True), 'reference_genome': 'GRCh37'}
-def get_interval_by_chrom(chrom):
-    intervals=[{"chrom":20, "interval": hl.Interval(hl.Locus("20", 1), hl.Locus("20", 62965366), includes_end=True)
+def get_interval_by_chrom(chrom,partitions):
+    intervals=[{"chrom":20, "interval":get_intervals(chrom,62965366,partitions)
     , 'reference_genome':'GRCh37','array_elements_required':False}]
     for interval in intervals:
         for key,value in interval.items():    # for name, age in dictionary.iteritems():  (for Python 2.x)
@@ -20,7 +34,7 @@ def get_interval_by_chrom(chrom):
 
 
 def load_gvcf(hl,files,chrom,destinationPath,gvcf_store_path):
-    interval= get_interval_by_chrom(chrom)
+    interval= get_interval_by_chrom(chrom,partitions)
     vcfs = [transform_gvcf(mt.annotate_rows(info=mt.info.annotate(
         MQ_DP=hl.null(hl.tint32),
         VarDP=hl.null(hl.tint32),

@@ -39,7 +39,7 @@ def load_gvcf(hl,files,chrom,destinationPath,gvcf_store_path,partitions):
         MQ_DP=hl.null(hl.tint32),
         VarDP=hl.null(hl.tint32),
         QUALapprox=hl.null(hl.tint32))))
-            for mt in hl.import_vcfs(files,partitions= [interval["interval"]]
+            for mt in hl.import_vcfs(files,partitions= interval["interval"]
     , reference_genome=interval["reference_genome"],
                                      array_elements_required=False)]
     if (gvcf_store_path==None):

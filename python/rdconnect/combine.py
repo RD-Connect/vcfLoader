@@ -19,7 +19,7 @@ def get_intervals(chrom,max_pos,partitions):
             end=max_pos
         if start==0:
             start=1
-        print(str(start)+" / "+str(end))
+        
         intervals.append( hl.Interval(hl.Locus(str(chrom),start),hl.Locus(str(chrom),end-1), includes_end=True)   )
     return intervals
 #return {'chrom': 20, 
@@ -51,7 +51,7 @@ def load_gvcf(hl,files,chrom,destinationPath,gvcf_store_path,partitions):
         gvcf_store= hl.read_matrix_table(gvcf_store_path)
         comb = combine_gvcfs([gvcf_store]+vcfs)
     comb.write(destinationPath, overwrite = True)
-    comb.count_cols()
+    
 
 
 #check if an experiment has been uploaded to hdfs

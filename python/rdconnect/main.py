@@ -93,9 +93,9 @@ def main(sqlContext, configuration, chrom, nchroms, step, somaticFlag):
         print ("step gVCFtoSparseMatrix")
         max_items_batch=100
         partitions_chromosome=20
-        if ('partitions_chromosome' in configuration):
+        if ('partitions_chromosome' in configuration['combine']):
             partitions_chromosome=configuration["combine"]['partitions_chromosome']
-        if ('max_items_batch' in configuration):
+        if ('max_items_batch' in configuration['combine']):
             max_items_batch=configuration["combine"]['max_items_batch']
         gvcf_store_path=None
         new_gvcf_store_path = configuration["new_gvcf_store_path"]

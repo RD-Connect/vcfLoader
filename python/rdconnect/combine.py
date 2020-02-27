@@ -37,6 +37,8 @@ def get_intervals(chrom,max_pos,partitions):
 #includes_start=True, includes_end=True), 'reference_genome': 'GRCh37'}
 def get_interval_by_chrom(chrom,partitions):
     intervals=[{"chrom":20, "interval":get_intervals(chrom,62965366,partitions)
+    , 'reference_genome':'GRCh37','array_elements_required':False},
+    {"chrom":1, "interval":get_intervals(chrom,247199719,partitions)
     , 'reference_genome':'GRCh37','array_elements_required':False}]
     for interval in intervals:
         for key,value in interval.items():    # for name, age in dictionary.iteritems():  (for Python 2.x)

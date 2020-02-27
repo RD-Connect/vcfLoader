@@ -6,6 +6,15 @@ def resource(filename):
     return os.path.join(filename)
 
 
+def divide_chunks(l, n): 
+      
+    # looping till length l 
+    for i in range(0, len(l), n):  
+        yield l[i:i + n] 
+def get_samples(url_sample):
+    splitted=url_sample.split("/")
+    name_file=splitted[len(splitted)-1]
+    return name_file.replace(".g.vcf.bgz","").split(".")
 
 def get_intervals(chrom,max_pos,partitions):
     quantity=max_pos//partitions

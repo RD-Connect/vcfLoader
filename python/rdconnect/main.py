@@ -112,7 +112,14 @@ def main(sqlContext, configuration, chrom, nchroms, step, somaticFlag):
             prefix_hdfs=configuration["combine"]["prefix_hdfs"]
             sourceFilesName=combine.get_experiment_by_group(group,url_project,token,prefix_hdfs,chrom,max_items_batch)
             print(sourceFilesName[0])
-            combine.load_gvcf(hl, sourceFilesName, chrom, new_gvcf_store_path+"/chrom-"+chrom, gvcf_store_path,partitions_chromosome)
+            batches= list(combine.divide_chunk(sourceFilesName,100))
+            for index,batch in enumerate(batches):
+                if index==0:
+                   gvcf_store_path==gvcf_store_path
+                else:
+                   gvcf_store_path= new_gvcf_store_path+"/chrom-"+chrom
+                   new_gvcf_store_path = :"hdfs://rdhdfs1:27000/test/rdconnect-ES6/sparseMatrix/0.3"
+                combine.load_gvcf(hl, batch, chrom, new_gvcf_store_path+"/chrom-"+chrom, gvcf_store_path,partitions_chromosome)
 
     # Pipeline steps
         

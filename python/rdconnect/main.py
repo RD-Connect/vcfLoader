@@ -118,7 +118,7 @@ def main(sqlContext, configuration, chrom, nchroms, step, somaticFlag):
                    gvcf_store_path==gvcf_store_path
                 else:
                    gvcf_store_path= new_gvcf_store_path+"/chrom-"+chrom
-                   new_gvcf_store_path = :"hdfs://rdhdfs1:27000/test/rdconnect-ES6/sparseMatrix/0.3"
+                   new_gvcf_store_path = "hdfs://rdhdfs1:27000/test/rdconnect-ES6/sparseMatrix/0.3"
                 combine.load_gvcf(hl, batch, chrom, new_gvcf_store_path+"/chrom-"+chrom, gvcf_store_path,partitions_chromosome)
 
     # Pipeline steps

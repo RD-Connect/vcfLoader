@@ -59,7 +59,7 @@ def load_gvcf(hl,files,chrom,destinationPath,gvcf_store_path,partitions):
     else:
         gvcf_store= hl.read_matrix_table(gvcf_store_path)
         comb = combine_gvcfs([gvcf_store]+vcfs)
-    comb.write(destinationPath, overwrite = True)
+    comb.write(destinationPath, overwrite = False)
     
 
 

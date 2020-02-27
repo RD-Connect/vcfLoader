@@ -123,6 +123,16 @@ def main(sqlContext, configuration, chrom, nchroms, step, somaticFlag):
                    print("current gvcf store is "+gvcf_store_path)
                 combine.load_gvcf(hl, batch, chrom, new_gvcf_store_path+"/chrom-"+chrom, gvcf_store_path,partitions_chromosome)
 
+
+
+    if ("denseMatrix" in step):
+        print ("step denseMatrix")
+        denseMatrix_path=configuration["denseMatrix_path"]
+        gvcf_store_path=None
+        gvcf_store_path = configuration["new_gvcf_store_path"]
+        sparseMatrix=  hl.read_matrix_table(gvcf_store_path+"/chrom-"+chrom)
+        denseMatrix=hl.experimental.densify(sparseMatrix)
+        denseMatrix.write(denseMatrix_path+"/chrom-"+chrom, overwrite = False)
     # Pipeline steps
         
     if ("createIndex" in step):

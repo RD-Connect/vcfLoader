@@ -132,6 +132,7 @@ def main(sqlContext, configuration, chrom, nchroms, step, somaticFlag):
         gvcf_store_path = configuration["gvcf_store_path"]
         sparseMatrix=  hl.read_matrix_table(gvcf_store_path+"/chrom-"+chrom)
         denseMatrix=hl.experimental.densify(sparseMatrix)
+        print("writing in "+denseMatrix_path+"/chrom-"+str(chrom))
         denseMatrix.write(denseMatrix_path+"/chrom-"+chrom, overwrite = False)
     # Pipeline steps
         

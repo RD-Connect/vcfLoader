@@ -129,7 +129,7 @@ def main(sqlContext, configuration, chrom, nchroms, step, somaticFlag):
         print ("step denseMatrix")
         denseMatrix_path=configuration["denseMatrix_path"]
         gvcf_store_path=None
-        gvcf_store_path = configuration["new_gvcf_store_path"]
+        gvcf_store_path = configuration["gvcf_store_path"]
         sparseMatrix=  hl.read_matrix_table(gvcf_store_path+"/chrom-"+chrom)
         denseMatrix=hl.experimental.densify(sparseMatrix)
         denseMatrix.write(denseMatrix_path+"/chrom-"+chrom, overwrite = False)

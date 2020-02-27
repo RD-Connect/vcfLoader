@@ -112,7 +112,7 @@ def main(sqlContext, configuration, chrom, nchroms, step, somaticFlag):
             prefix_hdfs=configuration["combine"]["prefix_hdfs"]
             sourceFilesName=combine.get_experiment_by_group(group,url_project,token,prefix_hdfs,chrom,max_items_batch)
             print(sourceFilesName[0])
-            batches= list(combine.divide_chunk(sourceFilesName,100))
+            batches= list(combine.divide_chunks(sourceFilesName,100))
             for index,batch in enumerate(batches):
                 if index==0:
                    gvcf_store_path==gvcf_store_path

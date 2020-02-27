@@ -333,7 +333,7 @@ if __name__ == "__main__":
     # Command line options parsing
     chrom, path, nchroms, step, cores, somaticFlag = optionParser(sys.argv[1:])
     main_conf = config.readConfig(path)
-    spark_conf = SparkConf().setAppName(APP_NAME).set('spark.executor.cores',cores)
+    spark_conf = SparkConf().setAppName(APP_NAME).set('spark.executor.cores',cores).set("spark.local.dir", "hdfs://rdhdfs1:27000/test/tmp/spark-temp")
     spark = SparkSession.builder.config(conf=spark_conf).getOrCreate()
     spark.sparkContext._jsc.hadoopConfiguration().setInt("dfs.block.size",main_conf["dfs_block_size"])
     spark.sparkContext._jsc.hadoopConfiguration().setInt("parquet.block.size",main_conf["dfs_block_size"])

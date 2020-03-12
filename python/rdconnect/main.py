@@ -88,46 +88,34 @@ def main(sqlContext, configuration, chrom, nchroms, step, somaticFlag):
     if ("loadSomatic" in step and not somaticFlag):
         print('[ERROR]: Selected option "loadSomatic" but not set "somaticFlag"')
         return 2
-#(hl,files,chrom,destinationPath,gvcf_store_path)
+    
+
+    #(hl,files,chrom,destinationPath,gvcf_store_path)
     if ("gVCFtoSparseMatrix" in step):
         print ("step gVCFtoSparseMatrix")
-        max_items_batch=100
-        partitions_chromosome=20
-        if ('partitions_chromosome' in configuration['combine']):
-            partitions_chromosome=configuration["combine"]['partitions_chromosome']
-        if ('max_items_batch' in configuration['combine']):
-            max_items_batch=configuration["combine"]['max_items_batch']
-        gvcf_store_path=None
-        new_gvcf_store_path = configuration["new_gvcf_store_path"]
-        if "gvcf_store_path" in configuration:
-            gvcf_store_path=configuration["gvcf_store_path"]
-        if ( not (gvcf_store_path is None) and  os.path.normpath(new_gvcf_store_path)==os.path.normpath(gvcf_store_path)):
-            print("error old store and new store are the same ")
+        if 'partitions_chromosome' in configuration[ 'combine' ]:
+            partitions_chromosome = configuration[ 'combine'][ 'partitions_chromosome' ]
+        if 'max_items_batch' in configuration[ 'combine' ]:
+            max_items_batch = configuration[ 'combine' ][ 'max_items_batch' ]
+
+        new_gvcf_store_path = configuration[ 'combine' ][ 'new_gvcf_store_path' ]
+        if 'gvcf_store_path' in configuration:
+            gvcf_store_path = configuration[ 'gvcf_store_path' ]
         else:
-            
-
-            token=configuration["combine"]["token"]
-            url_project=configuration["combine"]["url_project"]
-            group=configuration["combine"]["group"]
-            prefix_hdfs=configuration["combine"]["prefix_hdfs"]
-            sourceFilesName=combine.get_experiment_by_group(group,url_project,token,prefix_hdfs,chrom,max_items_batch)
-            print(sourceFilesName[0])
-            batches= list(combine.divide_chunks(sourceFilesName,100))
-            for index,batch in enumerate(batches):
-                if index==0:
-                   gvcf_store_path==gvcf_store_path
-                else:
-                   gvcf_store_path= new_gvcf_store_path+"/chrom-"+chrom
-                   new_gvcf_store_path = utils.update_version(new_gvcf_store_path)
-                   print("new version gvcf store is "+new_gvcf_store_path)
-                   print("current gvcf store is "+gvcf_store_path)
-                combine.load_gvcf(hl, batch, chrom, new_gvcf_store_path+"/chrom-"+chrom, gvcf_store_path,partitions_chromosome)
-
+            gvcf_store_path = None
+        if not ( gvcf_store_path is None ) and ( os.path.normpath( new_gvcf_store_path ) == os.path.normpath( gvcf_store_path ) ):
+            raise Expcetion( 'Old store and new store paths are the same.' )
+        else:
+            token = 'Token {0}'.format( configuration[ 'datamanagement' ][ 'token'] )
+            url_project = configuration[ 'datamanagement' ][ 'host' ]
+            group = configuration[ 'combine' ][ 'group' ]
+            prefix_hdfs = configuration[ 'combine' ][ 'prefix_hdfs' ]
+            combine.createSparseMatrix( group, url_project, token, prefix_hdfs, chrom, max_items_batch ):
 
 
     if ("denseMatrix" in step):
         print ("step denseMatrix")
-        denseMatrix_path=configuration["denseMatrix_path"]
+        denseMatrix_path = configuration["denseMatrix_path"]
         gvcf_store_path=None
         gvcf_store_path = configuration["gvcf_store_path"]
         sparseMatrix=  hl.read_matrix_table(gvcf_store_path+"/chrom-"+chrom)

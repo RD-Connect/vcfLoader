@@ -1,6 +1,7 @@
 import hail as hl
 import os,requests,json
 from hail.experimental.vcf_combiner import *
+from hail.experimental import full_outer_join_mt
 from rdconnect import utils
 
 
@@ -53,6 +54,41 @@ def createSparseMatrix( group, url_project, token, prefix_hdfs, chrom, max_items
             print( "new version gvcf store is " + new_gvcf_store_path )
         loadGvcf( hl, batch, chrom, new_gvcf_store_path, gvcf_store_path, partitions_chromosome )
 
+
+def createDenseMatrix( denseMatrix_path, gvcf_store_path, chrom, save_family_dense = False  ):
+    print( 'read from in {0}/chrom-{1}'.format( gvcf_store_path, chrom ) )
+    sparseMatrix = hl.read_matrix_table( '{0}/chrom-{1}'.format( gvcf_store_path, chrom ) )
+
+    experiments_in_matrix = [ x.get( 's' ) for x in sparseMatrix.col.collect() ]
+    #experiments_in_matrix = [ 'E000071', 'E000074', 'E000001', 'E000002', 'E000003', 'E000004', 'E000005' ]
+    experiments_in_group = combine.getExperimentByGroup( group, url_project, token, prefix_hdfs, chrom, max_items_batch )
+    full_ids_in_matrix = [ x for x in experiments_in_group if x[ 'RD_Connect_ID_Experiment' ] in experiments_in_matrix ]
+    experiments_and_families = combine.getExperimentsByFamily( full_ids_in_matrix, configuration[ 'datamanagement' ][ 'host' ], configuration[ 'gpap' ][ 'id' ], configuration[ 'gpap' ][ 'token' ] )
+
+    experiments_by_family = {}
+    for fam in list( set( [ x[ 'Family' ] for x in ef ] ) ):
+        experiments_by_family[ fam ] = [ x[ 'Experiment' ] for x in ef if x[ 'Family' ] == fam ]
+    #experiments_by_family = {'Families.FAM0000825': ['E012878'], 'Families.FAM0001023': ['E012877', 'E012882']}
+
+    if None in experiments_by_family.keys():
+        raise Exception( 'Provided experiment ids got no family assigned ({}).'.format('; '.join( experiments_by_family[ None ] ) ) )
+
+    dense_by_family = {}
+    for fam in experiments_by_family.keys():
+        sam = hl.literal( experiments_by_family[ fam ], 'array<str>' )
+        familyMatrix = sparseMatrix.filter_cols( sam.contains( sparseMatrix['s'] ) )
+        familyMatrix = hl.experimental.densify( familyMatrix )
+        familyMatrix = familyMatrix.annotate_rows( nH = hl.agg.count_where( familyMatrix.LGT.is_hom_ref() ) )
+        familyMatrix = familyMatrix.filter_rows( familyMatrix.nH < familyMatrix.count_cols() )
+        if save_family_dense:
+            familyMatrix.write( '{0}/{1}/chrom-{2}'.format( denseMatrix_path, fam, chrom ), overwrite = True )
+        dense_by_family[ fam ] = familyMatrix
+
+    dense_by_family[ 0 ] 
+    denseMatrix = dense_by_family[ 0 ] 
+    for ii in range(1 , len( dense_by_family ) ):
+        denseMatrix = full_outer_join_mt( denseMatrix, dense_by_family[ ii ] )
+    denseMatrix.write( '{0}/chrm-{1}'.format( denseMatrix_path, chrom ), overwrite = True )
 
 
 

@@ -91,8 +91,8 @@ def main(sqlContext, configuration, chrom, nchroms, step, somaticFlag):
     
 
     #(hl,files,chrom,destinationPath,gvcf_store_path)
-    if ("gVCFtoSparseMatrix" in step):
-        print ("step gVCFtoSparseMatrix")
+    if ("createSparseMatrix" in step):
+        print ("step createSparseMatrix")
         if 'partitions_chromosome' in configuration[ 'combine' ]:
             partitions_chromosome = configuration[ 'combine'][ 'partitions_chromosome' ]
         if 'max_items_batch' in configuration[ 'combine' ]:
@@ -113,16 +113,15 @@ def main(sqlContext, configuration, chrom, nchroms, step, somaticFlag):
             combine.createSparseMatrix( group, url_project, token, prefix_hdfs, chrom, max_items_batch ):
 
 
-    if ("denseMatrix" in step):
-        print ("step denseMatrix")
-        denseMatrix_path = configuration["denseMatrix_path"]
-        gvcf_store_path=None
-        gvcf_store_path = configuration["gvcf_store_path"]
-        sparseMatrix=  hl.read_matrix_table(gvcf_store_path+"/chrom-"+chrom)
-        denseMatrix=hl.experimental.densify(sparseMatrix)
-        print("writing in "+denseMatrix_path+"/chrom-"+str(chrom))
-        denseMatrix.write(denseMatrix_path+"/chrom-"+chrom, overwrite = False)
-    # Pipeline steps
+    if ("createDenseMatrix" in step):
+        print ("step createDenseMatrix")
+        denseMatrix_path = configuration[ 'combine' ][ 'denseMatrix_path' ]
+        if 'gvcf_store_path' in configuration[ 'combine' ].keys():
+            gvcf_store_path = configuration[ 'combine' ][ 'gvcf_store_path' ]
+        else:
+            gvcf_store_path = None
+
+        combine.createDenseMatrix( denseMatrix_path, gvcf_store_path, chrom, save_family_dense = False )
         
     if ("createIndex" in step):
         if ("createIndexCNV" in step):

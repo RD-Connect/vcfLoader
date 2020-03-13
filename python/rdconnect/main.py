@@ -98,7 +98,10 @@ def main(sqlContext, configuration, chrom, nchroms, step, somaticFlag):
         if 'max_items_batch' in configuration[ 'combine' ]:
             max_items_batch = configuration[ 'combine' ][ 'max_items_batch' ]
 
-        new_gvcf_store_path = configuration[ 'combine' ][ 'new_gvcf_store_path' ]
+        if 'new_gvcf_store_path' in configuration[ 'combine' ].keys():
+            new_gvcf_store_path = configuration[ 'combine' ][ 'new_gvcf_store_path' ]
+        else:
+            new_gvcf_store_path = None
         if 'gvcf_store_path' in configuration:
             gvcf_store_path = configuration[ 'gvcf_store_path' ]
         else:

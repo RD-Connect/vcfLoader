@@ -42,7 +42,7 @@ def getExperimentsToProcess( experiment_status, experiment_available, check_hdfs
     return [ x for x in experiment_available if x[ 'RD_Connect_ID_Experiment' ] in selected_experiments ]
 
 
-def createSparseMatrix( group, url_project, token, prefix_hdfs, chrom, max_items_batch, gvcf_store_path, new_gvcf_store_path ):
+def createSparseMatrix( group, url_project, token, prefix_hdfs, chrom, max_items_batch, partitions_chromosome, gvcf_store_path, new_gvcf_store_path ):
     experiments_in_group = getExperimentByGroup( group, url_project, token, prefix_hdfs, chrom, max_items_batch )
     experiment_status = getExperimentStatus( url_project, token )
     experiments_to_be_loaded = getExperimentsToProcess( experiment_status, experiments_in_group, check_hdfs = True )

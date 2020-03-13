@@ -60,7 +60,7 @@ def createSparseMatrix( group, url_project, token, prefix_hdfs, chrom, max_items
         if index == 0:
             print( "current gvcf store is ------> {0}".format(  bse_old ) )
             print( "new version gvcf store is --> " + bse_new )
-            new_gvcf_store_path = '{0}/chrom-{1}'.format( utils.update_version( bse_new ), chrom )
+            new_gvcf_store_path = '{0}/chrom-{1}'.format( bse_new, chrom )
         else:
             bse_old = bse_new
             gvcf_store_path = '{0}/chrom-{1}'.format( bse_new, chrom )

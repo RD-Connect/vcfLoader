@@ -59,8 +59,8 @@ def createSparseMatrix( group, url_project, token, prefix_hdfs, chrom, max_items
         else:
             gvcf_store_path = '{0}/chrom-{1}'.format( new_gvcf_store_path, chrom )
             new_gvcf_store_path = '{0}/chrom-{1}'.format( utils.update_version( new_gvcf_store_path ), chrom )
-            print( "current gvcf store is " + gvcf_store_path )
-            print( "new version gvcf store is " + new_gvcf_store_path )
+            print( "current gvcf store is ------> " + gvcf_store_path )
+            print( "new version gvcf store is --> " + new_gvcf_store_path )
         loadGvcf( hl, batch, chrom, new_gvcf_store_path, gvcf_store_path, partitions_chromosome )
 
 
@@ -193,8 +193,8 @@ def loadGvcf( hl, files, chrom, destinationPath, gvcfStorePath, partitions ):
             info = mt.info.annotate( MQ_DP = hl.null( hl.tint32 ), VarDP = hl.null( hl.tint32 ), QUALapprox = hl.null( hl.tint32 ) )
         ))
     def importFiles( files ):
-        for ii, fl in enumerate( files ):
-            print( '{0}. {1}'.format( ii, fl ) )
+        #for ii, fl in enumerate( files ):
+        #    print( '{0}. {1}'.format( ii, fl ) )
         return hl.import_vcfs(
             files,
             partitions = interval[ 'interval' ], 
@@ -212,7 +212,8 @@ def loadGvcf( hl, files, chrom, destinationPath, gvcfStorePath, partitions ):
     else:
         gvcf_store = hl.read_matrix_table( gvcfStorePath )
         comb = combine_gvcfs( [ gvcf_store ] + vcfs )
-    comb.write( destinationPath, overwrite = False )
+    print( "loadGvcf ---> {0}".format( destinationPath ) )
+    #comb.write( destinationPath, overwrite = False )
     
 
 

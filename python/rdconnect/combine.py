@@ -192,6 +192,7 @@ def loadGvcf( hl, files, chrom, destinationPath, gvcfStorePath, partitions ):
             info = mt.info.annotate( MQ_DP = hl.null( hl.tint32 ), VarDP = hl.null( hl.tint32 ), QUALapprox = hl.null( hl.tint32 ) )
         ))
     def importFiles( files ):
+        print( files )
         return hl.import_vcfs(
             files,
             partitions = interval[ 'interval' ], 

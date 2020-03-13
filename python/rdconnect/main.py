@@ -102,7 +102,8 @@ def main(sqlContext, configuration, chrom, nchroms, step, somaticFlag):
             new_gvcf_store_path = configuration[ 'combine' ][ 'new_gvcf_store_path' ]
         else:
             new_gvcf_store_path = None
-        if 'gvcf_store_path' in configuration:
+            
+        if 'gvcf_store_path' in configuration[ 'combine' ].keys():
             gvcf_store_path = configuration[ 'gvcf_store_path' ]
         else:
             gvcf_store_path = None

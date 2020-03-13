@@ -102,12 +102,12 @@ def main(sqlContext, configuration, chrom, nchroms, step, somaticFlag):
             new_gvcf_store_path = configuration[ 'combine' ][ 'new_gvcf_store_path' ]
         else:
             new_gvcf_store_path = None
-            
+
         if 'gvcf_store_path' in configuration[ 'combine' ].keys():
             gvcf_store_path = configuration[ 'combine' ][ 'gvcf_store_path' ]
         else:
             gvcf_store_path = None
-        if not ( gvcf_store_path is None ) and ( os.path.normpath( new_gvcf_store_path ) == os.path.normpath( gvcf_store_path ) ):
+        if not ( gvcf_store_path is None ) and not ( new_gvcf_store_path is None ) and ( os.path.normpath( new_gvcf_store_path ) == os.path.normpath( gvcf_store_path ) ):
             raise Expcetion( 'Old store and new store paths are the same.' )
         else:
             token = 'Token {0}'.format( configuration[ 'datamanagement' ][ 'token'] )

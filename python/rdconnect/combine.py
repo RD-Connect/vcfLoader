@@ -203,7 +203,7 @@ def loadGvcf( hl, files, chrom, destinationPath, gvcfStorePath, partitions ):
         )
 
     interval = getIntervalByChrom( chrom, partitions )
-    print( "loadGvcf --> {1} / {2}".format( files[ 0 ], files[ len(files) - 1 ] ) )
+    print( "loadGvcf --> {0} / {1}".format( files[ 0 ], files[ len(files) - 1 ] ) )
     vcfs = [ transformFile( mt ) for mt in importFiles( files ) ]
 
     if gvcfStorePath == None:

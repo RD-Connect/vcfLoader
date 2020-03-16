@@ -65,7 +65,7 @@ def createSparseMatrix( group, url_project, token, prefix_hdfs, chrom, max_items
             bse_old = bse_new
             gvcf_store_path = '{0}/chrom-{1}'.format( bse_new, chrom )
             bse_new = utils.update_version( bse_new )
-            new_gvcf_store_path = '{0}/chrom-{1}'.format( utils.update_version( bse_new ), chrom )
+            new_gvcf_store_path = '{0}/chrom-{1}'.format( bse_new, chrom )
             print( "current gvcf store is ------> " + gvcf_store_path )
             print( "new version gvcf store is --> " + new_gvcf_store_path )
         loadGvcf( hl, batch, chrom, new_gvcf_store_path, gvcf_store_path, partitions_chromosome )

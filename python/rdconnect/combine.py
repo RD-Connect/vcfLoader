@@ -88,10 +88,14 @@ def createDenseMatrix( url_project, denseMatrix_path, gvcf_store_path, chrom, gr
         experiments_by_family[ fam ] = [ x[ 'Experiment' ] for x in ef if x[ 'Family' ] == fam ]
     #experiments_by_family = {'Families.FAM0000825': ['E012878'], 'Families.FAM0001023': ['E012877', 'E012882']}
 
+    print(" >>>> ", len(experiments_by_family.keys()))
+    print(experiments_by_family[experiments_by_family.keys()[0]])
+
     if None in experiments_by_family.keys():
         raise Exception( 'Provided experiment ids got no family assigned ({}).'.format('; '.join( experiments_by_family[ None ] ) ) )
 
-    print(experiments_by_family[experiments_by_family.keys()[0]])
+    
+
     # dense_by_family = {}
     # for fam in experiments_by_family.keys():
     #     sam = hl.literal( experiments_by_family[ fam ], 'array<str>' )

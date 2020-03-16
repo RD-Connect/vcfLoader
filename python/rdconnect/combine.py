@@ -223,9 +223,6 @@ def loadGvcf( hl, files, chrom, destinationPath, gvcfStorePath, partitions ):
     print( "loadGvcf ---> {0}".format( destinationPath ) )
     comb.write( destinationPath, overwrite = False )
     print( "" )
-    print( "         ----> nrows: {0}".format( comb.count_rows() ) )
-    print( "         ----> ncols: {0}".format( comb.count_cols() ) )
-    print( "" )
     
 
 

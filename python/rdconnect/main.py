@@ -120,12 +120,13 @@ def main(sqlContext, configuration, chrom, nchroms, step, somaticFlag):
     if ("createDenseMatrix" in step):
         print ("step createDenseMatrix")
         denseMatrix_path = configuration[ 'combine' ][ 'denseMatrix_path' ]
+        group = configuration[ 'combine' ][ 'group' ]
         if 'gvcf_store_path' in configuration[ 'combine' ].keys():
             gvcf_store_path = configuration[ 'combine' ][ 'gvcf_store_path' ]
         else:
             gvcf_store_path = None
 
-        combine.createDenseMatrix( denseMatrix_path, gvcf_store_path, chrom, save_family_dense = False )
+        combine.createDenseMatrix( denseMatrix_path, gvcf_store_path, chrom, group, save_family_dense = False )
         
     if ("createIndex" in step):
         if ("createIndexCNV" in step):

@@ -219,11 +219,13 @@ def loadGvcf( hl, files, chrom, destinationPath, gvcfStorePath, partitions ):
     else:
         gvcf_store = hl.read_matrix_table( gvcfStorePath )
         comb = combine_gvcfs( [ gvcf_store ] + vcfs )
+    print( "" )
     print( "loadGvcf ---> {0}".format( destinationPath ) )
+    comb.write( destinationPath, overwrite = False )
+    print( "" )
     print( "         ----> nrows: {0}".format( comb.count_rows() ) )
     print( "         ----> ncols: {0}".format( comb.count_cols() ) )
     print( "" )
-    comb.write( destinationPath, overwrite = False )
     
 
 

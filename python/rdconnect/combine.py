@@ -72,14 +72,16 @@ def createSparseMatrix( group, url_project, token, prefix_hdfs, chrom, max_items
 
 
 def createDenseMatrix( denseMatrix_path, gvcf_store_path, chrom, save_family_dense = False  ):
+    if gvcf_store_path is None:
+        raise 'no information on "gvcf_store_path" was provided.'
     print( 'read from in {0}/chrom-{1}'.format( gvcf_store_path, chrom ) )
     sparseMatrix = hl.read_matrix_table( '{0}/chrom-{1}'.format( gvcf_store_path, chrom ) )
 
-    experiments_in_matrix = [ x.get( 's' ) for x in sparseMatrix.col.collect() ]
+    experiments_in_matrix = [ x.get( 's' ) for x in sparseMatrix.col.collect() ]    
     #experiments_in_matrix = [ 'E000071', 'E000074', 'E000001', 'E000002', 'E000003', 'E000004', 'E000005' ]
-    experiments_in_group = combine.getExperimentByGroup( group, url_project, token, prefix_hdfs, chrom, max_items_batch )
+    experiments_in_group = getExperimentByGroup( group, url_project, token, prefix_hdfs, chrom, max_items_batch )
     full_ids_in_matrix = [ x for x in experiments_in_group if x[ 'RD_Connect_ID_Experiment' ] in experiments_in_matrix ]
-    experiments_and_families = combine.getExperimentsByFamily( full_ids_in_matrix, configuration[ 'datamanagement' ][ 'host' ], configuration[ 'gpap' ][ 'id' ], configuration[ 'gpap' ][ 'token' ] )
+    experiments_and_families = getExperimentsByFamily( full_ids_in_matrix, configuration[ 'datamanagement' ][ 'host' ], configuration[ 'gpap' ][ 'id' ], configuration[ 'gpap' ][ 'token' ] )
 
     experiments_by_family = {}
     for fam in list( set( [ x[ 'Family' ] for x in ef ] ) ):

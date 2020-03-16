@@ -126,12 +126,14 @@ def main(sqlContext, configuration, chrom, nchroms, step, somaticFlag):
         gpap_id = configuration[ 'gpap' ][ 'id' ]
         gpap_token = configuration[ 'gpap' ][ 'token' ]
         prefix_hdfs = configuration[ 'combine' ][ 'prefix_hdfs' ]
+        if 'max_items_batch' in configuration[ 'combine' ]:
+            max_items_batch = configuration[ 'combine' ][ 'max_items_batch' ]
         if 'gvcf_store_path' in configuration[ 'combine' ].keys():
             gvcf_store_path = configuration[ 'combine' ][ 'gvcf_store_path' ]
         else:
             gvcf_store_path = None
 
-        combine.createDenseMatrix( url_project, prefix_hdfs, denseMatrix_path, gvcf_store_path, chrom, group, token, gpap_id, gpap_token, save_family_dense = False )
+        combine.createDenseMatrix( url_project, prefix_hdfs, max_items_batch, denseMatrix_path, gvcf_store_path, chrom, group, token, gpap_id, gpap_token, save_family_dense = False )
         
     if ("createIndex" in step):
         if ("createIndexCNV" in step):

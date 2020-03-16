@@ -71,7 +71,8 @@ def createSparseMatrix( group, url_project, token, prefix_hdfs, chrom, max_items
         loadGvcf( hl, batch, chrom, new_gvcf_store_path, gvcf_store_path, partitions_chromosome )
 
 
-def createDenseMatrix( url_project, prefix_hdfs, denseMatrix_path, gvcf_store_path, chrom, group, token, gpap_id, gpap_token, save_family_dense = False  ):
+max_items_batch
+def createDenseMatrix( url_project, prefix_hdfs, , denseMatrix_path, gvcf_store_path, chrom, group, token, gpap_id, gpap_token, save_family_dense = False  ):
     if gvcf_store_path is None:
         raise 'no information on "gvcf_store_path" was provided.'
     print( 'read from in {0}/chrom-{1}'.format( gvcf_store_path, chrom ) )

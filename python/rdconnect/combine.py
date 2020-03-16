@@ -71,7 +71,7 @@ def createSparseMatrix( group, url_project, token, prefix_hdfs, chrom, max_items
         loadGvcf( hl, batch, chrom, new_gvcf_store_path, gvcf_store_path, partitions_chromosome )
 
 
-def createDenseMatrix( url_project, denseMatrix_path, gvcf_store_path, chrom, group, save_family_dense = False  ):
+def createDenseMatrix( url_project, denseMatrix_path, gvcf_store_path, chrom, group, token, gpap_id, gpap_token, save_family_dense = False  ):
     if gvcf_store_path is None:
         raise 'no information on "gvcf_store_path" was provided.'
     print( 'read from in {0}/chrom-{1}'.format( gvcf_store_path, chrom ) )
@@ -81,7 +81,7 @@ def createDenseMatrix( url_project, denseMatrix_path, gvcf_store_path, chrom, gr
     #experiments_in_matrix = [ 'E000071', 'E000074', 'E000001', 'E000002', 'E000003', 'E000004', 'E000005' ]
     experiments_in_group = getExperimentByGroup( group, url_project, token, prefix_hdfs, chrom, max_items_batch )
     full_ids_in_matrix = [ x for x in experiments_in_group if x[ 'RD_Connect_ID_Experiment' ] in experiments_in_matrix ]
-    experiments_and_families = getExperimentsByFamily( full_ids_in_matrix, configuration[ 'datamanagement' ][ 'host' ], configuration[ 'gpap' ][ 'id' ], configuration[ 'gpap' ][ 'token' ] )
+    experiments_and_families = getExperimentsByFamily( full_ids_in_matrix, curl_project, gpap_id, gpap_token )
 
     experiments_by_family = {}
     for fam in list( set( [ x[ 'Family' ] for x in ef ] ) ):

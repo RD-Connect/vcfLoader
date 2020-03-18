@@ -103,7 +103,7 @@ def createDenseMatrix( url_project, prefix_hdfs, max_items_batch, denseMatrix_pa
     dense_by_family = []
     ttl = len( list( experiments_by_family.keys() ) )
     for idx, fam in enumerate( experiments_by_family.keys() ):
-        print( "Fam '{0}' with {1} members ()".format( fam, len( experiments_by_family[ fam ] ), idx, ttl ) )
+        print( "Fam '{0}' with {1} members ({2}/{3})".format( fam, len( experiments_by_family[ fam ] ), idx, ttl ) )
         if not fam is None:
             sam = hl.literal( experiments_by_family[ fam ], 'array<str>' )
             familyMatrix = sparseMatrix.filter_cols( sam.contains( sparseMatrix['s'] ) )

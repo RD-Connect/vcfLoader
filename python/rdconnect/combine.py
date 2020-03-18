@@ -98,11 +98,12 @@ def createDenseMatrix( url_project, prefix_hdfs, max_items_batch, denseMatrix_pa
 
     del experiments_by_family[None]
     y = len( experiments_by_family.keys() )
-    print( "Number of original families was of '{0}' and of '{1}' after removing 'None'.".format( x, y ) )
+    print( 'Number of original families was of "{0}" and of "{1}" after removing "None".'.format( x, y ) )
 
     dense_by_family = []
-    for fam in experiments_by_family.keys():
-        print( "Fam '{0}' with {1} members".format( fam, len( experiments_by_family[ fam ] ) ) )
+    ttl = len( list( experiments_by_family.keys() ) )
+    for idx, fam in enumerate( experiments_by_family.keys() ):
+        print( "Fam '{0}' with {1} members ()".format( fam, len( experiments_by_family[ fam ] ), idx, ttl ) )
         if not fam is None:
             sam = hl.literal( experiments_by_family[ fam ], 'array<str>' )
             familyMatrix = sparseMatrix.filter_cols( sam.contains( sparseMatrix['s'] ) )
@@ -113,6 +114,7 @@ def createDenseMatrix( url_project, prefix_hdfs, max_items_batch, denseMatrix_pa
                 familyMatrix.write( '{0}/{1}/chrom-{2}'.format( denseMatrix_path, fam, chrom ), overwrite = True )
             dense_by_family.append( familyMatrix )
 
+    print( 'Saving dense matrix to disk ({0})'.format( '{0}/chrm-{1}'.format( denseMatrix_path, chrom ) ) )
     dense_by_family[ 0 ] 
     denseMatrix = dense_by_family[ 0 ] 
     for ii in range(1 , len( dense_by_family ) ):

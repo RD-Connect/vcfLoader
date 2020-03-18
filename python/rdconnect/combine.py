@@ -85,8 +85,8 @@ def createDenseMatrix( url_project, prefix_hdfs, max_items_batch, denseMatrix_pa
     experiments_and_families = getExperimentsByFamily( full_ids_in_matrix, url_project, gpap_id, gpap_token )
 
     experiments_by_family = {}
-    for fam in list( set( [ x[ 'Family' ] for x in ef ] ) ):
-        experiments_by_family[ fam ] = [ x[ 'Experiment' ] for x in ef if x[ 'Family' ] == fam ]
+    for fam in list( set( [ x[ 'Family' ] for x in experiments_and_families ] ) ):
+        experiments_by_family[ fam ] = [ x[ 'Experiment' ] for x in experiments_and_families if x[ 'Family' ] == fam ]
     #experiments_by_family = {'Families.FAM0000825': ['E012878'], 'Families.FAM0001023': ['E012877', 'E012882']}
 
     print(" >>>> ", len(experiments_by_family.keys()))

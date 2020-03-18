@@ -1,3 +1,4 @@
+import warnings
 import hail as hl
 import os,requests,json
 from hail.experimental.vcf_combiner import *
@@ -93,7 +94,8 @@ def createDenseMatrix( url_project, prefix_hdfs, max_items_batch, denseMatrix_pa
     print(experiments_by_family[list(experiments_by_family.keys())[0]])
 
     if None in experiments_by_family.keys():
-        raise Exception( 'Provided experiment ids got no family assigned ({}).'.format('; '.join( experiments_by_family[ None ] ) ) )
+        #raise Exception( 'Provided experiment ids got no family assigned ({}).'.format('; '.join( experiments_by_family[ None ] ) ) )
+        warnings.warn( 'Provided experiment ids got no family assigned ({}).'.format('; '.join( experiments_by_family[ None ] ) ) )
 
     dense_by_family = {}
     for fam in experiments_by_family.keys():

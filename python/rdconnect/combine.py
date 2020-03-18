@@ -117,6 +117,7 @@ def createDenseMatrix( url_project, prefix_hdfs, max_items_batch, denseMatrix_pa
     denseMatrix = dense_by_family[ 0 ] 
     for ii in range(1 , len( dense_by_family ) ):
         denseMatrix = full_outer_join_mt( denseMatrix, dense_by_family[ ii ] )
+    #print( "Final dense matrix with {0} cols and {1} rows".format( denseMatrix.count_cols(), denseMatrix.count_rows() ) )
     denseMatrix.write( '{0}/chrm-{1}'.format( denseMatrix_path, chrom ), overwrite = True )
 
 

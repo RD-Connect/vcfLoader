@@ -90,16 +90,17 @@ def createDenseMatrix( url_project, prefix_hdfs, max_items_batch, denseMatrix_pa
         experiments_by_family[ fam ] = [ x[ 'Experiment' ] for x in experiments_and_families if x[ 'Family' ] == fam ]
     #experiments_by_family = {'Families.FAM0000825': ['E012878'], 'Families.FAM0001023': ['E012877', 'E012882']}
 
-    print( " >>>> ", len(experiments_by_family.keys()) )
+    x = len( experiments_by_family.keys() )
 
     if None in experiments_by_family.keys():
         #raise Exception( 'Provided experiment ids got no family assigned ({}).'.format('; '.join( experiments_by_family[ None ] ) ) )
         warnings.warn( 'Provided experiment ids got no family assigned ({}).'.format('; '.join( experiments_by_family[ None ] ) ) )
 
     del experiments_by_family[None]
-    print( " >>>> ", len(experiments_by_family.keys()) )
+    y = len( experiments_by_family.keys() )
+    print( "Number of original families was of '{0}' and of '{1}' after removing 'None'.".format( x, y ) )
 
-    dense_by_family = {}
+    dense_by_family = []
     for fam in experiments_by_family.keys():
         print( "Fam '{0}' with {1} members".format( fam, len( experiments_by_family[ fam ] ) ) )
         if not fam is None:
@@ -110,7 +111,7 @@ def createDenseMatrix( url_project, prefix_hdfs, max_items_batch, denseMatrix_pa
             familyMatrix = familyMatrix.filter_rows( familyMatrix.nH < familyMatrix.count_cols() )
             if save_family_dense:
                 familyMatrix.write( '{0}/{1}/chrom-{2}'.format( denseMatrix_path, fam, chrom ), overwrite = True )
-            dense_by_family[ fam ] = familyMatrix
+            dense_by_family.append( familyMatrix )
 
     dense_by_family[ 0 ] 
     denseMatrix = dense_by_family[ 0 ] 

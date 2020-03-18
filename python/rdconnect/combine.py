@@ -126,11 +126,16 @@ def getExperimentsByFamily( pids, url_project, id_gpap, token_gpap ):
         else:
             return pid, None
     print( "{0} ---> {1} / {2}".format( "getExperimentsByFamily", pids[ 0 ], pids[ len(pids) - 1 ] ) )
-    url = '{0}/genomics_service/pheno_api/multiple'.format( url_project )
-    headers = { 'Content-Type': 'application/json', 'X-TOKEN-AUTH': token_gpap, 'ID': id_gpap }
+    
+    # url = '{0}/genomics_service/pheno_api/multiple'.format( url_project )
+    # headers = { 'Content-Type': 'application/json', 'X-TOKEN-AUTH': token_gpap, 'ID': id_gpap }
+    
+    url = 'http://rdproto10:8082/phenotips/ExportMultiple'
+    headers = { 'Content-Type': 'application/json' }
     body = { 'patients': [ { 'id': x[ 'Phenotips_ID' ] } for x in pids ] }
-    print(body)
+    print( "getExperimentsByFamily\n\t{}\n\t{}\n\n{}".format( url, headers, body ) )
     resp = requests.post( url, headers = headers, json = body, verify = False )
+
     data = resp.json()
     completed_list = []
     for item in data:

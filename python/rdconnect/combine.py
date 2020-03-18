@@ -90,15 +90,18 @@ def createDenseMatrix( url_project, prefix_hdfs, max_items_batch, denseMatrix_pa
         experiments_by_family[ fam ] = [ x[ 'Experiment' ] for x in experiments_and_families if x[ 'Family' ] == fam ]
     #experiments_by_family = {'Families.FAM0000825': ['E012878'], 'Families.FAM0001023': ['E012877', 'E012882']}
 
-    print(" >>>> ", len(experiments_by_family.keys()))
-    print(experiments_by_family[list(experiments_by_family.keys())[0]])
+    print( " >>>> ", len(experiments_by_family.keys()) )
 
     if None in experiments_by_family.keys():
         #raise Exception( 'Provided experiment ids got no family assigned ({}).'.format('; '.join( experiments_by_family[ None ] ) ) )
         warnings.warn( 'Provided experiment ids got no family assigned ({}).'.format('; '.join( experiments_by_family[ None ] ) ) )
 
+    del experiments_by_family[None]
+    print( " >>>> ", len(experiments_by_family.keys()) )
+
     dense_by_family = {}
     for fam in experiments_by_family.keys():
+        print( "Fam '{0}' with {1} members".format( fam, len( experiments_by_family[ fam ] ) ) )
         if not fam is None:
             sam = hl.literal( experiments_by_family[ fam ], 'array<str>' )
             familyMatrix = sparseMatrix.filter_cols( sam.contains( sparseMatrix['s'] ) )
@@ -127,14 +130,9 @@ def getExperimentsByFamily( pids, url_project, id_gpap, token_gpap ):
         else:
             return pid, None
     print( "{0} ---> {1} / {2}".format( "getExperimentsByFamily", pids[ 0 ], pids[ len(pids) - 1 ] ) )
-    
-    # url = '{0}/genomics_service/pheno_api/multiple'.format( url_project )
-    # headers = { 'Content-Type': 'application/json', 'X-TOKEN-AUTH': token_gpap, 'ID': id_gpap }
-    
     url = 'http://rdproto10:8082/phenotips/ExportMultiple'
     headers = { 'Content-Type': 'application/json' }
     body = { 'patients': [ { 'id': x[ 'Phenotips_ID' ] } for x in pids ] }
-    print( "getExperimentsByFamily\n\t{}\n\t{}\n\n{}".format( url, headers, body ) )
     resp = requests.post( url, headers = headers, json = body, verify = False )
 
     data = resp.json()

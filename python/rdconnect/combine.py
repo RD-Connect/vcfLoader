@@ -90,29 +90,27 @@ def createDenseMatrix( url_project, prefix_hdfs, max_items_batch, denseMatrix_pa
     #experiments_by_family = {'Families.FAM0000825': ['E012878'], 'Families.FAM0001023': ['E012877', 'E012882']}
 
     print(" >>>> ", len(experiments_by_family.keys()))
-    print(experiments_by_family[experiments_by_family.keys()[0]])
+    print(experiments_by_family[list(experiments_by_family.keys())[0]])
 
     if None in experiments_by_family.keys():
         raise Exception( 'Provided experiment ids got no family assigned ({}).'.format('; '.join( experiments_by_family[ None ] ) ) )
 
-    
+    dense_by_family = {}
+    for fam in experiments_by_family.keys():
+        sam = hl.literal( experiments_by_family[ fam ], 'array<str>' )
+        familyMatrix = sparseMatrix.filter_cols( sam.contains( sparseMatrix['s'] ) )
+        familyMatrix = hl.experimental.densify( familyMatrix )
+        familyMatrix = familyMatrix.annotate_rows( nH = hl.agg.count_where( familyMatrix.LGT.is_hom_ref() ) )
+        familyMatrix = familyMatrix.filter_rows( familyMatrix.nH < familyMatrix.count_cols() )
+        if save_family_dense:
+            familyMatrix.write( '{0}/{1}/chrom-{2}'.format( denseMatrix_path, fam, chrom ), overwrite = True )
+        dense_by_family[ fam ] = familyMatrix
 
-    # dense_by_family = {}
-    # for fam in experiments_by_family.keys():
-    #     sam = hl.literal( experiments_by_family[ fam ], 'array<str>' )
-    #     familyMatrix = sparseMatrix.filter_cols( sam.contains( sparseMatrix['s'] ) )
-    #     familyMatrix = hl.experimental.densify( familyMatrix )
-    #     familyMatrix = familyMatrix.annotate_rows( nH = hl.agg.count_where( familyMatrix.LGT.is_hom_ref() ) )
-    #     familyMatrix = familyMatrix.filter_rows( familyMatrix.nH < familyMatrix.count_cols() )
-    #     if save_family_dense:
-    #         familyMatrix.write( '{0}/{1}/chrom-{2}'.format( denseMatrix_path, fam, chrom ), overwrite = True )
-    #     dense_by_family[ fam ] = familyMatrix
-
-    # dense_by_family[ 0 ] 
-    # denseMatrix = dense_by_family[ 0 ] 
-    # for ii in range(1 , len( dense_by_family ) ):
-    #     denseMatrix = full_outer_join_mt( denseMatrix, dense_by_family[ ii ] )
-    # denseMatrix.write( '{0}/chrm-{1}'.format( denseMatrix_path, chrom ), overwrite = True )
+    dense_by_family[ 0 ] 
+    denseMatrix = dense_by_family[ 0 ] 
+    for ii in range(1 , len( dense_by_family ) ):
+        denseMatrix = full_outer_join_mt( denseMatrix, dense_by_family[ ii ] )
+    denseMatrix.write( '{0}/chrm-{1}'.format( denseMatrix_path, chrom ), overwrite = True )
 
 
 

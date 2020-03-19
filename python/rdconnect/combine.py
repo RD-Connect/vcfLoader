@@ -88,6 +88,62 @@ def mt_to_t(vcf) :
     return vcf
 
 
+# def createDenseMatrix( url_project, prefix_hdfs, max_items_batch, denseMatrix_path, gvcf_store_path, chrom, group, token, gpap_id, gpap_token, save_family_dense = False, intermidiate_write = True ):
+#     if gvcf_store_path is None:
+#         raise 'no information on "gvcf_store_path" was provided.'
+#     print( 'read from in {0}/chrom-{1}'.format( gvcf_store_path, chrom ) )
+#     sparseMatrix = hl.read_matrix_table( '{0}/chrom-{1}'.format( gvcf_store_path, chrom ) )
+
+#     experiments_in_matrix = [ x.get( 's' ) for x in sparseMatrix.col.collect() ]    
+#     #experiments_in_matrix = [ 'E000071', 'E000074', 'E000001', 'E000002', 'E000003', 'E000004', 'E000005' ]
+#     experiments_in_group = getExperimentByGroup( group, url_project, token, prefix_hdfs, chrom, max_items_batch )
+#     full_ids_in_matrix = [ x for x in experiments_in_group if x[ 'RD_Connect_ID_Experiment' ] in experiments_in_matrix ]
+#     experiments_and_families = getExperimentsByFamily( full_ids_in_matrix, url_project, gpap_id, gpap_token )
+
+#     experiments_by_family = {}
+#     for fam in list( set( [ x[ 'Family' ] for x in experiments_and_families ] ) ):
+#         experiments_by_family[ fam ] = [ x[ 'Experiment' ] for x in experiments_and_families if x[ 'Family' ] == fam ]
+#     #experiments_by_family = {'Families.FAM0000825': ['E012878'], 'Families.FAM0001023': ['E012877', 'E012882']}
+
+#     x = len( experiments_by_family.keys() )
+
+#     if None in experiments_by_family.keys():
+#         #raise Exception( 'Provided experiment ids got no family assigned ({}).'.format('; '.join( experiments_by_family[ None ] ) ) )
+#         warnings.warn( 'Provided experiment ids got no family assigned ({}).'.format('; '.join( experiments_by_family[ None ] ) ) )
+
+#     del experiments_by_family[None]
+#     y = len( experiments_by_family.keys() )
+#     print( 'Number of original families was of "{0}" and of "{1}" after removing "None".'.format( x, y ) )
+
+#     dense_by_family = []
+#     table_by_family = []
+#     ttl = len( list( experiments_by_family.keys() ) )
+#     for idx, fam in enumerate( experiments_by_family.keys() ):
+#         print( "Fam '{0}' with {1} members ({2}/{3})".format( fam, len( experiments_by_family[ fam ] ), idx, ttl ) )
+    
+#         print( "    . Densify and filtering")
+#         sam = hl.literal( experiments_by_family[ fam ], 'array<str>' )
+#         familyMatrix = sparseMatrix.filter_cols( sam.contains( sparseMatrix['s'] ) )
+#         familyMatrix = hl.experimental.densify( familyMatrix )
+#         familyMatrix = familyMatrix.annotate_rows( nH = hl.agg.count_where( familyMatrix.LGT.is_hom_ref() ) )
+#         familyMatrix = familyMatrix.filter_rows( familyMatrix.nH < familyMatrix.count_cols() )
+#         if save_family_dense:
+#             familyMatrix.write( '{0}/{1}/chrom-{2}'.format( denseMatrix_path, fam, chrom ), overwrite = True )        
+#         table_by_family.append( mt_to_t( familyMatrix ) )
+#         dense_by_family.append( familyMatrix )
+
+#     print( 'Saving dense table to disk ({0})'.format( '{0}/chrm-{1}'.format( denseMatrix_path, chrom ) ) )
+    
+#     denseTable = table_by_family[ 0 ]
+#     for ii in range(1 , len( table_by_family ) ):
+#         denseTable = denseTable.join( table_by_family[ ii ], "outer" )
+#         if ii % 5 == 0 and intermidiate_write:
+#             print( ii, '{0}/chrm-{1}'.format( denseTable, chrom ) )
+#             denseTable.write( '{0}/chrm-{1}'.format( denseMatrix_path, chrom ), overwrite = True )
+    
+#     print( "Final dense table" )# with {0} cols and {1} rows".format( denseMatrix.count_cols(), denseMatrix.count_rows() ) )
+#     denseTable.write( '{0}/chrm-{1}'.format( denseMatrix_path, chrom ), overwrite = True )
+
 def createDenseMatrix( url_project, prefix_hdfs, max_items_batch, denseMatrix_path, gvcf_store_path, chrom, group, token, gpap_id, gpap_token, save_family_dense = False, intermidiate_write = True ):
     if gvcf_store_path is None:
         raise 'no information on "gvcf_store_path" was provided.'
@@ -95,7 +151,6 @@ def createDenseMatrix( url_project, prefix_hdfs, max_items_batch, denseMatrix_pa
     sparseMatrix = hl.read_matrix_table( '{0}/chrom-{1}'.format( gvcf_store_path, chrom ) )
 
     experiments_in_matrix = [ x.get( 's' ) for x in sparseMatrix.col.collect() ]    
-    #experiments_in_matrix = [ 'E000071', 'E000074', 'E000001', 'E000002', 'E000003', 'E000004', 'E000005' ]
     experiments_in_group = getExperimentByGroup( group, url_project, token, prefix_hdfs, chrom, max_items_batch )
     full_ids_in_matrix = [ x for x in experiments_in_group if x[ 'RD_Connect_ID_Experiment' ] in experiments_in_matrix ]
     experiments_and_families = getExperimentsByFamily( full_ids_in_matrix, url_project, gpap_id, gpap_token )
@@ -103,47 +158,37 @@ def createDenseMatrix( url_project, prefix_hdfs, max_items_batch, denseMatrix_pa
     experiments_by_family = {}
     for fam in list( set( [ x[ 'Family' ] for x in experiments_and_families ] ) ):
         experiments_by_family[ fam ] = [ x[ 'Experiment' ] for x in experiments_and_families if x[ 'Family' ] == fam ]
-    #experiments_by_family = {'Families.FAM0000825': ['E012878'], 'Families.FAM0001023': ['E012877', 'E012882']}
 
     x = len( experiments_by_family.keys() )
-
-    if None in experiments_by_family.keys():
-        #raise Exception( 'Provided experiment ids got no family assigned ({}).'.format('; '.join( experiments_by_family[ None ] ) ) )
-        warnings.warn( 'Provided experiment ids got no family assigned ({}).'.format('; '.join( experiments_by_family[ None ] ) ) )
-
-    del experiments_by_family[None]
-    y = len( experiments_by_family.keys() )
-    print( 'Number of original families was of "{0}" and of "{1}" after removing "None".'.format( x, y ) )
+    none_fam = None in experiments_by_family.keys()
+    if none_fam:
+        del experiments_by_family[None]
+        y = len( experiments_by_family.keys() )
+        warnings.warn( 'Provided experiment ids got no family assigned ({}). Number of original families was of "{}" and of "{}" after removing "None".'.format('; '.join( experiments_by_family[ None ] ), x, y ) )
 
     dense_by_family = []
-    table_by_family = []
-    ttl = len( list( experiments_by_family.keys() ) )
     for idx, fam in enumerate( experiments_by_family.keys() ):
-        print( "Fam '{0}' with {1} members ({2}/{3})".format( fam, len( experiments_by_family[ fam ] ), idx, ttl ) )
-    
-        print( "    . Densify and filtering")
         sam = hl.literal( experiments_by_family[ fam ], 'array<str>' )
         familyMatrix = sparseMatrix.filter_cols( sam.contains( sparseMatrix['s'] ) )
         familyMatrix = hl.experimental.densify( familyMatrix )
         familyMatrix = familyMatrix.annotate_rows( nH = hl.agg.count_where( familyMatrix.LGT.is_hom_ref() ) )
         familyMatrix = familyMatrix.filter_rows( familyMatrix.nH < familyMatrix.count_cols() )
-        if save_family_dense:
-            familyMatrix.write( '{0}/{1}/chrom-{2}'.format( denseMatrix_path, fam, chrom ), overwrite = True )        
-        table_by_family.append( mt_to_t( familyMatrix ) )
         dense_by_family.append( familyMatrix )
 
-    print( 'Saving dense table to disk ({0})'.format( '{0}/chrm-{1}'.format( denseMatrix_path, chrom ) ) )
-    
-    denseTable = table_by_family[ 0 ]
-    for ii in range(1 , len( table_by_family ) ):
-        denseTable = denseTable.join( table_by_family[ ii ], "outer" )
-        if ii % 5 == 0 and intermidiate_write:
-            print( ii, '{0}/chrm-{1}'.format( denseTable, chrom ) )
-            denseTable.write( '{0}/chrm-{1}'.format( denseMatrix_path, chrom ), overwrite = True )
-    
-    print( "Final dense table" )# with {0} cols and {1} rows".format( denseMatrix.count_cols(), denseMatrix.count_rows() ) )
-    denseTable.write( '{0}/chrm-{1}'.format( denseMatrix_path, chrom ), overwrite = True )
+    print( "Flatting dense matrix" )
+    mts_ = dense_by_family[:]
+    ii = 0
+    while len( mts_ ) > 1:
+        ii += 1
+        print( 'Compression {0}/{1}'.format( ii, len( mts_ ) ) )
+        tmp = []
+        for jj in range( 0, len(mts_), 2 ):
+            tmp.append( full_outer_join_mt( mts_[ jj ], mts_[ jj+2 ] ) )
+        mts_ = tmp[:]
+    [dense_matrix] = mts_
 
+    print( "Final dense matrix" )
+    dense_matrix.write( '{0}/chrm-{1}'.format( denseMatrix_path, chrom ), overwrite = True )
 
 
 def getExperimentsByFamily( pids, url_project, id_gpap, token_gpap ):

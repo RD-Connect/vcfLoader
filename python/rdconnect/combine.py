@@ -113,7 +113,6 @@ def createDenseMatrix( url_project, prefix_hdfs, max_items_batch, denseMatrix_pa
             if save_family_dense:
                 familyMatrix.write( '{0}/{1}/chrom-{2}'.format( denseMatrix_path, fam, chrom ), overwrite = True )
             dense_by_family.append( familyMatrix )
-            cnt += 1
             
 
 

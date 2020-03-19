@@ -134,7 +134,7 @@ def createDenseMatrix( url_project, prefix_hdfs, max_items_batch, denseMatrix_pa
 
     print( 'Saving dense table to disk ({0})'.format( '{0}/chrm-{1}'.format( denseMatrix_path, chrom ) ) )
     
-    denseTable = table_by_family[ 0 ].rows()
+    denseTable = table_by_family[ 0 ]
     for ii in range(1 , len( table_by_family ) ):
         denseTable = denseTable.join( table_by_family[ ii ], "outer" )
         if ii % 5 == 0 and intermidiate_write:

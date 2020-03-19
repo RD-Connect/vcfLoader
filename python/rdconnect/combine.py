@@ -71,6 +71,21 @@ def createSparseMatrix( group, url_project, token, prefix_hdfs, chrom, max_items
             print( "new version gvcf store is --> " + new_gvcf_store_path )
         loadGvcf( hl, batch, chrom, new_gvcf_store_path, gvcf_store_path, partitions_chromosome )
 
+def mt_to_t(vcf) :
+    vcf = vcf.transmute_entries( sample = hl.struct(
+        sample = vcf.s,
+        ad = truncateAt( hl, vcf.LAD[ 1 ] / hl.sum( vcf.LAD ), "2" ),
+        dp = vcf.DP,
+        gtInt = vcf.LGT,
+        gt = hl.str( vcf.LGT ),
+        gq = vcf.GQ
+    ) )
+    vcf = vcf.annotate_rows(
+        samples_germline = hl.agg.collect( vcf.sample ) 
+    ) \
+    .drop( 'rsid', 'gvcf_info', 'nH' ) \
+    .rows()
+    return vcf
 
 
 def createDenseMatrix( url_project, prefix_hdfs, max_items_batch, denseMatrix_path, gvcf_store_path, chrom, group, token, gpap_id, gpap_token, save_family_dense = False, intermidiate_write = True ):
@@ -101,30 +116,33 @@ def createDenseMatrix( url_project, prefix_hdfs, max_items_batch, denseMatrix_pa
     print( 'Number of original families was of "{0}" and of "{1}" after removing "None".'.format( x, y ) )
 
     dense_by_family = []
+    table_by_family = []
     ttl = len( list( experiments_by_family.keys() ) )
     for idx, fam in enumerate( experiments_by_family.keys() ):
         print( "Fam '{0}' with {1} members ({2}/{3})".format( fam, len( experiments_by_family[ fam ] ), idx, ttl ) )
     
+        print( "    . Densify and filtering")
         sam = hl.literal( experiments_by_family[ fam ], 'array<str>' )
         familyMatrix = sparseMatrix.filter_cols( sam.contains( sparseMatrix['s'] ) )
         familyMatrix = hl.experimental.densify( familyMatrix )
         familyMatrix = familyMatrix.annotate_rows( nH = hl.agg.count_where( familyMatrix.LGT.is_hom_ref() ) )
         familyMatrix = familyMatrix.filter_rows( familyMatrix.nH < familyMatrix.count_cols() )
         if save_family_dense:
-            familyMatrix.write( '{0}/{1}/chrom-{2}'.format( denseMatrix_path, fam, chrom ), overwrite = True )
+            familyMatrix.write( '{0}/{1}/chrom-{2}'.format( denseMatrix_path, fam, chrom ), overwrite = True )        
+        table_by_family.append( mt_to_t( familyMatrix ) )
         dense_by_family.append( familyMatrix )
 
-    print( 'Saving dense matrix/table to disk ({0})'.format( '{0}/chrm-{1}'.format( denseMatrix_path, chrom ) ) )
+    print( 'Saving dense table to disk ({0})'.format( '{0}/chrm-{1}'.format( denseMatrix_path, chrom ) ) )
     
-    denseMatrix = dense_by_family[ 0 ].rows()
-    for ii in range(1 , len( dense_by_family ) ):
-        print( ii )
-        denseMatrix = denseMatrix.join( dense_by_family[ ii ].rows(), "outer" ) # full_outer_join_mt( denseMatrix, dense_by_family[ ii ] )
+    denseTable = table_by_family[ 0 ].rows()
+    for ii in range(1 , len( table_by_family ) ):
+        denseTable = denseTable.join( table_by_family[ ii ], "outer" )
         if ii % 5 == 0 and intermidiate_write:
-            print( ii, '{0}/chrm-{1}'.format( denseMatrix_path, chrom ) )
-            denseMatrix.write( '{0}/chrm-{1}'.format( denseMatrix_path, chrom ), overwrite = True )
-    print( "Final dense matrix/table with {0} cols and {1} rows".format( denseMatrix.count_cols(), denseMatrix.count_rows() ) )
-    denseMatrix.write( '{0}/chrm-{1}'.format( denseMatrix_path, chrom ), overwrite = True )
+            print( ii, '{0}/chrm-{1}'.format( denseTable, chrom ) )
+            denseTable.write( '{0}/chrm-{1}'.format( denseMatrix_path, chrom ), overwrite = True )
+    
+    print( "Final dense table" )# with {0} cols and {1} rows".format( denseMatrix.count_cols(), denseMatrix.count_rows() ) )
+    denseTable.write( '{0}/chrm-{1}'.format( denseMatrix_path, chrom ), overwrite = True )
 
 
 

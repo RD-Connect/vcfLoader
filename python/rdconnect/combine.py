@@ -104,27 +104,26 @@ def createDenseMatrix( url_project, prefix_hdfs, max_items_batch, denseMatrix_pa
     ttl = len( list( experiments_by_family.keys() ) )
     for idx, fam in enumerate( experiments_by_family.keys() ):
         print( "Fam '{0}' with {1} members ({2}/{3})".format( fam, len( experiments_by_family[ fam ] ), idx, ttl ) )
-        if not fam is None:
-            sam = hl.literal( experiments_by_family[ fam ], 'array<str>' )
-            familyMatrix = sparseMatrix.filter_cols( sam.contains( sparseMatrix['s'] ) )
-            familyMatrix = hl.experimental.densify( familyMatrix )
-            familyMatrix = familyMatrix.annotate_rows( nH = hl.agg.count_where( familyMatrix.LGT.is_hom_ref() ) )
-            familyMatrix = familyMatrix.filter_rows( familyMatrix.nH < familyMatrix.count_cols() )
-            if save_family_dense:
-                familyMatrix.write( '{0}/{1}/chrom-{2}'.format( denseMatrix_path, fam, chrom ), overwrite = True )
-            dense_by_family.append( familyMatrix )
-            
+    
+        sam = hl.literal( experiments_by_family[ fam ], 'array<str>' )
+        familyMatrix = sparseMatrix.filter_cols( sam.contains( sparseMatrix['s'] ) )
+        familyMatrix = hl.experimental.densify( familyMatrix )
+        familyMatrix = familyMatrix.annotate_rows( nH = hl.agg.count_where( familyMatrix.LGT.is_hom_ref() ) )
+        familyMatrix = familyMatrix.filter_rows( familyMatrix.nH < familyMatrix.count_cols() )
+        if save_family_dense:
+            familyMatrix.write( '{0}/{1}/chrom-{2}'.format( denseMatrix_path, fam, chrom ), overwrite = True )
+        dense_by_family.append( familyMatrix )
 
-
-    print( 'Saving dense matrix to disk ({0})'.format( '{0}/chrm-{1}'.format( denseMatrix_path, chrom ) ) )
-    dense_by_family[ 0 ] 
-    denseMatrix = dense_by_family[ 0 ] 
+    print( 'Saving dense matrix/table to disk ({0})'.format( '{0}/chrm-{1}'.format( denseMatrix_path, chrom ) ) )
+    
+    denseMatrix = dense_by_family[ 0 ].rows()
     for ii in range(1 , len( dense_by_family ) ):
-        denseMatrix = full_outer_join_mt( denseMatrix, dense_by_family[ ii ] )
+        print( ii )
+        denseMatrix = denseMatrix.join( denseMatrix, dense_by_family[ ii ].rows() ) # full_outer_join_mt( denseMatrix, dense_by_family[ ii ] )
         if ii % 5 == 0 and intermidiate_write:
             print( ii, '{0}/chrm-{1}'.format( denseMatrix_path, chrom ) )
             denseMatrix.write( '{0}/chrm-{1}'.format( denseMatrix_path, chrom ), overwrite = True )
-    #print( "Final dense matrix with {0} cols and {1} rows".format( denseMatrix.count_cols(), denseMatrix.count_rows() ) )
+    print( "Final dense matrix/table with {0} cols and {1} rows".format( denseMatrix.count_cols(), denseMatrix.count_rows() ) )
     denseMatrix.write( '{0}/chrm-{1}'.format( denseMatrix_path, chrom ), overwrite = True )
 
 

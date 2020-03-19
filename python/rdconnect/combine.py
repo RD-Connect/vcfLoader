@@ -119,7 +119,7 @@ def createDenseMatrix( url_project, prefix_hdfs, max_items_batch, denseMatrix_pa
     denseMatrix = dense_by_family[ 0 ].rows()
     for ii in range(1 , len( dense_by_family ) ):
         print( ii )
-        denseMatrix = denseMatrix.join( denseMatrix, dense_by_family[ ii ].rows() ) # full_outer_join_mt( denseMatrix, dense_by_family[ ii ] )
+        denseMatrix = denseMatrix.join( denseMatrix, dense_by_family[ ii ].rows(), how = "outer" ) # full_outer_join_mt( denseMatrix, dense_by_family[ ii ] )
         if ii % 5 == 0 and intermidiate_write:
             print( ii, '{0}/chrm-{1}'.format( denseMatrix_path, chrom ) )
             denseMatrix.write( '{0}/chrm-{1}'.format( denseMatrix_path, chrom ), overwrite = True )

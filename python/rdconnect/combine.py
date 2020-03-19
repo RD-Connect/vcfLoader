@@ -184,7 +184,8 @@ def createDenseMatrix( url_project, prefix_hdfs, max_items_batch, denseMatrix_pa
         print( 'Compression {0}/{1}'.format( ii, len( mts_ ) ) )
         tmp = []
         for jj in range( 0, len(mts_), 2 ):
-            tmp.append( full_outer_join_mt( mts_[ jj ], mts_[ jj+2 ] ) )
+            if jj+1 < len(mts_):
+                tmp.append( full_outer_join_mt( mts_[ jj ], mts_[ jj+1 ] ) )
         mts_ = tmp[:]
     [dense_matrix] = mts_
 

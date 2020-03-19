@@ -73,7 +73,7 @@ def createSparseMatrix( group, url_project, token, prefix_hdfs, chrom, max_items
 
 
 
-def createDenseMatrix( url_project, prefix_hdfs, max_items_batch, denseMatrix_path, gvcf_store_path, chrom, group, token, gpap_id, gpap_token, save_family_dense = False  ):
+def createDenseMatrix( url_project, prefix_hdfs, max_items_batch, denseMatrix_path, gvcf_store_path, chrom, group, token, gpap_id, gpap_token, save_family_dense = False, intermidiate_write = True ):
     if gvcf_store_path is None:
         raise 'no information on "gvcf_store_path" was provided.'
     print( 'read from in {0}/chrom-{1}'.format( gvcf_store_path, chrom ) )
@@ -113,12 +113,17 @@ def createDenseMatrix( url_project, prefix_hdfs, max_items_batch, denseMatrix_pa
             if save_family_dense:
                 familyMatrix.write( '{0}/{1}/chrom-{2}'.format( denseMatrix_path, fam, chrom ), overwrite = True )
             dense_by_family.append( familyMatrix )
+            cnt += 1
+            
+
 
     print( 'Saving dense matrix to disk ({0})'.format( '{0}/chrm-{1}'.format( denseMatrix_path, chrom ) ) )
     dense_by_family[ 0 ] 
     denseMatrix = dense_by_family[ 0 ] 
     for ii in range(1 , len( dense_by_family ) ):
         denseMatrix = full_outer_join_mt( denseMatrix, dense_by_family[ ii ] )
+        if ii % 10 == 0 and intermidiate_write:
+            denseMatrix.write( '{0}/chrm-{1}'.format( denseMatrix_path, chrom ), overwrite = True )
     #print( "Final dense matrix with {0} cols and {1} rows".format( denseMatrix.count_cols(), denseMatrix.count_rows() ) )
     denseMatrix.write( '{0}/chrm-{1}'.format( denseMatrix_path, chrom ), overwrite = True )
 

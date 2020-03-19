@@ -4,7 +4,7 @@ import os,requests,json
 from hail.experimental.vcf_combiner import *
 from hail.experimental import full_outer_join_mt
 from rdconnect import utils
-from annotatiosn import truncateAt
+from annotations import truncateAt
 
 def resource(filename):
     return os.path.join(filename)

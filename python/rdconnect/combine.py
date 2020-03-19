@@ -162,9 +162,10 @@ def createDenseMatrix( url_project, prefix_hdfs, max_items_batch, denseMatrix_pa
     x = len( experiments_by_family.keys() )
     none_fam = None in experiments_by_family.keys()
     if none_fam:
+        z = '; '.join( experiments_by_family[ None ] )
         del experiments_by_family[None]
         y = len( experiments_by_family.keys() )
-        warnings.warn( 'Provided experiment ids got no family assigned ({}). Number of original families was of "{}" and of "{}" after removing "None".'.format('; '.join( experiments_by_family[ None ] ), x, y ) )
+        warnings.warn( 'Provided experiment ids got no family assigned ({0}). Number of original families was of "{1}" and of "{2}" after removing "None".'.format( z, x, y ) )
 
     dense_by_family = []
     for idx, fam in enumerate( experiments_by_family.keys() ):

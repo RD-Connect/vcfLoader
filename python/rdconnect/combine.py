@@ -340,7 +340,7 @@ def loadGvcf( hl, files, chrom, destinationPath, gvcfStorePath, partitions, lgr 
         return x
 
     interval = getIntervalByChrom( chrom, partitions )
-    lgr.debug( 'Got {} intervals for chrm {}'.format( len( intervals ), chrom ) )
+    lgr.debug( 'Got {} intervals for chrm {}'.format( len( interval ), chrom ) )
 
     vcfs = [ transformFile( mt ) for mt in importFiles( files ) ]
     lgr.debug( 'Transformed files' )

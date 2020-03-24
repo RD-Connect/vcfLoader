@@ -31,6 +31,7 @@ def create_logger( name, path ):
 
 
 def sparse_table( name, experiment, chrm ):
+    now = datetime.now()
     date_time = now.strftime("%y%m%d_%H%M%S")
     filename = 'vcfLoader_{}_table.tsv'.format( name )
     with open( filename, 'a') as myfile:

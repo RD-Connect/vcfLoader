@@ -105,9 +105,9 @@ def createSparseMatrix( sqlContext, sc, group, url_project, token, prefix_hdfs, 
         try:
             x = ff.split( '/' )
             z.append( ( x[ len( x ) - 1 ].split( '.' )[ 0 ], chrom ) )
+            print( x )
         except:
             z.append( ( ff, chrom ) )
-            sparse_table( 'sparse', x, chrom )
 
     rdd = sc.parallelize( z )
     experiments = rdd.map( lambda x: Row( name = x[ 0 ], age = int( x[ 1 ] ) ) )
@@ -116,7 +116,7 @@ def createSparseMatrix( sqlContext, sc, group, url_project, token, prefix_hdfs, 
     
     now = datetime.now()
     date_time = now.strftime("%y%m%d_%H%M%S")
-    df.write.csv( 'hdfs://rdhdfs1:27000/test/rdconnect-ES6/sparseMatrix/1737/{}}.csv'.format( date_time ) )
+    df.write.csv( 'hdfs://rdhdfs1:27000/test/rdconnect-ES6/sparseMatrix/1737/{}.csv'.format( date_time ) )
     lgr.debug( 'Saved table-log' )
 
 def mt_to_t(vcf) :

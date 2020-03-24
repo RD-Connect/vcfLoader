@@ -96,7 +96,7 @@ def createSparseMatrix( sqlContext, sc, group, url_project, token, prefix_hdfs, 
             #print( "current gvcf store is ------> " + gvcf_store_path )
             #print( "new version gvcf store is --> " + new_gvcf_store_path )
             lgr.debug( 'Index {}\n\tCurrent gvcf store is "{}"\tNew version gvcf store is "{}"'.format( index, gvcf_store_path, new_gvcf_store_path ) )
-        loadGvcf( hl, batch, chrom, new_gvcf_store_path, gvcf_store_path, partitions_chromosome, lgr )
+        #loadGvcf( hl, batch, chrom, new_gvcf_store_path, gvcf_store_path, partitions_chromosome, lgr )
 
 
     lgr.debug( 'Saving table-log for tracking purposes' )
@@ -109,10 +109,10 @@ def createSparseMatrix( sqlContext, sc, group, url_project, token, prefix_hdfs, 
             z.append( ( ff, chrom ) )
             sparse_table( 'sparse', x, chrom )
 
-    #rdd = sc.parallelize(l)
-    #experiments = rdd.map( lambda x: Row( name = x[ 0 ], age = int( x[ 1 ] ) ) )
-    #df = sqlContext.createDataFrame( experiments )
-    df = sc.createDataFrame( z )
+    rdd = sc.parallelize(l)
+    experiments = rdd.map( lambda x: Row( name = x[ 0 ], age = int( x[ 1 ] ) ) )
+    df = sqlContext.createDataFrame( experiments )
+    #df = sc.createDataFrame( z )
     
     now = datetime.now()
     date_time = now.strftime("%y%m%d_%H%M%S")

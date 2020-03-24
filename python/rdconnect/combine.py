@@ -109,7 +109,7 @@ def createSparseMatrix( sqlContext, sc, group, url_project, token, prefix_hdfs, 
             z.append( ( ff, chrom ) )
             sparse_table( 'sparse', x, chrom )
 
-    rdd = sc.parallelize(l)
+    rdd = sc.parallelize( z )
     experiments = rdd.map( lambda x: Row( name = x[ 0 ], age = int( x[ 1 ] ) ) )
     df = sqlContext.createDataFrame( experiments )
     #df = sc.createDataFrame( z )

@@ -34,8 +34,8 @@ def sparse_table( name, experiment, chrm ): # hdfs
     with open( filename, 'a') as myfile:
         myfile.write( '{}\t{}\t{}\t'.format( date_time, experiment, chrm ) )
 
-    table_hdfs = 'hdfs://rdhdfs1:27000/test/rdconnect-ES6/sparseMatrix/1737/log/{}'.format( filename )
-    put = Popen(["hadoop", "fs", "-put", filename, table_hdfs], stdin=PIPE, bufsize=-1)
+    table_hdfs = 'hdfs://rdhdfs1:27000/test/rdconnect-ES6/sparseMatrix/1737/log/'
+    put = Popen(["hdfs", "dfs", "-put", filename, table_hdfs], stdin=PIPE, bufsize=-1)
     put.communicate()
 
 

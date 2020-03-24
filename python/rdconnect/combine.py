@@ -7,6 +7,7 @@ from hail.experimental import full_outer_join_mt
 from rdconnect import utils
 from rdconnect.annotations import truncateAt
 from datetime import datetime
+from subprocess import PIPE, Popen
 
 
 def create_logger( name, path ):
@@ -14,28 +15,29 @@ def create_logger( name, path ):
     date_time = now.strftime("%y%m%d_%H%M%S")
     logger = logging.getLogger( name )
     logger.setLevel( logging.DEBUG )
-    fh1 = logging.FileHandler( os.path.join( path, 'vcfLoader_{}_info.log'.format( date_time ) ) )
-    fh1.setLevel( logging.INFO )
-    fh2 = logging.FileHandler( os.path.join( path, 'vcfLoader_{}_debug.log'.format( date_time ) ) )
-    fh2.setLevel(logging.DEBUG)
+    fh = logging.FileHandler( os.path.join( path, 'vcfLoader_{}_debug.log'.format( date_time ) ) )
+    fh.setLevel(logging.DEBUG)
     ch = logging.StreamHandler()
     ch.setLevel( logging.DEBUG )
     formatter = logging.Formatter( '%(asctime)s - %(name)s - %(levelname)s - %(message)s' )
-    fh1.setFormatter( formatter )
-    fh2.setFormatter( formatter )
+    fh.setFormatter( formatter )
     ch.setFormatter( formatter )
-    logger.addHandler( fh1 )
-    logger.addHandler( fh2 )
+    logger.addHandler( fh )
     logger.addHandler( ch )
     return logger
 
 
-def sparse_table( name, experiment, chrm ):
+def sparse_table( name, experiment, chrm ): # hdfs
     now = datetime.now()
     date_time = now.strftime("%y%m%d_%H%M%S")
     filename = 'vcfLoader_{}_table.tsv'.format( name )
     with open( filename, 'a') as myfile:
         myfile.write( '{}\t{}\t{}\t'.format( date_time, experiment, chrm ) )
+
+    table_hdfs = 'hdfs://rdhdfs1:27000/test/rdconnect-ES6/sparseMatrix/1737/log/{}'.format( filename )
+    put = Popen(["hadoop", "fs", "-put", filename, hdfs_path], stdin=PIPE, bufsize=-1)
+    put.communicate()
+
 
 
 def resource(filename):

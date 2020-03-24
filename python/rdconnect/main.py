@@ -51,7 +51,7 @@ def optionParser(argv):
     return chrom, path, nchroms, step, cores, somaticFlag
 
 # Main functionality. It runs the pipeline steps
-def main(sqlContext, configuration, chrom, nchroms, step, somaticFlag):
+def main(sqlContext, sc, configuration, chrom, nchroms, step, somaticFlag):
     now = datetime.datetime.now()
     print('Staring PIPELINE at {}/{}/{} {}:{}:{}'.format(now.year,now.month,now.day,now.hour,now.minute,now.second,))
 
@@ -114,7 +114,7 @@ def main(sqlContext, configuration, chrom, nchroms, step, somaticFlag):
             url_project = configuration[ 'datamanagement' ][ 'host' ]
             group = configuration[ 'combine' ][ 'group' ]
             prefix_hdfs = configuration[ 'combine' ][ 'prefix_hdfs' ]
-            combine.createSparseMatrix( group, url_project, token, prefix_hdfs, chrom, max_items_batch, partitions_chromosome, gvcf_store_path, new_gvcf_store_path )
+            combine.createSparseMatrix( sqlContext, sc, group, url_project, token, prefix_hdfs, chrom, max_items_batch, partitions_chromosome, gvcf_store_path, new_gvcf_store_path )
 
 
     if ("createDenseMatrix" in step):
@@ -339,4 +339,4 @@ if __name__ == "__main__":
     hl.init(spark.sparkContext,tmp_dir="hdfs://rdhdfs1:27000/test/tmp")
     sqlContext = SQLContext(hl.spark_context())
     # Execute Main functionality
-    main(sqlContext, main_conf, chrom, nchroms, step, somaticFlag)
+    main( sqlContext, park.sparkContext main_conf, chrom, nchroms, step, somaticFlag )

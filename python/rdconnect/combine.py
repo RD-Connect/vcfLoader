@@ -8,6 +8,7 @@ from rdconnect import utils
 from rdconnect.annotations import truncateAt
 from datetime import datetime
 from subprocess import PIPE, Popen
+from pyspark.sql import Row
 
 
 def create_logger( name, path ):
@@ -25,19 +26,6 @@ def create_logger( name, path ):
     logger.addHandler( fh )
     logger.addHandler( ch )
     return logger
-
-
-def sparse_table( name, experiment, chrm ): # hdfs
-    now = datetime.now()
-    date_time = now.strftime("%y%m%d_%H%M%S")
-    filename = 'vcfLoader_{}_table.tsv'.format( name )
-    with open( filename, 'a') as myfile:
-        myfile.write( '{}\t{}\t{}\t'.format( date_time, experiment, chrm ) )
-
-    table_hdfs = 'hdfs://rdhdfs1:27000/test/rdconnect-ES6/sparseMatrix/1737/log/'
-    put = Popen(["hdfs", "dfs", "-put", filename, table_hdfs], stdin=PIPE, bufsize=-1)
-    put.communicate()
-
 
 
 def resource(filename):
@@ -77,7 +65,7 @@ def getExperimentsToProcess( experiment_status, experiment_available, check_hdfs
     return [ x for x in experiment_available if x[ 'RD_Connect_ID_Experiment' ] in selected_experiments ]
 
 
-def createSparseMatrix( group, url_project, token, prefix_hdfs, chrom, max_items_batch, partitions_chromosome, gvcf_store_path, new_gvcf_store_path ):
+def createSparseMatrix( sqlContext, sc, group, url_project, token, prefix_hdfs, chrom, max_items_batch, partitions_chromosome, gvcf_store_path, new_gvcf_store_path ):
     lgr = create_logger( 'createSparseMatrix', '' )
 
     experiments_in_group = getExperimentByGroup( group, url_project, token, prefix_hdfs, chrom, max_items_batch )
@@ -109,6 +97,27 @@ def createSparseMatrix( group, url_project, token, prefix_hdfs, chrom, max_items
             #print( "new version gvcf store is --> " + new_gvcf_store_path )
             lgr.debug( 'Index {}\n\tCurrent gvcf store is "{}"\tNew version gvcf store is "{}"'.format( index, gvcf_store_path, new_gvcf_store_path ) )
         loadGvcf( hl, batch, chrom, new_gvcf_store_path, gvcf_store_path, partitions_chromosome, lgr )
+
+
+    lgr.debug( 'Saving table-log for tracking purposes' )
+    z = []
+    for ff in files_to_be_loaded:
+        try:
+            x = ff.split( '/' )
+            z.append( ( x[ len( x ) - 1 ].split( '.' )[ 0 ], chrom ) )
+        except:
+            z.append( ( ff, chrom ) )
+            sparse_table( 'sparse', x, chrom )
+
+    #rdd = sc.parallelize(l)
+    #experiments = rdd.map( lambda x: Row( name = x[ 0 ], age = int( x[ 1 ] ) ) )
+    #df = sqlContext.createDataFrame( experiments )
+    df = sc.createDataFrame( z )
+    
+    now = datetime.now()
+    date_time = now.strftime("%y%m%d_%H%M%S")
+    df.write.csv( 'hdfs://rdhdfs1:27000/test/rdconnect-ES6/sparseMatrix/1737/{}}.csv'.format( date_time ) )
+    lgr.debug( 'Saved table-log' )
 
 def mt_to_t(vcf) :
     vcf = vcf.transmute_entries( sample = hl.struct(
@@ -357,14 +366,6 @@ def loadGvcf( hl, files, chrom, destinationPath, gvcfStorePath, partitions, lgr 
     lgr.debug( 'Saving sparse matrix to "{}"'.format( destinationPath ) )
     comb.write( destinationPath, overwrite = True )
     lgr.debug( 'Ended saving sparse matrix' )
-    for ff in files:
-        try:
-            x = ff.split( '/' )
-            x = x[ len( x ) - 1 ].split( '.' )[ 0 ]
-        except:
-            x = ff
-        sparse_table( 'sparse', x, chrom )
-    lgr.debug( 'Saved table-log' )
     
 
 

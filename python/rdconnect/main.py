@@ -339,4 +339,4 @@ if __name__ == "__main__":
     hl.init(spark.sparkContext,tmp_dir="hdfs://rdhdfs1:27000/test/tmp")
     sqlContext = SQLContext(hl.spark_context())
     # Execute Main functionality
-    main( sqlContext, park.sparkContext, main_conf, chrom, nchroms, step, somaticFlag )
+    main( sqlContext, spark.sparkContext, main_conf, chrom, nchroms, step, somaticFlag )

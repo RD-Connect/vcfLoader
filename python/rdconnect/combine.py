@@ -99,7 +99,7 @@ def createSparseMatrix( sqlContext, sc, group, url_project, token, prefix_hdfs, 
             #print( "current gvcf store is ------> " + gvcf_store_path )
             #print( "new version gvcf store is --> " + new_gvcf_store_path )
             lgr.debug( 'Index {}\n\tCurrent gvcf store is "{}"\tNew version gvcf store is "{}"'.format( index, gvcf_store_path, new_gvcf_store_path ) )
-        #loadGvcf( hl, batch, chrom, new_gvcf_store_path, gvcf_store_path, partitions_chromosome, lgr )
+        loadGvcf( hl, batch, chrom, new_gvcf_store_path, gvcf_store_path, partitions_chromosome, lgr )
 
 
     lgr.debug( 'Saving table-log for tracking purposes' )
@@ -108,7 +108,6 @@ def createSparseMatrix( sqlContext, sc, group, url_project, token, prefix_hdfs, 
         try:
             x = ff.split( '/' )
             z.append( ( x[ len( x ) - 1 ].split( '.' )[ 0 ], chrom ) )
-            print( x )
         except:
             z.append( ( ff, chrom ) )
 

@@ -6,9 +6,11 @@ from hail.experimental.vcf_combiner import *
 from hail.experimental import full_outer_join_mt
 from rdconnect import utils
 from rdconnect.annotations import truncateAt
+from datetime import datetime
 
 
 def create_logger( name, path ):
+    now = datetime.now()
     date_time = now.strftime("%y%m%d_%H%M%S")
     logger = logging.getLogger( name )
     logger.setLevel( logging.DEBUG )

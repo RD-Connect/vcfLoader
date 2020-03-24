@@ -35,7 +35,7 @@ def sparse_table( name, experiment, chrm ): # hdfs
         myfile.write( '{}\t{}\t{}\t'.format( date_time, experiment, chrm ) )
 
     table_hdfs = 'hdfs://rdhdfs1:27000/test/rdconnect-ES6/sparseMatrix/1737/log/{}'.format( filename )
-    put = Popen(["hadoop", "fs", "-put", filename, hdfs_path], stdin=PIPE, bufsize=-1)
+    put = Popen(["hadoop", "fs", "-put", filename, table_hdfs], stdin=PIPE, bufsize=-1)
     put.communicate()
 
 
@@ -364,6 +364,7 @@ def loadGvcf( hl, files, chrom, destinationPath, gvcfStorePath, partitions, lgr 
         except:
             x = ff
         sparse_table( 'sparse', x, chrom )
+    lgr.debug( 'Saved table-log' )
     
 
 

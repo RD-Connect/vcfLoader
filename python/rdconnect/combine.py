@@ -243,6 +243,7 @@ def divideChunks( collection, size ):
 def divideChunksFamily( collection, size = 1000 ):
     # for all families, make packs of families with size of experiments
     fam = list( collection.keys() )
+    ttl = []
     while len( fam ) > 0:
         acc = 0
         rst = []
@@ -250,7 +251,8 @@ def divideChunksFamily( collection, size = 1000 ):
             itm = fam.pop( 0 )
             acc += len( collection[ itm ] )
             rst.append( itm )
-        yield rst
+        ttl.append( rst )
+    return ttl
 
 
 def get_samples(url_sample):

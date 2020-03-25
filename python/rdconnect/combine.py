@@ -88,19 +88,20 @@ def createSparseMatrix( sqlContext, sc, group, url_project, token, prefix_hdfs, 
     
     for index, batch in enumerate( batches ):
         #print( index )
-        if index == 0:
-            #print( "current gvcf store is ------> {0}".format(  bse_old ) )
-            #print( "new version gvcf store is --> " + bse_new )
-            lgr.debug( 'Index {}\n\tCurrent gvcf store is "{}"\tNew version gvcf store is "{}"'.format( index, bse_old, bse_new ) )
+        if index == 0 and bse_old is None:
+            lgr.debug( 'Index {}\n\tCurrent gvcf store is "{}"\n\tNew version gvcf store is "{}"'.format( index, bse_old, bse_new ) )
             new_gvcf_store_path = '{0}/chrom-{1}'.format( bse_new, chrom )
+        else if index == 0 and not bse_old is None:
+            gvcf_store_path = '{0}/chrom-{1}'.format( bse_old, chrom )
+            bse_new = utils.update_version( bse_new )
+            new_gvcf_store_path = '{0}/chrom-{1}'.format( bse_new, chrom )
+            lgr.debug( 'Index {}\n\tCurrent gvcf store is "{}"\n\tNew version gvcf store is "{}"'.format( index, gvcf_store_path, new_gvcf_store_path ) )
         else:
             bse_old = bse_new
             gvcf_store_path = '{0}/chrom-{1}'.format( bse_new, chrom )
             bse_new = utils.update_version( bse_new )
             new_gvcf_store_path = '{0}/chrom-{1}'.format( bse_new, chrom )
-            #print( "current gvcf store is ------> " + gvcf_store_path )
-            #print( "new version gvcf store is --> " + new_gvcf_store_path )
-            lgr.debug( 'Index {}\n\tCurrent gvcf store is "{}"\tNew version gvcf store is "{}"'.format( index, gvcf_store_path, new_gvcf_store_path ) )
+            lgr.debug( 'Index {}\n\tCurrent gvcf store is "{}"\n\tNew version gvcf store is "{}"'.format( index, gvcf_store_path, new_gvcf_store_path ) )
         loadGvcf( hl, batch, chrom, new_gvcf_store_path, gvcf_store_path, partitions_chromosome, lgr )
 
 
@@ -116,7 +117,6 @@ def createSparseMatrix( sqlContext, sc, group, url_project, token, prefix_hdfs, 
     rdd = sc.parallelize( z )
     experiments = rdd.map( lambda x: Row( name = x[ 0 ], age = int( x[ 1 ] ) ) )
     df = sqlContext.createDataFrame( experiments )
-    #df = sc.createDataFrame( z )
     
     now = datetime.now()
     date_time = now.strftime("%y%m%d_%H%M%S")

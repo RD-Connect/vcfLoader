@@ -172,38 +172,38 @@ def createDenseMatrix( url_project, prefix_hdfs, max_items_batch, denseMatrix_pa
         y = len( experiments_by_family.keys() )
         warnings.warn( 'Provided experiment ids got no family assigned ({0}). Number of original families was of "{1}" and of "{2}" after removing "None".'.format( z, x, y ) )
 
-    dense_by_family = {}
-    for idx, fam in enumerate( experiments_by_family.keys() ):
-        lgr.debug( 'Processing family "{0}/{1}"'.format( idx, fam ) )
-        sam = hl.literal( experiments_by_family[ fam ], 'array<str>' )
-        familyMatrix = sparseMatrix.filter_cols( sam.contains( sparseMatrix['s'] ) )
-        familyMatrix = hl.experimental.densify( familyMatrix )
-        familyMatrix = familyMatrix.annotate_rows( nH = hl.agg.count_where( familyMatrix.LGT.is_hom_ref() ) )
-        familyMatrix = familyMatrix.filter_rows( familyMatrix.nH < familyMatrix.count_cols() )
-        dense_by_family[ fam ] = familyMatrix
+    # dense_by_family = {}
+    # for idx, fam in enumerate( experiments_by_family.keys() ):
+    #     lgr.debug( 'Processing family "{0}/{1}"'.format( idx, fam ) )
+    #     sam = hl.literal( experiments_by_family[ fam ], 'array<str>' )
+    #     familyMatrix = sparseMatrix.filter_cols( sam.contains( sparseMatrix['s'] ) )
+    #     familyMatrix = hl.experimental.densify( familyMatrix )
+    #     familyMatrix = familyMatrix.annotate_rows( nH = hl.agg.count_where( familyMatrix.LGT.is_hom_ref() ) )
+    #     familyMatrix = familyMatrix.filter_rows( familyMatrix.nH < familyMatrix.count_cols() )
+    #     dense_by_family[ fam ] = familyMatrix
 
 
     chunks = divideChunksFamily( experiments_by_family, size = 1000 )
     lgr.debug( 'Number of dense matrix to be created: "{0}"'.format( len( chunks ) ) )
 
 
-    print( "Flatting dense matrix" )
-    mts_ = dense_by_family[:]
-    ii = 0
-    while len( mts_ ) > 1:
-        ii += 1
-        print( 'Compression {0}/{1}'.format( ii, len( mts_ ) ) )
-        tmp = []
-        for jj in range( 0, len(mts_), 2 ):
-            if jj+1 < len(mts_):
-                tmp.append( full_outer_join_mt( mts_[ jj ], mts_[ jj+1 ] ) )
-            else:
-                tmp.append( mts_[ jj ] )
-        mts_ = tmp[:]
-    [dense_matrix] = mts_
+    # print( "Flatting dense matrix" )
+    # mts_ = dense_by_family[:]
+    # ii = 0
+    # while len( mts_ ) > 1:
+    #     ii += 1
+    #     print( 'Compression {0}/{1}'.format( ii, len( mts_ ) ) )
+    #     tmp = []
+    #     for jj in range( 0, len(mts_), 2 ):
+    #         if jj+1 < len(mts_):
+    #             tmp.append( full_outer_join_mt( mts_[ jj ], mts_[ jj+1 ] ) )
+    #         else:
+    #             tmp.append( mts_[ jj ] )
+    #     mts_ = tmp[:]
+    # [dense_matrix] = mts_
 
-    print( "Final dense matrix" )
-    dense_matrix.write( '{0}/chrm-{1}'.format( denseMatrix_path, chrom ), overwrite = True )
+    # print( "Final dense matrix" )
+    # dense_matrix.write( '{0}/chrm-{1}'.format( denseMatrix_path, chrom ), overwrite = True )
 
 
 def getExperimentsByFamily( pids, url_project, id_gpap, token_gpap ):

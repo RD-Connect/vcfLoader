@@ -175,7 +175,7 @@ def createDenseMatrix( url_project, prefix_hdfs, max_items_batch, denseMatrix_pa
     
 
 
-    size = 1000
+    size = 100
     chunks = divideChunksFamily( experiments_by_family, size = size )
     lgr.debug( 'Number of dense matrix to be created: {0} (max size of {1})'.format( len( chunks ), size ) )
 
@@ -184,8 +184,8 @@ def createDenseMatrix( url_project, prefix_hdfs, max_items_batch, denseMatrix_pa
     for idx, chunk in enumerate( chunks ):
         lgr.info( 'Filtering sparse matrix no. {0} with {1} families'.format( idx, len( chunk ) ) )
         dense_by_family = []
-        for idx, fam in enumerate( chunk ):
-            lgr.debug( 'Processing family "{0}/{1}"'.format( idx, fam ) )
+        for idx2, fam in enumerate( chunk ):
+            lgr.debug( 'Processing family "{0}/{1}"'.format( idx2, fam ) )
             sam = hl.literal( experiments_by_family[ fam ], 'array<str>' )
             familyMatrix = sparseMatrix.filter_cols( sam.contains( sparseMatrix['s'] ) )
             familyMatrix = hl.experimental.densify( familyMatrix )
@@ -198,7 +198,7 @@ def createDenseMatrix( url_project, prefix_hdfs, max_items_batch, denseMatrix_pa
         ii = 0
         while len( mts_ ) > 1:
             ii += 1
-            print( 'Compression {0}/{1}'.format( ii, len( mts_ ) ) )
+            lgr.debug( 'Compression {0}/{1}'.format( ii, len( mts_ ) ) )
             tmp = []
             for jj in range( 0, len(mts_), 2 ):
                 if jj+1 < len(mts_):
@@ -207,7 +207,7 @@ def createDenseMatrix( url_project, prefix_hdfs, max_items_batch, denseMatrix_pa
                     tmp.append( mts_[ jj ] )
             mts_ = tmp[:]
         [dense_matrix] = mts_
-        
+
         if first:
             first = False
         else:

@@ -87,13 +87,12 @@ def createSparseMatrix( sqlContext, sc, group, url_project, token, prefix_hdfs, 
     bse_new = new_gvcf_store_path
     
     for index, batch in enumerate( batches ):
-        #print( index )
         if index == 0 and bse_old is None:
             lgr.debug( 'Index {}\n\tCurrent gvcf store is "{}"\n\tNew version gvcf store is "{}"'.format( index, bse_old, bse_new ) )
             new_gvcf_store_path = '{0}/chrom-{1}'.format( bse_new, chrom )
-        else if index == 0 and not bse_old is None:
+        elif index == 0 and not bse_old is None:
             gvcf_store_path = '{0}/chrom-{1}'.format( bse_old, chrom )
-            bse_new = utils.update_version( bse_new )
+            bse_new = utils.update_version( bse_old )
             new_gvcf_store_path = '{0}/chrom-{1}'.format( bse_new, chrom )
             lgr.debug( 'Index {}\n\tCurrent gvcf store is "{}"\n\tNew version gvcf store is "{}"'.format( index, gvcf_store_path, new_gvcf_store_path ) )
         else:

@@ -112,7 +112,6 @@ def createSparseMatrix( sqlContext, sc, group, url_project, token, prefix_hdfs, 
     # /
 
     # DISTRIBUTE EXPERIMENTS BY FAMILY
-
     experiments_in_group = getExperimentByGroup( group, url_project, token, prefix_hdfs, chrom, max_items_batch )
     full_ids_in_matrix = [ x for x in experiments_in_group if x[ 'RD_Connect_ID_Experiment' ] in experiments_to_be_loaded ]
     experiments_and_families = getExperimentsByFamily( full_ids_in_matrix, url_project, gpap_id, gpap_token )
@@ -136,40 +135,32 @@ def createSparseMatrix( sqlContext, sc, group, url_project, token, prefix_hdfs, 
     batches = divideChunksFamily2( experiments_by_family, size = size )
     lgr.debug( 'Number of sparse matrix to be created: {} (max size of {})'.format( len( batches ), size ) )
 
-    for idx, bt in enumerate( batches ):
-        print( "idx: ", idx )
-        print( "\tlen( exps ): ", len(bt['exps']))
-        print( "***", bt['exps'])
-        print( "\tlen( fams ): ", len(bt['fams']))
-        print( "***", bt['fams'])
-        print("\n")
+    # to remove
+    files_to_be_loaded2 = {}
+    for ff in files_to_be_loaded:
+        files_to_be_loaded2[ ff.split( '/' )[ 7 ] ] = ff
+    # /
 
-    # # to remove
-    # files_to_be_loaded2 = {}
-    # for ff in files_to_be_loaded:
-    #     files_to_be_loaded2[ ff.split( '/' )[ 7 ] ] = ff
-    # # /
-
-    # bse_old = gvcf_store_path
-    # bse_new = new_gvcf_store_path
+    bse_old = gvcf_store_path
+    bse_new = new_gvcf_store_path
     
-    # for index, batch in enumerate( batches ):
-    #     if index == 0 and bse_old is None:
-    #         new_gvcf_store_path = '{0}/chrom-{1}'.format( bse_new, chrom )
-    #         lgr.debug( 'Index {}\n\tCurrent gvcf store is "{}"\n\tNew version gvcf store is "{}"'.format( index, bse_old, new_gvcf_store_path ) )
-    #     elif index == 0 and not bse_old is None:
-    #         gvcf_store_path = '{0}/chrom-{1}'.format( bse_old, chrom )
-    #         bse_new = utils.update_version( bse_old )
-    #         new_gvcf_store_path = '{0}/chrom-{1}'.format( bse_new, chrom )
-    #         lgr.debug( 'Index {}\n\tCurrent gvcf store is "{}"\n\tNew version gvcf store is "{}"'.format( index, gvcf_store_path, new_gvcf_store_path ) )
-    #     else:
-    #         bse_old = bse_new
-    #         gvcf_store_path = '{0}/chrom-{1}'.format( bse_new, chrom )
-    #         bse_new = utils.update_version( bse_new )
-    #         new_gvcf_store_path = '{0}/chrom-{1}'.format( bse_new, chrom )
-    #         lgr.debug( 'Index {}\n\tCurrent gvcf store is "{}"\n\tNew version gvcf store is "{}"'.format( index, gvcf_store_path, new_gvcf_store_path ) )
-    #     path_to_exps = [ files_to_be_loaded2[ x ] for x in batch[ 'exps' ] ]
-    #     loadGvcf( hl, path_to_exps, chrom, new_gvcf_store_path, gvcf_store_path, partitions_chromosome, lgr )
+    for index, batch in enumerate( batches ):
+        if index == 0 and bse_old is None:
+            new_gvcf_store_path = '{0}/chrom-{1}'.format( bse_new, chrom )
+            lgr.debug( 'Index {}\n\tCurrent gvcf store is "{}"\n\tNew version gvcf store is "{}"'.format( index, bse_old, new_gvcf_store_path ) )
+        elif index == 0 and not bse_old is None:
+            gvcf_store_path = '{0}/chrom-{1}'.format( bse_old, chrom )
+            bse_new = utils.update_version( bse_old )
+            new_gvcf_store_path = '{0}/chrom-{1}'.format( bse_new, chrom )
+            lgr.debug( 'Index {}\n\tCurrent gvcf store is "{}"\n\tNew version gvcf store is "{}"'.format( index, gvcf_store_path, new_gvcf_store_path ) )
+        else:
+            bse_old = bse_new
+            gvcf_store_path = '{0}/chrom-{1}'.format( bse_new, chrom )
+            bse_new = utils.update_version( bse_new )
+            new_gvcf_store_path = '{0}/chrom-{1}'.format( bse_new, chrom )
+            lgr.debug( 'Index {}\n\tCurrent gvcf store is "{}"\n\tNew version gvcf store is "{}"'.format( index, gvcf_store_path, new_gvcf_store_path ) )
+        path_to_exps = [ files_to_be_loaded2[ x ] for x in batch[ 'exps' ] ]
+        loadGvcf( hl, path_to_exps, chrom, new_gvcf_store_path, gvcf_store_path, partitions_chromosome, lgr )
 
 
 

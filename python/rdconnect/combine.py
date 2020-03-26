@@ -151,69 +151,73 @@ def createDenseMatrix( url_project, prefix_hdfs, max_items_batch, denseMatrix_pa
     experiments_in_matrix = [ x.get( 's' ) for x in sparseMatrix.col.collect() ]    
     lgr.debug( 'Total of {0} experiments'.format( len( experiments_in_matrix ) ) )
 
-    experiments_in_group = getExperimentByGroup( group, url_project, token, prefix_hdfs, chrom, max_items_batch )
-    full_ids_in_matrix = [ x for x in experiments_in_group if x[ 'RD_Connect_ID_Experiment' ] in experiments_in_matrix ]
-    experiments_and_families = getExperimentsByFamily( full_ids_in_matrix, url_project, gpap_id, gpap_token )
+    # experiments_in_group = getExperimentByGroup( group, url_project, token, prefix_hdfs, chrom, max_items_batch )
+    # full_ids_in_matrix = [ x for x in experiments_in_group if x[ 'RD_Connect_ID_Experiment' ] in experiments_in_matrix ]
+    # experiments_and_families = getExperimentsByFamily( full_ids_in_matrix, url_project, gpap_id, gpap_token )
 
-    experiments_by_family = {}
-    for fam in list( set( [ x[ 'Family' ] for x in experiments_and_families ] ) ):
-        experiments_by_family[ fam ] = [ x[ 'Experiment' ] for x in experiments_and_families if x[ 'Family' ] == fam ]
-    lgr.debug( 'Total of {0} families'.format( len( experiments_by_family.keys() ) ) )
+    # experiments_by_family = {}
+    # for fam in list( set( [ x[ 'Family' ] for x in experiments_and_families ] ) ):
+    #     experiments_by_family[ fam ] = [ x[ 'Experiment' ] for x in experiments_and_families if x[ 'Family' ] == fam ]
+    # lgr.debug( 'Total of {0} families'.format( len( experiments_by_family.keys() ) ) )
 
-    x = len( experiments_by_family.keys() )
-    none_fam = None in experiments_by_family.keys()
-    if none_fam:
-        z = '; '.join( experiments_by_family[ None ] )
-        for ind in experiments_by_family[ None ]:
-            if type( ind ) == "list":
-                experiments_by_family[ ind ] = ind
-            else:
-                experiments_by_family[ ind ] = [ ind ]
-        y = len( experiments_by_family.keys() )
-        warnings.warn( 'Provided experiment ids got no family assigned ({0}). Number of original families was of "{1}" and of "{2}" after removing "None".'.format( z, x, y ) )
-
+    # x = len( experiments_by_family.keys() )
+    # none_fam = None in experiments_by_family.keys()
+    # if none_fam:
+    #     z = '; '.join( experiments_by_family[ None ] )
+    #     for ind in experiments_by_family[ None ]:
+    #         if type( ind ) == "list":
+    #             experiments_by_family[ ind ] = ind
+    #         else:
+    #             experiments_by_family[ ind ] = [ ind ]
+    #     y = len( experiments_by_family.keys() )
+    #     warnings.warn( 'Provided experiment ids got no family assigned ({0}). Number of original families was of "{1}" and of "{2}" after removing "None".'.format( z, x, y ) )
     
+    # size = 100
+    # chunks = divideChunksFamily( experiments_by_family, size = size )
+    # lgr.debug( 'Number of dense matrix to be created: {0} (max size of {1})'.format( len( chunks ), size ) )
 
+    # first = True
+    # dm = denseMatrix_path
+    # for idx, chunk in enumerate( chunks ):
+    #     lgr.info( 'Filtering sparse matrix no. {0} with {1} families'.format( idx, len( chunk ) ) )
+    #     dense_by_family = []
+    #     for idx2, fam in enumerate( chunk ):
+    #         lgr.debug( 'Processing family "{0}/{1}"'.format( idx2, fam ) )
+    sam = experiments_in_matrix[ 0:100 ] #hl.literal( experiments_by_family[ fam ], 'array<str>' )
+    familyMatrix = sparseMatrix.filter_cols( sam.contains( sparseMatrix['s'] ) )
+    familyMatrix = hl.experimental.densify( familyMatrix )
+    # familyMatrix = familyMatrix.annotate_rows( nH = hl.agg.count_where( familyMatrix.LGT.is_hom_ref() ) )
+    # familyMatrix = familyMatrix.filter_rows( familyMatrix.nH < familyMatrix.count_cols() )
+    familyMatrix = familyMatrix.filter_rows( hl.agg.any( familyMatrix.LGT.is_non_ref() ) )
+    #dense_by_family.append( familyMatrix )
 
-    size = 100
-    chunks = divideChunksFamily( experiments_by_family, size = size )
-    lgr.debug( 'Number of dense matrix to be created: {0} (max size of {1})'.format( len( chunks ), size ) )
+    # lgr.info( 'Flatting dense matrix no. {0} with {1} families'.format( idx, len( chunk ) ) )
+    # mts_ = dense_by_family[:]
+    # ii = 0
+    # while len( mts_ ) > 1:
+    #     ii += 1
+    #     lgr.debug( 'Compression {0}/{1}'.format( ii, len( mts_ ) ) )
+    #     tmp = []
+    #     for jj in range( 0, len(mts_), 2 ):
+    #         if jj+1 < len(mts_):
+    #             tmp.append( full_outer_join_mt( mts_[ jj ], mts_[ jj+1 ] ) )
+    #         else:
+    #             tmp.append( mts_[ jj ] )
+    #     mts_ = tmp[:]
+    # [dense_matrix] = mts_
 
-    first = True
-    dm = denseMatrix_path
-    for idx, chunk in enumerate( chunks ):
-        lgr.info( 'Filtering sparse matrix no. {0} with {1} families'.format( idx, len( chunk ) ) )
-        dense_by_family = []
-        for idx2, fam in enumerate( chunk ):
-            lgr.debug( 'Processing family "{0}/{1}"'.format( idx2, fam ) )
-            sam = hl.literal( experiments_by_family[ fam ], 'array<str>' )
-            familyMatrix = sparseMatrix.filter_cols( sam.contains( sparseMatrix['s'] ) )
-            familyMatrix = hl.experimental.densify( familyMatrix )
-            familyMatrix = familyMatrix.annotate_rows( nH = hl.agg.count_where( familyMatrix.LGT.is_hom_ref() ) )
-            familyMatrix = familyMatrix.filter_rows( familyMatrix.nH < familyMatrix.count_cols() )
-            dense_by_family.append( familyMatrix )
+    # if first:
+    #     first = False
+    # else:
+    #     dm = utils.update_version( dm )
+    lgr.info( 'Writing dense matrix to disk ({0})'.format( dm ) )
+    #dense_matrix.write( '{0}/chrm-{1}'.format( denseMatrix_path, chrom ), overwrite = True )
+    familyMatrix.write( '{0}/chrm-{1}'.format( denseMatrix_path, chrom ), overwrite = True )
 
-        lgr.info( 'Flatting dense matrix no. {0} with {1} families'.format( idx, len( chunk ) ) )
-        mts_ = dense_by_family[:]
-        ii = 0
-        while len( mts_ ) > 1:
-            ii += 1
-            lgr.debug( 'Compression {0}/{1}'.format( ii, len( mts_ ) ) )
-            tmp = []
-            for jj in range( 0, len(mts_), 2 ):
-                if jj+1 < len(mts_):
-                    tmp.append( full_outer_join_mt( mts_[ jj ], mts_[ jj+1 ] ) )
-                else:
-                    tmp.append( mts_[ jj ] )
-            mts_ = tmp[:]
-        [dense_matrix] = mts_
+    # 100 experiments matrix 0.1 --> dense matrix sobre els 100
+    # 100 experiments matrix 0.20 --> dense matrix sobre els 100
+    # 500 experiments matrix 0.10 --> write family
 
-        if first:
-            first = False
-        else:
-            dm = utils.update_version( dm )
-        lgr.info( 'Writing dense matrix to disk ({0})'.format( dm ) )
-        dense_matrix.write( '{0}/chrm-{1}'.format( denseMatrix_path, chrom ), overwrite = True )
 
 
 def getExperimentsByFamily( pids, url_project, id_gpap, token_gpap ):

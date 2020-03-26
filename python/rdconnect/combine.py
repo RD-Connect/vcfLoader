@@ -136,7 +136,7 @@ def createSparseMatrix( sqlContext, sc, group, url_project, token, prefix_hdfs, 
     # CREATE BATCHES OF EXPERIMENTS COUNTING FAMILIES
     size = 100
     batches = divideChunksFamily2( experiments_by_family, size = size )
-    lgr.debug( 'Number of dense matrix to be created: {} (max size of {})'.format( len( batches ), size ) )
+    lgr.debug( 'Number of sparse matrix to be created: {} (max size of {})'.format( len( batches ), size ) )
 
 
     # to remove
@@ -150,8 +150,8 @@ def createSparseMatrix( sqlContext, sc, group, url_project, token, prefix_hdfs, 
     
     for index, batch in enumerate( batches ):
         if index == 0 and bse_old is None:
-            lgr.debug( 'Index {}\n\tCurrent gvcf store is "{}"\n\tNew version gvcf store is "{}"'.format( index, bse_old, bse_new ) )
             new_gvcf_store_path = '{0}/chrom-{1}'.format( bse_new, chrom )
+            lgr.debug( 'Index {}\n\tCurrent gvcf store is "{}"\n\tNew version gvcf store is "{}"'.format( index, bse_old, new_gvcf_store_path ) )
         elif index == 0 and not bse_old is None:
             gvcf_store_path = '{0}/chrom-{1}'.format( bse_old, chrom )
             bse_new = utils.update_version( bse_old )
@@ -425,13 +425,14 @@ def loadGvcf( hl, files, chrom, destinationPath, gvcfStorePath, partitions, lgr 
             reference_genome = interval[ 'reference_genome' ], 
             array_elements_required = False
         )
-        for ff in files:
-            lgr.debug( 'Importing file "{}"'.format( ff ) )
+        # for ff in files:
+        #    lgr.debug( 'Importing file "{}"'.format( ff ) )
         return x
 
     interval = getIntervalByChrom( chrom, partitions )
     lgr.debug( 'Got {} intervals for chrm {}'.format( len( interval ), chrom ) )
 
+    lgr.debug( 'Importing {} files'.format( len( files ) ) )
     vcfs = [ transformFile( mt ) for mt in importFiles( files ) ]
     lgr.debug( 'Transformed files' )
 

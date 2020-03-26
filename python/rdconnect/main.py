@@ -115,7 +115,9 @@ def main(sqlContext, sc, configuration, chrom, nchroms, step, somaticFlag):
             group = configuration[ 'combine' ][ 'group' ]
             prefix_hdfs = configuration[ 'combine' ][ 'prefix_hdfs' ]
             path_log = configuration[ 'combine' ][ 'log_sparse' ]
-            combine.createSparseMatrix( sqlContext, sc, group, url_project, token, prefix_hdfs, chrom, max_items_batch, partitions_chromosome, gvcf_store_path, new_gvcf_store_path, path_log )
+            gpap_id = configuration[ 'gpap' ][ 'id' ]
+            gpap_token = configuration[ 'gpap' ][ 'token' ]
+            combine.createSparseMatrix( sqlContext, sc, group, url_project, token, prefix_hdfs, chrom, max_items_batch, partitions_chromosome, gvcf_store_path, new_gvcf_store_path, gpap_id, gpap_token, path_log )
 
 
     if ("createDenseMatrix" in step):

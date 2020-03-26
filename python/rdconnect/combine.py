@@ -108,6 +108,7 @@ def createSparseMatrix( sqlContext, sc, group, url_project, token, prefix_hdfs, 
 
     # to remove
     experiments_to_be_loaded = [ x.split( '/' )[ 7 ] for x in files_to_be_loaded ]
+    # /
 
     # DISTRIBUTE EXPERIMENTS BY FAMILY
 
@@ -138,6 +139,12 @@ def createSparseMatrix( sqlContext, sc, group, url_project, token, prefix_hdfs, 
     lgr.debug( 'Number of dense matrix to be created: {} (max size of {})'.format( len( batches ), size ) )
 
 
+    # to remove
+    files_to_be_loaded2 = {}
+    for ff in files_to_be_loaded:
+        files_to_be_loaded2[ ff.split( '/' )[ 7 ] ] = ff
+    # /
+
     bse_old = gvcf_store_path
     bse_new = new_gvcf_store_path
     
@@ -156,7 +163,7 @@ def createSparseMatrix( sqlContext, sc, group, url_project, token, prefix_hdfs, 
             bse_new = utils.update_version( bse_new )
             new_gvcf_store_path = '{0}/chrom-{1}'.format( bse_new, chrom )
             lgr.debug( 'Index {}\n\tCurrent gvcf store is "{}"\n\tNew version gvcf store is "{}"'.format( index, gvcf_store_path, new_gvcf_store_path ) )
-        path_to_exps = [ buildPath( prefix_hdfs, group, x, chrom ) for x in batch[ 'exps' ] ]
+        path_to_exps = [ files_to_be_loaded2[ x ] for x in batch[ 'exps' ] ]
         loadGvcf( hl, path_to_exps, chrom, new_gvcf_store_path, gvcf_store_path, partitions_chromosome, lgr )
 
 

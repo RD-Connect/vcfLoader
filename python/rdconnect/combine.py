@@ -204,7 +204,7 @@ def createSparseMatrix( sqlContext, sc, group, url_project, token, prefix_hdfs, 
         
         # Accumulate the small sparse matrix
         accum_mtxs.append( comb )
-        accum_cols += comb.count_cols()
+        accum_cols += size
 
         if accum_cols >= 200 or index == len( batches ) - 1:
             # DENSIFY AND FILTER THE MULTIPLE SPARSE MATRICES DONE BY FAMILY

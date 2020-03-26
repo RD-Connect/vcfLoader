@@ -116,7 +116,6 @@ def createSparseMatrix( sqlContext, sc, group, url_project, token, prefix_hdfs, 
     experiments_in_group = getExperimentByGroup( group, url_project, token, prefix_hdfs, chrom, max_items_batch )
     full_ids_in_matrix = [ x for x in experiments_in_group if x[ 'RD_Connect_ID_Experiment' ] in experiments_to_be_loaded ]
     experiments_and_families = getExperimentsByFamily( full_ids_in_matrix, url_project, gpap_id, gpap_token )
-    print("\n\n", experiments_and_families, "\n\n")
     experiments_by_family = {}
     for fam in list( set( [ x[ 'Family' ] for x in experiments_and_families ] ) ):
         experiments_by_family[ fam ] = [ x[ 'Experiment' ] for x in experiments_and_families if x[ 'Family' ] == fam ]
@@ -124,15 +123,12 @@ def createSparseMatrix( sqlContext, sc, group, url_project, token, prefix_hdfs, 
 
     # RELOCATE THISE EXPERIMENTS WITH NO FAMILY
     x = len( experiments_by_family.keys() )
-    none_fam = None in experiments_by_family.keys()
-    if none_fam:
+    if None in experiments_by_family.keys():
         z = '; '.join( experiments_by_family[ None ] )
         for ind in experiments_by_family[ None ]:
-            if type( ind ) == "list":
-                experiments_by_family[ ind ] = ind
-            else:
-                experiments_by_family[ ind ] = [ ind ]
+            experiments_by_family[ ind ] = [ ind ]
         y = len( experiments_by_family.keys() )
+        del experiments_by_family[ None ]
         warnings.warn( 'Provided experiment ids got no family assigned ({}). Number of original families was of "{}" and of "{}" after removing "None".'.format( z, x, y ) )
 
     # CREATE BATCHES OF EXPERIMENTS COUNTING FAMILIES

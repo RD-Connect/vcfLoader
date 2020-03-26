@@ -85,6 +85,41 @@ def divideChunksFamily2( collection, size = 1000 ):
     return ttl
 
 
+def loadGvcf2( hl, files, chrom, destinationPath, gvcfStorePath, partitions, lgr ):
+    def transformFile( mt ):
+        return transform_gvcf(mt.annotate_rows(
+            info = mt.info.annotate( MQ_DP = hl.null( hl.tint32 ), VarDP = hl.null( hl.tint32 ), QUALapprox = hl.null( hl.tint32 ) )
+        ))
+    def importFiles( files ):
+        x = hl.import_vcfs(
+            files,
+            partitions = interval[ 'interval' ], 
+            reference_genome = interval[ 'reference_genome' ], 
+            array_elements_required = False
+        )
+        return x
+
+    interval = getIntervalByChrom( chrom, partitions )
+    lgr.debug( 'Got {} intervals for chrm {}'.format( len( interval ), chrom ) )
+
+    lgr.debug( 'Importing {} files'.format( len( files ) ) )
+    vcfs = [ transformFile( mt ) for mt in importFiles( files ) ]
+    lgr.debug( 'Transformed files' )
+
+    comb = combine_gvcfs( vcfs )
+    if gvcfStorePath == None:
+        accum = comb
+    else:
+        gvcf_store = hl.read_matrix_table( gvcfStorePath + "/accum" )
+        accum = combine_gvcfs( [ gvcf_store ] + vcfs )
+
+    lgr.debug( 'Combined gVCF files' )
+    lgr.debug( 'Saving sparse matrix to "{}"'.format( destinationPath ) )
+    comb.write( destinationPath + "/batch", overwrite = True )
+    accum.write( destinationPath + "/accum", overwrite = True )
+    lgr.debug( 'Ended saving sparse matrix' )
+
+    return( comb )
 
 
 
@@ -144,6 +179,11 @@ def createSparseMatrix( sqlContext, sc, group, url_project, token, prefix_hdfs, 
     bse_old = gvcf_store_path
     bse_new = new_gvcf_store_path
     
+    accum_cols = 0
+    accum_mtxs = []
+    first_dm = True
+    dm = 'hdfs://rdhdfs1:27000/test/rdconnect-ES6/denseMatrix/1737-test-dm3/0.1'
+
     for index, batch in enumerate( batches ):
         if index == 0 and bse_old is None:
             new_gvcf_store_path = '{0}/chrom-{1}'.format( bse_new, chrom )
@@ -160,7 +200,43 @@ def createSparseMatrix( sqlContext, sc, group, url_project, token, prefix_hdfs, 
             new_gvcf_store_path = '{0}/chrom-{1}'.format( bse_new, chrom )
             lgr.debug( 'Index {}\n\tCurrent gvcf store is "{}"\n\tNew version gvcf store is "{}"'.format( index, gvcf_store_path, new_gvcf_store_path ) )
         path_to_exps = [ files_to_be_loaded2[ x ] for x in batch[ 'exps' ] ]
-        loadGvcf( hl, path_to_exps, chrom, new_gvcf_store_path, None, partitions_chromosome, lgr )
+        comb = loadGvcf2( hl, path_to_exps, chrom, new_gvcf_store_path, gvcf_store_path, partitions_chromosome, lgr )
+        
+        # Accumulate the small sparse matrix
+        accum_mtxs.append( comb )
+        accum_cols += comb.count_cols()
+
+        if accum_cols >= 200 or index == len( batches ) - 1:
+            # DENSIFY AND FILTER THE MULTIPLE SPARSE MATRICES DONE BY FAMILY
+            lgr.info( 'Densifying and filtering {} sparse matrices'.format( len( accum_mtxs ) ) )
+            accum_mtxs = [ hl.experimental.densify( mtx ) for mtx in accum_mtxs ]
+            dense_by_family = [ mtx.filter_rows( hl.agg.any( mtx.LGT.is_non_ref() ) ) for mtx in accum_mtxs ]
+            # CLEAR THE ACCUMULARIVE VARIABLES
+            accum_mtxs = []
+            accum_cols = 0
+            # FLAT THE DENSE MATRICES
+            lgr.info( 'Flatting dense matrices' )
+            mts_ = dense_by_family[:]
+            ii = 0
+            while len( mts_ ) > 1:
+                ii += 1
+                lgr.debug( 'Compression {0}/{1}'.format( ii, len( mts_ ) ) )
+                tmp = []
+                for jj in range( 0, len(mts_), 2 ):
+                    if jj+1 < len(mts_):
+                        tmp.append( full_outer_join_mt( mts_[ jj ], mts_[ jj+1 ] ) )
+                    else:
+                        tmp.append( mts_[ jj ] )
+                mts_ = tmp[:]
+            [dense_matrix] = mts_
+            # SAVE DENSE MATRIX
+            if first_dm:
+                first_dm = False
+            else:
+                dm = utils.update_version( dm )
+            lgr.info( 'Writing dense matrix to disk ({0})'.format( dm ) )
+            dense_matrix.write( '{0}/chrm-{1}'.format( dm, chrom ), overwrite = True )
+
 
 
 

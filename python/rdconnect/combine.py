@@ -229,7 +229,7 @@ def createDenseMatrix( url_project, prefix_hdfs, max_items_batch, denseMatrix_pa
     lgr = create_logger( 'createDenseMatrix', '' )
 
     if gvcf_store_path is None:
-        raise 'no information on "gvcf_store_path" was provided.'
+        raise 'No information on "gvcf_store_path" was provided.'
     lgr.debug( 'Read from in {0}/chrom-{1}'.format( gvcf_store_path, chrom ) )
     sparseMatrix = hl.read_matrix_table( '{0}/chrom-{1}'.format( gvcf_store_path, chrom ) )
 
@@ -238,7 +238,7 @@ def createDenseMatrix( url_project, prefix_hdfs, max_items_batch, denseMatrix_pa
 
 
     # NEW CODE
-    familyMatrix = hl.experimental.densify( experiments_in_matrix )
+    familyMatrix = hl.experimental.densify( sparseMatrix )
     familyMatrix = familyMatrix.filter_rows( hl.agg.any( familyMatrix.LGT.is_non_ref() ) )
     familyMatrix.write( '{0}/chrm-{1}'.format( denseMatrix_path, chrom ), overwrite = True )
     # /

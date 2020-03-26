@@ -191,28 +191,28 @@ def createDenseMatrix( url_project, prefix_hdfs, max_items_batch, denseMatrix_pa
             familyMatrix = familyMatrix.filter_rows( hl.agg.any( familyMatrix.LGT.is_non_ref() ) )
             dense_by_family.append( familyMatrix )
 
-    lgr.info( 'Flatting dense matrix no. {0} with {1} families'.format( idx, len( chunk ) ) )
-    mts_ = dense_by_family[:]
-    ii = 0
-    while len( mts_ ) > 1:
-        ii += 1
-        lgr.debug( 'Compression {0}/{1}'.format( ii, len( mts_ ) ) )
-        tmp = []
-        for jj in range( 0, len(mts_), 2 ):
-            if jj+1 < len(mts_):
-                tmp.append( full_outer_join_mt( mts_[ jj ], mts_[ jj+1 ] ) )
-            else:
-                tmp.append( mts_[ jj ] )
-        mts_ = tmp[:]
-    [dense_matrix] = mts_
+        lgr.info( 'Flatting dense matrix no. {0} with {1} families'.format( idx, len( chunk ) ) )
+        mts_ = dense_by_family[:]
+        ii = 0
+        while len( mts_ ) > 1:
+            ii += 1
+            lgr.debug( 'Compression {0}/{1}'.format( ii, len( mts_ ) ) )
+            tmp = []
+            for jj in range( 0, len(mts_), 2 ):
+                if jj+1 < len(mts_):
+                    tmp.append( full_outer_join_mt( mts_[ jj ], mts_[ jj+1 ] ) )
+                else:
+                    tmp.append( mts_[ jj ] )
+            mts_ = tmp[:]
+        [dense_matrix] = mts_
 
-    if first:
-        first = False
-    else:
-        dm = utils.update_version( dm )
-    lgr.info( 'Writing dense matrix to disk ({0})'.format( denseMatrix_path ) )
-    dense_matrix.write( '{0}/chrm-{1}'.format( denseMatrix_path, chrom ), overwrite = True )
-    #familyMatrix.write( '{0}/chrm-{1}'.format( denseMatrix_path, chrom ), overwrite = True )
+        if first:
+            first = False
+        else:
+            dm = utils.update_version( dm )
+        lgr.info( 'Writing dense matrix to disk ({0})'.format( denseMatrix_path ) )
+        dense_matrix.write( '{0}/chrm-{1}'.format( denseMatrix_path, chrom ), overwrite = True )
+        #familyMatrix.write( '{0}/chrm-{1}'.format( denseMatrix_path, chrom ), overwrite = True )
 
     
 

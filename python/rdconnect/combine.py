@@ -141,8 +141,11 @@ def createSparseMatrix( sqlContext, sc, group, url_project, token, prefix_hdfs, 
 
     for idx, bt in enumerate( batches ):
         print( "idx: ", idx )
-        print( "\nlen( exps ): ", len(bt['exps']))
-        print( "\nlen( fams ): ", len(bt['fams']))
+        print( "\tlen( exps ): ", len(bt['exps']))
+        print( "***", bt['exps'])
+        print( "\tlen( fams ): ", len(bt['fams']))
+        print( "***", bt['fams'])
+        print("\n")
 
     # # to remove
     # files_to_be_loaded2 = {}

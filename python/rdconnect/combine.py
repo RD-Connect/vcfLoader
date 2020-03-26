@@ -210,7 +210,7 @@ def createDenseMatrix( url_project, prefix_hdfs, max_items_batch, denseMatrix_pa
     #     first = False
     # else:
     #     dm = utils.update_version( dm )
-    lgr.info( 'Writing dense matrix to disk ({0})'.format( dm ) )
+    lgr.info( 'Writing dense matrix to disk ({0})'.format( denseMatrix_path ) )
     #dense_matrix.write( '{0}/chrm-{1}'.format( denseMatrix_path, chrom ), overwrite = True )
     familyMatrix.write( '{0}/chrm-{1}'.format( denseMatrix_path, chrom ), overwrite = True )
 

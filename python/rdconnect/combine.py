@@ -116,6 +116,7 @@ def createSparseMatrix( sqlContext, sc, group, url_project, token, prefix_hdfs, 
     experiments_in_group = getExperimentByGroup( group, url_project, token, prefix_hdfs, chrom, max_items_batch )
     full_ids_in_matrix = [ x for x in experiments_in_group if x[ 'RD_Connect_ID_Experiment' ] in experiments_to_be_loaded ]
     experiments_and_families = getExperimentsByFamily( full_ids_in_matrix, url_project, gpap_id, gpap_token )
+    print("\n\n", experiments_and_families, "\n\n")
     experiments_by_family = {}
     for fam in list( set( [ x[ 'Family' ] for x in experiments_and_families ] ) ):
         experiments_by_family[ fam ] = [ x[ 'Experiment' ] for x in experiments_and_families if x[ 'Family' ] == fam ]

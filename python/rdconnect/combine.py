@@ -183,7 +183,7 @@ def createDenseMatrix( url_project, prefix_hdfs, max_items_batch, denseMatrix_pa
     #     dense_by_family = []
     #     for idx2, fam in enumerate( chunk ):
     #         lgr.debug( 'Processing family "{0}/{1}"'.format( idx2, fam ) )
-    sam = hl.literal( experiments_in_matrix[ 0:100 ], 'array<str>' ) #hl.literal( experiments_by_family[ fam ], 'array<str>' )
+    sam = hl.literal( experiments_in_matrix[ 0:500 ], 'array<str>' ) #hl.literal( experiments_by_family[ fam ], 'array<str>' )
     familyMatrix = sparseMatrix.filter_cols( sam.contains( sparseMatrix['s'] ) )
     familyMatrix = hl.experimental.densify( familyMatrix )
     # familyMatrix = familyMatrix.annotate_rows( nH = hl.agg.count_where( familyMatrix.LGT.is_hom_ref() ) )

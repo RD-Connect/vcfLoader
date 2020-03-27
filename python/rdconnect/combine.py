@@ -355,9 +355,10 @@ def createSparseMatrix( sqlContext, sc, group, url_project, token, prefix_hdfs, 
             new_gvcf_store_path = '{0}/chrom-{1}'.format( bse_new, chrom )
             lgr.debug( 'Index {}\n\tCurrent gvcf store is "{}"\n\tNew version gvcf store is "{}"'.format( index, gvcf_store_path, new_gvcf_store_path ) )
         path_to_exps = [ x[ 3 ] for x in batch ]
+        
         print( batch[ :2 ] )
         print( path_to_exps[ :2 ] )
-        sys.exit( -1 )
+        
         loadGvcf( hl, path_to_exps, chrom, new_gvcf_store_path, gvcf_store_path, partitions_chromosome, lgr )
         save_table_log( sc, sqlContext, batch, chrom, bse_new )
 

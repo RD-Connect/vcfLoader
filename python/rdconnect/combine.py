@@ -464,7 +464,7 @@ def createDenseMatrix( url_project, prefix_hdfs, max_items_batch, denseMatrix_pa
 def getExperimentsByFamily( pids, url_project, id_gpap, token_gpap ):
     """Function to get the IDs from phenotips, from experiments, and from family."""
     print( "{0} ---> {1} / {2}".format( "getExperimentsByFamily", pids[ 0 ], pids[ len(pids) - 1 ] ) )
-    url = 'http://localhost:8002/phenotips/ExportMultiple'
+    url = 'http://rdproto10:8082/phenotips/ExportMultiple'
     headers = { 'Content-Type': 'application/json' }
     body = { 'patients': [ { 'id': x[ 'Phenotips_ID' ] } for x in pids ] }
     resp = requests.post( url, headers = headers, json = body, verify = False )

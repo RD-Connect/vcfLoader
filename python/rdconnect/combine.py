@@ -376,7 +376,7 @@ def createSparseMatrix( sqlContext, sc, group, url_project, token, prefix_hdfs, 
 def save_table_log( sc, qc, files, chrom, path ):
     rdd = sc.parallelize( files )
     experiments = rdd.map( lambda x: Row( RD_Connect_ID = x[ 0 ], Phenotips_ID = x[ 1 ], Filename = x[ 3 ], Chrom = chrom ) )
-    df = sqlContext.createDataFrame( experiments )
+    df = qc.createDataFrame( experiments )
     df.write.csv( '{}/log-chrom-{}'.format( path, chrom ) )
 
 

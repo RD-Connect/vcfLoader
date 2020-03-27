@@ -333,6 +333,8 @@ def createSparseMatrix( sqlContext, sc, group, url_project, token, prefix_hdfs, 
     for item in experiments_and_families:
         experiments_by_family2[ item[ 'Experiment' ] ] = item[ 'Family' ] if not item[ 'Family' ] is None else item[ 'Experiment' ]
 
+    print( experiments_by_family2 )
+
     files_to_be_loaded2 = {}
     files_to_be_loaded3 = {}
     for ff in files_to_be_loaded:

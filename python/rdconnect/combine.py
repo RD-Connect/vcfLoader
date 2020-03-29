@@ -427,10 +427,6 @@ def createDenseMatrix( sq, url_project, prefix_hdfs, max_items_batch, dense_matr
         if idx < 50:
             print( idx, " ---> ", cnt )
     print( "=" * 25 )
-    for idx, cnt in batches[ 10 ]:
-        if idx < 50:
-            print( idx, " ---> ", cnt )
-    print( "=" * 25 )
 
     first = True
     dm = denseMatrix_path

@@ -370,16 +370,21 @@ def load_table_log( sq, sparse_matrix_path, chrom ):
 
 def create_batches_by_family( experiments, size = 1000 ):
     rst = []
+    ii = 0
     while len( experiments ) > 0:
         batch = []
         cnt = 0
+        jj = 0
         while cnt <= size and len( experiments ) > 0:
+            print( ii, " .. ", jj, " .. ", cnt )
             fam = experiments.pop( 0 )
             exp_fam = [ x for x in experiments if x[ 2 ] == fam ]
             batch += exp_fam
             cnt += len( exp_fam )
             experiments = [ x for x in experiments if x[ 2 ] != fam ]
+            jj += 1
         rst.append( batch )
+        ii += 1
     return rst
 
 
@@ -395,7 +400,6 @@ def createDenseMatrix( sq, url_project, prefix_hdfs, max_items_batch, dense_matr
 
     #logs_sampels = load_table_log( sq, sparse_matrix_path, chrom )
     
-
     experiments_in_matrix = [ x.get( 's' ) for x in sparse_matrix.col.collect() ]    
     lgr.debug( 'Total of {0} experiments'.format( len( experiments_in_matrix ) ) )
 
@@ -416,6 +420,7 @@ def createDenseMatrix( sq, url_project, prefix_hdfs, max_items_batch, dense_matr
 
     
     batches = create_batches_by_family( experiments_and_families, 100 )
+    print( "batches ----> ", len( batches ) )
 
     print( "=" * 25 )
     for idx, cnt in batches[ 0 ]:

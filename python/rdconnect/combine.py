@@ -370,21 +370,21 @@ def load_table_log( sq, sparse_matrix_path, chrom ):
 
 def create_batches_by_family( experiments, size = 1000 ):
     rst = []
-    ii = 0
+    # ii = 0
     while len( experiments ) > 0:
         batch = []
         cnt = 0
-        jj = 0
+        # jj = 0
         while cnt <= size and len( experiments ) > 0:
             fam = experiments[ 0 ][ 2 ]
             exp_fam = [ x for x in experiments if x[ 2 ] == fam ]
-            print( ii, " .. ", jj, " .. ", cnt, " -> ", fam, "(", len(exp_fam), "): ", exp_fam )
+            # print( ii, " .. ", jj, " .. ", cnt, " -> ", fam, "(", len(exp_fam), "): ", exp_fam )
             batch += exp_fam
             cnt += len( exp_fam )
             experiments = [ x for x in experiments if x[ 2 ] != fam ]
-            jj += 1
+            # jj += 1
         rst.append( batch )
-        ii += 1
+        # ii += 1
     return rst
 
 
@@ -423,19 +423,26 @@ def createDenseMatrix( sq, url_project, prefix_hdfs, max_items_batch, dense_matr
     print( "batches ----> ", len( batches ) )
 
     print( "=" * 25 )
-    for idx, cnt in batches[ 0 ]:
+    for idx, cnt in enumerate( batches[ 0 ] ):
         print( idx, " ---> ", cnt )
     print( "=" * 25 )
     for idx, cnt in batches[ 10 ]:
         print( idx, " ---> ", cnt )
     print( "=" * 25 )
 
-
-    # NEW CODE
-    # familyMatrix = hl.experimental.densify( sparseMatrix )
-    # familyMatrix = familyMatrix.filter_rows( hl.agg.any( familyMatrix.LGT.is_non_ref() ) )
-    # familyMatrix.write( '{0}/chrm-{1}'.format( denseMatrix_path, chrom ), overwrite = True )
-    # /
+    first = True
+    dm = denseMatrix_path
+    for idx, batch in enumerate( batches ):
+        sam = hl.literal( [ x[ 0 ] for x in batch ], 'array<str>' )
+        small_matrix = sparse_matrix.filter_cols( sam.contains( sparse_matrix['s'] ) )
+        small_matrix = hl.experimental.densify( sparse_matrix )
+        small_matrix = small_matrix.filter_rows( hl.agg.any( small_matrix.LGT.is_non_ref() ) )
+        if first:
+            first = False
+        else:
+            dm = utils.update_version( dm )
+        lgr.info( 'Writing dense matrix {} to disk ({})'.format( idx, dm ) )
+        small_matrix.write( '{0}/chrm-{1}'.format( dm, chrom ), overwrite = True )
 
 
 

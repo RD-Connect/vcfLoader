@@ -398,7 +398,7 @@ def createDenseMatrix( sq, url_project, prefix_hdfs, max_items_batch, dense_matr
     if none_detected:
         warnings.warn( 'Provided experiment ids got no family assigned. RD-Connect ID used as family ID for those experiments. Original families were of {} while after update are of {}.'.format( x, y ) )
 
-    for idx, cnt in enumerate( experiments_and_families ):
+    for idx, cnt in enumerate( len( experiments_and_families ), len( experiments_and_families ) - 50 ):
         if idx > 50:
             break
         print( idx, " ---> ", cnt )

@@ -376,9 +376,9 @@ def create_batches_by_family( experiments, size = 1000 ):
         cnt = 0
         jj = 0
         while cnt <= size and len( experiments ) > 0:
-            print( ii, " .. ", jj, " .. ", cnt )
             fam = experiments.pop( 0 )
             exp_fam = [ x for x in experiments if x[ 2 ] == fam ]
+            print( ii, " .. ", jj, " .. ", cnt, " -> ", fam, "(", len(exp_fam), "): ", exp_fam )
             batch += exp_fam
             cnt += len( exp_fam )
             experiments = [ x for x in experiments if x[ 2 ] != fam ]
@@ -418,7 +418,7 @@ def createDenseMatrix( sq, url_project, prefix_hdfs, max_items_batch, dense_matr
     if none_detected:
         warnings.warn( 'Provided experiment ids got no family assigned. RD-Connect ID used as family ID for those experiments. Original families were of {} while after update are of {}.'.format( x, y ) )
 
-    
+    print( " ** ", experiments_and_families[ 0 ] )
     batches = create_batches_by_family( experiments_and_families, 100 )
     print( "batches ----> ", len( batches ) )
 

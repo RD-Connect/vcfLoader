@@ -304,12 +304,9 @@ def createSparseMatrix( sqlContext, sc, group, url_project, token, prefix_hdfs, 
     experiments_to_be_loaded = [ x.split( '/' )[ 7 ] for x in files_to_be_loaded ]
     # /
 
-
     # Distribute experiments by family
     full_ids_to_be_loaded = [ x for x in experiments_in_group if x[ 'RD_Connect_ID_Experiment' ] in experiments_to_be_loaded ]
     experiments_and_families = getExperimentsByFamily( full_ids_to_be_loaded, url_project, gpap_id, gpap_token )
-
-
 
     # Relocate experiments with no family
     none_detected = False
@@ -355,22 +352,8 @@ def createSparseMatrix( sqlContext, sc, group, url_project, token, prefix_hdfs, 
             new_gvcf_store_path = '{0}/chrom-{1}'.format( bse_new, chrom )
             lgr.debug( 'Index {}\n\tCurrent gvcf store is "{}"\n\tNew version gvcf store is "{}"'.format( index, gvcf_store_path, new_gvcf_store_path ) )
         path_to_exps = [ x[ 3 ] for x in batch ]
-        
-        print( batch[ :2 ] )
-        print( path_to_exps[ :2 ] )
-        
         loadGvcf( hl, path_to_exps, chrom, new_gvcf_store_path, gvcf_store_path, partitions_chromosome, lgr )
         save_table_log( sc, sqlContext, batch, chrom, bse_new )
-
-
-    # rdd = sc.parallelize( z )
-    # experiments = rdd.map( lambda x: Row( name = x[ 0 ], age = int( x[ 1 ] ) ) )
-    # df = sqlContext.createDataFrame( experiments )
-    
-    # now = datetime.now()
-    # date_time = now.strftime("%y%m%d_%H%M%S")
-    # df.write.csv( '{}/chrom-{}-{}.csv'.format( path_log, chrom, date_time ) )
-    # lgr.debug( 'Saved table-log' )
 
 
 def save_table_log( sc, qc, files, chrom, path ):
@@ -379,24 +362,51 @@ def save_table_log( sc, qc, files, chrom, path ):
     df = qc.createDataFrame( experiments )
     df.write.csv( '{}/log-chrom-{}'.format( path, chrom ) )
 
+def load_table_log( sq, sparse_matrix_path ):
+    path_log = '{0}/log-chrom-{1}'.format( sparse_matrix_path, chrom )
+    sparlse_log =  sq.read( path_log )
+    return sparlse_log.select( 'RD_Connect_ID' ).collect()
 
-
-def createDenseMatrix( url_project, prefix_hdfs, max_items_batch, denseMatrix_path, gvcf_store_path, chrom, group, token, gpap_id, gpap_token, save_family_dense = False, intermidiate_write = True ):
+def createDenseMatrix( sq, url_project, prefix_hdfs, max_items_batch, dense_matrix_path, sparse_matrix_path, chrom, group, token, gpap_id, gpap_token ):
     lgr = create_logger( 'createDenseMatrix', '' )
 
-    if gvcf_store_path is None:
-        raise 'No information on "gvcf_store_path" was provided.'
-    lgr.debug( 'Read from in {0}/chrom-{1}'.format( gvcf_store_path, chrom ) )
-    sparseMatrix = hl.read_matrix_table( '{0}/chrom-{1}'.format( gvcf_store_path, chrom ) )
+    if sparse_matrix_path is None:
+        raise 'No information on "sparse_matrix_path" was provided.'
+    lgr.debug( 'Read from in {0}/chrom-{1}'.format( sparse_matrix_path, chrom ) )
+    
+    path_matrix = '{0}/chrom-{1}'.format( sparse_matrix_path, chrom )
+    sparse_matrix = hl.read_matrix_table( path_matrix )
+
+    logs_sampels = load_table_log( sq, sparse_matrix_path )
+    
 
     experiments_in_matrix = [ x.get( 's' ) for x in sparseMatrix.col.collect() ]    
     lgr.debug( 'Total of {0} experiments'.format( len( experiments_in_matrix ) ) )
 
+    experiments_in_group = getExperimentByGroup( group, url_project, token, prefix_hdfs, chrom, max_items_batch )
+    full_ids_in_matrix = [ x for x in experiments_in_group if x[ 'RD_Connect_ID_Experiment' ] in experiments_in_matrix ]
+    experiments_and_families = getExperimentsByFamily( full_ids_in_matrix, url_project, gpap_id, gpap_token )
+
+    # Relocate experiments with no family
+    none_detected = False
+    x = len( list( set( [ x[ 2 ] for x in experiments_and_families ] ) ) )
+    for ii in range( len( experiments_and_families ) ):
+        if experiments_and_families[ ii ][ 2 ] == '---':
+            none_detected = True
+            experiments_and_families[ ii ][ 2 ] = experiments_and_families[ ii ][ 0 ]
+    y = len( list( set( [ x[ 2 ] for x in experiments_and_families ] ) ) )
+    if none_detected:
+        warnings.warn( 'Provided experiment ids got no family assigned. RD-Connect ID used as family ID for those experiments. Original families were of {} while after update are of {}.'.format( x, y ) )
+
+    for idx, cnt in enumerate( experiments_and_families ):
+        if idx > 50:
+            break
+        print( idx, " ---> ", cnt )
 
     # NEW CODE
-    familyMatrix = hl.experimental.densify( sparseMatrix )
-    familyMatrix = familyMatrix.filter_rows( hl.agg.any( familyMatrix.LGT.is_non_ref() ) )
-    familyMatrix.write( '{0}/chrm-{1}'.format( denseMatrix_path, chrom ), overwrite = True )
+    # familyMatrix = hl.experimental.densify( sparseMatrix )
+    # familyMatrix = familyMatrix.filter_rows( hl.agg.any( familyMatrix.LGT.is_non_ref() ) )
+    # familyMatrix.write( '{0}/chrm-{1}'.format( denseMatrix_path, chrom ), overwrite = True )
     # /
 
 

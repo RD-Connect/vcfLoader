@@ -419,15 +419,17 @@ def createDenseMatrix( sq, url_project, prefix_hdfs, max_items_batch, dense_matr
         warnings.warn( 'Provided experiment ids got no family assigned. RD-Connect ID used as family ID for those experiments. Original families were of {} while after update are of {}.'.format( x, y ) )
 
     print( " ** ", experiments_and_families[ 0 ] )
-    batches = create_batches_by_family( experiments_and_families, 100 )
+    batches = create_batches_by_family( experiments_and_families, 500 )
     print( "batches ----> ", len( batches ) )
 
     print( "=" * 25 )
     for idx, cnt in enumerate( batches[ 0 ] ):
-        print( idx, " ---> ", cnt )
+        if idx < 50:
+            print( idx, " ---> ", cnt )
     print( "=" * 25 )
     for idx, cnt in batches[ 10 ]:
-        print( idx, " ---> ", cnt )
+        if idx < 50:
+            print( idx, " ---> ", cnt )
     print( "=" * 25 )
 
     first = True

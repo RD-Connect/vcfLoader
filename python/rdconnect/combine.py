@@ -380,7 +380,7 @@ def createDenseMatrix( sq, url_project, prefix_hdfs, max_items_batch, dense_matr
     #logs_sampels = load_table_log( sq, sparse_matrix_path, chrom )
     
 
-    experiments_in_matrix = [ x.get( 's' ) for x in sparseMatrix.col.collect() ]    
+    experiments_in_matrix = [ x.get( 's' ) for x in sparse_matrix.col.collect() ]    
     lgr.debug( 'Total of {0} experiments'.format( len( experiments_in_matrix ) ) )
 
     experiments_in_group = getExperimentByGroup( group, url_project, token, prefix_hdfs, chrom, max_items_batch )

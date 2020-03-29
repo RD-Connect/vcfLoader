@@ -367,6 +367,22 @@ def load_table_log( sq, sparse_matrix_path, chrom ):
     sparlse_log =  sq.read( path_log )
     return sparlse_log.select( 'RD_Connect_ID' ).collect()
 
+
+def create_batches_by_family( experiments, size = 1000 ):
+    rst = []
+    while len( experiments ) > 0:
+        batch = []
+        cnt = 0
+        while cnt <= size and len( experiments ) > 0:
+            fam = experimerns.pop( 0 )
+            exp_fam = [ x for x in experiments if x[ 2 ] == fam ]
+            batch += exp_fam
+            cnt += len( exp_fam )
+            experiments = [ x for x in experiments if x[ 2 ] != fam ]
+        rst.append( batch )
+    return rst
+
+
 def createDenseMatrix( sq, url_project, prefix_hdfs, max_items_batch, dense_matrix_path, sparse_matrix_path, chrom, group, token, gpap_id, gpap_token ):
     lgr = create_logger( 'createDenseMatrix', '' )
 
@@ -398,10 +414,17 @@ def createDenseMatrix( sq, url_project, prefix_hdfs, max_items_batch, dense_matr
     if none_detected:
         warnings.warn( 'Provided experiment ids got no family assigned. RD-Connect ID used as family ID for those experiments. Original families were of {} while after update are of {}.'.format( x, y ) )
 
-    for idx, cnt in enumerate( len( experiments_and_families ), len( experiments_and_families ) - 50 ):
-        if idx > 50:
-            break
+    
+    batches = create_batches_by_family( experiments_and_families, 100 )
+
+    print( "=" * 25 )
+    for idx, cnt in batches[ 0 ]:
         print( idx, " ---> ", cnt )
+    print( "=" * 25 )
+    for idx, cnt in batches[ 10 ]:
+        print( idx, " ---> ", cnt )
+    print( "=" * 25 )
+
 
     # NEW CODE
     # familyMatrix = hl.experimental.densify( sparseMatrix )

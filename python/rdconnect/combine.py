@@ -376,7 +376,7 @@ def create_batches_by_family( experiments, size = 1000 ):
         cnt = 0
         jj = 0
         while cnt <= size and len( experiments ) > 0:
-            fam = experiments.pop( 0 )
+            fam = experiments[ 0 ][ 3 ]
             exp_fam = [ x for x in experiments if x[ 2 ] == fam ]
             print( ii, " .. ", jj, " .. ", cnt, " -> ", fam, "(", len(exp_fam), "): ", exp_fam )
             batch += exp_fam
@@ -422,13 +422,13 @@ def createDenseMatrix( sq, url_project, prefix_hdfs, max_items_batch, dense_matr
     batches = create_batches_by_family( experiments_and_families, 100 )
     print( "batches ----> ", len( batches ) )
 
-    # print( "=" * 25 )
-    # for idx, cnt in batches[ 0 ]:
-    #     print( idx, " ---> ", cnt )
-    # print( "=" * 25 )
-    # for idx, cnt in batches[ 10 ]:
-    #     print( idx, " ---> ", cnt )
-    # print( "=" * 25 )
+    print( "=" * 25 )
+    for idx, cnt in batches[ 0 ]:
+        print( idx, " ---> ", cnt )
+    print( "=" * 25 )
+    for idx, cnt in batches[ 10 ]:
+        print( idx, " ---> ", cnt )
+    print( "=" * 25 )
 
 
     # NEW CODE

@@ -362,7 +362,7 @@ def save_table_log( sc, qc, files, chrom, path ):
     df = qc.createDataFrame( experiments )
     df.write.csv( '{}/log-chrom-{}'.format( path, chrom ) )
 
-def load_table_log( sq, sparse_matrix_path ):
+def load_table_log( sq, sparse_matrix_path, chrom ):
     path_log = '{0}/log-chrom-{1}'.format( sparse_matrix_path, chrom )
     sparlse_log =  sq.read( path_log )
     return sparlse_log.select( 'RD_Connect_ID' ).collect()
@@ -377,7 +377,7 @@ def createDenseMatrix( sq, url_project, prefix_hdfs, max_items_batch, dense_matr
     path_matrix = '{0}/chrom-{1}'.format( sparse_matrix_path, chrom )
     sparse_matrix = hl.read_matrix_table( path_matrix )
 
-    logs_sampels = load_table_log( sq, sparse_matrix_path )
+    #logs_sampels = load_table_log( sq, sparse_matrix_path, chrom )
     
 
     experiments_in_matrix = [ x.get( 's' ) for x in sparseMatrix.col.collect() ]    

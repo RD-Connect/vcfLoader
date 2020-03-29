@@ -429,8 +429,9 @@ def createDenseMatrix( sq, url_project, prefix_hdfs, max_items_batch, dense_matr
     print( "=" * 25 )
 
     first = True
-    dm = denseMatrix_path
+    dm = dense_matrix_path
     for idx, batch in enumerate( batches ):
+        lgr.debug( "Flatting and filtering dense matrix {}".format( idx ) )
         sam = hl.literal( [ x[ 0 ] for x in batch ], 'array<str>' )
         small_matrix = sparse_matrix.filter_cols( sam.contains( sparse_matrix['s'] ) )
         small_matrix = hl.experimental.densify( sparse_matrix )
@@ -441,6 +442,7 @@ def createDenseMatrix( sq, url_project, prefix_hdfs, max_items_batch, dense_matr
             dm = utils.update_version( dm )
         lgr.info( 'Writing dense matrix {} to disk ({})'.format( idx, dm ) )
         small_matrix.write( '{0}/chrm-{1}'.format( dm, chrom ), overwrite = True )
+        lgr.debug( "Ending writing dense matrix" )
 
 
 

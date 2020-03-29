@@ -422,13 +422,13 @@ def createDenseMatrix( sq, url_project, prefix_hdfs, max_items_batch, dense_matr
     batches = create_batches_by_family( experiments_and_families, 100 )
     print( "batches ----> ", len( batches ) )
 
-    print( "=" * 25 )
-    for idx, cnt in batches[ 0 ]:
-        print( idx, " ---> ", cnt )
-    print( "=" * 25 )
-    for idx, cnt in batches[ 10 ]:
-        print( idx, " ---> ", cnt )
-    print( "=" * 25 )
+    # print( "=" * 25 )
+    # for idx, cnt in batches[ 0 ]:
+    #     print( idx, " ---> ", cnt )
+    # print( "=" * 25 )
+    # for idx, cnt in batches[ 10 ]:
+    #     print( idx, " ---> ", cnt )
+    # print( "=" * 25 )
 
 
     # NEW CODE

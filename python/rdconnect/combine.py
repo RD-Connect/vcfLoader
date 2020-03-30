@@ -434,7 +434,7 @@ def createDenseMatrix( sq, url_project, prefix_hdfs, max_items_batch, dense_matr
         lgr.debug( "Flatting and filtering dense matrix {}".format( idx ) )
         sam = hl.literal( [ x[ 0 ] for x in batch ], 'array<str>' )
         small_matrix = sparse_matrix.filter_cols( sam.contains( sparse_matrix['s'] ) )
-        small_matrix = hl.experimental.densify( sparse_matrix )
+        small_matrix = hl.experimental.densify( small_matrix )
         small_matrix = small_matrix.filter_rows( hl.agg.any( small_matrix.LGT.is_non_ref() ) )
         if first:
             first = False

@@ -324,7 +324,7 @@ def createSparseMatrix2( sqlContext, sc, group, url_project, token, prefix_hdfs,
             bse_new = utils.update_version( bse_new )
             new_gvcf_store_path = '{0}/chrom-{1}'.format( bse_new, chrom )
             lgr.debug( 'Index {}\n\tCurrent gvcf store is "{}"\n\tNew version gvcf store is "{}"'.format( index, gvcf_store_path, new_gvcf_store_path ) )
-        loadGvcf( hl, path_to_exps, chrom, new_gvcf_store_path, gvcf_store_path, partitions_chromosome, lgr )
+        loadGvcf( hl, files_to_be_loaded, chrom, new_gvcf_store_path, gvcf_store_path, partitions_chromosome, lgr )
 
 
 

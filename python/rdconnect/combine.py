@@ -304,7 +304,7 @@ def createSparseMatrix2( sqlContext, sc, group, url_project, token, prefix_hdfs,
 
     # Create batches of 'size' experiments ordered by family
     batches = list( divideChunks( files_to_be_loaded, 100 ) )
-    lgr.debug( 'Created {} batches from {} files'.format( len( batches ), len( experiments_and_families ) ) )
+    lgr.debug( 'Created {} batches from {} files'.format( len( batches ), len( files_to_be_loaded ) ) )
 
     bse_old = gvcf_store_path
     bse_new = new_gvcf_store_path

@@ -136,7 +136,7 @@ def main(sqlContext, sc, configuration, chrom, nchroms, step, somaticFlag):
         else:
             gvcf_store_path = None
 
-        combine.createDenseMatrix2( sqlContext, url_project, prefix_hdfs, max_items_batch, denseMatrix_path, gvcf_store_path, chrom, group, token, gpap_id, gpap_token )
+        combine.createDenseMatrix( sqlContext, url_project, prefix_hdfs, max_items_batch, denseMatrix_path, gvcf_store_path, chrom, group, token, gpap_id, gpap_token )
         
     if ("createIndex" in step):
         if ("createIndexCNV" in step):

@@ -433,6 +433,32 @@ def create_batches_by_family( experiments, size = 1000 ):
 def createDenseMatrix2( sq, url_project, prefix_hdfs, max_items_batch, dense_matrix_path, sparse_matrix_path, chrom, group, token, gpap_id, gpap_token ):
     lgr = create_logger( 'createDenseMatrix2', '' )
 
+    if sparse_matrix_path is None:
+        raise 'No information on "sparse_matrix_path" was provided.'
+    lgr.debug( 'Read from in {0}/chrom-{1}'.format( sparse_matrix_path, chrom ) )
+    
+    path_matrix = '{0}/chrom-{1}'.format( sparse_matrix_path, chrom )
+    sparse_matrix = hl.read_matrix_table( path_matrix )
+
+    experiments_in_matrix = [ x.get( 's' ) for x in sparse_matrix.col.collect() ]    
+    lgr.debug( 'Total of {0} experiments'.format( len( experiments_in_matrix ) ) )
+
+    experiments_in_group = getExperimentByGroup( group, url_project, token, prefix_hdfs, chrom, max_items_batch )
+    full_ids_in_matrix = [ x for x in experiments_in_group if x[ 'RD_Connect_ID_Experiment' ] in experiments_in_matrix ]
+    experiments_and_families = getExperimentsByFamily( full_ids_in_matrix, url_project, gpap_id, gpap_token )
+
+    # Relocate experiments with no family
+    none_detected = False
+    x = len( list( set( [ x[ 2 ] for x in experiments_and_families ] ) ) )
+    for ii in range( len( experiments_and_families ) ):
+        if experiments_and_families[ ii ][ 2 ] == '---':
+            none_detected = True
+            experiments_and_families[ ii ][ 2 ] = experiments_and_families[ ii ][ 0 ]
+    y = len( list( set( [ x[ 2 ] for x in experiments_and_families ] ) ) )
+    if none_detected:
+        warnings.warn( 'Provided experiment ids got no family assigned. RD-Connect ID used as family ID for those experiments. Original families were of {} while after update are of {}.'.format( x, y ) )
+
+
 def createDenseMatrix( sq, url_project, prefix_hdfs, max_items_batch, dense_matrix_path, sparse_matrix_path, chrom, group, token, gpap_id, gpap_token ):
     lgr = create_logger( 'createDenseMatrix', '' )
 

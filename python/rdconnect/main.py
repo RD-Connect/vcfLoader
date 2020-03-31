@@ -117,7 +117,7 @@ def main(sqlContext, sc, configuration, chrom, nchroms, step, somaticFlag):
             path_log = configuration[ 'combine' ][ 'log_sparse' ]
             gpap_id = configuration[ 'gpap' ][ 'id' ]
             gpap_token = configuration[ 'gpap' ][ 'token' ]
-            combine.createSparseMatrix( sqlContext, sc, group, url_project, token, prefix_hdfs, chrom, max_items_batch, partitions_chromosome, gvcf_store_path, new_gvcf_store_path, gpap_id, gpap_token, path_log )
+            combine.createSparseMatrix2( sqlContext, sc, group, url_project, token, prefix_hdfs, chrom, max_items_batch, partitions_chromosome, gvcf_store_path, new_gvcf_store_path, gpap_id, gpap_token, path_log )
 
 
     if ("createDenseMatrix" in step):
@@ -136,7 +136,7 @@ def main(sqlContext, sc, configuration, chrom, nchroms, step, somaticFlag):
         else:
             gvcf_store_path = None
 
-        combine.createDenseMatrix( sqlContext, url_project, prefix_hdfs, max_items_batch, denseMatrix_path, gvcf_store_path, chrom, group, token, gpap_id, gpap_token )
+        combine.createDenseMatrix2( sqlContext, url_project, prefix_hdfs, max_items_batch, denseMatrix_path, gvcf_store_path, chrom, group, token, gpap_id, gpap_token )
         
     if ("createIndex" in step):
         if ("createIndexCNV" in step):

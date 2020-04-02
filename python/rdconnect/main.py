@@ -272,16 +272,16 @@ def main(sqlContext, sc, configuration, chrom, nchroms, step, somaticFlag):
         annotated = hl.read_table(utils.buildDestinationExAC(destination, fileName, somaticFlag))
         transform.transform(annotated, utils.buildDestinationTransform(destination, somaticFlag), chrom)
 
-    if "test" in step:
+    if "read_log_file" in step:
         from pyspark.sql import Row
         sq = sqlContext
         path = "hdfs://rdhdfs1:27000/test/rdconnect-ES6/denseMatrix/1737-test-dm7/0.1/log-chrom-18"
-        files = [ [ "E1", 18, "path1" ], [ "E2", 18, "path1" ], [ "E3", 18, "path1" ], [ "E4", 18, "path2" ], [ "E5", 18, "path2" ] ]
-        rdd = sc.parallelize( files )
-        experiments = rdd.map( lambda x: Row( RD_Connect_ID = x[ 0 ], Chrom = x[ 1 ], Dense_Path = x[ 2 ] ) )
-        df = sq.createDataFrame( experiments )
-        #df.write( path )
-        df.repartition(1).write.format("csv").save( path )
+        #files = [ [ "E1", 18, "path1" ], [ "E2", 18, "path1" ], [ "E3", 18, "path1" ], [ "E4", 18, "path2" ], [ "E5", 18, "path2" ] ]
+        #rdd = sc.parallelize( files )
+        #experiments = rdd.map( lambda x: Row( RD_Connect_ID = x[ 0 ], Chrom = x[ 1 ], Dense_Path = x[ 2 ] ) )
+        #df = sq.createDataFrame( experiments )
+        #df.repartition(1).write.format("csv").save( path )
+        print( load_table_log( sc, path ) )
         
     # Uploading step. It uploads all annotated variants to ElasticSearch
     if ("toElastic" in step):

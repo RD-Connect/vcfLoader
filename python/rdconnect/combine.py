@@ -206,10 +206,10 @@ def createSparseMatrix( sc, group, url_project, token, prefix_hdfs, chrom, max_i
 #         save_table_log( sc, sqlContext, batch, chrom, bse_new )
 
 
-def save_table_log( sc, qc, files, path ):
+def save_table_log( sc, sq, files, path ):
     rdd = sc.parallelize( files )
     experiments = rdd.map( lambda x: Row( RD_Connect_ID = x[ 0 ], Chrom = x[ 1 ], Dense_Path = x[ 2 ] ) )
-    df = qc.createDataFrame( experiments )
+    df = sq.createDataFrame( experiments )
     df.write( path )
 
 

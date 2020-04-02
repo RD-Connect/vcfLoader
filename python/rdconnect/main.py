@@ -282,7 +282,7 @@ def main(sqlContext, sc, configuration, chrom, nchroms, step, somaticFlag):
         #df = sq.createDataFrame( experiments )
         #df.repartition(1).write.format("csv").save( path )
         print("A")
-        z = combine.load_table_log( sc, path )
+        z = combine.load_table_log( sq, path )
         print("B", z)
         
     # Uploading step. It uploads all annotated variants to ElasticSearch

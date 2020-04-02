@@ -275,7 +275,7 @@ def main(sqlContext, sc, configuration, chrom, nchroms, step, somaticFlag):
     if "test" in step:
         from pyspark.sql import Row
         sq = sqlContext
-        path = "https://172.16.10.100:9090/explorer.html#/test/rdconnect-ES6/denseMatrix/1737-test-dm7/0.1/log-chrom-18"
+        path = "hdfs://rdhdfs1:27000/test/rdconnect-ES6/denseMatrix/1737-test-dm7/0.1/log-chrom-18"
         files = [ [ "E1", 18, "path1" ], [ "E2", 18, "path1" ], [ "E3", 18, "path1" ], [ "E4", 18, "path2" ], [ "E5", 18, "path2" ] ]
         rdd = sc.parallelize( files )
         experiments = rdd.map( lambda x: Row( RD_Connect_ID = x[ 0 ], Chrom = x[ 1 ], Dense_Path = x[ 2 ] ) )

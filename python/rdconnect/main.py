@@ -280,7 +280,8 @@ def main(sqlContext, sc, configuration, chrom, nchroms, step, somaticFlag):
         rdd = sc.parallelize( files )
         experiments = rdd.map( lambda x: Row( RD_Connect_ID = x[ 0 ], Chrom = x[ 1 ], Dense_Path = x[ 2 ] ) )
         df = sq.createDataFrame( experiments )
-        df.write( path )
+        #df.write( path )
+        df.repartition(1).write.format("csv").save( path )
         
     # Uploading step. It uploads all annotated variants to ElasticSearch
     if ("toElastic" in step):

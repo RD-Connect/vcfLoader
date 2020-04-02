@@ -217,9 +217,10 @@ def load_table_log( sq, path ):
     #df = sc.read.format( 'csv' ).option( 'header', 'true' ).load( path )
     sparlse_log = sq.read.format( 'csv' ).option( 'header', 'true' ).load( path )
     x = sparlse_log.select( 'RD_Connect_ID' ).collect()
+    y = sparlse_log.select( 'Dense_Path' ).collect()
     print( 'load_table_log : {}'.format( path ) )
     print( '\t :', x )
-    return x
+    return zip( x, y )
 
 
 def create_batches_by_family( experiments, size = 1000 ):

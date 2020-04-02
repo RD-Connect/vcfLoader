@@ -272,7 +272,7 @@ def main(sqlContext, sc, configuration, chrom, nchroms, step, somaticFlag):
         annotated = hl.read_table(utils.buildDestinationExAC(destination, fileName, somaticFlag))
         transform.transform(annotated, utils.buildDestinationTransform(destination, somaticFlag), chrom)
 
-    if "read_log_file" in step:
+    if "readDenseLog" in step:
         from pyspark.sql import Row
         sq = sqlContext
         path = "hdfs://rdhdfs1:27000/test/rdconnect-ES6/denseMatrix/1737-test-dm7/0.1/log-chrom-18"

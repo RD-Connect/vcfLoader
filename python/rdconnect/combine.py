@@ -292,10 +292,10 @@ def createDenseMatrix( sc, sq, url_project, prefix_hdfs, max_items_batch, dense_
             for ff in batch:
                 log_files.append( ( ff, chrom, path ) )
     except Exception as ex:
-        save_table_log(sc, sq, log_files, log_path )
+        save_table_log( sc, sq, log_files, log_path )
         raise ex
 
-    save_table_log(sc, sq, log_files, log_path )
+    save_table_log( sc, sq, log_files, log_path )
 
     # experiments_in_group = getExperimentByGroup( group, url_project, token, prefix_hdfs, chrom, max_items_batch )
     # full_ids_in_matrix = [ x for x in experiments_in_group if x[ 'RD_Connect_ID_Experiment' ] in experiments_in_matrix ]

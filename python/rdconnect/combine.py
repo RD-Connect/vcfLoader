@@ -266,7 +266,7 @@ def createDenseMatrix( sc, sq, url_project, prefix_hdfs, max_items_batch, dense_
     if none_detected:
         warnings.warn( 'Provided experiment ids got no family assigned. RD-Connect ID used as family ID for those experiments. Original families were of {} while after update are of {}.'.format( x, y ) )
 
-    batches = create_batches_by_family( experiments_and_families, 500 )
+    batches = create_batches_by_family( experiments_and_families, 1000 )
     lgr.debug( 'Created {} batches'.format( len( batches ) ) )
 
     

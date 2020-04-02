@@ -281,7 +281,7 @@ def main(sqlContext, sc, configuration, chrom, nchroms, step, somaticFlag):
         #experiments = rdd.map( lambda x: Row( RD_Connect_ID = x[ 0 ], Chrom = x[ 1 ], Dense_Path = x[ 2 ] ) )
         #df = sq.createDataFrame( experiments )
         #df.repartition(1).write.format("csv").save( path )
-        save_table_log( sc, sq, files, path )
+        combine.save_table_log( sc, sq, files, path )
         print("A")
         z = combine.load_table_log( sq, path )
         print("B", z)

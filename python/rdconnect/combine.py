@@ -216,7 +216,10 @@ def save_table_log( sc, sq, files, path ):
 def load_table_log( sq, path ):
     #df = sc.read.format( 'csv' ).option( 'header', 'true' ).load( path )
     sparlse_log =  sq.read( path )
-    return sparlse_log.select( 'RD_Connect_ID' ).collect()
+    x = sparlse_log.select( 'RD_Connect_ID' ).collect()
+    print( 'load_table_log : {}'.format( path ) )
+    print( '\t :', x )
+    return x
 
 
 def create_batches_by_family( experiments, size = 1000 ):

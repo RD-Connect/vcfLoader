@@ -280,7 +280,6 @@ def createDenseMatrix( sc, sq, url_project, prefix_hdfs, max_items_batch, dense_
     log_path = '{0}/log-chrm-{1}'.format( dm, chrom )
     try:
         for idx, batch in enumerate( batches ):
-            path = '{0}/chrm-{1}'.format( dm, chrom )
             lgr.debug( "Flatting and filtering dense matrix {}".format( idx ) )
             sam = hl.literal( [ x[ 0 ] for x in batch ], 'array<str>' )
             small_matrix = sparse_matrix.filter_cols( sam.contains( sparse_matrix['s'] ) )
@@ -290,6 +289,7 @@ def createDenseMatrix( sc, sq, url_project, prefix_hdfs, max_items_batch, dense_
                 first = False
             else:
                 dm = utils.update_version( dm )
+            path = '{0}/chrm-{1}'.format( dm, chrom )
             lgr.info( 'Writing dense matrix {} to disk ({})'.format( idx, dm ) )
             small_matrix.write( path, overwrite = True )
             lgr.debug( "Ending writing dense matrix" )

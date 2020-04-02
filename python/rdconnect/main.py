@@ -2,7 +2,7 @@
 
 from pyspark import SparkConf, SparkContext
 from pyspark.sql import SQLContext, SparkSession
-from rdconnect import config, annotations, index, transform, utils,combine
+from rdconnect import config, annotations, index, transform, utils, combine
 from pyspark.sql.functions import lit
 from subprocess import call
 from pyspark.sql.types import FloatType, IntegerType
@@ -282,7 +282,7 @@ def main(sqlContext, sc, configuration, chrom, nchroms, step, somaticFlag):
         #df = sq.createDataFrame( experiments )
         #df.repartition(1).write.format("csv").save( path )
         print("A")
-        z = load_table_log( sc, path )
+        z = combine.load_table_log( sc, path )
         print("B", z)
         
     # Uploading step. It uploads all annotated variants to ElasticSearch

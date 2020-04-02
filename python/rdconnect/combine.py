@@ -207,8 +207,10 @@ def createSparseMatrix( sc, group, url_project, token, prefix_hdfs, chrom, max_i
 
 
 def save_table_log( sc, sq, files, path ):
+    print( "1.", files[ 0:10 ])
     rdd = sc.parallelize( files )
     experiments = rdd.map( lambda x: Row( RD_Connect_ID = x[ 0 ], Chrom = x[ 1 ], Dense_Path = x[ 2 ] ) )
+    print( "1.", experiments[ 0:10 ])
     df = sq.createDataFrame( experiments )
     df.repartition( 1 ).write.format( 'csv' ).mode( 'overwrite' ).save( path, header = 'true' )
 
@@ -282,16 +284,16 @@ def createDenseMatrix( sc, sq, url_project, prefix_hdfs, max_items_batch, dense_
         for idx, batch in enumerate( batches ):
             path = '{0}/chrm-{1}'.format( dm, chrom )
             lgr.debug( "Flatting and filtering dense matrix {}".format( idx ) )
-            sam = hl.literal( [ x[ 0 ] for x in batch ], 'array<str>' )
-            small_matrix = sparse_matrix.filter_cols( sam.contains( sparse_matrix['s'] ) )
-            small_matrix = hl.experimental.densify( small_matrix )
-            small_matrix = small_matrix.filter_rows( hl.agg.any( small_matrix.LGT.is_non_ref() ) )
-            if first:
-                first = False
-            else:
-                dm = utils.update_version( dm )
-            lgr.info( 'Writing dense matrix {} to disk ({})'.format( idx, dm ) )
-            small_matrix.write( path, overwrite = True )
+            # sam = hl.literal( [ x[ 0 ] for x in batch ], 'array<str>' )
+            # small_matrix = sparse_matrix.filter_cols( sam.contains( sparse_matrix['s'] ) )
+            # small_matrix = hl.experimental.densify( small_matrix )
+            # small_matrix = small_matrix.filter_rows( hl.agg.any( small_matrix.LGT.is_non_ref() ) )
+            # if first:
+            #     first = False
+            # else:
+            #     dm = utils.update_version( dm )
+            # lgr.info( 'Writing dense matrix {} to disk ({})'.format( idx, dm ) )
+            # small_matrix.write( path, overwrite = True )
             lgr.debug( "Ending writing dense matrix" )
             for ff in batch:
                 log_files.append( ( ff, chrom, path ) )

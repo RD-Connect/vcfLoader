@@ -273,18 +273,9 @@ def main(sqlContext, sc, configuration, chrom, nchroms, step, somaticFlag):
         transform.transform(annotated, utils.buildDestinationTransform(destination, somaticFlag), chrom)
 
     if "readDenseLog" in step:
-        from pyspark.sql import Row
-        sq = sqlContext
-        path = "hdfs://rdhdfs1:27000/test/rdconnect-ES6/denseMatrix/1737-test-dm7/0.1/log-chrom-18"
-        files = [ [ "E1", 18, "path1" ], [ "E2", 18, "path1" ], [ "E3", 18, "path1" ], [ "E4", 18, "path2" ], [ "E5", 18, "path2" ] ]
-        #rdd = sc.parallelize( files )
-        #experiments = rdd.map( lambda x: Row( RD_Connect_ID = x[ 0 ], Chrom = x[ 1 ], Dense_Path = x[ 2 ] ) )
-        #df = sq.createDataFrame( experiments )
-        #df.repartition(1).write.format("csv").save( path )
-        combine.save_table_log( sc, sq, files, path )
-        print("A")
-        z = combine.load_table_log( sq, path )
-        print("B", z)
+        print ("step readDenseLog")
+        path = '{} /log-chrom-{}'.format( configuration[ 'combine' ][ 'denseMatrix_path' ], chrom )
+        z = combine.load_table_log( sqlContext, path )
         
     # Uploading step. It uploads all annotated variants to ElasticSearch
     if ("toElastic" in step):

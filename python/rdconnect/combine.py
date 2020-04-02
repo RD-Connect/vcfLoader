@@ -215,7 +215,7 @@ def save_table_log( sc, sq, files, path ):
 
 def load_table_log( sq, path ):
     #df = sc.read.format( 'csv' ).option( 'header', 'true' ).load( path )
-    sparlse_log =  sq.read( path )
+    sparlse_log = sq.read.format( 'csv' ).option( 'header', 'true' ).load( path )
     x = sparlse_log.select( 'RD_Connect_ID' ).collect()
     print( 'load_table_log : {}'.format( path ) )
     print( '\t :', x )

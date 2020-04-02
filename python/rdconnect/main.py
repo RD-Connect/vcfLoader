@@ -271,6 +271,14 @@ def main(sqlContext, sc, configuration, chrom, nchroms, step, somaticFlag):
         print ("loading from " + utils.buildDestinationExAC(destination, fileName, somaticFlag))
         annotated = hl.read_table(utils.buildDestinationExAC(destination, fileName, somaticFlag))
         transform.transform(annotated, utils.buildDestinationTransform(destination, somaticFlag), chrom)
+
+    if "test" on step:
+        path = "https://172.16.10.100:9090/explorer.html#/test/rdconnect-ES6/denseMatrix/1737-test-dm7/0.1/log-chrom-18"
+        files = [ [ "E1", 18, "path1" ], [ "E2", 18, "path1" ], [ "E3", 18, "path1" ], [ "E4", 18, "path2" ], [ "E5", 18, "path2" ] ]
+        rdd = sc.parallelize( files )
+        experiments = rdd.map( lambda x: Row( RD_Connect_ID = x[ 0 ], Chrom = x[ 1 ], Dense_Path = x[ 2 ] ) )
+        df = qc.createDataFrame( experiments )
+        df.write( path )
         
     # Uploading step. It uploads all annotated variants to ElasticSearch
     if ("toElastic" in step):

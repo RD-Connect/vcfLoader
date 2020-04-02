@@ -210,7 +210,7 @@ def save_table_log( sc, qc, files, path ):
     rdd = sc.parallelize( files )
     experiments = rdd.map( lambda x: Row( RD_Connect_ID = x[ 0 ], Chrom = x[ 1 ], Dense_Path = x[ 2 ] ) )
     df = qc.createDataFrame( experiments )
-    df.write.csv( path )
+    df.write( path )
 
 
 def load_table_log( sq, path ):

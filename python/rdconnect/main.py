@@ -150,7 +150,7 @@ def main(sqlContext, sc, configuration, chrom, nchroms, step, somaticFlag):
         annotations.importInternalFreq(hl, sourceFileName, destination + "/internal_freq/" + fileName, number_partitions)
 
     if "loadDenseMatrix" in step:
-        print ("step loadDenseMatrix")
+        print ( "step loadDenseMatrix" )
         annotations.loadDenseMatrix( hl, current_dir, sourceFileName, destination + "/loaded/" + fileName, number_partitions )
         current_dir = destination + "/loaded/" + "variants" + chrom + ".ht"
 

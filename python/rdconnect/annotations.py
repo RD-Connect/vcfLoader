@@ -66,12 +66,12 @@ def loadDenseMatrix( hl, originPath, sourcePath, destinationPath, nPartitions ):
     lgr.debug( 'Argument "destinationPath" filled with "{}"'.format( destinationPath ) )
     lgr.debug( 'Argument "nPartitions" filled with "{}"'.format( nPartitions ) )
     try:
-        vcf = hl.split_multi_hts( hl.import_vcf( str(sourcePath), array_elements_required = False, force_bgz = True, min_partitions = nPartitions ) )
+        vcf = hl.read_matrix_table( sourcePath, array_elements_required = False, force_bgz = True, min_partitions = nPartitions )
         x = [y.get('s') for y in vcf.col.collect()]
         lgr.debug( 'Experiments in loaded VCF: {}'.format( len( x ) ) )
         lgr.debug( 'First and last sample: {} // {}'.format( x[ 0 ], x[ len( x ) - 1 ] ) )
     except Exception as ex:
-        lgr.debug( 'Unexpected error during the load of sense matrix "{}"'.format( sourcePath ) )
+        lgr.debug( 'Unexpected error during the load of dense matrix "{}"'.format( sourcePath ) )
         lgr.error( 'Unexpected error --> {}'.format( str( ex ) ) )
         sys.exit( 2 )
 

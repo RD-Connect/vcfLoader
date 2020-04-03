@@ -224,21 +224,16 @@ def load_table_log( sq, path ):
 
 def create_batches_by_family( experiments, size = 1000 ):
     rst = []
-    # ii = 0
     while len( experiments ) > 0:
         batch = []
         cnt = 0
-        # jj = 0
         while cnt <= size and len( experiments ) > 0:
             fam = experiments[ 0 ][ 2 ]
             exp_fam = [ x for x in experiments if x[ 2 ] == fam ]
-            # print( ii, " .. ", jj, " .. ", cnt, " -> ", fam, "(", len(exp_fam), "): ", exp_fam )
             batch += exp_fam
             cnt += len( exp_fam )
             experiments = [ x for x in experiments if x[ 2 ] != fam ]
-            # jj += 1
         rst.append( batch )
-        # ii += 1
     return rst
 
 

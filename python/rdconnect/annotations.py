@@ -71,7 +71,7 @@ def loadDenseMatrix( hl, originPath, sourcePath, destinationPath, nPartitions ):
         lgr.debug( 'Experiments in loaded VCF: {}'.format( len( x ) ) )
         lgr.debug( 'First and last sample: {} // {}'.format( x[ 0 ], x[ len( x ) - 1 ] ) )
 
-        vcf = hl.split_multi_hts( vcf )
+        print( vcf.describe() )
 
         vcf = vcf.transmute_entries(sample=hl.struct(sample=vcf.s,
                                                      ad=truncateAt(hl,vcf.AD[1]/hl.sum(vcf.AD),"2"),

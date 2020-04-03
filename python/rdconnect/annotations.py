@@ -70,8 +70,6 @@ def loadDenseMatrix( hl, originPath, sourcePath, destinationPath, nPartitions ):
         x = [y.get('s') for y in vcf.col.collect()]
         lgr.debug( 'Experiments in loaded VCF: {}'.format( len( x ) ) )
         lgr.debug( 'First and last sample: {} // {}'.format( x[ 0 ], x[ len( x ) - 1 ] ) )
-
-
         lgr.debug( 'Starting "transmute_entries"' )
         vcf = vcf.transmute_entries(
             sample = hl.struct(
@@ -82,9 +80,8 @@ def loadDenseMatrix( hl, originPath, sourcePath, destinationPath, nPartitions ):
                 gt = hl.str( vcf.LGT ),
                 gq = vcf.GQ
             )
-        ) #.drop('rsid','qual','filters','info')
-
-        lgr.debug( 'Starting "annotate_rows" (1/2)' )
+        )
+        lgr.debug( 'Starting "annotate_rows"' )
         vcf = vcf.annotate_rows(
             ref = vcf.alleles[ 0 ],
             alt = vcf.alleles[ 1 ],
@@ -96,15 +93,6 @@ def loadDenseMatrix( hl, originPath, sourcePath, destinationPath, nPartitions ):
                 lambda x: ( x.dp > MIN_DP ) & ( x.gq > MIN_GQ ), hl.agg.collect( vcf.sample )
             )
         )
-        print( "---2---")
-        print( vcf.describe() )
-        lgr.debug( 'Starting "annotate_rows" (2/2)' )
-        vcf = vcf.annotate_rows(freqIntGermline = hl.cond((hl.len(vcf.samples_germline) > 0) | (hl.len(hl.filter(lambda x: x.dp > MIN_DP,vcf.samples_germline)) > 0),
-                                            truncateAt(hl,hl.sum(hl.map(lambda x: x.gtInt.unphased_diploid_gt_index(),vcf.samples_germline))/hl.sum(hl.map(lambda x: 2,hl.filter(lambda x: x.dp > MIN_DP,vcf.samples_germline))),"6"), 0.0)) \
-                 .drop("sample") \
-                 .rows() 
-        print( "---3---")
-        print( vcf.describe() )
         lgr.debug( 'Output VCF file will be saved to "{}"'.format( destinationPath ) )
         lgr.debug( 'Contents in "{}" will be overwritten'.format( destinationPath ) )
         vcf.key_by( vcf.locus, vcf.alleles ).distinct().write( destinationPath, overwrite = True )

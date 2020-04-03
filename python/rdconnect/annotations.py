@@ -1,8 +1,26 @@
+
+import sys
+import logging
+from datetime import datetime
 from rdconnect import utils, expr
+
 
 MIN_DP = 7
 MIN_GQ = 19
 SAMPLES_CNV = 939
+
+
+def create_logger( name ):
+    now = datetime.now()
+    date_time = now.strftime("%y%m%d_%H%M%S")
+    logger = logging.getLogger( name )
+    logger.setLevel( logging.DEBUG )
+    ch = logging.StreamHandler()
+    ch.setLevel( logging.DEBUG )
+    formatter = logging.Formatter( '%(asctime)s - %(name)s - %(levelname)s - %(message)s' )
+    ch.setFormatter( formatter )
+    logger.addHandler( ch )
+    return logger
 
 def importInternalFreq(hl, originPath, destinationPath, nPartitions):
     """ Function to compute the internal allele frequency of a given multi-sample
@@ -39,6 +57,23 @@ def importInternalFreq(hl, originPath, destinationPath, nPartitions):
         .rows()
     vcf_3.key_by(vcf_3.locus, vcf_3.alleles).distinct().write(destinationPath, overwrite = True)
     print('[importInternalFreq] - destinationPath: {0}'.format(destinationPath))
+
+
+def loadDenseMatrix( hl, originPath, sourcePath, destinationPath, nPartitions ):
+    lgr = create_logger( 'loadDenseMatrix' )
+    lgr.debug( 'Argument "originPath" filled with "{}"'.format( originPath ) )
+    lgr.debug( 'Argument "sourcePath" filled with "{}"'.format( sourcePath ) )
+    lgr.debug( 'Argument "destinationPath" filled with "{}"'.format( destinationPath ) )
+    lgr.debug( 'Argument "nPartitions" filled with "{}"'.format( nPartitions ) )
+    try:
+        vcf = hl.split_multi_hts( hl.import_vcf( str(sourcePath), array_elements_required = False, force_bgz = True, min_partitions = nPartitions ) )
+        x = [y.get('s') for y in vcf.col.collect()]
+        lgr.debug( 'Experiments in loaded VCF: {}'.format( len( x ) ) )
+        lgr.debug( 'First and last sample: {} // {}'.format( x[ 0 ], x[ len( x ) - 1 ] ) )
+    except Exception as ex:
+        lgr.debug( 'Unexpected error during the load of sense matrix "{}"'.format( sourcePath ) )
+        lgr.error( 'Unexpected error --> {}'.format( str( ex ) ) )
+        sys.exit( 2 )
 
 
 def importGermline(hl, originPath, sourcePath, destinationPath, nPartitions):

@@ -149,6 +149,11 @@ def main(sqlContext, sc, configuration, chrom, nchroms, step, somaticFlag):
         print ("step importInternalFreq")
         annotations.importInternalFreq(hl, sourceFileName, destination + "/internal_freq/" + fileName, number_partitions)
 
+    if "loadDenseMatrix" in step:
+        print ("step loadDenseMatrix")
+        annotations.loadDenseMatrix( hl, current_dir, sourceFileName, destination + "/loaded/" + fileName, number_partitions )
+        current_dir = destination + "/loaded/" + "variants" + chrom + ".ht"
+
     if ("loadGermline" in step):
         print ("step loadGermline")
         annotations.importGermline(hl,current_dir,sourceFileName,destination+"/loaded/"+fileName,number_partitions)

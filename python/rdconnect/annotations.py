@@ -70,6 +70,26 @@ def loadDenseMatrix( hl, originPath, sourcePath, destinationPath, nPartitions ):
         x = [y.get('s') for y in vcf.col.collect()]
         lgr.debug( 'Experiments in loaded VCF: {}'.format( len( x ) ) )
         lgr.debug( 'First and last sample: {} // {}'.format( x[ 0 ], x[ len( x ) - 1 ] ) )
+
+        vcf = hl.split_multi_hts( vcf )
+
+        vcf = vcf.transmute_entries(sample=hl.struct(sample=vcf.s,
+                                                     ad=truncateAt(hl,vcf.AD[1]/hl.sum(vcf.AD),"2"),
+                                                     dp=vcf.DP,
+                                                     gtInt=vcf.GT,
+                                                     gt=hl.str(vcf.GT),
+                                                     gq=vcf.GQ)) \
+                     .drop('rsid','qual','filters','info')
+        vcf = vcf.annotate_rows(ref=vcf.alleles[0],
+                          alt=vcf.alleles[1],
+                          pos=vcf.locus.position,
+                          indel=hl.cond((hl.len(vcf.alleles[0]) != (hl.len(vcf.alleles[1]))) | (hl.len(vcf.alleles[0]) != 1) | (hl.len(vcf.alleles[0]) != 1), True, False),
+                          samples_germline=hl.filter(lambda x: (x.dp > MIN_DP) & (x.gq > MIN_GQ),hl.agg.collect(vcf.sample))) 
+        vcf = vcf.annotate_rows(freqIntGermline = hl.cond((hl.len(vcf.samples_germline) > 0) | (hl.len(hl.filter(lambda x: x.dp > MIN_DP,vcf.samples_germline)) > 0),
+                                            truncateAt(hl,hl.sum(hl.map(lambda x: x.gtInt.unphased_diploid_gt_index(),vcf.samples_germline))/hl.sum(hl.map(lambda x: 2,hl.filter(lambda x: x.dp > MIN_DP,vcf.samples_germline))),"6"), 0.0)) \
+                 .drop("sample") \
+                 .rows() 
+
     except Exception as ex:
         lgr.debug( 'Unexpected error during the load of dense matrix "{}"'.format( sourcePath ) )
         lgr.error( 'Unexpected error --> {}'.format( str( ex ) ) )

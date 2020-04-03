@@ -86,7 +86,7 @@ def loadDenseMatrix( hl, originPath, sourcePath, destinationPath, nPartitions ):
         ) #.drop('rsid','qual','filters','info')
         vcf = vcf.annotate_rows(
             ref = vcf.alleles[ 0 ],
-            alt =v cf.alleles[ 1 ],
+            alt = vcf.alleles[ 1 ],
             pos = vcf.locus.position,
             indel=hl.cond((hl.len(vcf.alleles[0]) != (hl.len(vcf.alleles[1]))) | (hl.len(vcf.alleles[0]) != 1) | (hl.len(vcf.alleles[0]) != 1), True, False),
             samples_germline=hl.filter(lambda x: (x.dp > MIN_DP) & (x.gq > MIN_GQ),hl.agg.collect(vcf.sample))

@@ -393,6 +393,7 @@ def getExperimentsByFamily( pids, url_project, id_gpap, token_gpap, sort_output 
     
     parsed = {}
     for elm in data:
+        print( elm )
         pid = list( elm.keys() )[ 0 ]
         fam = elm[ pid ][ 'family' ] if 'family' in elm[ pid ].keys() else '---'
         parsed[ pid ] = fam

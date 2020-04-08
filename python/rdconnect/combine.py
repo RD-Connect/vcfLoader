@@ -51,7 +51,9 @@ def getExperimentByGroup( group, url_project, host_project, token, prefix_hdfs, 
     url = "{0}/datamanagement_service/api/samplebygroup/?format=json&group={1}&user=dpiscia&owner=False".format( url_project, group )
     headers = { 'Authorization': token, 'Host': host_project }
     print( 'getExperimentByGroup: {0}'.format( url ) )
+    print( headers )
     resp = requests.get (url, headers = headers, verify = False )
+    print( resp )
     data = json.loads( resp.content )
     return data
 

@@ -33,11 +33,11 @@ def resource(filename):
     return os.path.join(filename)
 
 
-def getExperimentStatus( url_project, token ):
+def getExperimentStatus( url_project, host_project, token ):
     """Get the status information for all experiments allowed to be used by the token."""
     if not url_project.startswith( 'http://' ) and not url_project.startswith( 'https://' ):
         url_project = 'http://{0}'.format( url_project )
-    headers = { 'Authorization': token }
+    headers = { 'Authorization': token, 'Host': host_project }
     url = "{0}/datamanagement_service/api/statusbyexperiment".format( url_project )
     print( 'getExperimentStatus: {0}'.format( url ) )
     resp = requests.get( url, headers = headers, verify = False )
@@ -45,12 +45,13 @@ def getExperimentStatus( url_project, token ):
     return data
 
 
-def getExperimentByGroup( group, url_project, token, prefix_hdfs, chrom, max_items_batch ):
+def getExperimentByGroup( group, url_project, host_project, token, prefix_hdfs, chrom, max_items_batch ):
     if not url_project.startswith( 'http://' ) and not url_project.startswith( 'https://' ):
         url_project = 'https://{0}'.format( url_project )
     url = "{0}/datamanagement_service/api/samplebygroup/?format=json&group={1}&user=dpiscia&owner=False".format( url_project, group )
+    headers = { 'Authorization': token, 'Host': host_project }
     print( 'getExperimentByGroup: {0}'.format( url ) )
-    resp = requests.get (url, headers={ 'Authorization': token }, verify = False )
+    resp = requests.get (url, headers = headers, verify = False )
     data = json.loads( resp.content )
     return data
 
@@ -65,12 +66,12 @@ def getExperimentsToProcess( experiment_status, experiment_available, check_hdfs
     selected_experiments = [ x for x in experiment_available_2 if x in experiment_status_2 ]
     return [ x for x in experiment_available if x[ 'RD_Connect_ID_Experiment' ] in selected_experiments ]
 
-def createSparseMatrix( group, url_project, token, prefix_hdfs, chrom, max_items_batch, partitions_chromosome, gvcf_store_path, new_gvcf_store_path, gpap_id, gpap_token ):
+def createSparseMatrix( group, url_project, host_project, token, prefix_hdfs, chrom, max_items_batch, partitions_chromosome, gvcf_store_path, new_gvcf_store_path, gpap_id, gpap_token ):
     lgr = create_logger( 'createSparseMatrix', '' )
 
     # Get all the experiments that have to processed from data-management
-    experiments_in_group = getExperimentByGroup( group, url_project, token, prefix_hdfs, chrom, max_items_batch )
-    experiment_status = getExperimentStatus( url_project, token )
+    experiments_in_group = getExperimentByGroup( group, url_project, host_project, token, prefix_hdfs, chrom, max_items_batch )
+    experiment_status = getExperimentStatus( url_project, host_project, token )
     experiments_to_be_loaded = getExperimentsToProcess( experiment_status, experiments_in_group, check_hdfs = True )
     # files_to_be_loaded = [ buildPath( prefix_hdfs, group, x[ 'RD_Connect_ID_Experiment' ], chrom ) for x in experiments_to_be_loaded ]
 

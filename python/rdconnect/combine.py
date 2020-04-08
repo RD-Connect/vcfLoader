@@ -53,7 +53,9 @@ def getExperimentByGroup( group, url_project, host_project, token, prefix_hdfs, 
     print( 'getExperimentByGroup: {0}'.format( url ) )
     print( headers )
     resp = requests.get (url, headers = headers, verify = False )
-    print( resp )
+    print( '1', resp )
+    print( '2', resp.text )
+    print( '3', resp.content )
     data = json.loads( resp.content )
     return data
 

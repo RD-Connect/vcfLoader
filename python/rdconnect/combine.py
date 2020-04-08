@@ -35,8 +35,8 @@ def resource(filename):
 
 def getExperimentStatus( url_project, host_project, token ):
     """Get the status information for all experiments allowed to be used by the token."""
-    #if not url_project.startswith( 'http://' ) and not url_project.startswith( 'https://' ):
-    #    url_project = 'http://{0}'.format( url_project )
+    if not url_project.startswith( 'http://' ) and not url_project.startswith( 'https://' ):
+        url_project = 'http://{0}'.format( url_project )
     headers = { 'Authorization': token, 'Host': host_project }
     url = "{0}/datamanagement_service/api/statusbyexperiment".format( url_project )
     print( 'getExperimentStatus: {0}'.format( url ) )
@@ -46,8 +46,8 @@ def getExperimentStatus( url_project, host_project, token ):
 
 
 def getExperimentByGroup( group, url_project, host_project, token, prefix_hdfs, chrom, max_items_batch ):
-    #if not url_project.startswith( 'http://' ) and not url_project.startswith( 'https://' ):
-    #    url_project = 'https://{0}'.format( url_project )
+    if not url_project.startswith( 'http://' ) and not url_project.startswith( 'https://' ):
+        url_project = 'https://{0}'.format( url_project )
     url = "{0}/datamanagement_service/api/samplebygroup/?format=json&group={1}&user=dpiscia&owner=False".format( url_project, group )
     headers = { 'Authorization': token, 'Host': host_project }
     print( 'getExperimentByGroup: {0}'.format( url ) )

@@ -84,12 +84,24 @@ def createSparseMatrix( group, url_project, host_project, token, prefix_hdfs, ch
     # experiments_to_be_loaded = [ x.split( '/' )[ 7 ] for x in files_to_be_loaded ]
     # /
 
-    # Distribute experiments by family
+    # Distribute experiments by family1
     lgr.debug( 'Total experiments_in_group: {}'.format( len( experiments_in_group ) ) )
-    lgr.debug( '    {} -- {}'.format( experiments_in_group[ 0 ], experiments_in_group[ len( experiments_in_group ) - 1] ) )
+    if len( experiments_in_group ) > 0:
+        lgr.debug( '    {} -- {}'.format( experiments_in_group[ 0 ], experiments_in_group[ len( experiments_in_group ) - 1] ) )
+    lgr.debug( 'Total experiment_status: {}'.format( len( experiment_status ) ) )
+    if len( experiment_status ) > 0:
+        lgr.debug( '    {} -- {}'.format( experiment_status[ 0 ], experiment_status[ len( experiment_status ) - 1] ) )
+    lgr.debug( 'Total experiments_to_be_loaded: {}'.format( len( experiments_to_be_loaded ) ) )
+    if len( experiments_to_be_loaded ) > 0:
+        lgr.debug( '    {} -- {}'.format( experiments_to_be_loaded[ 0 ], experiments_to_be_loaded[ len( experiments_to_be_loaded ) - 1] ) )
+
+
     full_ids_to_be_loaded = [ x for x in experiments_in_group if x[ 'RD_Connect_ID_Experiment' ] in experiments_to_be_loaded ]
     lgr.debug( 'Total full_ids_to_be_loaded: {}'.format( len( full_ids_to_be_loaded ) ) )
-    lgr.debug( '    {} -- {}'.format( full_ids_to_be_loaded[ 0 ], full_ids_to_be_loaded[ len( full_ids_to_be_loaded ) - 1] ) )
+    if len( full_ids_to_be_loaded ) > 0:
+        lgr.debug( '    {} -- {}'.format( full_ids_to_be_loaded[ 0 ], full_ids_to_be_loaded[ len( full_ids_to_be_loaded ) - 1] ) )
+    else:
+        raise Exception( 'No experiment will be loaded and included in sparse matrix' )
     experiments_and_families = getExperimentsByFamily( full_ids_to_be_loaded, url_project, gpap_id, gpap_token, sort_output = False )
 
     # Relocate experiments with no family

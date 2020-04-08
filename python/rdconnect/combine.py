@@ -45,7 +45,7 @@ def getExperimentStatus( url_project, token ):
     return data
 
 
-def getExperimentByGroup( group, url_project, token, prefix_hdfs, chrom, max_items_batch):
+def getExperimentByGroup( group, url_project, token, prefix_hdfs, chrom, max_items_batch ):
     if not url_project.startswith( 'http://' ) and not url_project.startswith( 'https://' ):
         url_project = 'http://{0}'.format( url_project )
     url = "{0}/datamanagement_service/api/samplebygroup/?format=json&group={1}&user=dpiscia&owner=False".format( url_project, group )

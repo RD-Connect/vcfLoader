@@ -112,6 +112,7 @@ def main(sqlContext, sc, configuration, chrom, nchroms, step, somaticFlag):
         else:
             token = 'Token {0}'.format( configuration[ 'datamanagement' ][ 'token'] )
             url_project = configuration[ 'datamanagement' ][ 'host' ]
+            url_project = configuration[ 'datamanagement' ][ 'ip' ]
             group = configuration[ 'combine' ][ 'group' ]
             prefix_hdfs = configuration[ 'combine' ][ 'prefix_hdfs' ]
             gpap_id = configuration[ 'gpap' ][ 'id' ]

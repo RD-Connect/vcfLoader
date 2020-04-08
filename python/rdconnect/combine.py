@@ -85,7 +85,11 @@ def createSparseMatrix( group, url_project, host_project, token, prefix_hdfs, ch
     # /
 
     # Distribute experiments by family
+    lgr.debug( 'Total experiments_in_group: {}'.format( len( experiments_in_group ) ) )
+    lgr.debug( '    {} -- {}'.format( experiments_in_group[ 0 ], experiments_in_group[ len( experiments_in_group ) - 1] ) )
     full_ids_to_be_loaded = [ x for x in experiments_in_group if x[ 'RD_Connect_ID_Experiment' ] in experiments_to_be_loaded ]
+    lgr.debug( 'Total full_ids_to_be_loaded: {}'.format( len( full_ids_to_be_loaded ) ) )
+    lgr.debug( '    {} -- {}'.format( full_ids_to_be_loaded[ 0 ], full_ids_to_be_loaded[ len( full_ids_to_be_loaded ) - 1] ) )
     experiments_and_families = getExperimentsByFamily( full_ids_to_be_loaded, url_project, gpap_id, gpap_token, sort_output = False )
 
     # Relocate experiments with no family

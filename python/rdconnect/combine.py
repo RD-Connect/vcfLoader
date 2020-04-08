@@ -393,9 +393,11 @@ def getExperimentsByFamily( pids, url_project, id_gpap, token_gpap, sort_output 
     
     parsed = {}
     for elm in data:
-        print( elm )
         pid = list( elm.keys() )[ 0 ]
-        fam = elm[ pid ][ 'family' ] if 'family' in elm[ pid ].keys() else '---'
+        if type( elm[ pid ] ) == str:
+            fam = '---'
+        else: 
+            fam = elm[ pid ][ 'family' ] if 'family' in elm[ pid ].keys() else '---'
         parsed[ pid ] = fam
 
     rst = [ [ pak[ 'RD_Connect_ID_Experiment' ], pak[ 'Phenotips_ID' ], parsed[ pak[ 'Phenotips_ID' ] ] ] for pak in pids ]

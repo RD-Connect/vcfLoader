@@ -38,7 +38,7 @@ def getExperimentStatus( url_project, token ):
     if not url_project.startswith( 'http://' ) and not url_project.startswith( 'https://' ):
         url_project = 'http://{0}'.format( url_project )
     headers = { 'Authorization': token }
-    url = "{0}/datamanagement_service/statusbyexperiment".format( url_project )
+    url = "{0}/datamanagement_service/api/statusbyexperiment".format( url_project )
     print( 'getExperimentStatus: {0}'.format( url ) )
     resp = requests.get( url, headers = headers, verify = False )
     data = json.loads( resp.content )
@@ -48,7 +48,7 @@ def getExperimentStatus( url_project, token ):
 def getExperimentByGroup( group, url_project, token, prefix_hdfs, chrom, max_items_batch):
     if not url_project.startswith( 'http://' ) and not url_project.startswith( 'https://' ):
         url_project = 'http://{0}'.format( url_project )
-    url = "{0}/datamanagement_service/samplebygroup/?format=json&group={1}&user=dpiscia&owner=False".format( url_project, group )
+    url = "{0}/datamanagement_service/api/samplebygroup/?format=json&group={1}&user=dpiscia&owner=False".format( url_project, group )
     print( 'getExperimentByGroup: {0}'.format( url ) )
     resp = requests.get (url,headers={ 'Authorization': token }, verify = False )
     data = json.loads( resp.content )
@@ -501,7 +501,7 @@ def buildPath( prefix, group, experiment, chrom):
     return '{0}/{1}/{2}/{3}'.format( prefix, group, experiment, utils.buildFileName( '{0}.chromosome.g.vcf.bgz'.format( experiment ), chrom ) )
 
 def is_exp_uploaded(url_project,experiment,headers):
-    url=url_project+"/datamanagement_service/statusbyexperiment/?experiment="+experiment
+    url=url_project+"/datamanagement_service/api/statusbyexperiment/?experiment="+experiment
     resp=requests.get(url, headers=headers, verify=False)
 
     if (resp.ok):
@@ -515,7 +515,7 @@ def is_exp_uploaded(url_project,experiment,headers):
 #get a lit of file paths for a group
 def get_experiment_by_group(group,url_project,token,prefix_hdfs,chrom,max_items_batch):
     headers = {'Authorization': token}
-    url=url_project+"/datamanagement_service/samplebygroup/?format=json&group="+group+"&user=dpiscia&owner=False"
+    url=url_project+"/datamanagement_service/api/samplebygroup/?format=json&group="+group+"&user=dpiscia&owner=False"
     resp=requests.get(url,headers=headers, verify=False)
     data= json.loads(resp.content)
     response=[]

@@ -73,7 +73,7 @@ def createSparseMatrix( group, url_project, host_project, token, prefix_hdfs, ch
     experiments_in_group = getExperimentByGroup( group, url_project, host_project, token, prefix_hdfs, chrom, max_items_batch )
     experiment_status = getExperimentStatus( group, url_project, host_project, token )
     experiments_to_be_loaded = getExperimentsToProcess( experiment_status, experiments_in_group, check_hdfs = False )
-    # files_to_be_loaded = [ buildPath( prefix_hdfs, group, x[ 'RD_Connect_ID_Experiment' ], chrom ) for x in experiments_to_be_loaded ]
+    files_to_be_loaded = [ buildPath( prefix_hdfs, group, x[ 'RD_Connect_ID_Experiment' ], chrom ) for x in experiments_to_be_loaded ]
 
     # to remove
     # if chrom == "18":

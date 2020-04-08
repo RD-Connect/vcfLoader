@@ -65,8 +65,7 @@ def getExperimentsToProcess( experiment_status, experiment_available, check_hdfs
     selected_experiments = [ x for x in experiment_available_2 if x in experiment_status_2 ]
     return [ x for x in experiment_available if x[ 'RD_Connect_ID_Experiment' ] in selected_experiments ]
 
-
-def createSparseMatrix( sc, group, url_project, token, prefix_hdfs, chrom, max_items_batch, partitions_chromosome, gvcf_store_path, new_gvcf_store_path, gpap_id, gpap_token ):
+def createSparseMatrix( group, url_project, token, prefix_hdfs, chrom, max_items_batch, partitions_chromosome, gvcf_store_path, new_gvcf_store_path, gpap_id, gpap_token ):
     lgr = create_logger( 'createSparseMatrix', '' )
 
     # Get all the experiments that have to processed from data-management

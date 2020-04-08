@@ -37,8 +37,8 @@ def getExperimentStatus( url_project, host_project, token ):
     """Get the status information for all experiments allowed to be used by the token."""
     if not url_project.startswith( 'http://' ) and not url_project.startswith( 'https://' ):
         url_project = 'http://{0}'.format( url_project )
+    url = "{0}/datamanagement_service/api/statusbyexperiment/?format=json&group={1}&user=dpiscia&owner=False".format( url_project, group )
     headers = { 'Authorization': token, 'Host': host_project }
-    url = "{0}/datamanagement_service/api/statusbyexperiment".format( url_project )
     print( 'getExperimentStatus: {0}'.format( url ) )
     resp = requests.get( url, headers = headers, verify = False )
     data = json.loads( resp.content )
@@ -51,11 +51,7 @@ def getExperimentByGroup( group, url_project, host_project, token, prefix_hdfs, 
     url = "{0}/datamanagement_service/api/samplebygroup/?format=json&group={1}&user=dpiscia&owner=False".format( url_project, group )
     headers = { 'Authorization': token, 'Host': host_project }
     print( 'getExperimentByGroup: {0}'.format( url ) )
-    print( headers )
     resp = requests.get (url, headers = headers, verify = False )
-    print( '1', resp )
-    print( '2', resp.text )
-    print( '3', resp.content )
     data = json.loads( resp.content )
     return data
 
@@ -505,30 +501,30 @@ def loadGvcf( hl, files, chrom, destinationPath, gvcfStorePath, partitions, lgr 
 def buildPath( prefix, group, experiment, chrom):
     return '{0}/{1}/{2}/{3}'.format( prefix, group, experiment, utils.buildFileName( '{0}.chromosome.g.vcf.bgz'.format( experiment ), chrom ) )
 
-def is_exp_uploaded(url_project,experiment,headers):
-    url=url_project+"/datamanagement_service/api/statusbyexperiment/?experiment="+experiment
-    resp=requests.get(url, headers=headers, verify=False)
+# def is_exp_uploaded(url_project,experiment,headers):
+#     url=url_project+"/datamanagement_service/api/statusbyexperiment/?experiment="+experiment
+#     resp=requests.get(url, headers=headers, verify=False)
 
-    if (resp.ok):
-        data=json.loads(resp.content)
-        if (data["hdfs"]=="pass"):
-            return True
+#     if (resp.ok):
+#         data=json.loads(resp.content)
+#         if (data["hdfs"]=="pass"):
+#             return True
         
-    else:
-        return False
+#     else:
+#         return False
 
-#get a lit of file paths for a group
-def get_experiment_by_group(group,url_project,token,prefix_hdfs,chrom,max_items_batch):
-    headers = {'Authorization': token}
-    url=url_project+"/datamanagement_service/api/samplebygroup/?format=json&group="+group+"&user=dpiscia&owner=False"
-    resp=requests.get(url,headers=headers, verify=False)
-    data= json.loads(resp.content)
-    response=[]
-    counter=0
-    for exp in data:
-        if counter==max_items_batch:
-            break
-        if (is_exp_uploaded(url_project,exp["RD_Connect_ID_Experiment"],headers)):
-            counter=counter+1
-            response.append(build_path(prefix_hdfs,exp["Owner"],exp["RD_Connect_ID_Experiment"],chrom))
-    return response
+# #get a list of file paths for a group
+# def get_experiment_by_group(group,url_project,token,prefix_hdfs,chrom,max_items_batch):
+#     headers = {'Authorization': token}
+#     url=url_project+"/datamanagement_service/api/samplebygroup/?format=json&group="+group+"&user=dpiscia&owner=False"
+#     resp=requests.get(url,headers=headers, verify=False)
+#     data= json.loads(resp.content)
+#     response=[]
+#     counter=0
+#     for exp in data:
+#         if counter==max_items_batch:
+#             break
+#         if (is_exp_uploaded(url_project,exp["RD_Connect_ID_Experiment"],headers)):
+#             counter=counter+1
+#             response.append(build_path(prefix_hdfs,exp["Owner"],exp["RD_Connect_ID_Experiment"],chrom))
+#     return response

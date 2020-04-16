@@ -66,14 +66,17 @@ def getExperimentsToProcess( experiment_status, experiment_available, check_hdfs
     selected_experiments = [ x for x in experiment_available_2 if x in experiment_status_2 ]
     return [ x for x in experiment_available if x[ 'RD_Connect_ID_Experiment' ] in selected_experiments ]
 
-def createSparseMatrix( group, url_project, host_project, token, prefix_hdfs, chrom, max_items_batch, partitions_chromosome, gvcf_store_path, new_gvcf_store_path, gpap_id, gpap_token ):
+def createSparseMatrix( group, url_project, host_project, token, prefix_hdfs, chrom, max_items_batch, partitions_chromosome, gvcf_store_path, new_gvcf_store_path, gpap_id, gpap_token, is_playground ):
     lgr = create_logger( 'createSparseMatrix', '' )
 
     # Get all the experiments that have to processed from data-management
     experiments_in_group = getExperimentByGroup( group, url_project, host_project, token, prefix_hdfs, chrom, max_items_batch )
     experiment_status = getExperimentStatus( group, url_project, host_project, token )
     experiments_to_be_loaded = getExperimentsToProcess( experiment_status, experiments_in_group, check_hdfs = False )
-    files_to_be_loaded = [ buildPath( prefix_hdfs, group, x[ 'RD_Connect_ID_Experiment' ], chrom ) for x in experiments_to_be_loaded ]
+    if is_playground:
+        files_to_be_loaded = [ buildPathPlayground( prefix_hdfs, group, x[ 'RD_Connect_ID_Experiment' ], chrom ) for x in experiments_to_be_loaded ]
+    else:
+        files_to_be_loaded = [ buildPath( prefix_hdfs, group, x[ 'RD_Connect_ID_Experiment' ], chrom ) for x in experiments_to_be_loaded ]
 
     # to remove
     # if chrom == "18":
@@ -521,6 +524,9 @@ def loadGvcf( hl, files, chrom, destinationPath, gvcfStorePath, partitions, lgr 
 #check if an experiment has been uploaded to hdfs
 def buildPath( prefix, group, experiment, chrom):
     return '{0}/{1}/{2}/{3}'.format( prefix, group, experiment, utils.buildFileName( '{0}.chromosome.g.vcf.bgz'.format( experiment ), chrom ) )
+
+def buildPathPlayground( prefix, group, experiment, chrom):
+    return '{0}/{1}'.format( prefix, utils.buildFileName( '{0}.chromosome.g.vcf.bgz'.format( experiment ), chrom ) )
 
 # def is_exp_uploaded(url_project,experiment,headers):
 #     url=url_project+"/datamanagement_service/api/statusbyexperiment/?experiment="+experiment

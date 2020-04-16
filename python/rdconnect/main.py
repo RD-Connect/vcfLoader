@@ -117,7 +117,8 @@ def main(sqlContext, sc, configuration, chrom, nchroms, step, somaticFlag):
             prefix_hdfs = configuration[ 'combine' ][ 'prefix_hdfs' ]
             gpap_id = configuration[ 'gpap' ][ 'id' ]
             gpap_token = configuration[ 'gpap' ][ 'token' ]
-            combine.createSparseMatrix( group, url_project, host_project, token, prefix_hdfs, chrom, max_items_batch, partitions_chromosome, gvcf_store_path, new_gvcf_store_path, gpap_id, gpap_token )
+            is_playground = configuration[ 'elasticsearch' ][ 'main_project' ] == 'playground'
+            combine.createSparseMatrix( group, url_project, host_project, token, prefix_hdfs, chrom, max_items_batch, partitions_chromosome, gvcf_store_path, new_gvcf_store_path, gpap_id, gpap_token, is_playground )
 
 
     if ("createDenseMatrix" in step):

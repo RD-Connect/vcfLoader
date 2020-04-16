@@ -123,6 +123,7 @@ def createSparseMatrix( group, url_project, host_project, token, prefix_hdfs, ch
     # Add the path to the file to be loaded
     def buildPath2( full_list, rid ):
         for ff in full_list:
+            print( ff.split( '/' ) )
             if ff.split( '/' )[ 7 ] == rid:
                 return ff
         return ''

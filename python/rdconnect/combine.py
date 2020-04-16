@@ -123,11 +123,15 @@ def createSparseMatrix( group, url_project, host_project, token, prefix_hdfs, ch
     # Add the path to the file to be loaded
     def buildPath2( full_list, rid, is_playground ):
         for ff in full_list:
-            print( ff.split( '/' ), rid )
-            if ff.split( '/' )[ 7 ] == rid:
-                return ff
+            if is_playground:
+                if ff.split( '/' )[ 6 ].split( '.' )[ 0 ] == rid:
+                    return ff
+            else:
+                if ff.split( '/' )[ 7 ] == rid:
+                    return ff
         return ''
 
+    print( "experiments_and_families", experiments_and_families )
     for ii in range( len( experiments_and_families ) ):
         experiments_and_families[ ii ].append( buildPath2( files_to_be_loaded, experiments_and_families[ ii ][ 0 ], is_playground ) )
 

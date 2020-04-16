@@ -129,7 +129,7 @@ def createSparseMatrix( group, url_project, host_project, token, prefix_hdfs, ch
         return ''
 
     for ii in range( len( experiments_and_families ) ):
-        experiments_and_families[ ii ].append( buildPath2( files_to_be_loaded, experiments_and_families[ ii ][ 0 ] ) )
+        experiments_and_families[ ii ].append( buildPath2( files_to_be_loaded, experiments_and_families[ ii ][ 0 ], is_playground ) )
 
     # Create batches of 'size' experiments
     batches = list( divideChunks( experiments_and_families, 100 ) )

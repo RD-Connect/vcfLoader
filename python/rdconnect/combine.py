@@ -121,9 +121,9 @@ def createSparseMatrix( group, url_project, host_project, token, prefix_hdfs, ch
         warnings.warn( 'Provided experiment ids got no family assigned. RD-Connect ID used as family ID for those experiments. Original families were of {} while after update are of {}.'.format( x, y ) )
 
     # Add the path to the file to be loaded
-    def buildPath2( full_list, rid ):
+    def buildPath2( full_list, rid, is_playground ):
         for ff in full_list:
-            print( ff.split( '/' ) )
+            print( ff.split( '/' ), rid )
             if ff.split( '/' )[ 7 ] == rid:
                 return ff
         return ''
@@ -131,7 +131,7 @@ def createSparseMatrix( group, url_project, host_project, token, prefix_hdfs, ch
     for ii in range( len( experiments_and_families ) ):
         experiments_and_families[ ii ].append( buildPath2( files_to_be_loaded, experiments_and_families[ ii ][ 0 ] ) )
 
-    # Create batches of 'size' experiments ordered by family
+    # Create batches of 'size' experiments
     batches = list( divideChunks( experiments_and_families, 100 ) )
     lgr.debug( 'Created {} batches from {} files'.format( len( batches ), len( experiments_and_families ) ) )
 

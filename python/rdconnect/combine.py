@@ -534,9 +534,9 @@ def buildPathPlayground( prefix, group, experiment, chrom):
     if chrom in ('23', 23):
         chrom = 'MT'
     if chrom in ('24', 24):
-        chrom = 'Y'
-    if chrom in ('25', 25):
         chrom = 'X'
+    if chrom in ('25', 25):
+        chrom = 'Y'
     return '{0}/{1}'.format( prefix, utils.buildFileName( '{0}.chromosome.g.vcf.bgz'.format( experiment ), chrom ) )
 
 # def is_exp_uploaded(url_project,experiment,headers):

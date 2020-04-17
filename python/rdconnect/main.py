@@ -136,7 +136,6 @@ def main(sqlContext, sc, configuration, chrom, nchroms, step, somaticFlag):
             gvcf_store_path = configuration[ 'combine' ][ 'gvcf_store_path' ]
         else:
             gvcf_store_path = None
-
         combine.createDenseMatrix( sc, sqlContext, url_project, prefix_hdfs, max_items_batch, denseMatrix_path, gvcf_store_path, chrom, group, token, gpap_id, gpap_token )
         
     if ("createIndex" in step):

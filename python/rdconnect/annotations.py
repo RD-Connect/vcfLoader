@@ -95,6 +95,7 @@ def loadDenseMatrix( hl, originPath, sourcePath, destinationPath, nPartitions ):
         )
         lgr.debug( 'Output VCF file will be saved to "{}"'.format( destinationPath ) )
         lgr.debug( 'Contents in "{}" will be overwritten'.format( destinationPath ) )
+        print( vcf.describe() )
         vcf.key_by( vcf.locus, vcf.alleles ).distinct().write( destinationPath, overwrite = True )
     except Exception as ex:
         lgr.debug( 'Unexpected error during the load of dense matrix "{}"'.format( sourcePath ) )

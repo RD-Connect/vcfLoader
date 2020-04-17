@@ -126,7 +126,8 @@ def main(sqlContext, sc, configuration, chrom, nchroms, step, somaticFlag):
         token = 'Token {0}'.format( configuration[ 'datamanagement' ][ 'token'] )
         denseMatrix_path = configuration[ 'combine' ][ 'denseMatrix_path' ]
         group = configuration[ 'combine' ][ 'group' ]
-        url_project = configuration[ 'datamanagement' ][ 'host' ]
+        host_project = configuration[ 'datamanagement' ][ 'host' ]
+            url_project = configuration[ 'datamanagement' ][ 'ip' ]
         gpap_id = configuration[ 'gpap' ][ 'id' ]
         gpap_token = configuration[ 'gpap' ][ 'token' ]
         prefix_hdfs = configuration[ 'combine' ][ 'prefix_hdfs' ]

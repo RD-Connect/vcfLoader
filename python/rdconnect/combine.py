@@ -263,7 +263,7 @@ def create_batches_by_family( experiments, size = 1000 ):
     return rst
 
 
-def createDenseMatrix( sc, sq, url_project, prefix_hdfs, max_items_batch, dense_matrix_path, sparse_matrix_path, chrom, group, token, gpap_id, gpap_token ):
+def createDenseMatrix( sc, sq, url_project, host_project, prefix_hdfs, max_items_batch, dense_matrix_path, sparse_matrix_path, chrom, group, token, gpap_id, gpap_token ):
     lgr = create_logger( 'createDenseMatrix', '' )
 
     if sparse_matrix_path is None:
@@ -275,7 +275,7 @@ def createDenseMatrix( sc, sq, url_project, prefix_hdfs, max_items_batch, dense_
     
     experiments_in_matrix = [ x.get( 's' ) for x in sparse_matrix.col.collect() ]    
     lgr.debug( 'Total of {0} experiments'.format( len( experiments_in_matrix ) ) )
-    
+
     experiments_in_group = getExperimentByGroup( group, url_project, host_project, token, prefix_hdfs, chrom, max_items_batch )
     full_ids_in_matrix = [ x for x in experiments_in_group if x[ 'RD_Connect_ID_Experiment' ] in experiments_in_matrix ]
     experiments_and_families = getExperimentsByFamily( full_ids_in_matrix, url_project, gpap_id, gpap_token )

@@ -98,7 +98,11 @@ def loadDenseMatrix( hl, originPath, sourcePath, destinationPath, nPartitions ):
         print( vcf.describe() )
         print( "*" * 15 )
         print(  vcf.rows().describe() )
-        vcf.rows().key_by( vcf.locus, vcf.alleles ).distinct().write( destinationPath, overwrite = True )
+        vcf = vcf.rows()
+        vcf = vcf.key_by( vcf.locus, vcf.alleles )
+        print( "//" * 15 )
+        print(  vcf.rows().describe() )
+        vcf = vcf.distinct().write( destinationPath, overwrite = True )
     except Exception as ex:
         lgr.debug( 'Unexpected error during the load of dense matrix "{}"'.format( sourcePath ) )
         lgr.error( 'Unexpected error --> {}'.format( str( ex ) ) )

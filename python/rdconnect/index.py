@@ -3,6 +3,7 @@ import requests
 
 def index_exists(host, port, index_name, user, pwd):
     sts = requests.head('http://{}:{}/{}'.format(host, port, index_name), auth=(user, pwd))
+    print('http://{}:{}/{}'.format(host, port, index_name))
     print(sts.status_code)
     print(sts.text)
     return sts.status_code == 200

@@ -4,7 +4,7 @@ import requests
 def index_exists(host, port, index_name, user, pwd):
     sts = requests.head('http://{}:{}/{}'.format(host, port, index_name), auth=(user, pwd))
     print(sts.status_code)
-    print(sts)
+    print(sts.text())
     return sts.status_code == 200
 
 def create_index(host,port,index_name,data,user,pwd):

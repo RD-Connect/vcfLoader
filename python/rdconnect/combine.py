@@ -305,12 +305,12 @@ def createDenseMatrixAlternative( sc, sq, url_project, host_project, prefix_hdfs
             lgr.debug( "Flatting and filtering dense matrix {}".format( idx ) )
             sam = hl.literal( [ x[ 0 ] for x in batch ], 'array<str>' )
             small_matrix = sparse_matrix.filter_cols( sam.contains( sparse_matrix['s'] ) )
-            print( "1", small_matrix.count_rows(), small_matrix.describe() )
+            print( "1", small_matrix.count_rows(), small_matrix.count_cols(), small_matrix.describe() ) # 4361087
             small_matrix = hl.experimental.densify( small_matrix )
-            print( "2", small_matrix.count_rows(), small_matrix.describe() )
+            print( "2", small_matrix.count_rows(), small_matrix.count_cols(), small_matrix.describe() ) # 4361087
             small_matrix = small_matrix.annotate_rows( nH = hl.agg.count_where( small_matrix.LGT.is_hom_ref() ) )
             small_matrix = small_matrix.filter_rows( small_matrix.nH < small_matrix.count_cols() )
-            print( "3", small_matrix.count_rows(), small_matrix.describe() )
+            print( "3", small_matrix.count_rows(), small_matrix.count_cols(), small_matrix.describe() ) #  141917
             #small_matrix = small_matrix.filter_rows( hl.agg.any( small_matrix.LGT.is_non_ref() ) )
             if first:
                 first = False

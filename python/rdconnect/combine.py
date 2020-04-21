@@ -311,7 +311,7 @@ def createDenseMatrixAlternative( sc, sq, url_project, host_project, prefix_hdfs
             small_matrix = small_matrix.annotate_rows( nH = hl.agg.count_where( small_matrix.LGT.is_hom_ref() ) )
 
             call=hl.Call( alleles=[0, 0], phased = False )
-            small_matrix = small_matrix.annotate_rows( points = hl.filter( lambda x: x != call, hl.agg.collect( gen_matrix.LGT ) ).length() )
+            small_matrix = small_matrix.annotate_rows( points = hl.filter( lambda x: x != call, hl.agg.collect( small_matrix.LGT ) ).length() )
 
             print( "2-1", small_matrix.LGT.show(10))
             print( "2-1", small_matrix.nH.show(10))

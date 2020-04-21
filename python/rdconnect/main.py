@@ -138,7 +138,27 @@ def main(sqlContext, sc, configuration, chrom, nchroms, step, somaticFlag):
         else:
             gvcf_store_path = None
         combine.createDenseMatrix( sc, sqlContext, url_project, host_project, prefix_hdfs, max_items_batch, denseMatrix_path, gvcf_store_path, chrom, group, token, gpap_id, gpap_token )
-        
+    
+    if ("createDenseMatrixAlternative" in step):
+        print ("step createDenseMatrixAlternative")
+        token = 'Token {0}'.format( configuration[ 'datamanagement' ][ 'token'] )
+        denseMatrix_path = configuration[ 'combine' ][ 'denseMatrix_path' ]
+        group = configuration[ 'combine' ][ 'group' ]
+        host_project = configuration[ 'datamanagement' ][ 'host' ]
+        url_project = configuration[ 'datamanagement' ][ 'ip' ]
+        gpap_id = configuration[ 'gpap' ][ 'id' ]
+        gpap_token = configuration[ 'gpap' ][ 'token' ]
+        prefix_hdfs = configuration[ 'combine' ][ 'prefix_hdfs' ]
+        if 'max_items_batch' in configuration[ 'combine' ]:
+            max_items_batch = configuration[ 'combine' ][ 'max_items_batch' ]
+        if 'gvcf_store_path' in configuration[ 'combine' ].keys():
+            gvcf_store_path = configuration[ 'combine' ][ 'gvcf_store_path' ]
+        else:
+            gvcf_store_path = None
+        combine.createDenseMatrixAlternative( sc, sqlContext, url_project, host_project, prefix_hdfs, max_items_batch, denseMatrix_path, gvcf_store_path, chrom, group, token, gpap_id, gpap_token )
+   
+
+
     if ("createIndex" in step):
         if ("createIndexCNV" in step):
             print ("step to create index CNV")

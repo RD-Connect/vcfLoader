@@ -319,6 +319,7 @@ def createDenseMatrixAlternative( sc, sq, url_project, host_project, prefix_hdfs
             small_matrix = small_matrix.filter_rows( small_matrix.points > 0 )
             print( "2-2", small_matrix.LGT.show(10))
             print( "2-2", small_matrix.nH.show(10))
+            print( "2-2", small_matrix.points.show(10))
             print( "3", small_matrix.count_rows(), small_matrix.count_cols(), small_matrix.describe() ) #  141917
             #small_matrix = small_matrix.filter_rows( hl.agg.any( small_matrix.LGT.is_non_ref() ) )
             if first:

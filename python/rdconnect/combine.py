@@ -309,9 +309,14 @@ def createDenseMatrixAlternative( sc, sq, url_project, host_project, prefix_hdfs
             small_matrix = hl.experimental.densify( small_matrix )
             print( "2", small_matrix.count_rows(), small_matrix.count_cols(), small_matrix.describe() ) # 4361087
             small_matrix = small_matrix.annotate_rows( nH = hl.agg.count_where( small_matrix.LGT.is_hom_ref() ) )
+
+            call=hl.Call( alleles=[0, 0], phased = False )
+            small_matrix = small_matrix.annotate_rows( points = hl.filter( lambda x: x != call, hl.agg.collect( gen_matrix.LGT ) ).length() )
+
             print( "2-1", small_matrix.LGT.show(10))
             print( "2-1", small_matrix.nH.show(10))
-            small_matrix = small_matrix.filter_rows( small_matrix.nH < small_matrix.count_cols() )
+            #small_matrix = small_matrix.filter_rows( small_matrix.nH < small_matrix.count_cols() )
+            small_matrix = small_matrix.filter_rows( small_matrix.points > 0 )
             print( "2-2", small_matrix.LGT.show(10))
             print( "2-2", small_matrix.nH.show(10))
             print( "3", small_matrix.count_rows(), small_matrix.count_cols(), small_matrix.describe() ) #  141917

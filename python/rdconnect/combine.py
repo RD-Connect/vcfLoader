@@ -313,15 +313,15 @@ def createDenseMatrixAlternative( sc, sq, url_project, host_project, prefix_hdfs
             call=hl.Call( alleles=[0, 0], phased = False )
             small_matrix = small_matrix.annotate_rows( points = hl.filter( lambda x: x != call, hl.agg.collect( small_matrix.LGT ) ).length() )
 
-            export_vcf(small_matrix, 'hdfs://rdhdfs1:27000/test/Playground/1737-3/sm_vcf/small_matrix.vcf' )
+            hl.methods.export_vcf(small_matrix, 'hdfs://rdhdfs1:27000/test/Playground/1737-3/sm_vcf/small_matrix.vcf' )
 
 
             print( "2-1", small_matrix.LGT.show(10))
             print( "2-1", small_matrix.nH.show(10))
             small_matrixA = small_matrix.filter_rows( small_matrix.nH < small_matrix.count_cols() )
-            export_vcf(small_matrixA, 'hdfs://rdhdfs1:27000/test/Playground/1737-3/sm_vcf/small_matrix_A.vcf' )
+            hl.methods.export_vcf(small_matrixA, 'hdfs://rdhdfs1:27000/test/Playground/1737-3/sm_vcf/small_matrix_A.vcf' )
             small_matrixB = small_matrix.filter_rows( small_matrix.points > 0 )
-            export_vcf(small_matrixB, 'hdfs://rdhdfs1:27000/test/Playground/1737-3/sm_vcf/small_matrix_B.vcf' )
+            hl.methods.export_vcf(small_matrixB, 'hdfs://rdhdfs1:27000/test/Playground/1737-3/sm_vcf/small_matrix_B.vcf' )
             print( "2-2", small_matrix.LGT.show(10))
             print( "2-2", small_matrix.nH.show(10))
             print( "2-2", small_matrix.points.show(10))

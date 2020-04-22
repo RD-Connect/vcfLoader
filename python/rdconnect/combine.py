@@ -320,7 +320,6 @@ def createDenseMatrixAlternative( sc, sq, url_project, host_project, prefix_hdfs
             print( "2-1", small_matrix.nH.show(10))
             small_matrixA = small_matrix.filter_rows( small_matrix.nH < small_matrix.count_cols() )
             small_matrixA = small_matrixA.key_rows_by("locus","alleles")
-            gvcf_info
             hl.methods.drop("gvcf_info").export_vcf(small_matrixA, 'hdfs://rdhdfs1:27000/test/Playground/1737-3/sm_vcf/small_matrix_A.vcf' )
             small_matrixB = small_matrix.filter_rows( small_matrix.points > 0 )
             small_matrixB = small_matrixB.key_rows_by("locus","alleles")

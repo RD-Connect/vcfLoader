@@ -64,6 +64,8 @@ def getExperimentsToProcess( experiment_status, experiment_available, check_hdfs
     experiment_status_2 = [ x[ 'Experiment' ] for x in experiment_status ]
     experiment_available_2 = [ x[ 'RD_Connect_ID_Experiment' ] for x in experiment_available ]
     selected_experiments = [ x for x in experiment_available_2 if x in experiment_status_2 ]
+    print("Dropped experiments")
+    print([ x for x in experiment_available if x[ 'RD_Connect_ID_Experiment' ] not in selected_experiments ])
     return [ x for x in experiment_available if x[ 'RD_Connect_ID_Experiment' ] in selected_experiments ]
 
 
@@ -264,88 +266,88 @@ def create_batches_by_family( experiments, size = 1000 ):
     return rst
 
 
-def createDenseMatrixAlternative( sc, sq, url_project, host_project, prefix_hdfs, max_items_batch, dense_matrix_path, sparse_matrix_path, chrom, group, token, gpap_id, gpap_token ):
-    lgr = create_logger( 'createDenseMatrixAlternative', '' )
+# def createDenseMatrixAlternative( sc, sq, url_project, host_project, prefix_hdfs, max_items_batch, dense_matrix_path, sparse_matrix_path, chrom, group, token, gpap_id, gpap_token ):
+#     lgr = create_logger( 'createDenseMatrixAlternative', '' )
 
-    if sparse_matrix_path is None:
-        raise 'No information on "sparse_matrix_path" was provided.'
-    lgr.debug( 'Read from in {0}/chrom-{1}'.format( sparse_matrix_path, chrom ) )
+#     if sparse_matrix_path is None:
+#         raise 'No information on "sparse_matrix_path" was provided.'
+#     lgr.debug( 'Read from in {0}/chrom-{1}'.format( sparse_matrix_path, chrom ) )
     
-    path_matrix = '{0}/chrom-{1}'.format( sparse_matrix_path, chrom )
-    sparse_matrix = hl.read_matrix_table( path_matrix )
+#     path_matrix = '{0}/chrom-{1}'.format( sparse_matrix_path, chrom )
+#     sparse_matrix = hl.read_matrix_table( path_matrix )
     
-    experiments_in_matrix = [ x.get( 's' ) for x in sparse_matrix.col.collect() ]    
-    lgr.debug( 'Total of {0} experiments'.format( len( experiments_in_matrix ) ) )
+#     experiments_in_matrix = [ x.get( 's' ) for x in sparse_matrix.col.collect() ]    
+#     lgr.debug( 'Total of {0} experiments'.format( len( experiments_in_matrix ) ) )
 
-    experiments_in_group = getExperimentByGroup( group, url_project, host_project, token, prefix_hdfs, chrom, max_items_batch )
-    full_ids_in_matrix = [ x for x in experiments_in_group if x[ 'RD_Connect_ID_Experiment' ] in experiments_in_matrix ]
-    experiments_and_families = getExperimentsByFamily( full_ids_in_matrix, url_project, gpap_id, gpap_token )
+#     experiments_in_group = getExperimentByGroup( group, url_project, host_project, token, prefix_hdfs, chrom, max_items_batch )
+#     full_ids_in_matrix = [ x for x in experiments_in_group if x[ 'RD_Connect_ID_Experiment' ] in experiments_in_matrix ]
+#     experiments_and_families = getExperimentsByFamily( full_ids_in_matrix, url_project, gpap_id, gpap_token )
 
-    # Relocate experiments with no family
-    none_detected = False
-    x = len( list( set( [ x[ 2 ] for x in experiments_and_families ] ) ) )
-    for ii in range( len( experiments_and_families ) ):
-        if experiments_and_families[ ii ][ 2 ] == '---':
-            none_detected = True
-            experiments_and_families[ ii ][ 2 ] = experiments_and_families[ ii ][ 0 ]
-    y = len( list( set( [ x[ 2 ] for x in experiments_and_families ] ) ) )
-    if none_detected:
-        warnings.warn( 'Provided experiment ids got no family assigned. RD-Connect ID used as family ID for those experiments. Original families were of {} while after update are of {}.'.format( x, y ) )
+#     # Relocate experiments with no family
+#     none_detected = False
+#     x = len( list( set( [ x[ 2 ] for x in experiments_and_families ] ) ) )
+#     for ii in range( len( experiments_and_families ) ):
+#         if experiments_and_families[ ii ][ 2 ] == '---':
+#             none_detected = True
+#             experiments_and_families[ ii ][ 2 ] = experiments_and_families[ ii ][ 0 ]
+#     y = len( list( set( [ x[ 2 ] for x in experiments_and_families ] ) ) )
+#     if none_detected:
+#         warnings.warn( 'Provided experiment ids got no family assigned. RD-Connect ID used as family ID for those experiments. Original families were of {} while after update are of {}.'.format( x, y ) )
 
-    batches = create_batches_by_family( experiments_and_families, 1000 )
-    lgr.debug( 'Created {} batches'.format( len( batches ) ) )
+#     batches = create_batches_by_family( experiments_and_families, 1000 )
+#     lgr.debug( 'Created {} batches'.format( len( batches ) ) )
 
     
-    first = True
-    dm = dense_matrix_path
-    log_files = []
-    log_path = '{0}/log-chrm-{1}'.format( dm, chrom )
-    try:
-        for idx, batch in enumerate( batches ):
-            lgr.debug( "Flatting and filtering dense matrix {}".format( idx ) )
-            sam = hl.literal( [ x[ 0 ] for x in batch ], 'array<str>' )
-            small_matrix = sparse_matrix.filter_cols( sam.contains( sparse_matrix['s'] ) )
-            print( "1", small_matrix.count_rows(), small_matrix.count_cols(), small_matrix.describe() ) # 4361087
-            small_matrix = hl.experimental.densify( small_matrix )
-            print( "2", small_matrix.count_rows(), small_matrix.count_cols(), small_matrix.describe() ) # 4361087
-            small_matrix = small_matrix.annotate_rows( nH = hl.agg.count_where( small_matrix.LGT.is_hom_ref() ) )
+#     first = True
+#     dm = dense_matrix_path
+#     log_files = []
+#     log_path = '{0}/log-chrm-{1}'.format( dm, chrom )
+#     try:
+#         for idx, batch in enumerate( batches ):
+#             lgr.debug( "Flatting and filtering dense matrix {}".format( idx ) )
+#             sam = hl.literal( [ x[ 0 ] for x in batch ], 'array<str>' )
+#             small_matrix = sparse_matrix.filter_cols( sam.contains( sparse_matrix['s'] ) )
+#             print( "1", small_matrix.count_rows(), small_matrix.count_cols(), small_matrix.describe() ) # 4361087
+#             small_matrix = hl.experimental.densify( small_matrix )
+#             print( "2", small_matrix.count_rows(), small_matrix.count_cols(), small_matrix.describe() ) # 4361087
+#             small_matrix = small_matrix.annotate_rows( nH = hl.agg.count_where( small_matrix.LGT.is_hom_ref() ) )
 
-            call=hl.Call( alleles=[0, 0], phased = False )
-            small_matrix = small_matrix.annotate_rows( points = hl.filter( lambda x: x != call, hl.agg.collect( small_matrix.LGT ) ).length() )
+#             call=hl.Call( alleles=[0, 0], phased = False )
+#             small_matrix = small_matrix.annotate_rows( points = hl.filter( lambda x: x != call, hl.agg.collect( small_matrix.LGT ) ).length() )
 
             
 
 
-            print( "2-1", small_matrix.LGT.show(10))
-            print( "2-1", small_matrix.nH.show(10))
-            small_matrixA = small_matrix.filter_rows( small_matrix.nH < small_matrix.count_cols() )
-            small_matrixA = small_matrixA.key_rows_by("locus","alleles")
-            hl.methods.export_vcf(small_matrixA.drop("gvcf_info"), 'hdfs://rdhdfs1:27000/test/Playground/1737-3/sm_vcf/small_matrix_A.vcf' )
-            small_matrixB = small_matrix.filter_rows( small_matrix.points > 0 )
-            small_matrixB = small_matrixB.key_rows_by("locus","alleles")
-            hl.methods.export_vcf(small_matrixB.drop("gvcf_info"), 'hdfs://rdhdfs1:27000/test/Playground/1737-3/sm_vcf/small_matrix_B.vcf' )
-            small_matrix = small_matrix.key_rows_by("locus","alleles")
-            hl.methods.export_vcf(small_matrix.drop("gvcf_info"), 'hdfs://rdhdfs1:27000/test/Playground/1737-3/sm_vcf/small_matrix.vcf' )
-            print( "2-2", small_matrix.LGT.show(10))
-            print( "2-2", small_matrix.nH.show(10))
-            print( "2-2", small_matrix.points.show(10))
-            print( "3", small_matrix.count_rows(), small_matrix.count_cols(), small_matrix.describe() ) #  141917 - 127140
-            #small_matrix = small_matrix.filter_rows( hl.agg.any( small_matrix.LGT.is_non_ref() ) )
-            if first:
-                first = False
-            else:
-                dm = utils.update_version( dm )
-            path = '{0}/chrm-{1}'.format( dm, chrom )
-            lgr.info( 'Writing dense matrix {} to disk ({})'.format( idx, dm ) )
-            small_matrix.write( path, overwrite = True )
-            lgr.debug( "Ending writing dense matrix" )
-            for ff in batch:
-                log_files.append( ( ff[ 0 ], chrom, path ) )
-    except Exception as ex:
-        save_table_log( sc, sq, log_files, log_path )
-        raise ex
+#             print( "2-1", small_matrix.LGT.show(10))
+#             print( "2-1", small_matrix.nH.show(10))
+#             small_matrixA = small_matrix.filter_rows( small_matrix.nH < small_matrix.count_cols() )
+#             small_matrixA = small_matrixA.key_rows_by("locus","alleles")
+#             hl.methods.export_vcf(small_matrixA.drop("gvcf_info"), 'hdfs://rdhdfs1:27000/test/Playground/1737-3/sm_vcf/small_matrix_A.vcf' )
+#             small_matrixB = small_matrix.filter_rows( small_matrix.points > 0 )
+#             small_matrixB = small_matrixB.key_rows_by("locus","alleles")
+#             hl.methods.export_vcf(small_matrixB.drop("gvcf_info"), 'hdfs://rdhdfs1:27000/test/Playground/1737-3/sm_vcf/small_matrix_B.vcf' )
+#             small_matrix = small_matrix.key_rows_by("locus","alleles")
+#             hl.methods.export_vcf(small_matrix.drop("gvcf_info"), 'hdfs://rdhdfs1:27000/test/Playground/1737-3/sm_vcf/small_matrix.vcf' )
+#             print( "2-2", small_matrix.LGT.show(10))
+#             print( "2-2", small_matrix.nH.show(10))
+#             print( "2-2", small_matrix.points.show(10))
+#             print( "3", small_matrix.count_rows(), small_matrix.count_cols(), small_matrix.describe() ) #  141917 - 127140
+#             #small_matrix = small_matrix.filter_rows( hl.agg.any( small_matrix.LGT.is_non_ref() ) )
+#             if first:
+#                 first = False
+#             else:
+#                 dm = utils.update_version( dm )
+#             path = '{0}/chrm-{1}'.format( dm, chrom )
+#             lgr.info( 'Writing dense matrix {} to disk ({})'.format( idx, dm ) )
+#             small_matrix.write( path, overwrite = True )
+#             lgr.debug( "Ending writing dense matrix" )
+#             for ff in batch:
+#                 log_files.append( ( ff[ 0 ], chrom, path ) )
+#     except Exception as ex:
+#         save_table_log( sc, sq, log_files, log_path )
+#         raise ex
 
-    save_table_log( sc, sq, log_files, log_path )
+#     save_table_log( sc, sq, log_files, log_path )
 
 def createDenseMatrix( sc, sq, url_project, host_project, prefix_hdfs, max_items_batch, dense_matrix_path, sparse_matrix_path, chrom, group, token, gpap_id, gpap_token ):
     lgr = create_logger( 'createDenseMatrix', '' )

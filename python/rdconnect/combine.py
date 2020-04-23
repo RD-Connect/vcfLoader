@@ -571,7 +571,7 @@ def getIntervalByChrom( chrom, partitions ):
     ]
     for interval in intervals:
         for key, value in interval.items():
-            if key == "chrom":
+            if key == chrom:
                 return( interval )
 
 

@@ -65,9 +65,10 @@ def getExperimentsToProcess( experiment_status, experiment_available, check_hdfs
     experiment_status_2 = [ x[ 'Experiment' ] for x in experiment_status ]
     experiment_available_2 = [ x[ 'RD_Connect_ID_Experiment' ] for x in experiment_available ]
     selected_experiments = [ x for x in experiment_available_2 if x in experiment_status_2 ]
-    print("Dropped experiments")
-    print([ x for x in experiment_available if x[ 'RD_Connect_ID_Experiment' ] not in selected_experiments ])
-    return [ x for x in experiment_available if x[ 'RD_Connect_ID_Experiment' ] in selected_experiments ]
+    #print("Dropped experiments")
+    #print([ x for x in experiment_available if x[ 'RD_Connect_ID_Experiment' ] not in selected_experiments ])
+    #return [ x for x in experiment_available if x[ 'RD_Connect_ID_Experiment' ] in selected_experiments ]
+    return experiment_available
 
 
 def createSparseMatrix( group, url_project, host_project, token, prefix_hdfs, chrom, max_items_batch, partitions_chromosome, gvcf_store_path, new_gvcf_store_path, gpap_id, gpap_token, is_playground ):

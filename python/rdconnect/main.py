@@ -270,6 +270,25 @@ def main(sqlContext, configuration, chrom, nchroms, step, somaticFlag):
                                       .withColumn("chrom",lit(chrom))
             variants.printSchema()
         variants.write.format("org.elasticsearch.spark.sql").options(**es_conf).save(idx_name+"/"+configuration["elasticsearch"]["type"], mode='append')
+
+        initial_vcf = utils.buildFileName(configuration["source_path"], chrom)
+        data_ip = configuration["datamanagement"]["ip"]
+        data_url = configuration["datamanagement"]["host"]
+        data_token = configuration["datamanagement"]["token"]
+        index_name = configuration["elasticsearch"]["index_name"]
+
+        tracking.update_dm_index(initial_vcf, index_name, data_ip, data_url, data_token)
+        tracking.update_dm(initial_vcf, index_name, data_ip, data_url, data_token, "es")
+
+
+
+        initial_vcf = utils.buildFileName(configuration["source_path"], chrom)
+        data_ip = configuration["datamanagement"]["ip"]
+        data_url = configuration["datamanagement"]["host"]
+        data_token = configuration["datamanagement"]["token"]
+        index_name = configuration["elasticsearch"]["index_name"]
+        tracking.update_dm(initial_vcf, index_name, data_ip, data_url, data_token, "es")
+
     
     # [WORK IN PROGRESS] It till update a secondary index to maintain a revision of the last index per project
     if ("updateDataTracking" in step): 
@@ -322,14 +341,25 @@ def main(sqlContext, configuration, chrom, nchroms, step, somaticFlag):
         index_name = configuration["elasticsearch"]["index_name"]
         tracking.update_dm(initial_vcf, index_name, data_ip, data_url, data_token, "in_platform")
 
-    # Updates the in_platform fields of the data-management for each experiment in the original VCF
-    if ("updateDMhadoop" in step):
+    # Updates the in_platform fields at the data-management for each experiment in the original VCF
+    if ("updateDMsparsematrix" in step):
         initial_vcf = utils.buildFileName(configuration["source_path"], chrom)
         data_ip = configuration["datamanagement"]["ip"]
         data_url = configuration["datamanagement"]["host"]
         data_token = configuration["datamanagement"]["token"]
         index_name = configuration["elasticsearch"]["index_name"]
         tracking.update_dm(initial_vcf, index_name, data_ip, data_url, data_token, "genomicsdb")
+
+    # Updates the sparsematrix field at the data-management for each experiment in the original VCF
+    if 'updateDMdensematrix' in step:
+        initial_vcf = utils.buildFileName(configuration["source_path"], chrom)
+        data_ip = configuration["datamanagement"]["ip"]
+        data_url = configuration["datamanagement"]["host"]
+        data_token = configuration["datamanagement"]["token"]
+        index_name = configuration["elasticsearch"]["index_name"]
+        dense_matrix = configuration["combine"]["denseMatrix_path"]
+        tracking.update_dm_densematrix(initial_vcf, index_name, data_ip, data_url, data_token, dense_matrix)
+
 
     # Counting step to check whether the number of variants in Spark corresponds to the number of variants that
     # have been uploaded to ElasticSearch

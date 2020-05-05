@@ -46,7 +46,7 @@ def update_dm_index(initial_vcf, index_name, data_ip, data_url, data_token):
 	url = "https://" + data_ip + uri
 	headers = { 'accept': 'application/json', 'Content-Type': 'application/json', 'Authorization': 'Token ' + data_token, "Host": data_url }
 	data = "{\"dataset\":\"" + index_name + "\"}"
-
+	
 	vcf = hl.split_multi_hts(hl.import_vcf(str(initial_vcf), array_elements_required = False, force_bgz = True, min_partitions = 2))
 	full_samples = [y.get('s') for y in vcf.col.collect()]
 
@@ -76,7 +76,7 @@ def update_dm(initial_vcf, index_name, data_ip, data_url, data_token, field):
 	data = "{\"" + field + "\":\"pass\"}"
 
 	vcf = hl.split_multi_hts(hl.import_vcf(str(initial_vcf), array_elements_required = False, force_bgz = True, min_partitions = 2))
-	full_samples = [y.get('s') for y in vcf.col.collect()]
+	full_samples = [ y.get('s') for y in vcf.col.collect() ]
 
 	print('[INFO]:   . Experiments in loaded VCF: {}'.format(len(full_samples)))
 	print('[INFO]:   . First and last sample: {} // {}'.format(full_samples[0], full_samples[len(full_samples) - 1]))
@@ -91,4 +91,29 @@ def update_dm(initial_vcf, index_name, data_ip, data_url, data_token, field):
 		q_url = url + sam
 		response = requests.post(q_url, data = data, headers = headers, verify = False)
 		if response.status_code != 200:
-			raise Exception('[ERROR]   . Information for sample "{}" could not be updated.'.format(sam))
+			raise Exception('[ERROR]   . Information for sample "{}" could not be updated using "{}".'.format(sam, q_url))
+
+def update_dm_densematrix(initial_vcf, index_name, data_ip, data_url, data_token, value):
+	#url = "https://platform.rd-connect.eu/datamanagement/api/statusbyexperiment/?experiment="
+	uri = "/datamanagement/api/sparsematrix"
+	url = "https://" + data_ip + uri
+	headers = { 'accept': 'application/json', 'Content-Type': 'application/json', 'Authorization': 'Token ' + data_token, "Host": data_url }
+
+	vcf = hl.split_multi_hts(hl.import_vcf(str(initial_vcf), array_elements_required = False, force_bgz = True, min_partitions = 2))
+	full_samples = [ y.get('s') for y in vcf.col.collect() ]
+
+	print('[INFO]:   . Experiments in loaded VCF: {}'.format(len(full_samples)))
+	print('[INFO]:   . First and last sample: {} // {}'.format(full_samples[0], full_samples[len(full_samples) - 1]))
+	print('[INFO]:   . Provided IP for data-management: {}'.format(data_ip))
+	print('[INFO]:   . Provided URL for data-management: {}'.format(data_url))
+	print('[INFO]:   . Provided token for data-management: {}'.format(data_token))
+	print('[INFO]:   . Provided update content: "{}"'.format(str(data)))
+	print('[INFO]:   . Provided value to update "sparsematrix" in data-management: {}'.format(value))
+	print('[INFO]:   . Created query URL for data-management: {}'.format(url))
+
+	for sam in full_samples:
+		q_url = url + sam
+		data = "{\"" + sam + "\":\"" + value + "\"}"
+		response = requests.post(q_url, data = data, headers = headers, verify = False)
+		if response.status_code != 200:
+			raise Exception('[ERROR]   . Information for sample "{}" could not be updated using "{}".'.format(sam, q_url))

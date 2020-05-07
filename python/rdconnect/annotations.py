@@ -1,8 +1,26 @@
+
+import sys
+import logging
+from datetime import datetime
 from rdconnect import utils, expr
+
 
 MIN_DP = 7
 MIN_GQ = 19
 SAMPLES_CNV = 939
+
+
+def create_logger( name ):
+    now = datetime.now()
+    date_time = now.strftime("%y%m%d_%H%M%S")
+    logger = logging.getLogger( name )
+    logger.setLevel( logging.DEBUG )
+    ch = logging.StreamHandler()
+    ch.setLevel( logging.DEBUG )
+    formatter = logging.Formatter( '%(asctime)s - %(name)s - %(levelname)s - %(message)s' )
+    ch.setFormatter( formatter )
+    logger.addHandler( ch )
+    return logger
 
 def importInternalFreq(hl, originPath, destinationPath, nPartitions):
     """ Function to compute the internal allele frequency of a given multi-sample
@@ -39,6 +57,51 @@ def importInternalFreq(hl, originPath, destinationPath, nPartitions):
         .rows()
     vcf_3.key_by(vcf_3.locus, vcf_3.alleles).distinct().write(destinationPath, overwrite = True)
     print('[importInternalFreq] - destinationPath: {0}'.format(destinationPath))
+
+
+def loadDenseMatrix( hl, originPath, sourcePath, destinationPath, nPartitions ):
+    lgr = create_logger( 'loadDenseMatrix' )
+    lgr.debug( 'Argument "originPath" filled with "{}"'.format( originPath ) )
+    lgr.debug( 'Argument "sourcePath" filled with "{}"'.format( sourcePath ) )
+    lgr.debug( 'Argument "destinationPath" filled with "{}"'.format( destinationPath ) )
+    lgr.debug( 'Argument "nPartitions" filled with "{}"'.format( nPartitions ) )
+    try:
+        vcf = hl.read_matrix_table( sourcePath )#, array_elements_required = False, force_bgz = True, min_partitions = nPartitions )
+        x = [y.get('s') for y in vcf.col.collect()]
+        lgr.debug( 'Experiments in loaded VCF: {}'.format( len( x ) ) )
+        lgr.debug( 'First and last sample: {} // {}'.format( x[ 0 ], x[ len( x ) - 1 ] ) )
+        lgr.debug( 'Starting "transmute_entries"' )
+        vcf = vcf.transmute_entries(
+            sample = hl.struct(
+                sample = vcf.s,
+                ad = truncateAt( hl,vcf.LAD[ 1 ] / hl.sum( vcf.LAD ),"2" ),
+                dp = vcf.DP,
+                gtInt = vcf.LGT,
+                gt = hl.str( vcf.LGT ),
+                gq = vcf.GQ
+            )
+        )
+        lgr.debug( 'Starting "annotate_rows"' )
+        vcf = vcf.annotate_rows(
+            ref = vcf.alleles[ 0 ],
+            alt = vcf.alleles[ 1 ],
+            pos = vcf.locus.position,
+            indel = hl.cond(
+                ( hl.len( vcf.alleles[ 0 ] ) != ( hl.len( vcf.alleles[ 1 ] ) ) ) | ( hl.len( vcf.alleles[ 0 ] ) != 1 ) | ( hl.len( vcf.alleles[ 0 ] ) != 1 ), True, False 
+            ),
+            samples_germline = hl.filter(
+                lambda x: ( x.dp > MIN_DP ) & ( x.gq > MIN_GQ ), hl.agg.collect( vcf.sample )
+            )
+        )
+        lgr.debug( 'Output VCF file will be saved to "{}"'.format( destinationPath ) )
+        lgr.debug( 'Contents in "{}" will be overwritten'.format( destinationPath ) )
+        vcf = vcf.rows()
+        vcf = vcf.key_by( vcf.locus, vcf.alleles )
+        vcf = vcf.distinct().write( destinationPath, overwrite = True )
+    except Exception as ex:
+        lgr.debug( 'Unexpected error during the load of dense matrix "{}"'.format( sourcePath ) )
+        lgr.error( 'Unexpected error --> {}'.format( str( ex ) ) )
+        sys.exit( 2 )
 
 
 def importGermline(hl, originPath, sourcePath, destinationPath, nPartitions):
@@ -357,7 +420,8 @@ def annotateVEP(hl, variants, destinationPath, vepPath, nPartitions):
          :param Int nPartitions: Number of partitions 
     """
     print("Running vep")
-    print("destination is "+destinationPath)
+    print("origin is ", variants, vepPath)
+    print("destination is", destinationPath)
     varAnnotated = hl.vep(variants,vepPath)
     varAnnotated = varAnnotated.annotate(effs=hl.cond(hl.is_defined(varAnnotated.vep.transcript_consequences),transcript_annotations(hl,varAnnotated.vep.transcript_consequences),intergenic_annotations(hl,varAnnotated.vep.intergenic_consequences)),
                                          rs = varAnnotated.vep.colocated_variants[0].id)

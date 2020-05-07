@@ -2,14 +2,14 @@
 
 from pyspark import SparkConf, SparkContext
 from pyspark.sql import SQLContext, SparkSession
-from rdconnect import config, annotations, index, transform, utils, tracking
+from rdconnect import config, annotations, index, transform, utils, combine, tracking
 from pyspark.sql.functions import lit
 from subprocess import call
 from pyspark.sql.types import FloatType, IntegerType
 import sys, getopt
 import hail as hl
 import datetime
-
+import os,json,requests
 
 APP_NAME = "vcfLoader"
 # Usage function
@@ -51,7 +51,7 @@ def optionParser(argv):
     return chrom, path, nchroms, step, cores, somaticFlag
 
 # Main functionality. It runs the pipeline steps
-def main(sqlContext, configuration, chrom, nchroms, step, somaticFlag):
+def main(sqlContext, sc, configuration, chrom, nchroms, step, somaticFlag):
     now = datetime.datetime.now()
     print('Staring PIPELINE at {}/{}/{} {}:{}:{}'.format(now.year,now.month,now.day,now.hour,now.minute,now.second,))
 
@@ -88,9 +88,77 @@ def main(sqlContext, configuration, chrom, nchroms, step, somaticFlag):
     if ("loadSomatic" in step and not somaticFlag):
         print('[ERROR]: Selected option "loadSomatic" but not set "somaticFlag"')
         return 2
+    
 
-    # Pipeline steps
-        
+    #(hl,files,chrom,destinationPath,gvcf_store_path)
+    if ("createSparseMatrix" in step):
+        print ("step createSparseMatrix")
+        if 'partitions_chromosome' in configuration[ 'combine' ]:
+            partitions_chromosome = configuration[ 'combine'][ 'partitions_chromosome' ]
+        if 'max_items_batch' in configuration[ 'combine' ]:
+            max_items_batch = configuration[ 'combine' ][ 'max_items_batch' ]
+
+        if 'new_gvcf_store_path' in configuration[ 'combine' ].keys():
+            new_gvcf_store_path = configuration[ 'combine' ][ 'new_gvcf_store_path' ]
+        else:
+            new_gvcf_store_path = None
+
+        if 'gvcf_store_path' in configuration[ 'combine' ].keys():
+            gvcf_store_path = configuration[ 'combine' ][ 'gvcf_store_path' ]
+        else:
+            gvcf_store_path = None
+        if not ( gvcf_store_path is None ) and not ( new_gvcf_store_path is None ) and ( os.path.normpath( new_gvcf_store_path ) == os.path.normpath( gvcf_store_path ) ):
+            raise Expcetion( 'Old store and new store paths are the same.' )
+        else:
+            token = 'Token {0}'.format( configuration[ 'datamanagement' ][ 'token'] )
+            host_project = configuration[ 'datamanagement' ][ 'host' ]
+            url_project = configuration[ 'datamanagement' ][ 'ip' ]
+            group = configuration[ 'combine' ][ 'group' ]
+            prefix_hdfs = configuration[ 'combine' ][ 'prefix_hdfs' ]
+            gpap_id = configuration[ 'gpap' ][ 'id' ]
+            gpap_token = configuration[ 'gpap' ][ 'token' ]
+            is_playground = configuration[ 'elasticsearch' ][ 'main_project' ] == 'playground'
+            combine.createSparseMatrix( group, url_project, host_project, token, prefix_hdfs, chrom, max_items_batch, partitions_chromosome, gvcf_store_path, new_gvcf_store_path, gpap_id, gpap_token, is_playground )
+
+
+    if ("createDenseMatrix" in step):
+        print ("step createDenseMatrix")
+        token = 'Token {0}'.format( configuration[ 'datamanagement' ][ 'token'] )
+        denseMatrix_path = configuration[ 'combine' ][ 'denseMatrix_path' ]
+        group = configuration[ 'combine' ][ 'group' ]
+        host_project = configuration[ 'datamanagement' ][ 'host' ]
+        url_project = configuration[ 'datamanagement' ][ 'ip' ]
+        gpap_id = configuration[ 'gpap' ][ 'id' ]
+        gpap_token = configuration[ 'gpap' ][ 'token' ]
+        prefix_hdfs = configuration[ 'combine' ][ 'prefix_hdfs' ]
+        if 'max_items_batch' in configuration[ 'combine' ]:
+            max_items_batch = configuration[ 'combine' ][ 'max_items_batch' ]
+        if 'gvcf_store_path' in configuration[ 'combine' ].keys():
+            gvcf_store_path = configuration[ 'combine' ][ 'gvcf_store_path' ]
+        else:
+            gvcf_store_path = None
+        combine.createDenseMatrix( sc, sqlContext, url_project, host_project, prefix_hdfs, max_items_batch, denseMatrix_path, gvcf_store_path, chrom, group, token, gpap_id, gpap_token )
+    
+    # if ("createDenseMatrixAlternative" in step):
+    #     print ("step createDenseMatrixAlternative")
+    #     token = 'Token {0}'.format( configuration[ 'datamanagement' ][ 'token'] )
+    #     denseMatrix_path = configuration[ 'combine' ][ 'denseMatrix_path' ]
+    #     group = configuration[ 'combine' ][ 'group' ]
+    #     host_project = configuration[ 'datamanagement' ][ 'host' ]
+    #     url_project = configuration[ 'datamanagement' ][ 'ip' ]
+    #     gpap_id = configuration[ 'gpap' ][ 'id' ]
+    #     gpap_token = configuration[ 'gpap' ][ 'token' ]
+    #     prefix_hdfs = configuration[ 'combine' ][ 'prefix_hdfs' ]
+    #     if 'max_items_batch' in configuration[ 'combine' ]:
+    #         max_items_batch = configuration[ 'combine' ][ 'max_items_batch' ]
+    #     if 'gvcf_store_path' in configuration[ 'combine' ].keys():
+    #         gvcf_store_path = configuration[ 'combine' ][ 'gvcf_store_path' ]
+    #     else:
+    #         gvcf_store_path = None
+    #     combine.createDenseMatrixAlternative( sc, sqlContext, url_project, host_project, prefix_hdfs, max_items_batch, denseMatrix_path, gvcf_store_path, chrom, group, token, gpap_id, gpap_token )
+   
+
+
     if ("createIndex" in step):
         if ("createIndexCNV" in step):
             print ("step to create index CNV")
@@ -102,6 +170,11 @@ def main(sqlContext, configuration, chrom, nchroms, step, somaticFlag):
     if ("loadInternalFreq" in step):
         print ("step importInternalFreq")
         annotations.importInternalFreq(hl, sourceFileName, destination + "/internal_freq/" + fileName, number_partitions)
+
+    if "loadDenseMatrix" in step:
+        print ( "step loadDenseMatrix" )
+        annotations.loadDenseMatrix( hl, current_dir, sourceFileName, destination + "/loaded/" + fileName, number_partitions )
+        current_dir = destination + "/loaded/" + "variants" + chrom + ".ht"
 
     if ("loadGermline" in step):
         print ("step loadGermline")
@@ -225,6 +298,11 @@ def main(sqlContext, configuration, chrom, nchroms, step, somaticFlag):
         print ("loading from " + utils.buildDestinationExAC(destination, fileName, somaticFlag))
         annotated = hl.read_table(utils.buildDestinationExAC(destination, fileName, somaticFlag))
         transform.transform(annotated, utils.buildDestinationTransform(destination, somaticFlag), chrom)
+
+    if "readDenseLog" in step:
+        print ("step readDenseLog")
+        path = '{} /log-chrom-{}'.format( configuration[ 'combine' ][ 'denseMatrix_path' ], chrom )
+        z = combine.load_table_log( sqlContext, path )
         
     # Uploading step. It uploads all annotated variants to ElasticSearch
     if ("toElastic" in step):
@@ -377,11 +455,11 @@ if __name__ == "__main__":
     # Command line options parsing
     chrom, path, nchroms, step, cores, somaticFlag = optionParser(sys.argv[1:])
     main_conf = config.readConfig(path)
-    spark_conf = SparkConf().setAppName(APP_NAME).set('spark.executor.cores',cores)
+    spark_conf = SparkConf().setAppName(APP_NAME).set('spark.executor.cores',cores) #.set("spark.local.dir", "hdfs://rdhdfs1:27000/test/tmp/spark-temp")
     spark = SparkSession.builder.config(conf=spark_conf).getOrCreate()
     spark.sparkContext._jsc.hadoopConfiguration().setInt("dfs.block.size",main_conf["dfs_block_size"])
     spark.sparkContext._jsc.hadoopConfiguration().setInt("parquet.block.size",main_conf["dfs_block_size"])
-    hl.init(spark.sparkContext)
+    hl.init(spark.sparkContext,tmp_dir="hdfs://rdhdfs1:27000/test/tmp")
     sqlContext = SQLContext(hl.spark_context())
     # Execute Main functionality
-    main(sqlContext, main_conf, chrom, nchroms, step, somaticFlag)
+    main( sqlContext, spark.sparkContext, main_conf, chrom, nchroms, step, somaticFlag )

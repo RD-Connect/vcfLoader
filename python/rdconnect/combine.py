@@ -199,6 +199,9 @@ def createSparseMatrix( group, url_project, host_project, token, prefix_hdfs, ch
             print('' in batch)
             print("*" * 25)
 
+            import sys
+            sys.exit(-1)
+
         if index == 0 and bse_old is None:
             lgr.debug( 'Index {}\n\tCurrent gvcf store is "{}"\n\tNew version gvcf store is "{}"'.format( index, bse_old, bse_new ) )
             new_gvcf_store_path = '{0}/chrom-{1}'.format( bse_new, chrom )

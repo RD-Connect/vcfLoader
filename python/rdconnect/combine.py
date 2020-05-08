@@ -52,9 +52,9 @@ def getExperimentByGroup( group, url_project, host_project, token, prefix_hdfs, 
     if not url_project.startswith( 'http://' ) and not url_project.startswith( 'https://' ):
         url_project = 'https://{0}'.format( url_project )
     if is_playground:
-        url = "{0}/datamanagement_service/api/samplebygroup/?format=json&group={1}&user=dpiscia&owner=False".format( url_project, group )
+        url = "{0}/datamanagement_service/api/samplebygroup/?format=json&group={1}&user=dpiscia&owner=False&elastic_index=True".format( url_project, group )
     else:
-        url = "{0}/datamanagement/api/samplebygroup/?format=json&group={1}&user=dpiscia&owner=False".format( url_project, group )
+        url = "{0}/datamanagement/api/samplebygroup/?format=json&group={1}&user=dpiscia&owner=False&elastic_index=True".format( url_project, group )
     headers = { 'Authorization': token, 'Host': host_project }
     print( 'getExperimentByGroup: {0}'.format( url ) )
     resp = requests.get (url, headers = headers, verify = False )

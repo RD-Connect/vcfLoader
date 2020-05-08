@@ -44,7 +44,6 @@ def getExperimentStatus( group, url_project, host_project, token ):
     data = json.loads( resp.content )
     return data
 
-
 def getExperimentByGroup( group, url_project, host_project, token, prefix_hdfs, chrom, max_items_batch ):
     """Get all the experiments for a given group."""
     if not url_project.startswith( 'http://' ) and not url_project.startswith( 'https://' ):
@@ -55,6 +54,18 @@ def getExperimentByGroup( group, url_project, host_project, token, prefix_hdfs, 
     resp = requests.get (url, headers = headers, verify = False )
     data = json.loads( resp.content )
     return data
+
+
+# def getExperimentByGroup( group, url_project, host_project, token, prefix_hdfs, chrom, max_items_batch ):
+#     """Get all the experiments for a given group."""
+#     if not url_project.startswith( 'http://' ) and not url_project.startswith( 'https://' ):
+#         url_project = 'https://{0}'.format( url_project )
+#     url = "{0}/datamanagement_service/api/samplebygroup/?format=json&group={1}&user=dpiscia&owner=False".format( url_project, group )
+#     headers = { 'Authorization': token, 'Host': host_project }
+#     print( 'getExperimentByGroup: {0}'.format( url ) )
+#     resp = requests.get (url, headers = headers, verify = False )
+#     data = json.loads( resp.content )
+#     return data
 
 
 def getExperimentsToProcess( experiment_status, experiment_available, check_hdfs = False ):
@@ -70,6 +81,10 @@ def getExperimentsToProcess( experiment_status, experiment_available, check_hdfs
     #return [ x for x in experiment_available if x[ 'RD_Connect_ID_Experiment' ] in selected_experiments ]
     return experiment_available
 
+def create_files_list(experiments,chrom,elastic_dataset):
+    prefix="hdfs://rdhdfs1:27000/test/rdconnect/gVCF"
+    elastic_dataset="rdcon_1488_670"
+    return [ prefix+"/"+x['Owner']+"/"+x['RD_Connect_ID_Experiment']+'/'+x['RD_Connect_ID_Experiment']+'.'+chrom+'.g.vcf.bgz' for x in experiments if x[ 'elastic_dataset' ] == elastic_dataset ]
 
 def createSparseMatrix( group, url_project, host_project, token, prefix_hdfs, chrom, max_items_batch, partitions_chromosome, gvcf_store_path, new_gvcf_store_path, gpap_id, gpap_token, is_playground ):
     """Iterates to create the sparse matrix."""
@@ -79,11 +94,13 @@ def createSparseMatrix( group, url_project, host_project, token, prefix_hdfs, ch
     experiments_in_group = getExperimentByGroup( group, url_project, host_project, token, prefix_hdfs, chrom, max_items_batch )
     experiment_status = getExperimentStatus( group, url_project, host_project, token )
     experiments_to_be_loaded = getExperimentsToProcess( experiment_status, experiments_in_group, check_hdfs = False )
-    if is_playground:
-        files_to_be_loaded = [ buildPathPlayground( prefix_hdfs, group, x[ 'RD_Connect_ID_Experiment' ], chrom ) for x in experiments_to_be_loaded ]
-    else:
-        files_to_be_loaded = [ buildPath( prefix_hdfs, group, x[ 'RD_Connect_ID_Experiment' ], chrom ) for x in experiments_to_be_loaded ]
+
+    # if is_playground:
+    #     files_to_be_loaded = [ buildPathPlayground( prefix_hdfs, group, x[ 'RD_Connect_ID_Experiment' ], chrom ) for x in experiments_to_be_loaded ]
+    # else:
+    #     files_to_be_loaded = [ buildPath( prefix_hdfs, group, x[ 'RD_Connect_ID_Experiment' ], chrom ) for x in experiments_to_be_loaded ]
    
+    files_to_be_loaded = create_files_list(experiments_in_group,str(chrom),"rdcon_1488_670")
     experiments_to_be_loaded = [ x[ 'RD_Connect_ID_Experiment' ] for x in experiments_to_be_loaded ]
     
     
@@ -318,16 +335,42 @@ def createDenseMatrix( sc, sq, url_project, host_project, prefix_hdfs, max_items
 
 
 
+# def getExperimentsByFamily( pids, url_project, id_gpap, token_gpap, sort_output = True ):
+#     """Function to get the IDs from phenotips, from experiments, and from family."""
+#     print( "{0} ---> {1} / {2}".format( "getExperimentsByFamily", pids[ 0 ], pids[ len(pids) - 1 ] ) )
+#     url = 'http://rdproto10:8082/phenotips/ExportMultiple'
+#     headers = { 'Content-Type': 'application/json' }
+#     body = { 'patients': [ { 'id': x[ 'Phenotips_ID' ] } for x in pids ] }
+#     resp = requests.post( url, headers = headers, json = body, verify = False )
+#     data = resp.json()
+    
+#     parsed = {}
+#     for elm in data:
+#         pid = list( elm.keys() )[ 0 ]
+#         if type( elm[ pid ] ) == str:
+#             fam = '---'
+#         else: 
+#             fam = elm[ pid ][ 'family' ] if 'family' in elm[ pid ].keys() else '---'
+#         parsed[ pid ] = fam
+
+#     rst = [ [ pak[ 'RD_Connect_ID_Experiment' ], pak[ 'Phenotips_ID' ], parsed[ pak[ 'Phenotips_ID' ] ] ] for pak in pids ]
+#     if sort_output:
+#         return sorted( rst, key = lambda x: x[ 2 ] )
+#     else:
+#         return rst
+
 def getExperimentsByFamily( pids, url_project, id_gpap, token_gpap, sort_output = True ):
     """Function to get the IDs from phenotips, from experiments, and from family."""
     print( "{0} ---> {1} / {2}".format( "getExperimentsByFamily", pids[ 0 ], pids[ len(pids) - 1 ] ) )
     url = 'http://rdproto10:8082/phenotips/ExportMultiple'
+    data=[]
     headers = { 'Content-Type': 'application/json' }
-    body = { 'patients': [ { 'id': x[ 'Phenotips_ID' ] } for x in pids ] }
-    resp = requests.post( url, headers = headers, json = body, verify = False )
-    data = resp.json()
-    
+    for i in range(0,(len(pids)//1000)+1) :
+        body = { 'patients': [ { 'id': x[ 'Phenotips_ID' ] } for x in pids[(i*1000):((i+1)*1000)] ] }
+        resp = requests.post( url, headers = headers, json = body, verify = False )
+        data = data + resp.json()
     parsed = {}
+    #import pdb;pdb.set_trace()
     for elm in data:
         pid = list( elm.keys() )[ 0 ]
         if type( elm[ pid ] ) == str:
@@ -335,7 +378,6 @@ def getExperimentsByFamily( pids, url_project, id_gpap, token_gpap, sort_output 
         else: 
             fam = elm[ pid ][ 'family' ] if 'family' in elm[ pid ].keys() else '---'
         parsed[ pid ] = fam
-
     rst = [ [ pak[ 'RD_Connect_ID_Experiment' ], pak[ 'Phenotips_ID' ], parsed[ pak[ 'Phenotips_ID' ] ] ] for pak in pids ]
     if sort_output:
         return sorted( rst, key = lambda x: x[ 2 ] )

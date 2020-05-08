@@ -163,7 +163,7 @@ def createSparseMatrix( group, url_project, host_project, token, prefix_hdfs, ch
     # bse_old = gvcf_store_path
     # bse_new = new_gvcf_store_path
 
-    if if index == 3:
+    if index == 3:
         print("*" * 25)
         print("experiments_in_group", experiments_in_group[300:400])
         print('' in experiments_in_group)

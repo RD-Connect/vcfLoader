@@ -153,7 +153,6 @@ def createSparseMatrix( group, url_project, host_project, token, prefix_hdfs, ch
                     return ff
         return ''
 
-    print( "experiments_and_families", experiments_and_families )
     for ii in range( len( experiments_and_families ) ):
         experiments_and_families[ ii ].append( buildPath2( files_to_be_loaded, experiments_and_families[ ii ][ 0 ], is_playground ) )
 
@@ -161,35 +160,32 @@ def createSparseMatrix( group, url_project, host_project, token, prefix_hdfs, ch
     batches = list( divideChunks( experiments_and_families, 100 ) )
     lgr.debug( 'Created {} batches from {} files'.format( len( batches ), len( experiments_and_families ) ) )
 
-    bse_old = gvcf_store_path
-    bse_new = new_gvcf_store_path
+    # bse_old = gvcf_store_path
+    # bse_new = new_gvcf_store_path
     
-    for index, batch in enumerate( batches ):
-        if index == 0 and bse_old is None:
-            lgr.debug( 'Index {}\n\tCurrent gvcf store is "{}"\n\tNew version gvcf store is "{}"'.format( index, bse_old, bse_new ) )
-            new_gvcf_store_path = '{0}/chrom-{1}'.format( bse_new, chrom )
-        elif index == 0 and not bse_old is None:
-            gvcf_store_path = '{0}/chrom-{1}'.format( bse_old, chrom )
-            bse_new = utils.update_version( bse_old )
-            new_gvcf_store_path = '{0}/chrom-{1}'.format( bse_new, chrom )
-            lgr.debug( 'Index {}\n\tCurrent gvcf store is "{}"\n\tNew version gvcf store is "{}"'.format( index, gvcf_store_path, new_gvcf_store_path ) )
-        else:
-            bse_old = bse_new
-            gvcf_store_path = '{0}/chrom-{1}'.format( bse_new, chrom )
-            bse_new = utils.update_version( bse_new )
-            new_gvcf_store_path = '{0}/chrom-{1}'.format( bse_new, chrom )
-            lgr.debug( 'Index {}\n\tCurrent gvcf store is "{}"\n\tNew version gvcf store is "{}"'.format( index, gvcf_store_path, new_gvcf_store_path ) )
-        path_to_exps = [ x[ 3 ] for x in batch ]
-        loadGvcf( hl, path_to_exps, chrom, new_gvcf_store_path, gvcf_store_path, partitions_chromosome, lgr )
-
-
+    # for index, batch in enumerate( batches ):
+    #     print( "experiments_and_families", experiments_and_families )
+    #     if index == 0 and bse_old is None:
+    #         lgr.debug( 'Index {}\n\tCurrent gvcf store is "{}"\n\tNew version gvcf store is "{}"'.format( index, bse_old, bse_new ) )
+    #         new_gvcf_store_path = '{0}/chrom-{1}'.format( bse_new, chrom )
+    #     elif index == 0 and not bse_old is None:
+    #         gvcf_store_path = '{0}/chrom-{1}'.format( bse_old, chrom )
+    #         bse_new = utils.update_version( bse_old )
+    #         new_gvcf_store_path = '{0}/chrom-{1}'.format( bse_new, chrom )
+    #         lgr.debug( 'Index {}\n\tCurrent gvcf store is "{}"\n\tNew version gvcf store is "{}"'.format( index, gvcf_store_path, new_gvcf_store_path ) )
+    #     else:
+    #         bse_old = bse_new
+    #         gvcf_store_path = '{0}/chrom-{1}'.format( bse_new, chrom )
+    #         bse_new = utils.update_version( bse_new )
+    #         new_gvcf_store_path = '{0}/chrom-{1}'.format( bse_new, chrom )
+    #         lgr.debug( 'Index {}\n\tCurrent gvcf store is "{}"\n\tNew version gvcf store is "{}"'.format( index, gvcf_store_path, new_gvcf_store_path ) )
+    #     path_to_exps = [ x[ 3 ] for x in batch ]
+    #     loadGvcf( hl, path_to_exps, chrom, new_gvcf_store_path, gvcf_store_path, partitions_chromosome, lgr )
 
     bse_old = gvcf_store_path
     bse_new = new_gvcf_store_path
     to_be_merged=[]
     for index, batch in enumerate( batches ):
-        
-
         if index == 0 and bse_old is None:
             lgr.debug( 'Index {}\n\tCurrent gvcf store is "{}"\n\tNew version gvcf store is "{}"'.format( index, bse_old, bse_new ) )
             new_gvcf_store_path = '{0}/chrom-{1}'.format( bse_new, chrom )
@@ -224,7 +220,9 @@ def createSparseMatrix( group, url_project, host_project, token, prefix_hdfs, ch
         path_to_exps = [ x[ 3 ] for x in batch ]
         for path in path_to_exps:
             print(path)
-        loadGvcf( hl, path_to_exps, chrom, new_gvcf_store_path, gvcf_store_path, partitions_chromosome, lgr )
+
+        if index >= 3:
+            loadGvcf( hl, path_to_exps, chrom, new_gvcf_store_path, gvcf_store_path, partitions_chromosome, lgr )
     
     if len(to_be_merged) > 0:
             combine_two_dataset(to_be_merged.pop(),gvcf_store_path,chrom)

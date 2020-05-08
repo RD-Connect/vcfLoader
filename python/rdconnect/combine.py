@@ -33,22 +33,28 @@ def resource(filename):
     return os.path.join(filename)
 
 
-def getExperimentStatus( group, url_project, host_project, token ):
+def getExperimentStatus( group, url_project, host_project, token, is_playground ):
     """Get the status information for all experiments allowed to be used by the token."""
     if not url_project.startswith( 'http://' ) and not url_project.startswith( 'https://' ):
         url_project = 'https://{0}'.format( url_project )
-    url = "{0}/datamanagement_service/api/statusbyexperiment/?format=json&group={1}&user=dpiscia&owner=False".format( url_project, group )
+    if is_playground:
+        url = "{0}/datamanagement_service/api/statusbyexperiment/?format=json&group={1}&user=dpiscia&owner=False".format( url_project, group )
+    else:
+        url = "{0}/datamanagement/api/statusbyexperiment/?format=json&group={1}&user=dpiscia&owner=False".format( url_project, group )
     headers = { 'Authorization': token, 'Host': host_project }
     print( 'getExperimentStatus: {0}'.format( url ) )
     resp = requests.get( url, headers = headers, verify = False )
     data = json.loads( resp.content )
     return data
 
-def getExperimentByGroup( group, url_project, host_project, token, prefix_hdfs, chrom, max_items_batch ):
+def getExperimentByGroup( group, url_project, host_project, token, prefix_hdfs, chrom, max_items_batch, is_playground ):
     """Get all the experiments for a given group."""
     if not url_project.startswith( 'http://' ) and not url_project.startswith( 'https://' ):
         url_project = 'https://{0}'.format( url_project )
-    url = "{0}/datamanagement_service/api/samplebygroup/?format=json&group={1}&user=dpiscia&owner=False".format( url_project, group )
+    if is_playground:
+        url = "{0}/datamanagement_service/api/samplebygroup/?format=json&group={1}&user=dpiscia&owner=False".format( url_project, group )
+    else:
+        url = "{0}/datamanagement/api/samplebygroup/?format=json&group={1}&user=dpiscia&owner=False".format( url_project, group )
     headers = { 'Authorization': token, 'Host': host_project }
     print( 'getExperimentByGroup: {0}'.format( url ) )
     resp = requests.get (url, headers = headers, verify = False )
@@ -91,8 +97,8 @@ def createSparseMatrix( group, url_project, host_project, token, prefix_hdfs, ch
     lgr = create_logger( 'createSparseMatrix', '' )
 
     # Get all the experiments that have to processed from data-management
-    experiments_in_group = getExperimentByGroup( group, url_project, host_project, token, prefix_hdfs, chrom, max_items_batch )
-    experiment_status = getExperimentStatus( group, url_project, host_project, token )
+    experiments_in_group = getExperimentByGroup( group, url_project, host_project, token, prefix_hdfs, chrom, max_items_batch, is_playground )
+    experiment_status = getExperimentStatus( group, url_project, host_project, token, is_playground )
     experiments_to_be_loaded = getExperimentsToProcess( experiment_status, experiments_in_group, check_hdfs = False )
 
     # if is_playground:

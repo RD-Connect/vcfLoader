@@ -162,20 +162,6 @@ def createSparseMatrix( group, url_project, host_project, token, prefix_hdfs, ch
 
     # bse_old = gvcf_store_path
     # bse_new = new_gvcf_store_path
-
-    if index == 3:
-        print("*" * 25)
-        print("experiments_in_group", experiments_in_group[300:400])
-        print('' in experiments_in_group)
-        print("*" * 25)
-        print("experiment_status", experiment_status[300:400])
-        print('' in experiment_status)
-        print("*" * 25)
-        print("experiments_to_be_loaded", experiments_to_be_loaded[300:400])
-        print('' in experiments_to_be_loaded)
-        print("*" * 25)
-        print("experiments_and_families", experiments_and_families[300:400])
-        print("*" * 25)
     
     # for index, batch in enumerate( batches ):
     #     print( "experiments_and_families", experiments_and_families )
@@ -200,6 +186,20 @@ def createSparseMatrix( group, url_project, host_project, token, prefix_hdfs, ch
     bse_new = new_gvcf_store_path
     to_be_merged=[]
     for index, batch in enumerate( batches ):
+        if index == 3:
+            print("*" * 25)
+            print("experiments_in_group", experiments_in_group[300:400])
+            print('' in experiments_in_group)
+            print("*" * 25)
+            print("experiment_status", experiment_status[300:400])
+            print('' in experiment_status)
+            print("*" * 25)
+            print("experiments_to_be_loaded", experiments_to_be_loaded[300:400])
+            print('' in experiments_to_be_loaded)
+            print("*" * 25)
+            print("experiments_and_families", experiments_and_families[300:400])
+            print("*" * 25)
+
         if index == 0 and bse_old is None:
             lgr.debug( 'Index {}\n\tCurrent gvcf store is "{}"\n\tNew version gvcf store is "{}"'.format( index, bse_old, bse_new ) )
             new_gvcf_store_path = '{0}/chrom-{1}'.format( bse_new, chrom )

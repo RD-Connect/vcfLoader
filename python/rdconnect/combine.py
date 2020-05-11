@@ -239,11 +239,11 @@ def createSparseMatrix( group, url_project, host_project, token, prefix_hdfs, ch
 
 def combine_two_dataset(gvcf_store_1_path_chrom, gvcf_store_2_path_chrom, destination_path):
     print("[combine_two_dataset]: merging " + gvcf_store_1_path_chrom + " with " + gvcf_store_2_path_chrom)
-    # from hail.experimental.vcf_combiner import combine_gvcfs
-    # gvcf_store_1 = hl.read_matrix_table(gvcf_store_1_path_chrom)
-    # gvcf_store_2 = hl.read_matrix_table(gvcf_store_2_path_chrom)
-    # comb = combine_gvcfs( [ gvcf_store_1 ] + [gvcf_store_2] )
-    # comb.write(destination_path, overwrite = True )
+    from hail.experimental.vcf_combiner import combine_gvcfs
+    gvcf_store_1 = hl.read_matrix_table(gvcf_store_1_path_chrom)
+    gvcf_store_2 = hl.read_matrix_table(gvcf_store_2_path_chrom)
+    comb = combine_gvcfs( [ gvcf_store_1 ] + [gvcf_store_2] )
+    comb.write(destination_path, overwrite = True )
 
 def save_table_log( sc, sq, files, path ):
     rdd = sc.parallelize( files )

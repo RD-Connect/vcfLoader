@@ -229,10 +229,13 @@ def createSparseMatrix( group, url_project, host_project, token, prefix_hdfs, ch
     lgr.debug( '(end loop) After merging Index {}\n\tCurrent gvcf store is "{}"\n\tNew version gvcf store is "{}"'.format( index, gvcf_store_path, new_gvcf_store_path ) )
 
 
+    bse_new = utils.update_version( bse_new )
+    last_gvcf_store_path = '{0}/chrom-{1}'.format( bse_new, chrom )
+
     print("ENDING PROCESS - len(to_be_merged)", len(to_be_merged))
     if len(to_be_merged) > 0:
         print("ENDING PROCESS - to_be_merged", to_be_merged)
-        combine_two_dataset(to_be_merged.pop(), gvcf_store_path, chrom)
+        combine_two_dataset(to_be_merged.pop(), new_gvcf_store_path, last_gvcf_store_path)
 
 def combine_two_dataset(gvcf_store_1_path_chrom, gvcf_store_2_path_chrom, destination_path):
     print("[combine_two_dataset]: merging " + gvcf_store_1_path_chrom + " with " + gvcf_store_2_path_chrom)

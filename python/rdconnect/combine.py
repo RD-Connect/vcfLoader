@@ -203,12 +203,12 @@ def createSparseMatrix( group, url_project, host_project, token, prefix_hdfs, ch
             bse_new = utils.update_version( bse_new )
             new_gvcf_store_path = '{0}/chrom-{1}'.format( bse_new, chrom )
             lgr.debug( 'Index {}\n\tCurrent gvcf store is "{}"\n\tNew version gvcf store is "{}"'.format( index, gvcf_store_path, new_gvcf_store_path ) )
-        
-        if index % 15 == 0 and index !=0:
+
+        if index % 15 == 0 and index != 0:
             if len(to_be_merged) > 0:
                 bse_new = utils.update_version( bse_new )
                 new_gvcf_store_path = '{0}/chrom-{1}'.format( bse_new, chrom )
-                #combine_two_dataset(to_be_merged.pop(),gvcf_store_path,new_gvcf_store_path)
+                combine_two_dataset(to_be_merged.pop(), gvcf_store_path, new_gvcf_store_path)
                 to_be_merged.append(new_gvcf_store_path)
                 bse_new = utils.update_version( bse_new )
                 new_gvcf_store_path = '{0}/chrom-{1}'.format( bse_new, chrom )
@@ -226,21 +226,21 @@ def createSparseMatrix( group, url_project, host_project, token, prefix_hdfs, ch
         print("Index: ", index, "path_to_exps", path_to_exps)
         #loadGvcf( hl, path_to_exps, chrom, new_gvcf_store_path, gvcf_store_path, partitions_chromosome, lgr )
     
-    lgr.debug( 'After merging Index {}\n\tCurrent gvcf store is "{}"\n\tNew version gvcf store is "{}"'.format( index, gvcf_store_path, new_gvcf_store_path ) )
+    lgr.debug( '(end loop) After merging Index {}\n\tCurrent gvcf store is "{}"\n\tNew version gvcf store is "{}"'.format( index, gvcf_store_path, new_gvcf_store_path ) )
 
 
     print("ENDING PROCESS - len(to_be_merged)", len(to_be_merged))
     if len(to_be_merged) > 0:
         print("ENDING PROCESS - to_be_merged", to_be_merged)
-        #combine_two_dataset(to_be_merged.pop(),gvcf_store_path,chrom)
+        combine_two_dataset(to_be_merged.pop(), gvcf_store_path, chrom)
 
-def combine_two_dataset(gvcf_store_1_path_chrom,gvcf_store_2_path_chrom, destination_path):
-    print("merging "+gvcf_store_1_path_chrom+" with "+gvcf_store_2_path_chrom)
-    from hail.experimental.vcf_combiner import combine_gvcfs
-    gvcf_store_1 = hl.read_matrix_table(gvcf_store_1_path_chrom)
-    gvcf_store_2 = hl.read_matrix_table(gvcf_store_2_path_chrom)
-    comb = combine_gvcfs( [ gvcf_store_1 ] + [gvcf_store_2] )
-    comb.write(destination_path, overwrite = True )
+def combine_two_dataset(gvcf_store_1_path_chrom, gvcf_store_2_path_chrom, destination_path):
+    print("[combine_two_dataset]: merging " + gvcf_store_1_path_chrom + " with " + gvcf_store_2_path_chrom)
+    # from hail.experimental.vcf_combiner import combine_gvcfs
+    # gvcf_store_1 = hl.read_matrix_table(gvcf_store_1_path_chrom)
+    # gvcf_store_2 = hl.read_matrix_table(gvcf_store_2_path_chrom)
+    # comb = combine_gvcfs( [ gvcf_store_1 ] + [gvcf_store_2] )
+    # comb.write(destination_path, overwrite = True )
 
 def save_table_log( sc, sq, files, path ):
     rdd = sc.parallelize( files )

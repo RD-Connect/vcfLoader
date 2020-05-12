@@ -219,12 +219,12 @@ def createSparseMatrix( group, url_project, host_project, token, prefix_hdfs, ch
             #bse_new = utils.update_version( bse_new )
             #new_gvcf_store_path = '{0}/chrom-{1}'.format( bse_new, chrom )
 
-            #lgr.debug( 'Index {}\n\tCurrent gvcf store is "{}"\n\tNew version gvcf store is "{}"'.format( index, gvcf_store_path, new_gvcf_store_path ) )
+            lgr.debug( 'Index {}\n\tCurrent gvcf store is "{}"\n\tNew version gvcf store is "{}"'.format( index, gvcf_store_path, new_gvcf_store_path ) )
 
 
         path_to_exps = [ x[ 3 ] for x in batch ]
-        print("Index: ", index, "path_to_exps", path_to_exps)
-        #loadGvcf( hl, path_to_exps, chrom, new_gvcf_store_path, gvcf_store_path, partitions_chromosome, lgr )
+        #print("Index: ", index, "path_to_exps", path_to_exps)
+        loadGvcf( hl, path_to_exps, chrom, new_gvcf_store_path, gvcf_store_path, partitions_chromosome, lgr )
     
     lgr.debug( '(end loop) After merging Index {}\n\tCurrent gvcf store is "{}"\n\tNew version gvcf store is "{}"'.format( index, gvcf_store_path, new_gvcf_store_path ) )
 

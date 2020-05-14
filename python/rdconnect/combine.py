@@ -119,7 +119,7 @@ def createSparseMatrix( group, url_project, host_project, token, prefix_hdfs, ch
     lgr.debug( 'Length "experiments_to_be_loaded": {}'.format( len( experiments_to_be_loaded ) ) )
     if len( experiments_to_be_loaded ) > 0:
         lgr.debug( '    {} -- {}'.format( experiments_to_be_loaded[ 0 ], experiments_to_be_loaded[ len( experiments_to_be_loaded ) - 1] ) )
-
+    experiments_to_be_loaded = experiments_to_be_loaded[8100:] # to be removed urgently
 
     full_ids_to_be_loaded = [ x for x in experiments_in_group if x[ 'RD_Connect_ID_Experiment' ] in experiments_to_be_loaded ]
     lgr.debug( 'Length "full_ids_to_be_loaded": {}'.format( len( full_ids_to_be_loaded ) ) )
@@ -187,7 +187,7 @@ def createSparseMatrix( group, url_project, host_project, token, prefix_hdfs, ch
 
     bse_old = gvcf_store_path
     bse_new = new_gvcf_store_path
-    to_be_merged=[]
+    to_be_merged = []
     for index, batch in enumerate( batches ):
         if index == 0 and bse_old is None:
             lgr.debug( 'Index {}\n\tCurrent gvcf store is "{}"\n\tNew version gvcf store is "{}"'.format( index, bse_old, bse_new ) )
@@ -238,7 +238,7 @@ def createSparseMatrix( group, url_project, host_project, token, prefix_hdfs, ch
         combine_two_dataset(to_be_merged.pop(), new_gvcf_store_path, last_gvcf_store_path)
 
 def combine_two_dataset(gvcf_store_1_path_chrom, gvcf_store_2_path_chrom, destination_path):
-    print("[combine_two_dataset]: merging " + gvcf_store_1_path_chrom + " with " + gvcf_store_2_path_chrom)
+    print("[combine_two_dataset]: merging " + gvcf_store_1_path_chrom + " with " + gvcf_store_2_path_chrom + " ending at " + destination_path)
     from hail.experimental.vcf_combiner import combine_gvcfs
     gvcf_store_1 = hl.read_matrix_table(gvcf_store_1_path_chrom)
     gvcf_store_2 = hl.read_matrix_table(gvcf_store_2_path_chrom)

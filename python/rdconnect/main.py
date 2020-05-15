@@ -454,7 +454,8 @@ def main(sqlContext, sc, configuration, chrom, nchroms, step, somaticFlag):
     if 'listGenes' in step:
         for chrm in range(1, 26):
             dta = hl.read_table('hdfs://rdhdfs1:27000//test/rdconnect-ES6/1488/6.7.0/annotatedVEPdbnSFPCaddClinvar/variants{}.ht'.format(chrm))
-            dta['effs']['gene_name'].export('/tmp/rdconn_genes_chrm{}.tsv'.format(chrm), delimiter='\t', missing='')
+            print('hdfs://rdhdfs1:27000/test/tmp/rdconn_genes_chrm{}.tsv'.format(chrm))
+            dta['effs']['gene_name'].export('hdfs://rdhdfs1:27000/test/tmp/rdconn_genes_chrm{}.tsv'.format(chrm), delimiter='\t', missing='')
 
 if __name__ == "__main__":
     # Command line options parsing

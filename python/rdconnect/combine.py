@@ -119,7 +119,7 @@ def createSparseMatrix( group, url_project, host_project, token, prefix_hdfs, ch
     lgr.debug( 'Length "experiments_to_be_loaded": {}'.format( len( experiments_to_be_loaded ) ) )
     if len( experiments_to_be_loaded ) > 0:
         lgr.debug( '    {} -- {}'.format( experiments_to_be_loaded[ 0 ], experiments_to_be_loaded[ len( experiments_to_be_loaded ) - 1] ) )
-    experiments_to_be_loaded = experiments_to_be_loaded[7501:] # to be removed urgently
+    ###experiments_to_be_loaded = experiments_to_be_loaded[7501:] # to be removed urgently
 
     full_ids_to_be_loaded = [ x for x in experiments_in_group if x[ 'RD_Connect_ID_Experiment' ] in experiments_to_be_loaded ]
     lgr.debug( 'Length "full_ids_to_be_loaded": {}'.format( len( full_ids_to_be_loaded ) ) )

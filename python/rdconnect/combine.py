@@ -215,7 +215,6 @@ def create_batches_sparse( list_of_ids, dict_of_paths, uri, smallSize = 100, lar
             cnt = 0
 
         if added:
-            print( "<->", cnt,  cnt + smallSize, cnt + smallSize >= largeSize, uri )
             if cnt + smallSize >= largeSize:
                 uri = utils.version_bump( uri, 'revision' )
                 bumpRev = True
@@ -271,7 +270,7 @@ def loadGvcf2( hl, experiments, destinationPath, gvcfStorePath, chrom, partition
         return x
 
     interval = getIntervalByChrom( chrom, partitions )
-    vcfs = [ transformFile( mt ) for mt in importFiles( files ) ]
+    vcfs = [ transformFile( mt ) for mt in importFiles( [ x[ 'File' ] for x in experiments ] ) ]
 
     if gvcfStorePath == None:
         comb = combine_gvcfs( vcfs )

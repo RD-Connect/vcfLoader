@@ -106,8 +106,8 @@ def create_files_list(experiments, chrom, elastic_dataset):
 def createSparseMatrix( group, url_project, host_project, token, prefix_hdfs, chrom, sz_small_batch, sz_large_batch, partitions_chromosome, gvcf_store_path, new_gvcf_store_path, gpap_id, gpap_token, is_playground ):
     """Iterates to create the sparse matrix."""
     lgr = create_logger( 'createSparseMatrix', '' )
-    if new_gvcf_store_path is None or new_gvcf_store_path == '':
-        raise Exception('To properly run "createSparseMatrix" you have to provide the argument "new_gvcf_store_path".')
+    if (new_gvcf_store_path is None or new_gvcf_store_path == '') and (gvcf_store_path is None or gvcf_store_path == ''):
+        raise Exception('To properly run "createSparseMatrix" you have to provide the arguments "gvcf_store_path" or "new_gvcf_store_path".')
 
     # Get all the experiments that have to processed from data-management
     experiments_in_group = getExperimentByGroup( group, url_project, host_project, token, prefix_hdfs, chrom, sz_small_batch, is_playground )
@@ -156,6 +156,11 @@ def createSparseMatrix( group, url_project, host_project, token, prefix_hdfs, ch
     # # else:
     # #     raise Exception( 'No experiment will be loaded and included in sparse matrix' )
 
+
+
+    # The argument "new_gvcf_store_path" contains the path to the new sm that will be created from the blocks of 100 experiments and saved as 1k5
+    # The argument "gvcf_store_path" will contain the last sm matrix that can be of any size and that will accumulate the old plus the new experiments
+
     batches = create_batches_sparse( experiments_in_group, files_to_be_loaded, new_gvcf_store_path )
     print( [ x['uri'] for x in batches ] )
 
@@ -163,6 +168,19 @@ def createSparseMatrix( group, url_project, host_project, token, prefix_hdfs, ch
         # load each of the small batches of 100 experiments
         # write the matrix of 1k5 experiments
         pass
+
+    uris = [ b[ 'uri' ] for b in batches ]
+    if not( gvcf_store_path is None and new_gvcf_store_path == '' ):
+        uris = [ 'gvcf_store_path' ] + uris
+
+    first_uri = uris[ -1 ]
+    dst = utils.update_version( dst, revision = False )
+    for uri in uris:
+        # merge the sm of 1k5
+        combine_sparse_martix( first_uri, uri )
+        first = uri
+        dst = utils.update_version( dst, revision = False )
+
 
 
 def create_batches_sparse( list_of_ids, dict_of_paths, uri, smallSize = 100, largeSize = 1500 ):
@@ -197,14 +215,22 @@ def create_batches_sparse( list_of_ids, dict_of_paths, uri, smallSize = 100, lar
     return rst
 
 
+def combine_sparse_martix( uri_sm_1, uri_sm_2, destination_path ):
+    print( '[combine_sparse_martix]: merging "{}" and "{}" and saving it to "{}"'.format( uri_sm_1, uri_sm_2, destination_path ) )
+    # from hail.experimental.vcf_combiner import combine_gvcfs
+    # gvcf_store_1 = hl.read_matrix_table(gvcf_store_1_path_chrom)
+    # gvcf_store_2 = hl.read_matrix_table(gvcf_store_2_path_chrom)
+    # comb = combine_gvcfs( [ gvcf_store_1 ] + [gvcf_store_2] )
+    # comb.write(destination_path, overwrite = True )
 
-def combine_two_dataset(gvcf_store_1_path_chrom, gvcf_store_2_path_chrom, destination_path):
-    print("[combine_two_dataset]: merging " + gvcf_store_1_path_chrom + " with " + gvcf_store_2_path_chrom + " ending at " + destination_path)
-    from hail.experimental.vcf_combiner import combine_gvcfs
-    gvcf_store_1 = hl.read_matrix_table(gvcf_store_1_path_chrom)
-    gvcf_store_2 = hl.read_matrix_table(gvcf_store_2_path_chrom)
-    comb = combine_gvcfs( [ gvcf_store_1 ] + [gvcf_store_2] )
-    comb.write(destination_path, overwrite = True )
+
+# def combine_two_dataset(gvcf_store_1_path_chrom, gvcf_store_2_path_chrom, destination_path):
+#     print("[combine_two_dataset]: merging " + gvcf_store_1_path_chrom + " with " + gvcf_store_2_path_chrom + " ending at " + destination_path)
+#     from hail.experimental.vcf_combiner import combine_gvcfs
+#     gvcf_store_1 = hl.read_matrix_table(gvcf_store_1_path_chrom)
+#     gvcf_store_2 = hl.read_matrix_table(gvcf_store_2_path_chrom)
+#     comb = combine_gvcfs( [ gvcf_store_1 ] + [gvcf_store_2] )
+#     comb.write(destination_path, overwrite = True )
 
 def save_table_log( sc, sq, files, path ):
     rdd = sc.parallelize( files )

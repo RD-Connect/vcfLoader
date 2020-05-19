@@ -170,8 +170,8 @@ def createSparseMatrix( group, url_project, host_project, token, prefix_hdfs, ch
         pass
 
     uris = [ b[ 'uri' ] for b in batches ]
-    if not( gvcf_store_path is None and new_gvcf_store_path == '' ):
-        uris = [ 'gvcf_store_path' ] + uris
+    if not( gvcf_store_path is None and gvcf_store_path == '' ):
+        uris = [ gvcf_store_path ] + uris
 
     print( 'uris:', uris )
     

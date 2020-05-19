@@ -109,42 +109,49 @@ def createSparseMatrix( group, url_project, host_project, token, prefix_hdfs, ch
 
     # Get all the experiments that have to processed from data-management
     experiments_in_group = getExperimentByGroup( group, url_project, host_project, token, prefix_hdfs, chrom, max_items_batch, is_playground )
+    print('experiments_in_group')
+    print('\t', experiments_in_group[ : 2 ])
     experiment_status = getExperimentStatus( group, url_project, host_project, token, is_playground )
+    print('experiment_status')
+    print('\t', experiment_status[ : 2 ])
     experiments_to_be_loaded = getExperimentsToProcess( experiment_status, experiments_in_group, check_hdfs = False )
+    print('experiments_to_be_loaded')
+    print('\t', experiments_to_be_loaded[ : 2 ])
 
-    # if is_playground:
-    #     files_to_be_loaded = [ buildPathPlayground( prefix_hdfs, group, x[ 'RD_Connect_ID_Experiment' ], chrom ) for x in experiments_to_be_loaded ]
-    # else:
-    #     files_to_be_loaded = [ buildPath( prefix_hdfs, group, x[ 'RD_Connect_ID_Experiment' ], chrom ) for x in experiments_to_be_loaded ]
+    # # if is_playground:
+    # #     files_to_be_loaded = [ buildPathPlayground( prefix_hdfs, group, x[ 'RD_Connect_ID_Experiment' ], chrom ) for x in experiments_to_be_loaded ]
+    # # else:
+    # #     files_to_be_loaded = [ buildPath( prefix_hdfs, group, x[ 'RD_Connect_ID_Experiment' ], chrom ) for x in experiments_to_be_loaded ]
    
-    # Having the multiple IDs (RD-Connect ID and PhenoTIPS/PhenoStore ID) we can create the path to the gVCF
-    files_to_be_loaded = create_files_list(experiments_in_group, str(chrom), "rdcon_1488_670")
+    # # Having the multiple IDs (RD-Connect ID and PhenoTIPS/PhenoStore ID) we can create the path to the gVCF
+    # experiments_in_group = [ x for x in experiments_in_group if x[ 'elastic_dataset' ] ==  'rdcon_1488_670' ]
+    # files_to_be_loaded = create_files_list(experiments_in_group, str(chrom), "rdcon_1488_670")
     
-    ## Logging
-    lgr.debug( 'Length "experiments_in_group": {}'.format( len( experiments_in_group ) ) )
-    if len( experiments_in_group ) > 0:
-        lgr.debug( '    {} -- {}'.format( experiments_in_group[ 0 ], experiments_in_group[ len( experiments_in_group ) - 1 ] ) )
-    lgr.debug( 'Length "experiment_status": {}'.format( len( experiment_status ) ) )
-    if len( experiment_status ) > 0:
-        lgr.debug( '    {} -- {}'.format( experiment_status[ 0 ], experiment_status[ len( experiment_status ) - 1 ] ) )
-    lgr.debug( 'Length "experiments_to_be_loaded": {}'.format( len( experiments_to_be_loaded ) ) )
-    if len( experiments_to_be_loaded ) > 0:
-        lgr.debug( '    {} -- {}'.format( experiments_to_be_loaded[ 0 ], experiments_to_be_loaded[ len( experiments_to_be_loaded ) - 1 ] ) )
-    lgr.debug( 'Length "files_to_be_loaded": {}'.format( len( files_to_be_loaded.keys() ) ) )
-    ## /Logging
+    # ## Logging
+    # # lgr.debug( 'Length "experiments_in_group": {}'.format( len( experiments_in_group ) ) )
+    # # if len( experiments_in_group ) > 0:
+    # #     lgr.debug( '    {} -- {}'.format( experiments_in_group[ 0 ], experiments_in_group[ len( experiments_in_group ) - 1 ] ) )
+    # # lgr.debug( 'Length "experiment_status": {}'.format( len( experiment_status ) ) )
+    # # if len( experiment_status ) > 0:
+    # #     lgr.debug( '    {} -- {}'.format( experiment_status[ 0 ], experiment_status[ len( experiment_status ) - 1 ] ) )
+    # # lgr.debug( 'Length "experiments_to_be_loaded": {}'.format( len( experiments_to_be_loaded ) ) )
+    # # if len( experiments_to_be_loaded ) > 0:
+    # #     lgr.debug( '    {} -- {}'.format( experiments_to_be_loaded[ 0 ], experiments_to_be_loaded[ len( experiments_to_be_loaded ) - 1 ] ) )
+    # # lgr.debug( 'Length "files_to_be_loaded": {}'.format( len( files_to_be_loaded.keys() ) ) )
+    # ## /Logging
 
 
-    # full_ids_to_be_loaded = [ x for x in experiments_in_group if x[ 'RD_Connect_ID_Experiment' ] in experiments_to_be_loaded ]
-    # lgr.debug( 'Length "full_ids_to_be_loaded": {}'.format( len( full_ids_to_be_loaded ) ) )
-    # if len( full_ids_to_be_loaded ) > 0:
-    #     lgr.debug( '    {} -- {}'.format( full_ids_to_be_loaded[ 0 ], full_ids_to_be_loaded[ len( full_ids_to_be_loaded ) - 1] ) )
-    # else:
-    #     raise Exception( 'No experiment will be loaded and included in sparse matrix' )
+    # # full_ids_to_be_loaded = [ x for x in experiments_in_group if x[ 'RD_Connect_ID_Experiment' ] in experiments_to_be_loaded ]
+    # # lgr.debug( 'Length "full_ids_to_be_loaded": {}'.format( len( full_ids_to_be_loaded ) ) )
+    # # if len( full_ids_to_be_loaded ) > 0:
+    # #     lgr.debug( '    {} -- {}'.format( full_ids_to_be_loaded[ 0 ], full_ids_to_be_loaded[ len( full_ids_to_be_loaded ) - 1] ) )
+    # # else:
+    # #     raise Exception( 'No experiment will be loaded and included in sparse matrix' )
 
 
-    x = create_batches_sparse(experiments_to_be_loaded, experiments_to_be_loaded)
-    print( " 1 --> ", len( x ) )
-    print( " 2 --> ", len( x[ 0 ] ) )
+    # x = create_batches_sparse(experiments_to_be_loaded, experiments_to_be_loaded)
+    # print( " 1 --> ", len( x ) )
+    # print( " 2 --> ", len( x[ 0 ] ) )
 
 def create_batches_sparse(list_of_ids, list_of_paths, smallSize = 100, largeSize = 1500):
     current = 0

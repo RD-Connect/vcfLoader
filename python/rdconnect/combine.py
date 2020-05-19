@@ -193,31 +193,31 @@ def createSparseMatrix( group, url_project, host_project, token, prefix_hdfs, ch
 def create_batches_sparse( list_of_ids, dict_of_paths, uri, smallSize = 100, largeSize = 1500 ):
     rst = []
 
-    100batch = []
-    1500batch = []
+    smallBatch = []
+    largeBatch = []
 
     for idx, itm in enumerate( list_of_ids ):   
-        if len( 100batch ) >= smallSize:
-            1500batch.append( { 'uri': uri, 'batch': 100batch } )
+        if len( smallBatch ) >= smallSize:
+            largeBatch.append( { 'uri': uri, 'batch': smallBatch } )
             cnt += smallSize
-            100batch = []
+            smallBatch = []
             uri = utils.version_bump( uri, 'iteration' )
             if cnt + smallSize >= largeSize:
                 uri = utils.version_bump( uri, 'subversion' )
 
         if cnt >= largeSize:
-            rst.append( { 'uri': uri, 'batches': 1500batch } )
-            1500batch = [ ]
+            rst.append( { 'uri': uri, 'batches': largeBatch } )
+            largeBatch = [ ]
             cnt = 0
             
-        100batch.append( { 'RD_Connect_ID_Experiment': itm[ 'RD_Connect_ID_Experiment' ],
+        smallBatch.append( { 'RD_Connect_ID_Experiment': itm[ 'RD_Connect_ID_Experiment' ],
             'Phenotips_ID': itm[ 'Phenotips_ID' ],
             'File': dict_of_paths[ itm[ 'RD_Connect_ID_Experiment' ] ]
         } )
 
-    if len( 100batch ) != 0:
+    if len( smallBatch ) != 0:
         uri = utils.version_bump( uri_old, 'subversion' )
-        rst.append( { 'uri': uri, 'batches': [ { 'uri': uri, 'batch': 100batch } ] } )
+        rst.append( { 'uri': uri, 'batches': [ { 'uri': uri, 'batch': smallBatch } ] } )
     return rst
 
 def create_superbatches_sparse( list_of_uris ):

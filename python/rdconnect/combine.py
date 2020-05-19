@@ -215,7 +215,7 @@ def create_superbatches_sparse( list_of_uris ):
     first_uri = list_of_uris.pop( 0 )
     dst = utils.update_version( first_uri, revision = False )
     for uri in list_of_uris:
-        rst.push( { 'in_1': first_uri, 'in_2': uri, 'out': dst })
+        rst.append( { 'in_1': first_uri, 'in_2': uri, 'out': dst })
         first_uri = dst
         dst = utils.update_version( dst, revision = True )
     return rst

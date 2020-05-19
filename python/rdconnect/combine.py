@@ -119,7 +119,12 @@ def createSparseMatrix( group, url_project, host_project, token, prefix_hdfs, ch
     lgr.debug( 'Length "experiments_to_be_loaded": {}'.format( len( experiments_to_be_loaded ) ) )
     if len( experiments_to_be_loaded ) > 0:
         lgr.debug( '    {} -- {}'.format( experiments_to_be_loaded[ 0 ], experiments_to_be_loaded[ len( experiments_to_be_loaded ) - 1] ) )
-    ###experiments_to_be_loaded = experiments_to_be_loaded[7501:] # to be removed urgently
+    
+    lgr.debug( 'Length "files_to_be_loaded": {}'.format( len( files_to_be_loaded ) ) )
+    if len( files_to_be_loaded ) > 0:
+        lgr.debug( '    {} -- {}'.format( files_to_be_loaded[ 0 ], files_to_be_loaded[ len( files_to_be_loaded ) - 1] ) )
+
+
 
     full_ids_to_be_loaded = [ x for x in experiments_in_group if x[ 'RD_Connect_ID_Experiment' ] in experiments_to_be_loaded ]
     lgr.debug( 'Length "full_ids_to_be_loaded": {}'.format( len( full_ids_to_be_loaded ) ) )
@@ -128,12 +133,8 @@ def createSparseMatrix( group, url_project, host_project, token, prefix_hdfs, ch
     else:
         raise Exception( 'No experiment will be loaded and included in sparse matrix' )
 
-    # Format data
-    experiments_and_families = getExperimentsByFamily( full_ids_to_be_loaded, url_project, gpap_id, gpap_token, sort_output = False )
 
-    lgr.debug( 'Length "experiments_and_families": {}'.format( len( experiments_and_families ) ) )
-    if len( experiments_and_families ) > 0:
-        lgr.debug( '    {} -- {}'.format( experiments_and_families[ 0 ], experiments_and_families[ len( experiments_and_families ) - 1] ) )
+    #create_batches_sparse(full_ids_to_be_loaded, )
 
 
 

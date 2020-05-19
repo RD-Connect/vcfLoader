@@ -106,7 +106,7 @@ def create_files_list(experiments, chrom, elastic_dataset):
 def createSparseMatrix( group, url_project, host_project, token, prefix_hdfs, chrom, max_items_batch, partitions_chromosome, gvcf_store_path, new_gvcf_store_path, gpap_id, gpap_token, is_playground ):
     """Iterates to create the sparse matrix."""
     lgr = create_logger( 'createSparseMatrix', '' )
-    if new_gvcf_store_path is None or new_gvcf_store_path = '':
+    if new_gvcf_store_path is None or new_gvcf_store_path == '':
         raise Exception('To properly run "createSparseMatrix" you have to provide the argument "new_gvcf_store_path".')
 
     # Get all the experiments that have to processed from data-management

@@ -171,15 +171,19 @@ def createSparseMatrix( group, url_project, host_project, token, prefix_hdfs, ch
     # The argument "new_gvcf_store_path" contains the path to the new sm that will be created from the blocks of 100 experiments and saved as 1k5
     # The argument "gvcf_store_path" will contain the last sm matrix that can be of any size and that will accumulate the old plus the new experiments
 
-    batches = create_batches_sparse( experiments_in_group, files_to_be_loaded, new_gvcf_store_path, smallSize = sz_small_batch, largeSize = sz_large_batch )
+    list_of_batches = create_batches_sparse( experiments_in_group, files_to_be_loaded, new_gvcf_store_path, smallSize = sz_small_batch, largeSize = sz_large_batch )
     print( "-->", [ x['uri'] for x in batches ] )
+    print( "------>", [ [ y['uri'] for y in x['batch'] ] for x in batches ] )
 
-    accum = None
-    for batch in batches:
+    print( "*" * 25 )
+    print( batches )
+
+    for idx, batch in enumerate( list_of_batches ):
+        print(' > Processing large batch {}/{}'.format(idx, len( list_of_batches ) ) )
         # load each of the small batches of 100 experiments
-        # write the matrix of 1k5 experiments
-        loadGvcf( hl, batch[ 'batch' ], batch[ 'uri' ], accum, chrm, partitions_chromosome )
-        accum = batch[ 'uri' ]
+        for idx, pack in enumerate( batch[ 'batches' ] ):
+            print('     > Loading pack of {} gVCF #{}'.format( len( pack[ 'batch' ] ), idx ) )
+            loadGvcf( hl, pack[ 'batch' ], pack[ 'uri' ], accum, chrm, partitions_chromosome )
 
 
     uris = [ b[ 'uri' ] for b in batches ]

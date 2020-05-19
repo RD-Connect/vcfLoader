@@ -126,10 +126,10 @@ def createSparseMatrix( group, url_project, host_project, token, prefix_hdfs, ch
     #     files_to_be_loaded = [ buildPath( prefix_hdfs, group, x[ 'RD_Connect_ID_Experiment' ], chrom ) for x in experiments_to_be_loaded ]
    
     # Having the multiple IDs (RD-Connect ID and PhenoTIPS/PhenoStore ID) we can create the path to the gVCF
-    #experiments_in_group = [ x for x in experiments_in_group if x[ 'elastic_dataset' ] ==  'rdcon_1488_670' ]
     
 
     ## TO REMOVE - testing purposes
+    experiments_in_group = [ x for x in experiments_in_group if x[ 'elastic_dataset' ] ==  'rdcon_1488_670' ]
     experiments_in_group = experiments_in_group[ 0:15 ]
     sz_small_batch = 5
     sz_large_batch = 10

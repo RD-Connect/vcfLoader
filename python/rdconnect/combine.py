@@ -172,7 +172,7 @@ def createSparseMatrix( group, url_project, host_project, token, prefix_hdfs, ch
     # The argument "gvcf_store_path" will contain the last sm matrix that can be of any size and that will accumulate the old plus the new experiments
 
     batches = create_batches_sparse( experiments_in_group, files_to_be_loaded, new_gvcf_store_path, smallSize = sz_small_batch, largeSize = sz_large_batch )
-    print( "-->", batches )
+    print( "-->", [ x['uri'] for x in batches ] )
    
 # [
 #     {'uri': 'hdfs://rdhdfs1:27000/test/rdconnect-ES6/sparseMatrix/1737-9k/0.1.2', 
@@ -239,28 +239,28 @@ def create_batches_sparse( list_of_ids, dict_of_paths, uri, smallSize = 100, lar
             cnt += smallSize
             uri_old = uri
             if cnt >= largeSize:
-                uri = utils.update_version( uri, 'subversion' )
+                uri = utils.version_bump( uri, 'iteration' )
                 cnt = 0
             else:
-                uri = utils.update_version( uri, 'revision' )
+                uri = utils.version_bump( uri, 'revision' )
             collect = []
         collect.append( { 'RD_Connect_ID_Experiment': itm[ 'RD_Connect_ID_Experiment' ],
             'Phenotips_ID': itm[ 'Phenotips_ID' ],
             'File': dict_of_paths[ itm[ 'RD_Connect_ID_Experiment' ] ]
         } )
     if len( collect ) != 0:
-        uri = utils.update_version( uri_old, 'subversion' )
+        uri = utils.version_bump( uri_old, 'subversion' )
         rst.append( { 'uri': uri, 'batches': collect } )
     return rst
 
 def create_superbatches_sparse( list_of_uris ):
     rst = []
     first_uri = list_of_uris.pop( 0 )
-    dst = utils.update_version( first_uri, 'version' )
+    dst = utils.version_bump( first_uri, 'version' )
     for uri in list_of_uris:
         rst.append( { 'in_1': first_uri, 'in_2': uri, 'out': dst })
         first_uri = dst
-        dst = utils.update_version( dst, 'subversion' )
+        dst = utils.version_bump( dst, 'revision' )
     return rst
 
 

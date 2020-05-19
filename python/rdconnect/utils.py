@@ -17,19 +17,32 @@ def oneFile(chrom):
         return ""
     else:
         return chrom
+def update_version(url):
+    splitted=url.split("/")
+    old_version = splitted[len(splitted)-1]
+    ver, rev = str(old_version).split('.')
+    new_version=ver + '.' + str(int(rev)+1)
+    return url.replace(old_version,new_version)
 
-def update_version( uri, increment = 'version' ):
-    increment = { 'version': 0, 'subversion': 1, 'revision': 2 }[ increment.lower() ]
+
+def version_bump( uri, increment = 'version' ):
+    pos = { 'version': 0, 'revision': 1, 'iteration': 2 }[ increment.lower() ]
 
     splitted = uri.split('/')
     old_version = splitted[ len( splitted ) - 1 ]
     pack = str( old_version ).split( '.' )
-    pack[ increment ] = str( int( pack[ increment ] ) + 1 )
+    pack[ pos ] = str( int( pack[ pos ] ) + 1 )
+
+    if increment.lower() == 'version':
+        pack[ 1 ] = 0
+
+    if increment.lower() in ('version', 'revision'):
+        pack[ 2 ] = 0
+
     new_version = '.'.join( pack )
     
     return uri.replace( old_version, new_version )
-
-
+    
 def buildFileName(name,chrom):
     return name.replace("chromosome",chrom)
 

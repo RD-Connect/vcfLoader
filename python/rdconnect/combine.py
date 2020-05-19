@@ -128,7 +128,7 @@ def createSparseMatrix( group, url_project, host_project, token, prefix_hdfs, ch
     files_to_be_loaded = create_files_list(experiments_in_group, str(chrom), "rdcon_1488_670")
 
     print('files_to_be_loaded', len( files_to_be_loaded.keys() ))
-    print('\t', files_to_be_loaded.keys()[ : 2 ])
+    print('\t', list( files_to_be_loaded.keys() )[ : 2 ])
 
     print('experiments_in_group (2)', len( experiments_in_group ))
     print('\t', experiments_in_group[ : 2 ])

@@ -157,7 +157,7 @@ def createSparseMatrix( group, url_project, host_project, token, prefix_hdfs, ch
     x = create_batches_sparse(experiments_in_group, files_to_be_loaded)
     print( " 1 --> ", len( x ) )
     print( " 2 --> ", [ len( y ) for y in x ] )
-    print( " 3 --> ", [ len( y ) for y in x[ 0 ] ] )
+    print( " 3 --> ", [ len( y ) for y in x[ 5 ] ] )
 
 def create_batches_sparse(list_of_ids, dict_of_paths, smallSize = 100, largeSize = 1500):
     cntLarge = 0

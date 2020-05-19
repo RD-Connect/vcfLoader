@@ -191,6 +191,7 @@ def createSparseMatrix( group, url_project, host_project, token, prefix_hdfs, ch
         combine_sparse_martix( pack[ 'in_1' ], pack[ 'in_2' ], pack[ 'out' ] )
 
 def create_batches_sparse( list_of_ids, dict_of_paths, uri, smallSize = 100, largeSize = 1500 ):
+    cnt = 0
     rst = []
 
     smallBatch = []

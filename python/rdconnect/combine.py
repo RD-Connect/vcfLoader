@@ -173,44 +173,6 @@ def createSparseMatrix( group, url_project, host_project, token, prefix_hdfs, ch
 
     batches = create_batches_sparse( experiments_in_group, files_to_be_loaded, new_gvcf_store_path, smallSize = sz_small_batch, largeSize = sz_large_batch )
     print( "-->", [ x['uri'] for x in batches ] )
-   
-# [
-#     {'uri': 'hdfs://rdhdfs1:27000/test/rdconnect-ES6/sparseMatrix/1737-9k/0.1.2', 
-#         'batches': [
-#             {'uri': 'hdfs://rdhdfs1:27000/test/rdconnect-ES6/sparseMatrix/1737-9k/0.1.0', 
-#                 'batch': [
-#                     {'RD_Connect_ID_Experiment': 'E999782', 'Phenotips_ID': 'P0009447', 'File': 'hdfs://rdhdfs1:27000/test/rdconnect/gVCF/cuni-macek/E999782/E999782.2.g.vcf.bgz'}, 
-#                     {'RD_Connect_ID_Experiment': 'E999765', 'Phenotips_ID': 'P0013526', 'File': 'hdfs://rdhdfs1:27000/test/rdconnect/gVCF/rumc-vissers/E999765/E999765.2.g.vcf.bgz'}, 
-#                     {'RD_Connect_ID_Experiment': 'E999618', 'Phenotips_ID': 'P0003070', 'File': 'hdfs://rdhdfs1:27000/test/rdconnect/gVCF/ucl-hanna/E999618/E999618.2.g.vcf.bgz'}, 
-#                     {'RD_Connect_ID_Experiment': 'E999513', 'Phenotips_ID': 'P0004410', 'File': 'hdfs://rdhdfs1:27000/test/rdconnect/gVCF/iier-posada/E999513/E999513.2.g.vcf.bgz'}, 
-#                     {'RD_Connect_ID_Experiment': 'E999327', 'Phenotips_ID': 'P0012327', 'File': 'hdfs://rdhdfs1:27000/test/rdconnect/gVCF/aous-renieri/E999327/E999327.2.g.vcf.bgz'}
-#                 ]
-#             }, 
-#             {'uri': 'hdfs://rdhdfs1:27000/test/rdconnect-ES6/sparseMatrix/1737-9k/0.1.1', 
-#                 'batch': [
-#                         {'RD_Connect_ID_Experiment': 'E999162', 'Phenotips_ID': 'P0010912', 'File': 'hdfs://rdhdfs1:27000/test/rdconnect/gVCF/ucl-hanna/E999162/E999162.2.g.vcf.bgz'}, 
-#                         {'RD_Connect_ID_Experiment': 'E999041', 'Phenotips_ID': 'P0007145', 'File': 'hdfs://rdhdfs1:27000/test/rdconnect/gVCF/chud-faivre/E999041/E999041.2.g.vcf.bgz'}, 
-#                         {'RD_Connect_ID_Experiment': 'E999006', 'Phenotips_ID': 'P0000957', 'File': 'hdfs://rdhdfs1:27000/test/rdconnect/gVCF/vib-timmerman/E999006/E999006.2.g.vcf.bgz'}, 
-#                         {'RD_Connect_ID_Experiment': 'E998348', 'Phenotips_ID': 'P0010944', 'File': 'hdfs://rdhdfs1:27000/test/rdconnect/gVCF/ucl-hanna/E998348/E998348.2.g.vcf.bgz'}, 
-#                         {'RD_Connect_ID_Experiment': 'E998255', 'Phenotips_ID': 'P0012726', 'File': 'hdfs://rdhdfs1:27000/test/rdconnect/gVCF/rumc-vissers/E998255/E998255.2.g.vcf.bgz'}
-#                     ]
-#             }
-#         ]
-#     }, 
-#     {'uri': 'hdfs://rdhdfs1:27000/test/rdconnect-ES6/sparseMatrix/1737-9k/0.2.2', 
-#         'batches': [
-#             [
-#                 {'RD_Connect_ID_Experiment': 'E998239', 'Phenotips_ID': 'P0004351', 'File': 'hdfs://rdhdfs1:27000/test/rdconnect/gVCF/cheo-lochmuller/E998239/E998239.2.g.vcf.bgz'}, 
-#                 {'RD_Connect_ID_Experiment': 'E998171', 'Phenotips_ID': 'P0009113', 'File': 'hdfs://rdhdfs1:27000/test/rdconnect/gVCF/ukb-aretz/E998171/E998171.2.g.vcf.bgz'}, 
-#                 {'RD_Connect_ID_Experiment': 'E998109', 'Phenotips_ID': 'P0004130', 'File': 'hdfs://rdhdfs1:27000/test/rdconnect/gVCF/ucam-horvath/E998109/E998109.2.g.vcf.bgz'}, 
-#                 {'RD_Connect_ID_Experiment': 'E997932', 'Phenotips_ID': 'P0010362', 'File': 'hdfs://rdhdfs1:27000/test/rdconnect/gVCF/ucl-hanna/E997932/E997932.2.g.vcf.bgz'}, 
-#                 {'RD_Connect_ID_Experiment': 'E997832', 'Phenotips_ID': 'P0013722', 'File': 'hdfs://rdhdfs1:27000/test/rdconnect/gVCF/rumc-vissers/E997832/E997832.2.g.vcf.bgz'}
-#             ]
-#         ]
-#     }
-# ]
-
-
 
     accum = None
     for batch in batches:
@@ -229,28 +191,33 @@ def createSparseMatrix( group, url_project, host_project, token, prefix_hdfs, ch
         combine_sparse_martix( pack[ 'in_1' ], pack[ 'in_2' ], pack[ 'out' ] )
 
 def create_batches_sparse( list_of_ids, dict_of_paths, uri, smallSize = 100, largeSize = 1500 ):
-    cnt = 0
     rst = []
-    collect = []
-    uri_old = uri
-    for idx, itm in enumerate( list_of_ids ):
-        if len( collect ) >= smallSize:
-            rst.append( { 'uri': uri, 'batch': collect } )
+
+    100batch = []
+    1500batch = []
+
+    for idx, itm in enumerate( list_of_ids ):   
+        if len( 100batch ) >= smallSize:
+            1500batch.append( { 'uri': uri, 'batch': 100batch } )
             cnt += smallSize
-            uri_old = uri
-            if cnt >= largeSize:
-                uri = utils.version_bump( uri, 'iteration' )
-                cnt = 0
-            else:
-                uri = utils.version_bump( uri, 'revision' )
-            collect = []
-        collect.append( { 'RD_Connect_ID_Experiment': itm[ 'RD_Connect_ID_Experiment' ],
+            100batch = []
+            uri = utils.version_bump( uri, 'iteration' )
+            if cnt + smallSize >= largeSize:
+                uri = utils.version_bump( uri, 'subversion' )
+
+        if cnt >= largeSize:
+            rst.append( { 'uri': uri, 'batches': 1500batch } )
+            1500batch = [ ]
+            cnt = 0
+            
+        100batch.append( { 'RD_Connect_ID_Experiment': itm[ 'RD_Connect_ID_Experiment' ],
             'Phenotips_ID': itm[ 'Phenotips_ID' ],
             'File': dict_of_paths[ itm[ 'RD_Connect_ID_Experiment' ] ]
         } )
-    if len( collect ) != 0:
+
+    if len( 100batch ) != 0:
         uri = utils.version_bump( uri_old, 'subversion' )
-        rst.append( { 'uri': uri, 'batches': collect } )
+        rst.append( { 'uri': uri, 'batches': [ { 'uri': uri, 'batch': 100batch } ] } )
     return rst
 
 def create_superbatches_sparse( list_of_uris ):

@@ -34,10 +34,10 @@ def version_bump( uri, increment = 'version' ):
     pack[ pos ] = str( int( pack[ pos ] ) + 1 )
 
     if increment.lower() == 'version':
-        pack[ 1 ] = 0
+        pack[ 1 ] = "0"
 
     if increment.lower() in ('version', 'revision'):
-        pack[ 2 ] = 0
+        pack[ 2 ] = "0"
 
     new_version = '.'.join( pack )
     

@@ -179,6 +179,7 @@ def createSparseMatrix( group, url_project, host_project, token, prefix_hdfs, ch
         # load each of the small batches of 100 experiments
         # write the matrix of 1k5 experiments
         loadGvcf( hl, batch[ 'batch' ], batch[ 'uri' ], accum, chrm, partitions_chromosome )
+        accum = batch[ 'uri' ]
 
 
     uris = [ b[ 'uri' ] for b in batches ]

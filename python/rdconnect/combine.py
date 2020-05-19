@@ -155,7 +155,7 @@ def createSparseMatrix( group, url_project, host_project, token, prefix_hdfs, ch
     # #     raise Exception( 'No experiment will be loaded and included in sparse matrix' )
 
 
-    x = create_batches_sparse(experiments_to_be_loaded, experiments_to_be_loaded)
+    x = create_batches_sparse(experiments_to_be_loaded, files_to_be_loaded)
     print( " 1 --> ", len( x ) )
     print( " 2 --> ", len( x[ 0 ] ) )
 
@@ -172,8 +172,6 @@ def create_batches_sparse(list_of_ids, dict_of_paths, smallSize = 100, largeSize
         if cntLarge >= largeSize:
             rst.append( largeBarch )
             largeBarch = []
-        print( " -> ", itm )
-        print( " ---> ", list( dict_of_paths.keys() ))
         smallBatch.append( { 'RD_Connect_ID_Experiment': itm[ 'RD_Connect_ID_Experiment' ],
             'Phenotips_ID': itm[ 'Phenotips_ID' ],
             'File': dict_of_paths[ itm[ 'RD_Connect_ID_Experiment' ] ]

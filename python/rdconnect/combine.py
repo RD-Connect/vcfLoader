@@ -154,12 +154,10 @@ def createSparseMatrix( group, url_project, host_project, token, prefix_hdfs, ch
     # # else:
     # #     raise Exception( 'No experiment will be loaded and included in sparse matrix' )
 
-    x = create_batches_sparse(experiments_in_group, files_to_be_loaded)
-    print( " 1 --> ", len( x ) )
-    print( " 2 --> ", [ len( y ) for y in x ] )
-    print( " 3 --> ", [ len( y ) for y in x[ 6 ] ] )
+    batches = create_batches_sparse( experiments_in_group, files_to_be_loaded, gvcf_store_path )
+    print( [ x['uri'] for x in batches ])
 
-def create_batches_sparse(list_of_ids, dict_of_paths, smallSize = 100, largeSize = 1500):
+def create_batches_sparse( list_of_ids, dict_of_paths, uri, smallSize = 100, largeSize = 1500 ):
     cntLarge = 0
     rst = []
     largeBarch = []
@@ -168,9 +166,10 @@ def create_batches_sparse(list_of_ids, dict_of_paths, smallSize = 100, largeSize
     for idx, itm in enumerate( list_of_ids ):
         try:
             if len( smallBatch ) >= smallSize:
-                largeBarch.append( smallBatch )
+                largeBarch.append( { 'uri': uri, 'batches': smallBatch } )
                 cntLarge += smallSize
                 smallBatch = []
+                uri = utils.update_version( uri )
             if cntLarge >= largeSize:
                 rst.append( largeBarch )
                 largeBarch = []

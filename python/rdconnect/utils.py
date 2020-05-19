@@ -17,13 +17,18 @@ def oneFile(chrom):
         return ""
     else:
         return chrom
-def update_version(url):
-    splitted=url.split("/")
-    old_version = splitted[len(splitted)-1]
-    ver, rev = str(old_version).split('.')
-    new_version=ver + '.' + str(int(rev)+1)
-    return url.replace(old_version,new_version)
-    
+
+def update_version( uri, revision = True ):
+    splitted = uri.split('/')
+    old_version = splitted[ len( splitted ) - 1 ]
+    ver, rev = str( old_version ).split( '.' )
+    if revision:
+        new_version =  '{}.{}'.format( ver, str( int( rev ) + 1 ) )
+    else:
+        new_version =  '{}.0'.format( str( int( ver ) + 1 ) )
+    return uri.replace( old_version, new_version )
+
+
 def buildFileName(name,chrom):
     return name.replace("chromosome",chrom)
 

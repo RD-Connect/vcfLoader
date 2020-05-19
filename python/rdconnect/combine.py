@@ -172,6 +172,8 @@ def create_batches_sparse(list_of_ids, dict_of_paths, smallSize = 100, largeSize
         if cntLarge >= largeSize:
             rst.append( largeBarch )
             largeBarch = []
+        print( " -> ", itm )
+        print( " ---> ", list( dict_of_paths.keys() ))
         smallBatch.append( { 'RD_Connect_ID_Experiment': itm[ 'RD_Connect_ID_Experiment' ],
             'Phenotips_ID': itm[ 'Phenotips_ID' ],
             'File': dict_of_paths[ itm[ 'RD_Connect_ID_Experiment' ] ]

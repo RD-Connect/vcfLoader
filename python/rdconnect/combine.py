@@ -171,9 +171,9 @@ def create_batches_sparse( list_of_ids, dict_of_paths, uri, smallSize = 100, lar
                 largeBarch.append( smallBatch )
                 cntLarge += smallSize
                 smallBatch = []
-                uri = utils.update_version( uri )
             if cntLarge >= largeSize:
                 rst.append( { 'uri': uri, 'batches': largeBarch } )
+                uri = utils.update_version( uri )
                 largeBarch = []
                 cntLarge = 0
                 print( idx )

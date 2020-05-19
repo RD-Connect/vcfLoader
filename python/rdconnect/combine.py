@@ -130,9 +130,9 @@ def createSparseMatrix( group, url_project, host_project, token, prefix_hdfs, ch
 
     ## TO REMOVE - testing purposes
     experiments_in_group = [ x for x in experiments_in_group if x[ 'elastic_dataset' ] ==  'rdcon_1488_670' ]
-    experiments_in_group = experiments_in_group[ 0:47 ]
-    sz_small_batch = 5
-    sz_large_batch = 15
+    experiments_in_group = experiments_in_group[ 0:29 ]
+    sz_small_batch = 2
+    sz_large_batch = 7
     ## /TO REMOVE
 
 
@@ -180,7 +180,7 @@ def createSparseMatrix( group, url_project, host_project, token, prefix_hdfs, ch
         # load each of the small batches of 100 experiments
         accum = None
         for idx, pack in enumerate( batch[ 'batches' ] ):
-            print('     > Loading pack of {} gVCF #{}'.format( len( pack[ 'batch' ] ), idx ) )
+            print('     > Loading pack #{} of {} gVCF '.format( idx, len( pack[ 'batch' ] ) ) )
             loadGvcf2( hl, pack[ 'batch' ], pack[ 'uri' ], accum, chrom, partitions_chromosome )
             accum = pack[ 'uri' ]
 
@@ -200,6 +200,7 @@ def create_batches_sparse( list_of_ids, dict_of_paths, uri, smallSize = 100, lar
     smallBatch = []
     largeBatch = []
     added = False
+    bumpRev = False
 
     for idx, itm in enumerate( list_of_ids ):   
         if len( smallBatch ) >= smallSize:
@@ -217,8 +218,10 @@ def create_batches_sparse( list_of_ids, dict_of_paths, uri, smallSize = 100, lar
             print( "<->", cnt,  cnt + smallSize, cnt + smallSize >= largeSize, uri )
             if cnt + smallSize >= largeSize:
                 uri = utils.version_bump( uri, 'revision' )
+                bumpRev = True
             else:
                 uri = utils.version_bump( uri, 'iteration' )
+                bumpRev = False
             added = False
             
         smallBatch.append( { 'RD_Connect_ID_Experiment': itm[ 'RD_Connect_ID_Experiment' ],
@@ -227,7 +230,8 @@ def create_batches_sparse( list_of_ids, dict_of_paths, uri, smallSize = 100, lar
         } )
 
     if len( smallBatch ) != 0:
-        #uri = utils.version_bump( uri, 'revision' )
+        if not bumpRev:
+            uri = utils.version_bump( uri, 'revision' )
         rst.append( { 'uri': uri, 'batches': [ { 'uri': uri, 'batch': smallBatch } ] } )
     return rst
 
@@ -252,30 +256,29 @@ def combine_sparse_martix( uri_sm_1, uri_sm_2, destination_path ):
 
 
 def loadGvcf2( hl, experiments, destinationPath, gvcfStorePath, chrom, partitions ):
-    
     print("[loadGvcf] {} --> {}".format( str( len( experiments ) ), destinationPath ) )
-    # def transformFile( mt ):
-    #     return transform_gvcf(mt.annotate_rows(
-    #         info = mt.info.annotate( MQ_DP = hl.null( hl.tint32 ), VarDP = hl.null( hl.tint32 ), QUALapprox = hl.null( hl.tint32 ) )
-    #     ))
-    # def importFiles( files ):
-    #     x = hl.import_vcfs(
-    #         files,
-    #         partitions = interval[ 'interval' ], 
-    #         reference_genome = interval[ 'reference_genome' ], 
-    #         array_elements_required = interval[ 'array_elements_required' ]
-    #     )
-    #     return x
+    def transformFile( mt ):
+        return transform_gvcf(mt.annotate_rows(
+            info = mt.info.annotate( MQ_DP = hl.null( hl.tint32 ), VarDP = hl.null( hl.tint32 ), QUALapprox = hl.null( hl.tint32 ) )
+        ))
+    def importFiles( files ):
+        x = hl.import_vcfs(
+            files,
+            partitions = interval[ 'interval' ], 
+            reference_genome = interval[ 'reference_genome' ], 
+            array_elements_required = interval[ 'array_elements_required' ]
+        )
+        return x
 
-    # interval = getIntervalByChrom( chrom, partitions )
-    # vcfs = [ transformFile( mt ) for mt in importFiles( files ) ]
+    interval = getIntervalByChrom( chrom, partitions )
+    vcfs = [ transformFile( mt ) for mt in importFiles( files ) ]
 
-    # if gvcfStorePath == None:
-    #     comb = combine_gvcfs( vcfs )
-    # else:
-    #     gvcf_store = hl.read_matrix_table( gvcfStorePath )
-    #     comb = combine_gvcfs( [ gvcf_store ] + vcfs )
-    # comb.write( destinationPath, overwrite = True )
+    if gvcfStorePath == None:
+        comb = combine_gvcfs( vcfs )
+    else:
+        gvcf_store = hl.read_matrix_table( gvcfStorePath )
+        comb = combine_gvcfs( [ gvcf_store ] + vcfs )
+    comb.write( destinationPath, overwrite = True )
     
 
 

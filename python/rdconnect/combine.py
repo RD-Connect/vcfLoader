@@ -175,15 +175,14 @@ def createSparseMatrix( group, url_project, host_project, token, prefix_hdfs, ch
     print( "-->", [ x['uri'] for x in list_of_batches ] )
     print( "------>", [ [ y['uri'] for y in x['batches'] ] for x in list_of_batches ] )
 
-    print( "*" * 25 )
-    print( list_of_batches )
-
     for idx, batch in enumerate( list_of_batches ):
         print(' > Processing large batch {}/{}'.format(idx, len( list_of_batches ) ) )
         # load each of the small batches of 100 experiments
+        accum = None
         for idx, pack in enumerate( batch[ 'batches' ] ):
             print('     > Loading pack of {} gVCF #{}'.format( len( pack[ 'batch' ] ), idx ) )
             loadGvcf( hl, pack[ 'batch' ], pack[ 'uri' ], accum, chrm, partitions_chromosome )
+            accum = pack[ 'uri' ]
 
 
     uris = [ b[ 'uri' ] for b in batches ]
@@ -200,20 +199,25 @@ def create_batches_sparse( list_of_ids, dict_of_paths, uri, smallSize = 100, lar
 
     smallBatch = []
     largeBatch = []
+    added = False
 
     for idx, itm in enumerate( list_of_ids ):   
         if len( smallBatch ) >= smallSize:
             largeBatch.append( { 'uri': uri, 'batch': smallBatch } )
             cnt += smallSize
             smallBatch = []
-            uri = utils.version_bump( uri, 'iteration' )
-            if cnt + smallSize >= largeSize:
-                uri = utils.version_bump( uri, 'revision' )
+            added = True
 
         if cnt >= largeSize:
             rst.append( { 'uri': uri, 'batches': largeBatch } )
             largeBatch = [ ]
             cnt = 0
+
+        if added:
+            uri = utils.version_bump( uri, 'iteration' )
+            if cnt + smallSize >= largeSize:
+                uri = utils.version_bump( uri, 'revision' )
+                added = False
             
         smallBatch.append( { 'RD_Connect_ID_Experiment': itm[ 'RD_Connect_ID_Experiment' ],
             'Phenotips_ID': itm[ 'Phenotips_ID' ],

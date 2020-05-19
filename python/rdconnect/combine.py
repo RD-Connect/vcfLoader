@@ -130,9 +130,9 @@ def createSparseMatrix( group, url_project, host_project, token, prefix_hdfs, ch
 
     ## TO REMOVE - testing purposes
     experiments_in_group = [ x for x in experiments_in_group if x[ 'elastic_dataset' ] ==  'rdcon_1488_670' ]
-    experiments_in_group = experiments_in_group[ 0:27 ]
+    experiments_in_group = experiments_in_group[ 0:47 ]
     sz_small_batch = 5
-    sz_large_batch = 10
+    sz_large_batch = 15
     ## /TO REMOVE
 
 
@@ -185,7 +185,7 @@ def createSparseMatrix( group, url_project, host_project, token, prefix_hdfs, ch
             accum = pack[ 'uri' ]
 
 
-    uris = [ b[ 'uri' ] for b in batches ]
+    uris = [ b[ 'uri' ] for b in list_of_batches ]
     if not( gvcf_store_path is None or gvcf_store_path == '' ):
         uris = [ gvcf_store_path ] + uris
 
@@ -214,7 +214,7 @@ def create_batches_sparse( list_of_ids, dict_of_paths, uri, smallSize = 100, lar
             cnt = 0
 
         if added:
-            print( "<->", cnt,  cnt + smallSize, uri )
+            print( "<->", cnt,  cnt + smallSize, cnt + smallSize >= largeSize, uri )
             if cnt + smallSize >= largeSize:
                 uri = utils.version_bump( uri, 'revision' )
             else:
@@ -227,7 +227,7 @@ def create_batches_sparse( list_of_ids, dict_of_paths, uri, smallSize = 100, lar
         } )
 
     if len( smallBatch ) != 0:
-        uri = utils.version_bump( uri, 'revision' )
+        #uri = utils.version_bump( uri, 'revision' )
         rst.append( { 'uri': uri, 'batches': [ { 'uri': uri, 'batch': smallBatch } ] } )
     return rst
 

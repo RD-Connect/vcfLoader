@@ -173,10 +173,14 @@ def createSparseMatrix( group, url_project, host_project, token, prefix_hdfs, ch
     if not( gvcf_store_path is None and new_gvcf_store_path == '' ):
         uris = [ 'gvcf_store_path' ] + uris
 
-    print( 'uris:', uris )
-    print( 'first_uri:', first_uri )
+
     first_uri = uris.pop( 0 )
     dst = utils.update_version( first_uri, revision = False )
+
+    print( 'uris:', uris )
+    print( 'first_uri:', first_uri )
+    print( 'dst:', dst )
+
     for uri in uris:
         # merge the sm of 1k5
         combine_sparse_martix( first_uri, uri )

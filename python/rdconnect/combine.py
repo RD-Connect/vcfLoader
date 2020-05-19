@@ -159,13 +159,12 @@ def createSparseMatrix( group, url_project, host_project, token, prefix_hdfs, ch
     print( " 1 --> ", len( x ) )
     print( " 2 --> ", len( x[ 0 ] ) )
 
-def create_batches_sparse(list_of_ids, list_of_paths, smallSize = 100, largeSize = 1500):
-    current = 0
+def create_batches_sparse(list_of_ids, dict_of_paths, smallSize = 100, largeSize = 1500):
     cntLarge = 0
     rst = []
     largeBarch = []
     smallBatch = []
-    while current < len( list_of_ids ):
+    for itm in list_of_ids:
         if len( smallBatch ) >= smallSize:
             largeBarch.append( smallBatch )
             cntLarge += smallSize
@@ -175,9 +174,8 @@ def create_batches_sparse(list_of_ids, list_of_paths, smallSize = 100, largeSize
             largeBarch = []
         smallBatch.append( { 'RD_Connect_ID_Experiment': list_of_ids[ 0 ][ 'RD_Connect_ID_Experiment' ],
             'Phenotips_ID': list_of_ids[ 0 ][ 'Phenotips_ID' ],
-            'File': list_of_paths[ list_of_ids[ 0 ][ 'RD_Connect_ID_Experiment' ] ]
+            'File': dict_of_paths[ list_of_ids[ 0 ][ 'RD_Connect_ID_Experiment' ] ]
         } )
-        current += 1
     return rst
 
 

@@ -95,8 +95,6 @@ def main(sqlContext, sc, configuration, chrom, nchroms, step, somaticFlag):
         print ("step createSparseMatrix")
         if 'partitions_chromosome' in configuration[ 'combine' ]:
             partitions_chromosome = configuration[ 'combine'][ 'partitions_chromosome' ]
-        if 'max_items_batch' in configuration[ 'combine' ]:
-            max_items_batch = configuration[ 'combine' ][ 'max_items_batch' ]
 
         if 'new_gvcf_store_path' in configuration[ 'combine' ].keys():
             new_gvcf_store_path = configuration[ 'combine' ][ 'new_gvcf_store_path' ]
@@ -118,7 +116,9 @@ def main(sqlContext, sc, configuration, chrom, nchroms, step, somaticFlag):
             gpap_id = configuration[ 'gpap' ][ 'id' ]
             gpap_token = configuration[ 'gpap' ][ 'token' ]
             is_playground = configuration[ 'elasticsearch' ][ 'main_project' ] == 'playground'
-            combine.createSparseMatrix( group, url_project, host_project, token, prefix_hdfs, chrom, max_items_batch, partitions_chromosome, gvcf_store_path, new_gvcf_store_path, gpap_id, gpap_token, is_playground )
+            sz_small_batch = configuration[ 'combine' ][ 'sz_small_batch' ]
+            sz_large_batch = configuration[ 'combine' ][ 'sz_large_batch' ]
+            combine.createSparseMatrix( group, url_project, host_project, token, prefix_hdfs, chrom, sz_small_batch, sz_large_batch, partitions_chromosome, gvcf_store_path, new_gvcf_store_path, gpap_id, gpap_token, is_playground )
 
 
     if ("createDenseMatrix" in step):
@@ -132,7 +132,7 @@ def main(sqlContext, sc, configuration, chrom, nchroms, step, somaticFlag):
         gpap_token = configuration[ 'gpap' ][ 'token' ]
         prefix_hdfs = configuration[ 'combine' ][ 'prefix_hdfs' ]
         if 'max_items_batch' in configuration[ 'combine' ]:
-            max_items_batch = configuration[ 'combine' ][ 'max_items_batch' ]
+            max_items_batch = configuration[ 'combine' ][ 'sz_small_batch' ]
         if 'gvcf_store_path' in configuration[ 'combine' ].keys():
             gvcf_store_path = configuration[ 'combine' ][ 'gvcf_store_path' ]
         else:

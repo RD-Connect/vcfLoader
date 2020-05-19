@@ -5,6 +5,7 @@ import hail as hl
 import os,requests,json
 from hail.experimental.vcf_combiner import *
 from hail.experimental import full_outer_join_mt
+from hail.experimental.vcf_combiner import combine_gvcfs
 from rdconnect import utils
 from rdconnect.annotations import truncateAt
 from datetime import datetime
@@ -145,26 +146,6 @@ def createSparseMatrix( group, url_project, host_project, token, prefix_hdfs, ch
     print('experiments_in_group (2)', len( experiments_in_group ))
     print('\t', experiments_in_group[ : 2 ])
     
-    # ## Logging
-    # # lgr.debug( 'Length "experiments_in_group": {}'.format( len( experiments_in_group ) ) )
-    # # if len( experiments_in_group ) > 0:
-    # #     lgr.debug( '    {} -- {}'.format( experiments_in_group[ 0 ], experiments_in_group[ len( experiments_in_group ) - 1 ] ) )
-    # # lgr.debug( 'Length "experiment_status": {}'.format( len( experiment_status ) ) )
-    # # if len( experiment_status ) > 0:
-    # #     lgr.debug( '    {} -- {}'.format( experiment_status[ 0 ], experiment_status[ len( experiment_status ) - 1 ] ) )
-    # # lgr.debug( 'Length "experiments_to_be_loaded": {}'.format( len( experiments_to_be_loaded ) ) )
-    # # if len( experiments_to_be_loaded ) > 0:
-    # #     lgr.debug( '    {} -- {}'.format( experiments_to_be_loaded[ 0 ], experiments_to_be_loaded[ len( experiments_to_be_loaded ) - 1 ] ) )
-    # # lgr.debug( 'Length "files_to_be_loaded": {}'.format( len( files_to_be_loaded.keys() ) ) )
-    # ## /Logging
-
-
-    # # full_ids_to_be_loaded = [ x for x in experiments_in_group if x[ 'RD_Connect_ID_Experiment' ] in experiments_to_be_loaded ]
-    # # lgr.debug( 'Length "full_ids_to_be_loaded": {}'.format( len( full_ids_to_be_loaded ) ) )
-    # # if len( full_ids_to_be_loaded ) > 0:
-    # #     lgr.debug( '    {} -- {}'.format( full_ids_to_be_loaded[ 0 ], full_ids_to_be_loaded[ len( full_ids_to_be_loaded ) - 1] ) )
-    # # else:
-    # #     raise Exception( 'No experiment will be loaded and included in sparse matrix' )
 
 
 
@@ -172,23 +153,23 @@ def createSparseMatrix( group, url_project, host_project, token, prefix_hdfs, ch
     # The argument "gvcf_store_path" will contain the last sm matrix that can be of any size and that will accumulate the old plus the new experiments
 
     list_of_batches = create_batches_sparse( experiments_in_group, files_to_be_loaded, new_gvcf_store_path, smallSize = sz_small_batch, largeSize = sz_large_batch )
-    print( "-->", [ x['uri'] for x in list_of_batches ] )
-    print( "------>", [ [ y['uri'] for y in x['batches'] ] for x in list_of_batches ] )
 
-    for idx, batch in enumerate( list_of_batches ):
-        print(' > Processing large batch {}/{}'.format(idx, len( list_of_batches ) ) )
-        # load each of the small batches of 100 experiments
-        accum = None
-        for idx, pack in enumerate( batch[ 'batches' ] ):
-            print('     > Loading pack #{} of {} gVCF '.format( idx, len( pack[ 'batch' ] ) ) )
-            loadGvcf2( hl, pack[ 'batch' ], pack[ 'uri' ], accum, chrom, partitions_chromosome )
-            accum = pack[ 'uri' ]
-
+    print('RUNNING STEP1 - CREATION OF CUMMULATIVE MATRICES OF {} EXPERIMENTS INCREMENTING {} EXPERIMENTS AT A TIME'.format( sz_large_batch, sz_small_batch ) )
+    if True:
+        for idx, batch in enumerate( list_of_batches ):
+            print(' > Processing large batch {}/{}'.format(idx, len( list_of_batches ) ) )
+            # load each of the small batches of 100 experiments
+            accum = None
+            for idx, pack in enumerate( batch[ 'batches' ] ):
+                print('     > Loading pack #{} of {} gVCF '.format( idx, len( pack[ 'batch' ] ) ) )
+                loadGvcf2( hl, pack[ 'batch' ], pack[ 'uri' ], accum, chrom, partitions_chromosome )
+                accum = pack[ 'uri' ]
 
     uris = [ b[ 'uri' ] for b in list_of_batches ]
     if not( gvcf_store_path is None or gvcf_store_path == '' ):
         uris = [ gvcf_store_path ] + uris
 
+    print('RUNNING STEP2 - MERGING OF CUMMULATIVE MATRICES' )
     superbatches = create_superbatches_sparse( uris )
     for idx, pack in enumerate( superbatches ):
         combine_sparse_martix( pack[ 'in_1' ], pack[ 'in_2' ], pack[ 'out' ] )
@@ -247,15 +228,14 @@ def create_superbatches_sparse( list_of_uris ):
 
 def combine_sparse_martix( uri_sm_1, uri_sm_2, destination_path ):
     print( '[combine_sparse_martix]: merging "{}" and "{}" and saving it to "{}"'.format( uri_sm_1, uri_sm_2, destination_path ) )
-    # from hail.experimental.vcf_combiner import combine_gvcfs
-    # gvcf_store_1 = hl.read_matrix_table(gvcf_store_1_path_chrom)
-    # gvcf_store_2 = hl.read_matrix_table(gvcf_store_2_path_chrom)
-    # comb = combine_gvcfs( [ gvcf_store_1 ] + [gvcf_store_2] )
-    # comb.write(destination_path, overwrite = True )
+    sm_1 = hl.read_matrix_table( uri_sm_1 )
+    sm_2 = hl.read_matrix_table( uri_sm_2 )
+    comb = combine_gvcfs( [ sm_1 ] + [ sm_2 ] )
+    comb.write( destination_path, overwrite = True )
 
 
 def loadGvcf2( hl, experiments, destinationPath, gvcfStorePath, chrom, partitions ):
-    print("[loadGvcf] {} --> {}".format( str( len( experiments ) ), destinationPath ) )
+    #print("[loadGvcf] {} --> {}".format( str( len( experiments ) ), destinationPath ) )
     def transformFile( mt ):
         return transform_gvcf(mt.annotate_rows(
             info = mt.info.annotate( MQ_DP = hl.null( hl.tint32 ), VarDP = hl.null( hl.tint32 ), QUALapprox = hl.null( hl.tint32 ) )

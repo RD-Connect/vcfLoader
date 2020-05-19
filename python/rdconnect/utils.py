@@ -18,14 +18,15 @@ def oneFile(chrom):
     else:
         return chrom
 
-def update_version( uri, revision = True ):
+def update_version( uri, increment = 'version' ):
+    increment = { 'version': 0, 'subversion': 1, 'revision': 2 }[ increment.lower() ]
+
     splitted = uri.split('/')
     old_version = splitted[ len( splitted ) - 1 ]
-    ver, rev = str( old_version ).split( '.' )
-    if revision:
-        new_version =  '{}.{}'.format( ver, str( int( rev ) + 1 ) )
-    else:
-        new_version =  '{}.0'.format( str( int( ver ) + 1 ) )
+    pack = str( old_version ).split( '.' )
+    pack[ increment ] += 1
+    new_version = '.'.join( increment )
+    
     return uri.replace( old_version, new_version )
 
 

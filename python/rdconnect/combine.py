@@ -93,14 +93,14 @@ def getExperimentsToProcess( experiment_status, experiment_available, check_hdfs
 #     return [ prefix+"/"+x['Owner']+"/"+x['RD_Connect_ID_Experiment']+'/'+x['RD_Connect_ID_Experiment']+'.'+chrom+'.g.vcf.bgz' for x in experiments if x[ 'elastic_dataset' ] == elastic_dataset ]
 
 
-def create_files_list(experiments,chrom,elastic_dataset):
+def create_files_list(experiments, chrom, elastic_dataset):
     """Creates a dictionary using RD-Connect Experiment ID as key and the its file as value."""
-    prefix="hdfs://rdhdfs1:27000/test/rdconnect/gVCF"
-    elastic_dataset="rdcon_1488_670"
+    prefix = 'hdfs://rdhdfs1:27000/test/rdconnect/gVCF'
+    elastic_dataset = "rdcon_1488_670"
     rst = {}
     for x in experiments:
-        if x not in rst.keys() and x[ 'elastic_dataset' ] == elastic_dataset:
-            rst[x] = prefix+"/"+x['Owner']+"/"+x['RD_Connect_ID_Experiment']+'/'+x['RD_Connect_ID_Experiment']+'.'+chrom+'.g.vcf.bgz'
+        if x[ 'RD_Connect_ID_Experiment' ] not in rst.keys() and x[ 'elastic_dataset' ] == elastic_dataset:
+            rst[x] = prefix + '/' + x[ 'Owner' ] + "/" + x[ 'RD_Connect_ID_Experiment' ] + '/' + x[ 'RD_Connect_ID_Experiment' ] + '.' + chrom + '.g.vcf.bgz'
     return rst
 
 def createSparseMatrix( group, url_project, host_project, token, prefix_hdfs, chrom, max_items_batch, partitions_chromosome, gvcf_store_path, new_gvcf_store_path, gpap_id, gpap_token, is_playground ):

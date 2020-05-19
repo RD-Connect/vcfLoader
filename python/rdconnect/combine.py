@@ -173,7 +173,7 @@ def createSparseMatrix( group, url_project, host_project, token, prefix_hdfs, ch
 
     list_of_batches = create_batches_sparse( experiments_in_group, files_to_be_loaded, new_gvcf_store_path, smallSize = sz_small_batch, largeSize = sz_large_batch )
     print( "-->", [ x['uri'] for x in list_of_batches ] )
-    print( "------>", [ [ y['uri'] for y in x['batch'] ] for x in list_of_batches ] )
+    print( "------>", [ [ y['uri'] for y in x['batches'] ] for x in list_of_batches ] )
 
     print( "*" * 25 )
     print( list_of_batches )

@@ -131,111 +131,11 @@ def createSparseMatrix( group, url_project, host_project, token, prefix_hdfs, ch
     # Format data
     experiments_and_families = getExperimentsByFamily( full_ids_to_be_loaded, url_project, gpap_id, gpap_token, sort_output = False )
 
-    # Relocate experiments with no family
-    none_detected = False
-    x = len( list( set( [ x[ 2 ] for x in experiments_and_families ] ) ) )
-    for ii in range( len( experiments_and_families ) ):
-        if experiments_and_families[ ii ][ 2 ] == '---':
-            none_detected = True
-            experiments_and_families[ ii ][ 2 ] = experiments_and_families[ ii ][ 0 ]
-    y = len( list( set( [ x[ 2 ] for x in experiments_and_families ] ) ) )
-    if none_detected:
-        warnings.warn( 'Provided experiment ids got no family assigned. RD-Connect ID used as family ID for those experiments. Original families were of {} while after update are of {}.'.format( x, y ) )
-
-    # Add the path to the file to be loaded
-    def buildPath2( full_list, rid, is_playground ):
-        for ff in full_list:
-            if is_playground:
-                if ff.split( '/' )[ 6 ].split( '.' )[ 0 ] == rid:
-                    return ff
-            else:
-                if ff.split( '/' )[ 7 ] == rid:
-                    return ff
-        return ''
-
-    for ii in range( len( experiments_and_families ) ):
-        experiments_and_families[ ii ].append( buildPath2( files_to_be_loaded, experiments_and_families[ ii ][ 0 ], is_playground ) )
+    lgr.debug( 'Length "experiments_and_families": {}'.format( len( experiments_and_families ) ) )
+    if len( experiments_and_families ) > 0:
+        lgr.debug( '    {} -- {}'.format( experiments_and_families[ 0 ], experiments_and_families[ len( experiments_and_families ) - 1] ) )
 
 
-    experiments_and_families_clean = [ x for x in experiments_and_families if x[ 3 ] != '' ]
-    lgr.debug( 'From {} to {} files once cleaned the "filepath" (experiments_and_families)'.format( len( experiments_and_families ), len( experiments_and_families_clean ) ) )
-    # Create batches of 'size' experiments
-    batches = list( divideChunks( experiments_and_families_clean, 100 ) )
-    lgr.debug( 'Created {} batches from {} files'.format( len( batches ), len( experiments_and_families_clean ) ) )
-
-    # bse_old = gvcf_store_path
-    # bse_new = new_gvcf_store_path
-    
-    # for index, batch in enumerate( batches ):
-    #     print( "experiments_and_families", experiments_and_families )
-    #     if index == 0 and bse_old is None:
-    #         lgr.debug( 'Index {}\n\tCurrent gvcf store is "{}"\n\tNew version gvcf store is "{}"'.format( index, bse_old, bse_new ) )
-    #         new_gvcf_store_path = '{0}/chrom-{1}'.format( bse_new, chrom )
-    #     elif index == 0 and not bse_old is None:
-    #         gvcf_store_path = '{0}/chrom-{1}'.format( bse_old, chrom )
-    #         bse_new = utils.update_version( bse_old )
-    #         new_gvcf_store_path = '{0}/chrom-{1}'.format( bse_new, chrom )
-    #         lgr.debug( 'Index {}\n\tCurrent gvcf store is "{}"\n\tNew version gvcf store is "{}"'.format( index, gvcf_store_path, new_gvcf_store_path ) )
-    #     else:
-    #         bse_old = bse_new
-    #         gvcf_store_path = '{0}/chrom-{1}'.format( bse_new, chrom )
-    #         bse_new = utils.update_version( bse_new )
-    #         new_gvcf_store_path = '{0}/chrom-{1}'.format( bse_new, chrom )
-    #         lgr.debug( 'Index {}\n\tCurrent gvcf store is "{}"\n\tNew version gvcf store is "{}"'.format( index, gvcf_store_path, new_gvcf_store_path ) )
-    #     path_to_exps = [ x[ 3 ] for x in batch ]
-    #     loadGvcf( hl, path_to_exps, chrom, new_gvcf_store_path, gvcf_store_path, partitions_chromosome, lgr )
-
-    bse_old = gvcf_store_path
-    bse_new = new_gvcf_store_path
-    to_be_merged = []
-    for index, batch in enumerate( batches ):
-        if index == 0 and bse_old is None:
-            lgr.debug( 'Index {}\n\tCurrent gvcf store is "{}"\n\tNew version gvcf store is "{}"'.format( index, bse_old, bse_new ) )
-            new_gvcf_store_path = '{0}/chrom-{1}'.format( bse_new, chrom )
-        elif index == 0 and not bse_old is None:
-            gvcf_store_path = '{0}/chrom-{1}'.format( bse_old, chrom )
-            bse_new = utils.update_version( bse_old )
-            new_gvcf_store_path = '{0}/chrom-{1}'.format( bse_new, chrom )
-            lgr.debug( 'Index {}\n\tCurrent gvcf store is "{}"\n\tNew version gvcf store is "{}"'.format( index, gvcf_store_path, new_gvcf_store_path ) )
-        else:
-            bse_old = bse_new
-            gvcf_store_path = '{0}/chrom-{1}'.format( bse_new, chrom )
-            bse_new = utils.update_version( bse_new )
-            new_gvcf_store_path = '{0}/chrom-{1}'.format( bse_new, chrom )
-            lgr.debug( 'Index {}\n\tCurrent gvcf store is "{}"\n\tNew version gvcf store is "{}"'.format( index, gvcf_store_path, new_gvcf_store_path ) )
-
-        if index % 15 == 0 and index != 0:
-            if len(to_be_merged) > 0:
-                bse_new = utils.update_version( bse_new )
-                new_gvcf_store_path = '{0}/chrom-{1}'.format( bse_new, chrom )
-                combine_two_dataset(to_be_merged.pop(), gvcf_store_path, new_gvcf_store_path)
-                to_be_merged.append(new_gvcf_store_path)
-                bse_new = utils.update_version( bse_new )
-                new_gvcf_store_path = '{0}/chrom-{1}'.format( bse_new, chrom )
-                lgr.debug( 'After merging Index {}\n\tCurrent gvcf store is "{}"\n\tNew version gvcf store is "{}"'.format( index, gvcf_store_path, new_gvcf_store_path ) )
-            else:
-                to_be_merged.append(gvcf_store_path)
-            gvcf_store_path = None
-            #bse_new = utils.update_version( bse_new )
-            #new_gvcf_store_path = '{0}/chrom-{1}'.format( bse_new, chrom )
-
-            lgr.debug( 'Index {}\n\tCurrent gvcf store is "{}"\n\tNew version gvcf store is "{}"'.format( index, gvcf_store_path, new_gvcf_store_path ) )
-
-
-        path_to_exps = [ x[ 3 ] for x in batch ]
-        #print("Index: ", index, "path_to_exps", path_to_exps)
-        loadGvcf( hl, path_to_exps, chrom, new_gvcf_store_path, gvcf_store_path, partitions_chromosome, lgr )
-    
-    lgr.debug( '(end loop) After merging Index {}\n\tCurrent gvcf store is "{}"\n\tNew version gvcf store is "{}"'.format( index, gvcf_store_path, new_gvcf_store_path ) )
-
-
-    bse_new = utils.update_version( bse_new )
-    last_gvcf_store_path = '{0}/chrom-{1}'.format( bse_new, chrom )
-
-    print("ENDING PROCESS - len(to_be_merged)", len(to_be_merged))
-    if len(to_be_merged) > 0:
-        print("ENDING PROCESS - to_be_merged", to_be_merged)
-        combine_two_dataset(to_be_merged.pop(), new_gvcf_store_path, last_gvcf_store_path)
 
 def combine_two_dataset(gvcf_store_1_path_chrom, gvcf_store_2_path_chrom, destination_path):
     print("[combine_two_dataset]: merging " + gvcf_store_1_path_chrom + " with " + gvcf_store_2_path_chrom + " ending at " + destination_path)

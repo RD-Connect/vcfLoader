@@ -169,25 +169,15 @@ def createSparseMatrix( group, url_project, host_project, token, prefix_hdfs, ch
         # write the matrix of 1k5 experiments
         pass
 
+
     uris = [ b[ 'uri' ] for b in batches ]
     if not( gvcf_store_path is None or gvcf_store_path == '' ):
         uris = [ gvcf_store_path ] + uris
 
-    print( 'uris:', uris )
-    
-    first_uri = uris.pop( 0 )
-    print( 'first_uri:', first_uri )
-    
-    dst = utils.update_version( first_uri, revision = False )
-    print( 'dst:', dst )
-
-    for uri in uris:
-        # merge the sm of 1k5
-        combine_sparse_martix( first_uri, uri, dst )
-        first_uri = dst
-        dst = utils.update_version( dst, revision = True )
-
-
+    superbatches = create_superbatches_sparse( uris )
+    for idx, pack in enumerate( superbatches ):
+        print( idx )
+        combine_sparse_martix( pack[ 'in_1' ], pack[ 'in_2' ], pack[ 'out' ] )
 
 def create_batches_sparse( list_of_ids, dict_of_paths, uri, smallSize = 100, largeSize = 1500 ):
     cntLarge = 0
@@ -218,6 +208,16 @@ def create_batches_sparse( list_of_ids, dict_of_paths, uri, smallSize = 100, lar
     if len( smallBatch ) != 0:
         largeBarch.append( smallBatch )
         rst.append( { 'uri': uri, 'batches': largeBarch } )
+    return rst
+
+def create_superbatches_sparse( list_of_uris ):
+    rst = []
+    first_uri = uris.pop( 0 )
+    dst = utils.update_version( first_uri, revision = False )
+    for uri in uris:
+        rst.push( { 'in_1': first_uri, 'in_2': uri, 'out': dst })
+        first_uri = dst
+        dst = utils.update_version( dst, revision = True )
     return rst
 
 

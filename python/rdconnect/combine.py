@@ -109,23 +109,29 @@ def createSparseMatrix( group, url_project, host_project, token, prefix_hdfs, ch
 
     # Get all the experiments that have to processed from data-management
     experiments_in_group = getExperimentByGroup( group, url_project, host_project, token, prefix_hdfs, chrom, max_items_batch, is_playground )
-    print('experiments_in_group')
+    print('experiments_in_group', len( experiments_in_group ))
     print('\t', experiments_in_group[ : 2 ])
     experiment_status = getExperimentStatus( group, url_project, host_project, token, is_playground )
-    print('experiment_status')
+    print('experiment_status', len( experiment_status ))
     print('\t', experiment_status[ : 2 ])
     experiments_to_be_loaded = getExperimentsToProcess( experiment_status, experiments_in_group, check_hdfs = False )
-    print('experiments_to_be_loaded')
+    print('experiments_to_be_loaded', len( experiments_to_be_loaded ))
     print('\t', experiments_to_be_loaded[ : 2 ])
 
-    # # if is_playground:
-    # #     files_to_be_loaded = [ buildPathPlayground( prefix_hdfs, group, x[ 'RD_Connect_ID_Experiment' ], chrom ) for x in experiments_to_be_loaded ]
-    # # else:
-    # #     files_to_be_loaded = [ buildPath( prefix_hdfs, group, x[ 'RD_Connect_ID_Experiment' ], chrom ) for x in experiments_to_be_loaded ]
+    # if is_playground:
+    #     files_to_be_loaded = [ buildPathPlayground( prefix_hdfs, group, x[ 'RD_Connect_ID_Experiment' ], chrom ) for x in experiments_to_be_loaded ]
+    # else:
+    #     files_to_be_loaded = [ buildPath( prefix_hdfs, group, x[ 'RD_Connect_ID_Experiment' ], chrom ) for x in experiments_to_be_loaded ]
    
-    # # Having the multiple IDs (RD-Connect ID and PhenoTIPS/PhenoStore ID) we can create the path to the gVCF
-    # experiments_in_group = [ x for x in experiments_in_group if x[ 'elastic_dataset' ] ==  'rdcon_1488_670' ]
-    # files_to_be_loaded = create_files_list(experiments_in_group, str(chrom), "rdcon_1488_670")
+    # Having the multiple IDs (RD-Connect ID and PhenoTIPS/PhenoStore ID) we can create the path to the gVCF
+    experiments_in_group = [ x for x in experiments_in_group if x[ 'elastic_dataset' ] ==  'rdcon_1488_670' ]
+    files_to_be_loaded = create_files_list(experiments_in_group, str(chrom), "rdcon_1488_670")
+
+    print('files_to_be_loaded', len( files_to_be_loaded ))
+    print('\t', files_to_be_loaded[ : 2 ])
+
+    print('experiments_in_group (2)', len( experiments_in_group ))
+    print('\t', experiments_in_group[ : 2 ])
     
     # ## Logging
     # # lgr.debug( 'Length "experiments_in_group": {}'.format( len( experiments_in_group ) ) )

@@ -235,7 +235,7 @@ def create_batches_sparse( list_of_ids, dict_of_paths, uri, smallSize = 100, lar
     uri_old = uri
     for idx, itm in enumerate( list_of_ids ):
         if len( collect ) >= smallSize:
-            rst.append( { 'uri': uri, 'batch': smallBatch } )
+            rst.append( { 'uri': uri, 'batch': collect } )
             cnt += smallSize
             uri_old = uri
             if cnt >= largeSize:

@@ -157,7 +157,7 @@ def createSparseMatrix( group, url_project, host_project, token, prefix_hdfs, ch
     # #     raise Exception( 'No experiment will be loaded and included in sparse matrix' )
 
     batches = create_batches_sparse( experiments_in_group, files_to_be_loaded, new_gvcf_store_path )
-    print( [ x['uri'] for x in batches ])
+    print( batches[ 0 ] )
 
 def create_batches_sparse( list_of_ids, dict_of_paths, uri, smallSize = 100, largeSize = 1500 ):
     cntLarge = 0

@@ -171,7 +171,7 @@ def createSparseMatrix( group, url_project, host_project, token, prefix_hdfs, ch
     # The argument "new_gvcf_store_path" contains the path to the new sm that will be created from the blocks of 100 experiments and saved as 1k5
     # The argument "gvcf_store_path" will contain the last sm matrix that can be of any size and that will accumulate the old plus the new experiments
 
-    batches = create_batches_sparse( experiments_in_group, files_to_be_loaded, new_gvcf_store_path )
+    batches = create_batches_sparse( experiments_in_group, files_to_be_loaded, new_gvcf_store_path, smallSize = sz_small_batch, largeSize = sz_large_batch )
     print( [ x['uri'] for x in batches ] )
 
     for batch in batches:

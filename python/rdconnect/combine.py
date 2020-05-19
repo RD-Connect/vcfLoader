@@ -183,7 +183,7 @@ def createSparseMatrix( group, url_project, host_project, token, prefix_hdfs, ch
 
     for uri in uris:
         # merge the sm of 1k5
-        combine_sparse_martix( first_uri, uri )
+        combine_sparse_martix( first_uri, uri, dst )
         first = uri
         dst = utils.update_version( dst, revision = False )
 

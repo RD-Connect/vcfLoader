@@ -212,9 +212,9 @@ def create_batches_sparse( list_of_ids, dict_of_paths, uri, smallSize = 100, lar
 
 def create_superbatches_sparse( list_of_uris ):
     rst = []
-    first_uri = uris.pop( 0 )
+    first_uri = list_of_uris.pop( 0 )
     dst = utils.update_version( first_uri, revision = False )
-    for uri in uris:
+    for uri in list_of_uris:
         rst.push( { 'in_1': first_uri, 'in_2': uri, 'out': dst })
         first_uri = dst
         dst = utils.update_version( dst, revision = True )

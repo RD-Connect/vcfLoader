@@ -159,6 +159,12 @@ def createSparseMatrix( group, url_project, host_project, token, prefix_hdfs, ch
     batches = create_batches_sparse( experiments_in_group, files_to_be_loaded, new_gvcf_store_path )
     print( [ list(x.keys()) for x in batches ] )
 
+    for batch in batches:
+        # load each of the small batches of 100 experiments
+        # write the matrix of 1k5 experiments
+        pass
+
+
 def create_batches_sparse( list_of_ids, dict_of_paths, uri, smallSize = 100, largeSize = 1500 ):
     cntLarge = 0
     rst = []
@@ -187,8 +193,8 @@ def create_batches_sparse( list_of_ids, dict_of_paths, uri, smallSize = 100, lar
             import sys
             sys.exit(-1)
     if len( smallBatch ) != 0:
-        largeBarch.append( { 'uri': uri, 'batches': smallBatch } )
-        rst.append( largeBarch )
+        largeBarch.append( smallBatch )
+        rst.append( { 'uri': uri, 'batches': largeBarch } )
     return rst
 
 

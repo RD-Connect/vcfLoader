@@ -181,7 +181,7 @@ def createSparseMatrix( group, url_project, host_project, token, prefix_hdfs, ch
         accum = None
         for idx, pack in enumerate( batch[ 'batches' ] ):
             print('     > Loading pack of {} gVCF #{}'.format( len( pack[ 'batch' ] ), idx ) )
-            loadGvcf( hl, pack[ 'batch' ], pack[ 'uri' ], accum, chrom, partitions_chromosome )
+            loadGvcf2( hl, pack[ 'batch' ], pack[ 'uri' ], accum, chrom, partitions_chromosome )
             accum = pack[ 'uri' ]
 
 
@@ -214,6 +214,7 @@ def create_batches_sparse( list_of_ids, dict_of_paths, uri, smallSize = 100, lar
             cnt = 0
 
         if added:
+            print( "<->", cnt,  cnt + smallSize, uri )
             if cnt + smallSize >= largeSize:
                 uri = utils.version_bump( uri, 'revision' )
             else:
@@ -250,7 +251,7 @@ def combine_sparse_martix( uri_sm_1, uri_sm_2, destination_path ):
     # comb.write(destination_path, overwrite = True )
 
 
-def loadGvcf( hl, experiments, destinationPath, gvcfStorePath, chrom, partitions ):
+def loadGvcf2( hl, experiments, destinationPath, gvcfStorePath, chrom, partitions ):
     
     print("[loadGvcf] {} --> {}".format( str( len( experiments ) ), destinationPath ) )
     # def transformFile( mt ):

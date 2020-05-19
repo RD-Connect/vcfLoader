@@ -204,7 +204,7 @@ def create_batches_sparse( list_of_ids, dict_of_paths, uri, smallSize = 100, lar
             smallBatch = []
             uri = utils.version_bump( uri, 'iteration' )
             if cnt + smallSize >= largeSize:
-                uri = utils.version_bump( uri, 'subversion' )
+                uri = utils.version_bump( uri, 'revision' )
 
         if cnt >= largeSize:
             rst.append( { 'uri': uri, 'batches': largeBatch } )
@@ -217,7 +217,7 @@ def create_batches_sparse( list_of_ids, dict_of_paths, uri, smallSize = 100, lar
         } )
 
     if len( smallBatch ) != 0:
-        uri = utils.version_bump( uri_old, 'subversion' )
+        uri = utils.version_bump( uri_old, 'revision' )
         rst.append( { 'uri': uri, 'batches': [ { 'uri': uri, 'batch': smallBatch } ] } )
     return rst
 

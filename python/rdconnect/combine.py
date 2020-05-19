@@ -217,7 +217,7 @@ def create_batches_sparse( list_of_ids, dict_of_paths, uri, smallSize = 100, lar
         } )
 
     if len( smallBatch ) != 0:
-        uri = utils.version_bump( uri_old, 'revision' )
+        uri = utils.version_bump( uri, 'revision' )
         rst.append( { 'uri': uri, 'batches': [ { 'uri': uri, 'batch': smallBatch } ] } )
     return rst
 

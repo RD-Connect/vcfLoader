@@ -173,6 +173,7 @@ def createSparseMatrix( group, url_project, host_project, token, prefix_hdfs, ch
 
     batches = create_batches_sparse( experiments_in_group, files_to_be_loaded, new_gvcf_store_path, smallSize = sz_small_batch, largeSize = sz_large_batch )
     print( [ x['uri'] for x in batches ] )
+    print( batches )
 
     accum = None
     for batch in batches:
@@ -196,26 +197,20 @@ def create_batches_sparse( list_of_ids, dict_of_paths, uri, smallSize = 100, lar
     largeBarch = []
     smallBatch = []
     for idx, itm in enumerate( list_of_ids ):
-        try:
-            if len( smallBatch ) >= smallSize:
-                largeBarch.append( { 'uri': uri, 'batch': smallBatch } )
-                uri = utils.update_version( uri, 'revision' )
-                cntLarge += smallSize
-                smallBatch = []
-            if cntLarge >= largeSize:
-                rst.append( { 'uri': uri, 'batches': largeBarch } )
-                uri = utils.update_version( uri, 'subversion' )
-                largeBarch = []
-                cntLarge = 0
-            smallBatch.append( { 'RD_Connect_ID_Experiment': itm[ 'RD_Connect_ID_Experiment' ],
-                'Phenotips_ID': itm[ 'Phenotips_ID' ],
-                'File': dict_of_paths[ itm[ 'RD_Connect_ID_Experiment' ] ]
-            } )
-        except Exception as ex:
-            print("ERROR")
-            print(str(ex))
-            import sys
-            sys.exit(-1)
+        if len( smallBatch ) >= smallSize:
+            largeBarch.append( { 'uri': uri, 'batch': smallBatch } )
+            uri = utils.update_version( uri, 'revision' )
+            cntLarge += smallSize
+            smallBatch = []
+        if cntLarge >= largeSize:
+            rst.append( { 'uri': uri, 'batches': largeBarch } )
+            uri = utils.update_version( uri, 'subversion' )
+            largeBarch = []
+            cntLarge = 0
+        smallBatch.append( { 'RD_Connect_ID_Experiment': itm[ 'RD_Connect_ID_Experiment' ],
+            'Phenotips_ID': itm[ 'Phenotips_ID' ],
+            'File': dict_of_paths[ itm[ 'RD_Connect_ID_Experiment' ] ]
+        } )
     if len( smallBatch ) != 0:
         largeBarch.append( smallBatch )
         rst.append( { 'uri': uri, 'batches': largeBarch } )

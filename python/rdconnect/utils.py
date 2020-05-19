@@ -25,7 +25,7 @@ def update_version( uri, increment = 'version' ):
     old_version = splitted[ len( splitted ) - 1 ]
     pack = str( old_version ).split( '.' )
     pack[ increment ] += 1
-    new_version = '.'.join( increment )
+    new_version = '.'.join( pack )
     
     return uri.replace( old_version, new_version )
 

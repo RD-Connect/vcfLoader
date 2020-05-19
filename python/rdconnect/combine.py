@@ -154,8 +154,7 @@ def createSparseMatrix( group, url_project, host_project, token, prefix_hdfs, ch
     # # else:
     # #     raise Exception( 'No experiment will be loaded and included in sparse matrix' )
 
-
-    x = create_batches_sparse(experiments_to_be_loaded, files_to_be_loaded)
+    x = create_batches_sparse(experiments_in_group, files_to_be_loaded)
     print( " 1 --> ", len( x ) )
     print( " 2 --> ", len( x[ 0 ] ) )
 
@@ -165,17 +164,23 @@ def create_batches_sparse(list_of_ids, dict_of_paths, smallSize = 100, largeSize
     largeBarch = []
     smallBatch = []
     for itm in list_of_ids:
-        if len( smallBatch ) >= smallSize:
-            largeBarch.append( smallBatch )
-            cntLarge += smallSize
-            smallBatch = []
-        if cntLarge >= largeSize:
-            rst.append( largeBarch )
-            largeBarch = []
-        smallBatch.append( { 'RD_Connect_ID_Experiment': itm[ 'RD_Connect_ID_Experiment' ],
-            'Phenotips_ID': itm[ 'Phenotips_ID' ],
-            'File': dict_of_paths[ itm[ 'RD_Connect_ID_Experiment' ] ]
-        } )
+        try:
+            if len( smallBatch ) >= smallSize:
+                largeBarch.append( smallBatch )
+                cntLarge += smallSize
+                smallBatch = []
+            if cntLarge >= largeSize:
+                rst.append( largeBarch )
+                largeBarch = []
+            smallBatch.append( { 'RD_Connect_ID_Experiment': itm[ 'RD_Connect_ID_Experiment' ],
+                'Phenotips_ID': itm[ 'Phenotips_ID' ],
+                'File': dict_of_paths[ itm[ 'RD_Connect_ID_Experiment' ] ]
+            } )
+        except Exception as ex:
+            print("ERROR")
+            print(str(ex))
+            import sys
+            sys.exit(-1)
     return rst
 
 

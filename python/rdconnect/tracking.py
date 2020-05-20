@@ -58,11 +58,18 @@ def update_dm_index(initial_vcf, index_name, data_ip, data_url, data_token):
 	print('[INFO]:   . Provided update content: "{}"'.format(str(data)))
 	print('[INFO]:   . Created query URL for data-management: {}'.format(url))
 
+
+	accum = []
 	for sam in full_samples:
 		q_url = url + sam
 		response = requests.post(q_url, data = data, headers = headers, verify = False)
 		if response.status_code != 200:
-			raise Exception('[ERROR]   . Information for sample "{}" could not be updated.\n{}'.format(sam, response.text))
+			print('[ERROR]   . Information for sample "{}" could not be updated.\n{}'.format(sam, response.text))
+			accum.append((sam, response))
+
+	if len(accum) != 0:
+		for rst in accum:
+			print(rst[ 0 ], '\t', rst[ 1 ].json())
 
 
 def update_dm(initial_vcf, index_name, data_ip, data_url, data_token, field):

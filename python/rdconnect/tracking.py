@@ -64,12 +64,23 @@ def update_dm_index(initial_vcf, index_name, data_ip, data_url, data_token):
 		q_url = url + sam
 		response = requests.post(q_url, data = data, headers = headers, verify = False)
 		if response.status_code != 200:
-			print('[ERROR]   . Information for sample "{}" could not be updated.\n{}'.format(sam, response.text))
-			accum.append((sam, response))
+			print('[ERROR]   . Information for sample "{}" could not be updated. Querying for second time with extended data-body'.format(sam))
+			data = "{\"rawUpload\": \"pass\",		\"rawDownload\": \"pass\", \
+				\"receptionPipeline\": \"pass\",	\"mapping\": \"pass\", \
+				\"qc\": \"pass\",					\"coverage\": \"pass\", \
+				\"cnv\": \"waiting\",				\"variantCalling\": \"pass\", \
+				\"rohs\": \"pass\",					\"genomicsdb\": \"pass\", \
+				\"multivcf\": \"pass\",				\"hdfs\": \"pass\", \
+				\"es\": \"pass\",					\"in_platform\": \"pass\", \
+				\"dataset\":\"" + index_name + "\" \
+			}"
+			response2 = requests.post(q_url, data = data, headers = headers, verify = False)
+			if response2.status_code != 200:
+				accum.append((sam, response, response2))
 
 	if len(accum) != 0:
 		for rst in accum:
-			print(rst[ 0 ], '\t', rst[ 1 ].json())
+			print(rst[ 0 ], '\t', rst[ 1 ].json(), '\t', rst[ 1 ].json())
 
 
 def update_dm(initial_vcf, index_name, data_ip, data_url, data_token, field):

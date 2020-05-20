@@ -62,7 +62,7 @@ def update_dm_index(initial_vcf, index_name, data_ip, data_url, data_token):
 		q_url = url + sam
 		response = requests.post(q_url, data = data, headers = headers, verify = False)
 		if response.status_code != 200:
-			raise Exception('[ERROR]   . Information for sample "{}" could not be updated.'.format(sam))
+			raise Exception('[ERROR]   . Information for sample "{}" could not be updated.\n{}'.format(sam, response.text))
 
 
 def update_dm(initial_vcf, index_name, data_ip, data_url, data_token, field):

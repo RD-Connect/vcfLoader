@@ -97,7 +97,6 @@ def getExperimentsToProcess( experiment_status, experiment_available, check_hdfs
 def create_files_list( experiments, chrom, elastic_dataset ):
     """Creates a dictionary using RD-Connect Experiment ID as key and the its file as value."""
     prefix = 'hdfs://rdhdfs1:27000/test/rdconnect/gVCF'
-    elastic_dataset = "rdcon_1488_670"
     rst = {}
     for x in experiments:
         if x[ 'RD_Connect_ID_Experiment' ] not in rst.keys() and x[ 'elastic_dataset' ] == elastic_dataset:
@@ -137,6 +136,7 @@ def createSparseMatrix( group, url_project, host_project, token, prefix_hdfs, ch
     ## /TO REMOVE
 
 
+    experiments_in_group = [ x for x in experiments_in_group if x[ 'elastic_dataset' ] ==  'rdcon_1488_670' ]
     files_to_be_loaded = create_files_list(experiments_in_group, str(chrom), "rdcon_1488_670")
 
 

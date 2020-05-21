@@ -130,10 +130,10 @@ def createSparseMatrix( group, url_project, host_project, token, prefix_hdfs, ch
     
 
     ## TO REMOVE - testing purposes
-    experiments_in_group = [ x for x in experiments_in_group if x[ 'elastic_dataset' ] ==  'rdcon_1488_670' ]
-    experiments_in_group = experiments_in_group[ 0:29 ]
-    sz_small_batch = 2
-    sz_large_batch = 7
+    ## experiments_in_group = [ x for x in experiments_in_group if x[ 'elastic_dataset' ] ==  'rdcon_1488_670' ]
+    ## experiments_in_group = experiments_in_group[ 0:29 ]
+    ## sz_small_batch = 2
+    ## sz_large_batch = 7
     ## /TO REMOVE
 
 

@@ -155,6 +155,10 @@ def createSparseMatrix( group, url_project, host_project, token, prefix_hdfs, ch
     list_of_batches = create_batches_sparse( experiments_in_group, files_to_be_loaded, new_gvcf_store_path, smallSize = sz_small_batch, largeSize = sz_large_batch )
 
     print('RUNNING STEP1 - CREATION OF CUMMULATIVE MATRICES OF {} EXPERIMENTS INCREMENTING {} EXPERIMENTS AT A TIME'.format( sz_large_batch, sz_small_batch ) )
+
+    list_of_batches = list_of_batches[5:]
+    print( len( list_of_batches ) )
+
     if True:
         for idx, batch in enumerate( list_of_batches ):
             print(' > Processing large batch {}/{}'.format(idx, len( list_of_batches ) ) )

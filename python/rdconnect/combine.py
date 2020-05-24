@@ -157,14 +157,14 @@ def createSparseMatrix( group, url_project, host_project, token, prefix_hdfs, ch
     print('RUNNING STEP1 - CREATION OF CUMMULATIVE MATRICES OF {} EXPERIMENTS INCREMENTING {} EXPERIMENTS AT A TIME'.format( sz_large_batch, sz_small_batch ) )
 
 
-    # for idx, batch in enumerate( list_of_batches ):
-    #     print(' > Processing large batch {}/{}'.format(idx, len( list_of_batches ) ) )
-    #     # load each of the small batches of 100 experiments
-    #     accum = None
-    #     for idx, pack in enumerate( batch[ 'batches' ] ):
-    #         print('     > Loading pack #{} of {} gVCF '.format( idx, len( pack[ 'batch' ] ) ) )
-    #         loadGvcf2( hl, pack[ 'batch' ], pack[ 'uri' ], accum, chrom, partitions_chromosome )
-    #         accum = pack[ 'uri' ]
+    for idx, batch in enumerate( list_of_batches ):
+        print(' > Processing large batch {}/{}'.format(idx, len( list_of_batches ) ) )
+        # load each of the small batches of 100 experiments
+        accum = None
+        for idx, pack in enumerate( batch[ 'batches' ] ):
+            print('     > Loading pack #{} of {} gVCF '.format( idx, len( pack[ 'batch' ] ) ) )
+            loadGvcf2( hl, pack[ 'batch' ], pack[ 'uri' ], accum, chrom, partitions_chromosome )
+            accum = pack[ 'uri' ]
 
     uris = [ b[ 'uri' ] for b in list_of_batches ]
     if not( gvcf_store_path is None or gvcf_store_path == '' ):

@@ -163,8 +163,9 @@ def createSparseMatrix( group, url_project, host_project, token, prefix_hdfs, ch
         accum = None
         for idx, pack in enumerate( batch[ 'batches' ] ):
             print('     > Loading pack #{} of {} gVCF '.format( idx, len( pack[ 'batch' ] ) ) )
-            loadGvcf2( hl, pack[ 'batch' ], pack[ 'uri' ], accum, chrom, partitions_chromosome )
-            accum = pack[ 'uri' ]
+            uri = '{}/chrom-{}'.format( pack[ 'uri' ], chrom )
+            loadGvcf2( hl, pack[ 'batch' ], uri, accum, chrom, partitions_chromosome )
+            accum = uri
 
     uris = [ b[ 'uri' ] for b in list_of_batches ]
     if not( gvcf_store_path is None or gvcf_store_path == '' ):
@@ -173,7 +174,7 @@ def createSparseMatrix( group, url_project, host_project, token, prefix_hdfs, ch
     print('RUNNING STEP2 - MERGING OF CUMMULATIVE MATRICES' )
     superbatches = create_superbatches_sparse( uris )
     for idx, pack in enumerate( superbatches ):
-        combine_sparse_martix( pack[ 'in_1' ], pack[ 'in_2' ], pack[ 'out' ] )
+        combine_sparse_martix( '{}/chrom-{}'.format( pack[ 'in_1' ], chrom ), '{}/chrom-{}'.format( pack[ 'in_2' ], chrom ), '{}/chrom-{}'.format( pack[ 'out' ], chrom ) )
 
 def create_batches_sparse( list_of_ids, dict_of_paths, uri, smallSize = 100, largeSize = 1500 ):
     cnt = 0

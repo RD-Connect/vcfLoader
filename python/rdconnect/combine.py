@@ -159,6 +159,8 @@ def createSparseMatrix( group, url_project, host_project, token, prefix_hdfs, ch
 
     for idx, batch in enumerate( list_of_batches ):
         print(' > Processing large batch {}/{}'.format(idx, len( list_of_batches ) ) )
+        if idx < 4:
+            continue
         # load each of the small batches of 100 experiments
         accum = None
         for idx, pack in enumerate( batch[ 'batches' ] ):
@@ -167,14 +169,14 @@ def createSparseMatrix( group, url_project, host_project, token, prefix_hdfs, ch
             loadGvcf2( hl, pack[ 'batch' ], uri, accum, chrom, partitions_chromosome )
             accum = uri
 
-    uris = [ b[ 'uri' ] for b in list_of_batches ]
-    if not( gvcf_store_path is None or gvcf_store_path == '' ):
-        uris = [ gvcf_store_path ] + uris
+    #uris = [ b[ 'uri' ] for b in list_of_batches ]
+    #if not( gvcf_store_path is None or gvcf_store_path == '' ):
+    #    uris = [ gvcf_store_path ] + uris
 
-    print('RUNNING STEP2 - MERGING OF CUMMULATIVE MATRICES' )
-    superbatches = create_superbatches_sparse( uris )
-    for idx, pack in enumerate( superbatches ):
-        combine_sparse_martix( '{}/chrom-{}'.format( pack[ 'in_1' ], chrom ), '{}/chrom-{}'.format( pack[ 'in_2' ], chrom ), '{}/chrom-{}'.format( pack[ 'out' ], chrom ) )
+    #print('RUNNING STEP2 - MERGING OF CUMMULATIVE MATRICES' )
+    #superbatches = create_superbatches_sparse( uris )
+    #for idx, pack in enumerate( superbatches ):
+    #    combine_sparse_martix( '{}/chrom-{}'.format( pack[ 'in_1' ], chrom ), '{}/chrom-{}'.format( pack[ 'in_2' ], chrom ), '{}/chrom-{}'.format( pack[ 'out' ], chrom ) )
 
 def create_batches_sparse( list_of_ids, dict_of_paths, uri, smallSize = 100, largeSize = 1500 ):
     cnt = 0

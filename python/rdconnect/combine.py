@@ -163,7 +163,7 @@ def createSparseMatrix( group, url_project, host_project, token, prefix_hdfs, ch
         accum = None
         for idx, pack in enumerate( batch[ 'batches' ] ):
             print('     > Loading pack #{} of {} gVCF '.format( idx, len( pack[ 'batch' ] ) ) )
-            for i, f in pack[ 'batch' ]:
+            for f in pack[ 'batch' ]:
                 print(i, "-->", f)
             uri = '{}/chrom-{}'.format( pack[ 'uri' ], chrom )
             loadGvcf2( hl, pack[ 'batch' ], uri, accum, chrom, partitions_chromosome )

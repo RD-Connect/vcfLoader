@@ -153,7 +153,7 @@ def createSparseMatrix( group, url_project, host_project, token, prefix_hdfs, ch
         print(' > Processing large batch {}/{}'.format(idx, len( list_of_batches ) ) )
         # load each of the small batches of 100 experiments
         accum = None
-        if idx < 13: # TO REMOVE
+        if idx < 4: # TO REMOVE
             continue
         for idx, pack in enumerate( batch[ 'batches' ] ):
             print('     > Loading pack #{} of {} gVCF '.format( idx, len( pack[ 'batch' ] ) ) )

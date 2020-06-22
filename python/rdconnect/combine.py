@@ -149,7 +149,7 @@ def createSparseMatrix( group, url_project, host_project, token, prefix_hdfs, ch
     print('RUNNING STEP1 - CREATION OF CUMMULATIVE MATRICES OF {} EXPERIMENTS INCREMENTING {} EXPERIMENTS AT A TIME'.format( sz_large_batch, sz_small_batch ) )
 
     list_of_batches2 = list_of_batches      # to remove
-    list_of_batches = list_of_batches[3:]   # to remove
+    list_of_batches = list_of_batches[:4]   # to remove
 
     for idx, batch in enumerate( list_of_batches ):
         print(' > Processing large batch {}/{}'.format(idx, len( list_of_batches ) ) )

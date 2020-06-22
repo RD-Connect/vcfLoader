@@ -138,9 +138,6 @@ def createSparseMatrix( group, url_project, host_project, token, prefix_hdfs, ch
     print('experiments_in_group (2)', len( experiments_in_group ))
     print('\t', experiments_in_group[ : 2 ])
     
-
-
-
     # The argument "new_gvcf_store_path" contains the path to the new sm that will be created from the blocks of 100 experiments and saved as 1k5
     # The argument "gvcf_store_path" will contain the last sm matrix that can be of any size and that will accumulate the old plus the new experiments
 
@@ -148,9 +145,7 @@ def createSparseMatrix( group, url_project, host_project, token, prefix_hdfs, ch
 
     print('RUNNING STEP1 - CREATION OF CUMMULATIVE MATRICES OF {} EXPERIMENTS INCREMENTING {} EXPERIMENTS AT A TIME'.format( sz_large_batch, sz_small_batch ) )
 
-    list_of_batches2 = list_of_batches      # to remove
-    list_of_batches = list_of_batches[:4]   # to remove
-
+    
     for idx, batch in enumerate( list_of_batches ):
         print(' > Processing large batch {}/{}'.format(idx, len( list_of_batches ) ) )
         # load each of the small batches of 100 experiments
@@ -162,8 +157,6 @@ def createSparseMatrix( group, url_project, host_project, token, prefix_hdfs, ch
             uri = '{}/chrom-{}'.format( pack[ 'uri' ], chrom )
             loadGvcf2( hl, pack[ 'batch' ], uri, accum, chrom, partitions_chromosome )
             accum = uri
-
-    list_of_batches = list_of_batches2      # to remove
 
     uris = [ b[ 'uri' ] for b in list_of_batches ]
     if not( gvcf_store_path is None or gvcf_store_path == '' ):

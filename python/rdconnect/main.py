@@ -233,6 +233,9 @@ def main(sqlContext, sc, configuration, chrom, nchroms, step, somaticFlag):
         print ("step annotate Internal Allele Frequency")
         print ("source file is " + current_dir)
         print ("current intFreq file is " + configuration["intFreq"] +"/" + fileName)
+        if not current_dir.endswith(fileName):
+            current_dir = current_dir + "/" + fileName
+        print ("source file (bis): {}".format(current_dir))
         variants = hl.read_table(current_dir)
         annotations.annotateInternalFreq(hl, variants, configuration["intFreq"] +"/" + fileName, destination + "/annotateInternalFreq/" + fileName)
         current_dir = destination + "/annotateInternalFreq/" + fileName

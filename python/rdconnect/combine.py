@@ -5,7 +5,7 @@ import hail as hl
 import os,requests,json
 from hail.experimental.vcf_combiner import *
 from hail.experimental import full_outer_join_mt
-from hail.experimental.vcf_combiner import combine_gvcfs
+from hail.experimental.vcf_combiner.vcf_combiner import combine_gvcfs
 from rdconnect import utils
 from rdconnect.annotations import truncateAt
 from datetime import datetime
@@ -152,7 +152,7 @@ def createSparseMatrix( group, url_project, host_project, token, prefix_hdfs, ch
         accum = None
         for idx, pack in enumerate( batch[ 'batches' ] ):
             print('     > Loading pack #{} of {} gVCF '.format( idx, len( pack[ 'batch' ] ) ) )
-            for f in pack[ 'batch' ]:
+            for f in pack[ 'batch' ]:@
                 print(f)
             uri = '{}/chrom-{}'.format( pack[ 'uri' ], chrom )
             loadGvcf2( hl, pack[ 'batch' ], uri, accum, chrom, partitions_chromosome )

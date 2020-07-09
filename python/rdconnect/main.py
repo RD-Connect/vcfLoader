@@ -373,12 +373,12 @@ def main(sqlContext, sc, configuration, chrom, nchroms, step, somaticFlag):
 
 
 
-        initial_vcf = utils.buildFileName(configuration["source_path"], chrom)
-        data_ip = configuration["datamanagement"]["ip"]
-        data_url = configuration["datamanagement"]["host"]
-        data_token = configuration["datamanagement"]["token"]
-        index_name = configuration["elasticsearch"]["index_name"]
-        tracking.update_dm(initial_vcf, index_name, data_ip, data_url, data_token, "es")
+        # initial_vcf = utils.buildFileName(configuration["source_path"], chrom)
+        # data_ip = configuration["datamanagement"]["ip"]
+        # data_url = configuration["datamanagement"]["host"]
+        # data_token = configuration["datamanagement"]["token"]
+        # index_name = configuration["elasticsearch"]["index_name"]
+        # tracking.update_dm(initial_vcf, index_name, data_ip, data_url, data_token, "es")
 
     
     # [WORK IN PROGRESS] It till update a secondary index to maintain a revision of the last index per project

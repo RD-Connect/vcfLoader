@@ -5,7 +5,7 @@ import hail as hl
 import os,requests,json
 from hail.experimental.vcf_combiner import *
 from hail.experimental import full_outer_join_mt
-from hail.experimental.vcf_combiner.vcf_combiner import combine_gvcfs
+import hail.experimental.vcf_combiner.vcf_combiner as combine_gvcfs
 from rdconnect import utils
 from rdconnect.annotations import truncateAt
 from datetime import datetime

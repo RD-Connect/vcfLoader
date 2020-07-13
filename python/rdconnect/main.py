@@ -362,14 +362,14 @@ def main(sqlContext, sc, configuration, chrom, nchroms, step, somaticFlag):
             variants.printSchema()
         variants.write.format("org.elasticsearch.spark.sql").options(**es_conf).save(idx_name+"/"+configuration["elasticsearch"]["type"], mode='append')
 
-        initial_vcf = utils.buildFileName(configuration["source_path"], chrom)
-        data_ip = configuration["datamanagement"]["ip"]
-        data_url = configuration["datamanagement"]["host"]
-        data_token = configuration["datamanagement"]["token"]
-        index_name = configuration["elasticsearch"]["index_name"]
+        # initial_vcf = utils.buildFileName(configuration["source_path"], chrom)
+        # data_ip = configuration["datamanagement"]["ip"]
+        # data_url = configuration["datamanagement"]["host"]
+        # data_token = configuration["datamanagement"]["token"]
+        # index_name = configuration["elasticsearch"]["index_name"]
 
-        tracking.update_dm_index(initial_vcf, index_name, data_ip, data_url, data_token)
-        tracking.update_dm(initial_vcf, index_name, data_ip, data_url, data_token, "es")
+        # tracking.update_dm_index(initial_vcf, index_name, data_ip, data_url, data_token)
+        # tracking.update_dm(initial_vcf, index_name, data_ip, data_url, data_token, "es")
 
 
 

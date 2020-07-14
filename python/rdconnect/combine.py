@@ -108,13 +108,7 @@ def createSparseMatrix( group, url_project, host_project, token, prefix_hdfs, ch
     #lgr = create_logger( 'createSparseMatrix', '' )
     if (new_gvcf_store_path is None or new_gvcf_store_path == '') and (gvcf_store_path is None or gvcf_store_path == ''):
         raise Exception('To properly run "createSparseMatrix" you have to provide the arguments "gvcf_store_path" or "new_gvcf_store_path".')
-
-    if chrom == "23":
-        chrom = "MT"
-    elif chrom == "24":
-        chrom = "X"
-    elif chrom == "25":
-        chrom = "Y"
+    
 
     # Get all the experiments that have to processed from data-management
     experiments_in_group = getExperimentByGroup( group, url_project, host_project, token, prefix_hdfs, chrom, sz_small_batch, is_playground )

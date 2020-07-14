@@ -5,7 +5,8 @@ import hail as hl
 import os,requests,json
 from hail.experimental.vcf_combiner import *
 from hail.experimental import full_outer_join_mt
-import hail.experimental.vcf_combiner.vcf_combiner as combine_gvcfs
+from hail.experimental.vcf_combiner.vcf_combiner import combine_gvcfs
+from hail.experimental.vcf_combiner.vcf_combiner import transform_gvcf
 from rdconnect import utils
 from rdconnect.annotations import truncateAt
 from datetime import datetime
@@ -231,7 +232,7 @@ def combine_sparse_martix( uri_sm_1, uri_sm_2, destination_path ):
 def loadGvcf2( hl, experiments, destinationPath, gvcfStorePath, chrom, partitions ):
     #print("[loadGvcf] {} --> {}".format( str( len( experiments ) ), destinationPath ) )
     def transformFile( mt ):
-        return combine_gvcfs.transform_gvcf(mt.annotate_rows(
+        return transform_gvcf(mt.annotate_rows(
             info = mt.info.annotate( MQ_DP = hl.null( hl.tint32 ), VarDP = hl.null( hl.tint32 ), QUALapprox = hl.null( hl.tint32 ) )
         ))
     def importFiles( files ):
@@ -534,7 +535,7 @@ def getIntervalByChrom( chrom, partitions ):
 
 def loadGvcf( hl, files, chrom, destinationPath, gvcfStorePath, partitions, lgr ):
     def transformFile( mt ):
-        return combine_gvcfs.transform_gvcf(mt.annotate_rows(
+        return transform_gvcf(mt.annotate_rows(
             info = mt.info.annotate( MQ_DP = hl.null( hl.tint32 ), VarDP = hl.null( hl.tint32 ), QUALapprox = hl.null( hl.tint32 ) )
         ))
     def importFiles( files ):

@@ -12,22 +12,12 @@ import datetime
 import os,json,requests
 
 #---
-from pyspark import SparkConf, SparkContext
-from pyspark.sql import SQLContext, SparkSession
-from pyspark.sql.functions import lit
-from subprocess import call
-from pyspark.sql.types import FloatType, IntegerType
-import sys, getopt
-import hail as hl
-import datetime
 import logging
 import warnings
-import os,requests,json
 from hail.experimental.vcf_combiner import *
 from hail.experimental import full_outer_join_mt
 from hail.experimental.vcf_combiner.vcf_combiner import combine_gvcfs
 from hail.experimental.vcf_combiner.vcf_combiner import transform_gvcf
-from datetime import datetime
 from subprocess import PIPE, Popen
 from pyspark.sql import Row
 #---

@@ -652,8 +652,12 @@ def main(sqlContext, sc, configuration, chrom, nchroms, step, somaticFlag):
 
         experiments = files
         interval = getIntervalByChrom( chrom, number_partitions )
+        for ii in interval['interval']:
+            print(ii)
         vcfs = importFiles( [ x[ 'File' ] for x in experiments ] )
+        print("vcfs[0].count_rows():", vcfs[0].count_rows())
         vcfs2 = [ transformFile( mt ) for mt in vcfs ]
+        print("vcfs2[0].count_rows():", vcfs2[0].count_rows())
 
 
         comb = combine_gvcfs( vcfs2 )

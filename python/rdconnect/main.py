@@ -11,6 +11,27 @@ import hail as hl
 import datetime
 import os,json,requests
 
+#---
+from pyspark import SparkConf, SparkContext
+from pyspark.sql import SQLContext, SparkSession
+from pyspark.sql.functions import lit
+from subprocess import call
+from pyspark.sql.types import FloatType, IntegerType
+import sys, getopt
+import hail as hl
+import datetime
+import logging
+import warnings
+import os,requests,json
+from hail.experimental.vcf_combiner import *
+from hail.experimental import full_outer_join_mt
+from hail.experimental.vcf_combiner.vcf_combiner import combine_gvcfs
+from hail.experimental.vcf_combiner.vcf_combiner import transform_gvcf
+from datetime import datetime
+from subprocess import PIPE, Popen
+from pyspark.sql import Row
+#---
+
 APP_NAME = "vcfLoader"
 # Usage function
 def usage():
@@ -474,24 +495,7 @@ def main(sqlContext, sc, configuration, chrom, nchroms, step, somaticFlag):
         print("*" * 25)
         print("testingSparse")
         print("*" * 25)
-        from pyspark import SparkConf, SparkContext
-        from pyspark.sql import SQLContext, SparkSession
-        from pyspark.sql.functions import lit
-        from subprocess import call
-        from pyspark.sql.types import FloatType, IntegerType
-        import sys, getopt
-        import hail as hl
-        import datetime
-        import logging
-        import warnings
-        import os,requests,json
-        from hail.experimental.vcf_combiner import *
-        from hail.experimental import full_outer_join_mt
-        from hail.experimental.vcf_combiner.vcf_combiner import combine_gvcfs
-        from hail.experimental.vcf_combiner.vcf_combiner import transform_gvcf
-        from datetime import datetime
-        from subprocess import PIPE, Popen
-        from pyspark.sql import Row
+        
 
         files = [{'RD_Connect_ID_Experiment': 'E999782', 'Phenotips_ID': 'P0009447', 'File': 'hdfs://rdhdfs1:27000/test/rdconnect/gVCF/cuni-macek/E999782/E999782.23.g.vcf.bgz'},
         {'RD_Connect_ID_Experiment': 'E999765', 'Phenotips_ID': 'P0013526', 'File': 'hdfs://rdhdfs1:27000/test/rdconnect/gVCF/rumc-vissers/E999765/E999765.23.g.vcf.bgz'},

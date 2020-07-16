@@ -471,6 +471,9 @@ def main(sqlContext, sc, configuration, chrom, nchroms, step, somaticFlag):
             dta['effs']['gene_name'].export('hdfs://rdhdfs1:27000/test/tmp/rdconn_genes_chrm{}.tsv'.format(chrm), delimiter='\t', missing='')
 
     if "testingSparse" in step:
+        print("*" * 25)
+        print("testingSparse")
+        print("*" * 25)
         from pyspark import SparkConf, SparkContext
         from pyspark.sql import SQLContext, SparkSession
         from pyspark.sql.functions import lit

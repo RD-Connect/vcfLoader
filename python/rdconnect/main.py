@@ -604,12 +604,12 @@ def main(sqlContext, sc, configuration, chrom, nchroms, step, somaticFlag):
 
 
         def getIntervalByChrom( chrom, partitions ):
-                if chrom in ('23', 23):
-                    chrom = 'MT'
-                if chrom in ('24', 24):
-                    chrom = 'X'
-                if chrom in ('25', 25):
-                    chrom = 'Y'
+            if chrom in ('23', 23):
+                chrom = 'MT'
+            if chrom in ('24', 24):
+                chrom = 'X'
+            if chrom in ('25', 25):
+                chrom = 'Y'
             intervals = { # information from https://www.ncbi.nlm.nih.gov/grc/human/data?asm=GRCh37
                 "25": { "interval": getIntervals( chrom,  59373566, partitions ), 'reference_genome': 'GRCh37', 'array_elements_required': False }, # Y
                  "Y": { "interval": getIntervals( chrom,  59373566, partitions ), 'reference_genome': 'GRCh37', 'array_elements_required': False }, # Y

@@ -651,7 +651,7 @@ def main(sqlContext, sc, configuration, chrom, nchroms, step, somaticFlag):
             return x
 
 
-        interval = getIntervalByChrom( chrom, partitions )
+        interval = getIntervalByChrom( chrom, number_partitions )
         vcfs = importFiles( [ x[ 'File' ] for x in experiments ] )
         vcfs2 = [ transformFile( mt ) for mt in vcfs ]
 

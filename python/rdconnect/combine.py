@@ -147,6 +147,8 @@ def createSparseMatrix( group, url_project, host_project, token, prefix_hdfs, ch
 
     print('RUNNING STEP1 - CREATION OF CUMMULATIVE MATRICES OF {} EXPERIMENTS INCREMENTING {} EXPERIMENTS AT A TIME'.format( sz_large_batch, sz_small_batch ) )
 
+    target = "hdfs://rdhdfs1:27000/test/rdconnect-ES6/sparseMatrix/1737-9k/0.4.1/chrom-25"  # to remove
+    save = False                                                                            # to remove
     
     for idx, batch in enumerate( list_of_batches ):
         print(' > Processing large batch {}/{}'.format(idx, len( list_of_batches ) ) )
@@ -157,7 +159,10 @@ def createSparseMatrix( group, url_project, host_project, token, prefix_hdfs, ch
             for f in pack[ 'batch' ]:
                 print(f)
             uri = '{}/chrom-{}'.format( pack[ 'uri' ], chrom )
-            loadGvcf2( hl, pack[ 'batch' ], uri, accum, chrom, partitions_chromosome )
+            if uri == target:   # to remove
+                save = True     # to remove
+            if(save):           # to remove
+                loadGvcf2( hl, pack[ 'batch' ], uri, accum, chrom, partitions_chromosome )
             accum = uri
 
     uris = [ b[ 'uri' ] for b in list_of_batches ]

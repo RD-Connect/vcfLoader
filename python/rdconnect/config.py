@@ -8,7 +8,7 @@ def readFilesList(list_path):
     return paths
 
 def readConfig(config_path):
-	print(">>>>> config_path: {}".format(config_path))
+    print(">>>>> config_path: {}".format(config_path))
     with open(config_path) as data_file:
         data = json.load(data_file)
     return data

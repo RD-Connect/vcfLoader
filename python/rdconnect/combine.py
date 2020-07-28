@@ -331,7 +331,7 @@ def createDenseMatrix( sc, sq, url_project, host_project, prefix_hdfs, max_items
     if none_detected:
         warnings.warn( 'Provided experiment ids got no family assigned. RD-Connect ID used as family ID for those experiments. Original families were of {} while after update are of {}.'.format( x, y ) )
 
-    batches = create_batches_by_family( experiments_and_families, 2000 )
+    batches = create_batches_by_family( experiments_and_families, 10 )
     lgr.debug( 'Created {} batches'.format( len( batches ) ) )
     for ii, bat in enumerate(batches):
         print('\tMtx{0}: {1} --> {2} - {3}', ii, len( bat ), bat[0], bat[len(bat) - 1])
@@ -344,15 +344,18 @@ def createDenseMatrix( sc, sq, url_project, host_project, prefix_hdfs, max_items
         for idx, batch in enumerate( batches ):
             lgr.debug( "Flatting and filtering dense matrix {0} (sz: {1}) --> {2} - {3}".format( idx, len( batch ), batch[0], batch[len(batch) - 1] ) )
             sam = hl.literal( [ x[ 0 ] for x in batch ], 'array<str>' )
-            print("1.", sam)
-            print("2.", sam.contains( sparse_matrix['s'] ))
+            print("1.", len(sam), sam)
+            print("2.", len( sam.contains( sparse_matrix['s'] ) ), sam.contains( sparse_matrix['s'] ))
             small_matrix = sparse_matrix.filter_cols( sam.contains( sparse_matrix['s'] ) )
+            print("after filter - cols")
             small_matrix = hl.experimental.densify( small_matrix )
+            print("after densify")
             small_matrix = small_matrix.filter_rows( hl.agg.any( small_matrix.LGT.is_non_ref() ) )
-            if first:
-                first = False
-            else:
-                dm = utils.update_version( dm )
+            print("after filter - rows")
+            #if first:
+            #    first = False
+            #else:
+            #    dm = utils.update_version( dm )
             path = '{0}/chrom-{1}-mtx-{2}'.format( dm, chrom, idx )
             lgr.info( 'Writing dense matrix {} to disk ({})'.format( idx, path ) )
             small_matrix.write( path, overwrite = True )

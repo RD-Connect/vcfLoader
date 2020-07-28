@@ -46,7 +46,6 @@ def optionParser(argv):
     for opt, arg in opts:
         if opt in ("-c", "--chrom"):
             chrom = arg
-            print(">>>>>> chromosome: {}".format(chrom))
         elif opt in ("-p", "--path"):
             path = arg
         elif opt in ("-s", "--step"):

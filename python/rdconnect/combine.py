@@ -296,7 +296,7 @@ def create_batches_by_family( experiments, size = 1000 ):
     return rst
 
 
-def createDenseMatrix( sc, sq, url_project, host_project, prefix_hdfs, max_items_batch, dense_matrix_path, sparse_matrix_path, chrom, group, token, gpap_id, gpap_token ):
+def createDenseMatrix( sc, sq, url_project, host_project, prefix_hdfs, max_items_batch, dense_matrix_path, sparse_matrix_path, chrom, group, token, gpap_id, gpap_token, is_playground ):
     lgr = create_logger( 'createDenseMatrix', '' )
 
     print('RUNNING STEP1 - READING FAMILY AND BATCH DEFINITION ACCORDING TO [...]')
@@ -312,7 +312,7 @@ def createDenseMatrix( sc, sq, url_project, host_project, prefix_hdfs, max_items
     lgr.debug( 'Total of {0} experiments'.format( len( experiments_in_matrix ) ) )
 
     # Get all the experiments that have to processed from data-management
-    experiments_in_group = getExperimentByGroup( group, url_project, host_project, token, prefix_hdfs, chrom, max_items_batch )
+    experiments_in_group = getExperimentByGroup( group, url_project, host_project, token, prefix_hdfs, chrom, max_items_batch, is_playground )
     print('experiments_in_group', len( experiments_in_group ))
     print('\t', experiments_in_group[ : 2 ])
     full_ids_in_matrix = [ x for x in experiments_in_group if x[ 'RD_Connect_ID_Experiment' ] in experiments_in_matrix ]

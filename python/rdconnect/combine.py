@@ -345,7 +345,7 @@ def createDenseMatrix( sc, sq, url_project, host_project, prefix_hdfs, max_items
             lgr.debug( "Flatting and filtering dense matrix {0} (sz: {1}) --> {2} - {3}".format( idx, len( batch ), batch[0], batch[len(batch) - 1] ) )
             sam = hl.literal( [ x[ 0 ] for x in batch ], 'array<str>' )
             print("1.", hl.len(sam), sam)
-            print("2.", hl.len( sam.contains( sparse_matrix['s'] ) ), sam.contains( sparse_matrix['s'] ))
+            print("2.", sam.contains( sparse_matrix['s'] ))
             small_matrix = sparse_matrix.filter_cols( sam.contains( sparse_matrix['s'] ) )
             print("after filter - cols")
             small_matrix = hl.experimental.densify( small_matrix )

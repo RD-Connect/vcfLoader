@@ -335,8 +335,6 @@ def createDenseMatrix( sc, sq, url_project, host_project, prefix_hdfs, max_items
     lgr.debug( 'Created {} batches'.format( len( batches ) ) )
     for ii, bat in enumerate(batches):
         print('\t{0} --> {1} --> {2} - {3}', ii, len( bat ), bat[0], bat[len(bat) - 1])
-    
-    return
 
     first = True
     dm = dense_matrix_path

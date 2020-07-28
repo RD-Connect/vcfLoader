@@ -461,6 +461,7 @@ def getExperimentsByFamily( pids, url_project, id_gpap, token_gpap, sort_output 
     """Function to get the IDs from phenotips, from experiments, and from family."""
     print( "{0} ---> {1} / {2}".format( "getExperimentsByFamily", pids[ 0 ], pids[ len(pids) - 1 ] ) )
     url = 'http://rdproto10:8082/phenotips/ExportMultiple'
+    url = 'http://rdcompute3:8082/phenotips/ExportMultiple'
     data=[]
     headers = { 'Content-Type': 'application/json' }
     for i in range(0,(len(pids)//1000)+1) :

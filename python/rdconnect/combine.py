@@ -334,7 +334,7 @@ def createDenseMatrix( sc, sq, url_project, host_project, prefix_hdfs, max_items
     batches = create_batches_by_family( experiments_and_families, 10 )
     lgr.debug( 'Created {} batches'.format( len( batches ) ) )
     for ii, bat in enumerate(batches):
-        print('\tMtx{0}: {1} --> {2} - {3}', ii, len( bat ), bat[0], bat[len(bat) - 1])
+        print('\tBatch {0}: {1} --> {2} - {3}'.format( ii, len( bat ), bat[0], bat[len(bat) - 1]))
 
     first = True
     dm = dense_matrix_path
@@ -344,8 +344,8 @@ def createDenseMatrix( sc, sq, url_project, host_project, prefix_hdfs, max_items
         for idx, batch in enumerate( batches ):
             lgr.debug( "Flatting and filtering dense matrix {0} (sz: {1}) --> {2} - {3}".format( idx, len( batch ), batch[0], batch[len(batch) - 1] ) )
             sam = hl.literal( [ x[ 0 ] for x in batch ], 'array<str>' )
-            print("1.", len(sam), sam)
-            print("2.", len( sam.contains( sparse_matrix['s'] ) ), sam.contains( sparse_matrix['s'] ))
+            print("1.", hl.len(sam), sam)
+            print("2.", hl.len( sam.contains( sparse_matrix['s'] ) ), sam.contains( sparse_matrix['s'] ))
             small_matrix = sparse_matrix.filter_cols( sam.contains( sparse_matrix['s'] ) )
             print("after filter - cols")
             small_matrix = hl.experimental.densify( small_matrix )

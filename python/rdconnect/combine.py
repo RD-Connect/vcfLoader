@@ -331,7 +331,7 @@ def createDenseMatrix( sc, sq, url_project, host_project, prefix_hdfs, max_items
     if none_detected:
         warnings.warn( 'Provided experiment ids got no family assigned. RD-Connect ID used as family ID for those experiments. Original families were of {} while after update are of {}.'.format( x, y ) )
 
-    batches = create_batches_by_family( experiments_and_families, 1000 )
+    batches = create_batches_by_family( experiments_and_families, 2000 )
     lgr.debug( 'Created {} batches'.format( len( batches ) ) )
     for ii, bat in enumerate(batches):
         print('\t{0} --> {1} --> {2} - {3}', ii, len( bat ), bat[0], bat[len(bat) - 1])

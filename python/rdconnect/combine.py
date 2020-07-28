@@ -334,7 +334,7 @@ def createDenseMatrix( sc, sq, url_project, host_project, prefix_hdfs, max_items
     batches = create_batches_by_family( experiments_and_families, 2000 )
     lgr.debug( 'Created {} batches'.format( len( batches ) ) )
     for ii, bat in enumerate(batches):
-        print('\t{0} --> {1} --> {2} - {3}', ii, len( bat ), bat[0], bat[len(bat) - 1])
+        print('\tMtx{0}: {1} --> {2} - {3}', ii, len( bat ), bat[0], bat[len(bat) - 1])
 
     first = True
     dm = dense_matrix_path
@@ -342,7 +342,7 @@ def createDenseMatrix( sc, sq, url_project, host_project, prefix_hdfs, max_items
     log_path = '{0}/log-chrm-{1}'.format( dm, chrom )
     try:
         for idx, batch in enumerate( batches ):
-            lgr.debug( "Flatting and filtering dense matrix {}".format( idx ) )
+            lgr.debug( "Flatting and filtering dense matrix {0} (sz: {1}) --> {2} - {3}".format( idx, len( bat ), bat[0], bat[len(bat) - 1] ) )
             sam = hl.literal( [ x[ 0 ] for x in batch ], 'array<str>' )
             small_matrix = sparse_matrix.filter_cols( sam.contains( sparse_matrix['s'] ) )
             small_matrix = hl.experimental.densify( small_matrix )
@@ -351,8 +351,8 @@ def createDenseMatrix( sc, sq, url_project, host_project, prefix_hdfs, max_items
                 first = False
             else:
                 dm = utils.update_version( dm )
-            path = '{0}/chrm-{1}'.format( dm, chrom )
-            lgr.info( 'Writing dense matrix {} to disk ({})'.format( idx, dm ) )
+            path = '{0}/chrom-{1}-mtx-{2}'.format( dm, chrom, idx )
+            lgr.info( 'Writing dense matrix {} to disk ({})'.format( idx, path ) )
             small_matrix.write( path, overwrite = True )
             lgr.debug( "Ending writing dense matrix" )
             for ff in batch:

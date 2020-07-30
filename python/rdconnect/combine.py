@@ -268,11 +268,13 @@ def create_batches_by_family( experiments, size = 1000 ):
             batch += exp_fam
             cnt += len( exp_fam )
             experiments = [ x for x in experiments if x[ 2 ] != fam ]
+        batch = batch.sort(key = lambda x: x[ 0 ])
         rst += batch
+        mtx += 1
     return rst
 
 
-def create_family_groups(chrom, group, url_project, host_project, token, gpap_id,gpap_token,  prefix_hdfs, max_items_batch, sparse_matrix_path, is_playground):
+def create_family_groups(chrom, group, url_project, host_project, token, gpap_id,gpap_token,  prefix_hdfs, max_items_batch, sparse_matrix_path, dense_matrix_path, is_playground):
     lgr = create_logger('create_family_groups', '')
     chrom = "21"
     lgr.debug('OVERWRITING chrom to chrom-21')
@@ -311,13 +313,14 @@ def create_family_groups(chrom, group, url_project, host_project, token, gpap_id
     lgr.debug( 'Created {} batches'.format( len( batches ) ) )
     #for ii, bat in enumerate(batches):
     #    print('\tBatch {0}: {1} --> {2} - {3}'.format( ii, len( bat ), bat[0], bat[len(bat) - 1]))
-    print(batches)
+    for sam in batches:
+        print(sam)
 
-
-    #rdd = sc.parallelize( files )
-    #experiments = rdd.map( lambda x: Row( RD_Connect_ID = x[ 0 ], Chrom = x[ 1 ], Dense_Path = x[ 2 ] ) )
-    #df = sq.createDataFrame( experiments )
-    #df.repartition( 1 ).write.format( 'csv' ).mode( 'overwrite' ).save( path, header = 'true' )
+    log_path = '{0}/mapping'.format(dense_matrix_path)
+    rdd = sc.parallelize(batches)
+    experiments = rdd.map(lambda x: Row( RD_Connect_ID = x[ 0 ], PhenoTips = x[ 1 ], Family = x[ 2 ], DMatrix = x[ 3 ]))
+    df = sq.createDataFrame(experiments)
+    df.repartition(1).write.format('csv').mode('overwrite').save(log_path, header = 'true')
 
 
 def load_table_log( sq, path ):

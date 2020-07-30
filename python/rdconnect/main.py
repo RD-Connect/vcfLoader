@@ -166,8 +166,10 @@ def main(sqlContext, sc, configuration, chrom, nchroms, step, somaticFlag):
         else:
             sparse_matrix_path = None
         print( "max_items_batch:", max_items_batch )
+        dense_matrix_path = configuration[ 'combine' ][ 'denseMatrix_path' ]
+        print( "dense_matrix_path:", dense_matrix_path )
 
-        combine.create_family_groups(chrom, group, url_project, host_project, token, gpap_id,gpap_token,  prefix_hdfs, max_items_batch, sparse_matrix_path, is_playground)
+        combine.create_family_groups(chrom, group, url_project, host_project, token, gpap_id,gpap_token,  prefix_hdfs, max_items_batch, sparse_matrix_path, dense_matrix_path, is_playground)
         
 
     if ("createDenseMatrix" in step):

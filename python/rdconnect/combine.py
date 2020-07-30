@@ -268,7 +268,7 @@ def create_batches_by_family( experiments, size = 1000 ):
             batch += exp_fam
             cnt += len( exp_fam )
             experiments = [ x for x in experiments if x[ 2 ] != fam ]
-        batch = batch.sort(key = lambda x: x[ 0 ])
+        batch.sort(key = lambda x: x[ 0 ])
         rst += batch
         mtx += 1
     return rst

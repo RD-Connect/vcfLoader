@@ -337,7 +337,7 @@ def load_table_log( sq, path ):
     mapping = []
     for mtx in list(set([ x[3] for x in table ])):
         y = [ x for x in table if x[3] == mtx ]
-        print("\t{} : {} --> {}".format(mtx, y[0], y[len(y)- 1]))
+        print("\t{} / {} : {} --> {}".format(mtx, len(y), y[0], y[len(y)- 1]))
         mapping.append(y)
     print('table rows: {}'.format(len(table)))
     print('mapping len: {}'.format(len(mapping)))

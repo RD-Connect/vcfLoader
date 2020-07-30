@@ -328,7 +328,7 @@ def create_family_groups(sc, sq, chrom, group, url_project, host_project, token,
 def load_table_log( sq, path ):
     #df = sc.read.format( 'csv' ).option( 'header', 'true' ).load( path )
     sparlse_log = sq.read.format( 'csv' ).option( 'header', 'true' ).load( path )
-    table = [ (str(row.RD_Connect_ID), str(row.PhenoTips), str(row.Family), int(str(DMatrix).replace("mtx", ""))) for row in sparlse_log.collect() ]
+    table = [ (str(row.RD_Connect_ID), str(row.PhenoTips), str(row.Family), int(str(row.DMatrix).replace("mtx", ""))) for row in sparlse_log.collect() ]
     # x1 = [ str(x) for x in sparlse_log.select( 'RD_Connect_ID' ).collect() ]
     # x2 = [ str(x) for x in sparlse_log.select( 'PhenoTips' ).collect() ]
     # x3 = [ str(x) for x in sparlse_log.select( 'Family' ).collect() ]

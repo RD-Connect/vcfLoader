@@ -141,6 +141,29 @@ def main(sqlContext, sc, configuration, chrom, nchroms, step, somaticFlag):
             print( "sz_large_batch:", sz_large_batch )
             combine.createSparseMatrix( group, url_project, host_project, token, prefix_hdfs, chrom, sz_small_batch, sz_large_batch, partitions_chromosome, gvcf_store_path, new_gvcf_store_path, gpap_id, gpap_token, is_playground )
 
+    if "createFamilyGroups" in step:
+        print ("step createFamilyGroups")
+        group = configuration[ 'combine' ][ 'group' ]
+        print( "group:", group )
+        url_project = configuration[ 'datamanagement' ][ 'ip' ]
+        print( "url_project:", url_project )
+        host_project = configuration[ 'datamanagement' ][ 'host' ]
+        print( "host_project:", host_project )
+        token = 'Token {0}'.format( configuration[ 'datamanagement' ][ 'token'] )
+        print( "token:", token )
+        gpap_id = configuration[ 'gpap' ][ 'id' ]
+        print( "gpap_id:", gpap_id )
+        gpap_token = configuration[ 'gpap' ][ 'token' ]
+        print( "gpap_token:", gpap_token )
+        prefix_hdfs = configuration[ 'combine' ][ 'prefix_hdfs' ]
+        print( "prefix_hdfs:", prefix_hdfs )
+        if 'max_items_batch' in configuration[ 'combine' ]:
+            max_items_batch = configuration[ 'combine' ][ 'sz_small_batch' ]
+        is_playground = configuration[ 'elasticsearch' ][ 'main_project' ] == 'playground'
+        print( "is_playground:", is_playground )
+
+        combine.create_family_groups(chrom, group, url_project, host_project, token, gpap_id,gpap_token,  prefix_hdfs, max_items_batch, is_playground):
+        
 
     if ("createDenseMatrix" in step):
         print ("step createDenseMatrix")

@@ -254,22 +254,55 @@ def loadGvcf2( hl, experiments, destinationPath, gvcfStorePath, chrom, partition
     comb.write( destinationPath, overwrite = True )
     
 
+def create_batches_by_family( experiments, size = 1000 ):
+    rst = []
+    mtx = 0
+    while len( experiments ) > 0:
+        batch = []
+        cnt = 0
+        while cnt <= size and len( experiments ) > 0:
+            fam = experiments[ 0 ][ 2 ]
+            exp_fam = [ x for x in experiments if x[ 2 ] == fam ]
+            exp_fam = [ x.append('mtx' + str(mtx)) for z in exp_fam]
+            batch += exp_fam
+            cnt += len( exp_fam )
+            experiments = [ x for x in experiments if x[ 2 ] != fam ]
+        rst += batch
+    return rst
 
 
+def create_family_groups(chrom, group, url_project, host_project, token, gpap_id,gpap_token,  prefix_hdfs, max_items_batch, is_playground):
+    # Get all the experiments that have to processed from data-management
+    experiments_in_group = getExperimentByGroup( group, url_project, host_project, token, prefix_hdfs, chrom, max_items_batch, is_playground )
+    print('experiments_in_group', len( experiments_in_group ))
+    print('\t', experiments_in_group[ : 2 ])
+    full_ids_in_matrix = [ x for x in experiments_in_group if x[ 'RD_Connect_ID_Experiment' ] in experiments_in_matrix ]
+    print('full_ids_in_matrix', len( full_ids_in_matrix ))
+    print('\t', full_ids_in_matrix[ : 2 ])
+    experiments_and_families = getExperimentsByFamily( full_ids_in_matrix, url_project, gpap_id, gpap_token )
 
-# def combine_two_dataset(gvcf_store_1_path_chrom, gvcf_store_2_path_chrom, destination_path):
-#     print("[combine_two_dataset]: merging " + gvcf_store_1_path_chrom + " with " + gvcf_store_2_path_chrom + " ending at " + destination_path)
-#     from hail.experimental.vcf_combiner import combine_gvcfs
-#     gvcf_store_1 = hl.read_matrix_table(gvcf_store_1_path_chrom)
-#     gvcf_store_2 = hl.read_matrix_table(gvcf_store_2_path_chrom)
-#     comb = combine_gvcfs( [ gvcf_store_1 ] + [gvcf_store_2] )
-#     comb.write(destination_path, overwrite = True )
+    # Relocate experiments with no family
+    none_detected = False
+    x = len( list( set( [ x[ 2 ] for x in experiments_and_families ] ) ) )
+    for ii in range( len( experiments_and_families ) ):
+        if experiments_and_families[ ii ][ 2 ] == '---':
+            none_detected = True
+            experiments_and_families[ ii ][ 2 ] = experiments_and_families[ ii ][ 0 ]
+    y = len( list( set( [ x[ 2 ] for x in experiments_and_families ] ) ) )
+    if none_detected:
+        warnings.warn( 'Provided experiment ids got no family assigned. RD-Connect ID used as family ID for those experiments. Original families were of {} while after update are of {}.'.format( x, y ) )
 
-def save_table_log( sc, sq, files, path ):
-    rdd = sc.parallelize( files )
-    experiments = rdd.map( lambda x: Row( RD_Connect_ID = x[ 0 ], Chrom = x[ 1 ], Dense_Path = x[ 2 ] ) )
-    df = sq.createDataFrame( experiments )
-    df.repartition( 1 ).write.format( 'csv' ).mode( 'overwrite' ).save( path, header = 'true' )
+    batches = create_batches_by_family( experiments_and_families, 1000 )
+    lgr.debug( 'Created {} batches'.format( len( batches ) ) )
+    #for ii, bat in enumerate(batches):
+    #    print('\tBatch {0}: {1} --> {2} - {3}'.format( ii, len( bat ), bat[0], bat[len(bat) - 1]))
+    print(batches[0])
+
+
+    #rdd = sc.parallelize( files )
+    #experiments = rdd.map( lambda x: Row( RD_Connect_ID = x[ 0 ], Chrom = x[ 1 ], Dense_Path = x[ 2 ] ) )
+    #df = sq.createDataFrame( experiments )
+    #df.repartition( 1 ).write.format( 'csv' ).mode( 'overwrite' ).save( path, header = 'true' )
 
 
 def load_table_log( sq, path ):
@@ -281,25 +314,9 @@ def load_table_log( sq, path ):
     return list( zip( x, y ) )
 
 
-def create_batches_by_family( experiments, size = 1000 ):
-    rst = []
-    while len( experiments ) > 0:
-        batch = []
-        cnt = 0
-        while cnt <= size and len( experiments ) > 0:
-            fam = experiments[ 0 ][ 2 ]
-            exp_fam = [ x for x in experiments if x[ 2 ] == fam ]
-            batch += exp_fam
-            cnt += len( exp_fam )
-            experiments = [ x for x in experiments if x[ 2 ] != fam ]
-        rst.append( batch )
-    return rst
-
 
 def createDenseMatrix( sc, sq, url_project, host_project, prefix_hdfs, max_items_batch, dense_matrix_path, sparse_matrix_path, chrom, group, token, gpap_id, gpap_token, is_playground ):
     lgr = create_logger( 'createDenseMatrix', '' )
-
-    print('RUNNING STEP1 - READING FAMILY AND BATCH DEFINITION ACCORDING TO [...]')
 
     if sparse_matrix_path is None:
         raise 'No information on "sparse_matrix_path" was provided.'
@@ -368,102 +385,11 @@ def createDenseMatrix( sc, sq, url_project, host_project, prefix_hdfs, max_items
 
     save_table_log( sc, sq, log_files, log_path )
 
-    # experiments_in_group = getExperimentByGroup( group, url_project, token, prefix_hdfs, chrom, max_items_batch )
-    # full_ids_in_matrix = [ x for x in experiments_in_group if x[ 'RD_Connect_ID_Experiment' ] in experiments_in_matrix ]
-    # experiments_and_families = getExperimentsByFamily( full_ids_in_matrix, url_project, gpap_id, gpap_token )
-
-    # experiments_by_family = {}
-    # for fam in list( set( [ x[ 'Family' ] for x in experiments_and_families ] ) ):
-    #     experiments_by_family[ fam ] = [ x[ 'Experiment' ] for x in experiments_and_families if x[ 'Family' ] == fam ]
-    # lgr.debug( 'Total of {0} families'.format( len( experiments_by_family.keys() ) ) )
-
-    # x = len( experiments_by_family.keys() )
-    # none_fam = None in experiments_by_family.keys()
-    # if none_fam:
-    #     z = '; '.join( experiments_by_family[ None ] )
-    #     for ind in experiments_by_family[ None ]:
-    #         if type( ind ) == "list":
-    #             experiments_by_family[ ind ] = ind
-    #         else:
-    #             experiments_by_family[ ind ] = [ ind ]
-    #     y = len( experiments_by_family.keys() )
-    #     warnings.warn( 'Provided experiment ids got no family assigned ({0}). Number of original families was of "{1}" and of "{2}" after removing "None".'.format( z, x, y ) )
-
-    # size = 100
-    # chunks = divideChunksFamily( experiments_by_family, size = size )
-    # lgr.debug( 'Number of dense matrix to be created: {0} (max size of {1})'.format( len( chunks ), size ) )
-
-    # first = True
-    # dm = denseMatrix_path
-    # for idx, chunk in enumerate( chunks ):
-    #     lgr.info( 'Filtering sparse matrix no. {0} with {1} families'.format( idx, len( chunk ) ) )
-    #     dense_by_family = []
-    #     for idx2, fam in enumerate( chunk ):
-    #         lgr.debug( 'Processing family "{0}/{1}"'.format( idx2, fam ) )
-    #         sam = hl.literal( experiments_by_family[ fam ], 'array<str>' ) # hl.literal( experiments_in_matrix[ 0:500 ], 'array<str>' )
-    #         familyMatrix = sparseMatrix.filter_cols( sam.contains( sparseMatrix['s'] ) )
-    #         familyMatrix = hl.experimental.densify( familyMatrix )
-    #         # familyMatrix = familyMatrix.annotate_rows( nH = hl.agg.count_where( familyMatrix.LGT.is_hom_ref() ) )
-    #         # familyMatrix = familyMatrix.filter_rows( familyMatrix.nH < familyMatrix.count_cols() )
-    #         familyMatrix = familyMatrix.filter_rows( hl.agg.any( familyMatrix.LGT.is_non_ref() ) )
-    #         familyMatrix.write( '{0}/chrm-{1}-family/{2}'.format( denseMatrix_path, chrom, fam ), overwrite = True )
-    #         dense_by_family.append( familyMatrix )
-
-    #     lgr.info( 'Flatting dense matrix no. {0} with {1} families'.format( idx, len( chunk ) ) )
-    #     mts_ = dense_by_family[:]
-    #     ii = 0
-    #     while len( mts_ ) > 1:
-    #         ii += 1
-    #         lgr.debug( 'Compression {0}/{1}'.format( ii, len( mts_ ) ) )
-    #         tmp = []
-    #         for jj in range( 0, len(mts_), 2 ):
-    #             if jj+1 < len(mts_):
-    #                 tmp.append( full_outer_join_mt( mts_[ jj ], mts_[ jj+1 ] ) )
-    #             else:
-    #                 tmp.append( mts_[ jj ] )
-    #         mts_ = tmp[:]
-    #     [dense_matrix] = mts_
-
-    #     if first:
-    #         first = False
-    #     else:
-    #         dm = utils.update_version( dm )
-    #     lgr.info( 'Writing dense matrix to disk ({0})'.format( dm ) )
-    #     dense_matrix.write( '{0}/chrm-{1}'.format( dm, chrom ), overwrite = True )
-    #     #familyMatrix.write( '{0}/chrm-{1}'.format( denseMatrix_path, chrom ), overwrite = True )
-
-    
-
-
-
-# def getExperimentsByFamily( pids, url_project, id_gpap, token_gpap, sort_output = True ):
-#     """Function to get the IDs from phenotips, from experiments, and from family."""
-#     print( "{0} ---> {1} / {2}".format( "getExperimentsByFamily", pids[ 0 ], pids[ len(pids) - 1 ] ) )
-#     url = 'http://rdproto10:8082/phenotips/ExportMultiple'
-#     headers = { 'Content-Type': 'application/json' }
-#     body = { 'patients': [ { 'id': x[ 'Phenotips_ID' ] } for x in pids ] }
-#     resp = requests.post( url, headers = headers, json = body, verify = False )
-#     data = resp.json()
-    
-#     parsed = {}
-#     for elm in data:
-#         pid = list( elm.keys() )[ 0 ]
-#         if type( elm[ pid ] ) == str:
-#             fam = '---'
-#         else: 
-#             fam = elm[ pid ][ 'family' ] if 'family' in elm[ pid ].keys() else '---'
-#         parsed[ pid ] = fam
-
-#     rst = [ [ pak[ 'RD_Connect_ID_Experiment' ], pak[ 'Phenotips_ID' ], parsed[ pak[ 'Phenotips_ID' ] ] ] for pak in pids ]
-#     if sort_output:
-#         return sorted( rst, key = lambda x: x[ 2 ] )
-#     else:
-#         return rst
 
 def getExperimentsByFamily( pids, url_project, id_gpap, token_gpap, sort_output = True ):
     """Function to get the IDs from phenotips, from experiments, and from family."""
     print( "{0} ---> {1} / {2}".format( "getExperimentsByFamily", pids[ 0 ], pids[ len(pids) - 1 ] ) )
-    url = 'http://rdproto10:8082/phenotips/ExportMultiple'
+    #url = 'http://rdproto10:8082/phenotips/ExportMultiple'
     url = 'http://rdcompute3:8082/phenotips/ExportMultiple'
     data=[]
     headers = { 'Content-Type': 'application/json' }

@@ -316,7 +316,7 @@ def create_family_groups(sc, sq, chrom, group, url_project, host_project, token,
     #for ii, bat in enumerate(batches):
     #    print('\tBatch {0}: {1} --> {2} - {3}'.format( ii, len( bat ), bat[0], bat[len(bat) - 1]))
     for sam in batches:
-        print(sam)
+        print(sam[0], "\t", sam[1], "\t", sam[2], "\t", sam[3])
 
     log_path = '{0}/mapping'.format(dense_matrix_path)
     rdd = sc.parallelize(batches)

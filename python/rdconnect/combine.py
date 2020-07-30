@@ -297,6 +297,7 @@ def create_family_groups(sc, sq, chrom, group, url_project, host_project, token,
     print('full_ids_in_matrix', len( full_ids_in_matrix ))
     print('\t', full_ids_in_matrix[ : 2 ])
     experiments_and_families = getExperimentsByFamily( full_ids_in_matrix, url_project, gpap_id, gpap_token )
+    print('experiments_and_families', len( experiments_and_families ))
 
     # Relocate experiments with no family
     none_detected = False
@@ -308,6 +309,7 @@ def create_family_groups(sc, sq, chrom, group, url_project, host_project, token,
     y = len( list( set( [ x[ 2 ] for x in experiments_and_families ] ) ) )
     if none_detected:
         warnings.warn( 'Provided experiment ids got no family assigned. RD-Connect ID used as family ID for those experiments. Original families were of {} while after update are of {}.'.format( x, y ) )
+    experiments_and_families.sort(key=lambda x: x[ 0 ])
 
     batches = create_batches_by_family( experiments_and_families, 1000 )
     lgr.debug( 'Created {} batches'.format( len( batches ) ) )

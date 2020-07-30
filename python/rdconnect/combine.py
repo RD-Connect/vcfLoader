@@ -328,82 +328,94 @@ def create_family_groups(sc, sq, chrom, group, url_project, host_project, token,
 def load_table_log( sq, path ):
     #df = sc.read.format( 'csv' ).option( 'header', 'true' ).load( path )
     sparlse_log = sq.read.format( 'csv' ).option( 'header', 'true' ).load( path )
-    x = sparlse_log.select( 'RD_Connect_ID' ).collect()
-    y = sparlse_log.select( 'Dense_Path' ).collect()
-    print( 'load_table_log : {}'.format( path ) )
-    return list( zip( x, y ) )
+    x1 = sparlse_log.select( 'RD_Connect_ID' ).collect()
+    x2 = sparlse_log.select( 'PhenoTips' ).collect()
+    x3 = sparlse_log.select( 'Family' ).collect()
+    x4 = sparlse_log.select( 'DMatrix' ).collect()
+    table = list( zip( x1, x2, x3, x4 ) )
+    mapping = []
+    for mtx in list(set([ x[3] for x in table ])):
+        y = [ x for x in table if x[3] == mtx ]
+        print("\t{} : {} --> {}".format(mtx, y[0], y[len(y)- 1]))
+        mapping.append(y)
+    print('table rows: {}'.format(len(table)))
+    print('mapping len: {}'.format(len(mapping)))
+    return mapping
 
 
 
 def createDenseMatrix( sc, sq, url_project, host_project, prefix_hdfs, max_items_batch, dense_matrix_path, sparse_matrix_path, chrom, group, token, gpap_id, gpap_token, is_playground ):
     lgr = create_logger( 'createDenseMatrix', '' )
 
-    if sparse_matrix_path is None:
-        raise 'No information on "sparse_matrix_path" was provided.'
+    mapping = load_table_log(sc, '{0}/mapping'.format(dense_matrix_path))
+
+
+    # if sparse_matrix_path is None:
+    #     raise 'No information on "sparse_matrix_path" was provided.'
     
-    path_matrix = '{0}/chrom-{1}'.format( sparse_matrix_path, chrom )
-    lgr.debug( 'READING from in {0}'.format( path_matrix ) )
-    sparse_matrix = hl.read_matrix_table( path_matrix )
+    # path_matrix = '{0}/chrom-{1}'.format( sparse_matrix_path, chrom )
+    # lgr.debug( 'READING from in {0}'.format( path_matrix ) )
+    # sparse_matrix = hl.read_matrix_table( path_matrix )
     
-    experiments_in_matrix = [ x.get( 's' ) for x in sparse_matrix.col.collect() ]
-    lgr.debug( 'Total of {0} experiments'.format( len( experiments_in_matrix ) ) )
+    # experiments_in_matrix = [ x.get( 's' ) for x in sparse_matrix.col.collect() ]
+    # lgr.debug( 'Total of {0} experiments'.format( len( experiments_in_matrix ) ) )
 
-    # Get all the experiments that have to processed from data-management
-    experiments_in_group = getExperimentByGroup( group, url_project, host_project, token, prefix_hdfs, chrom, max_items_batch, is_playground )
-    print('experiments_in_group', len( experiments_in_group ))
-    print('\t', experiments_in_group[ : 2 ])
-    full_ids_in_matrix = [ x for x in experiments_in_group if x[ 'RD_Connect_ID_Experiment' ] in experiments_in_matrix ]
-    print('full_ids_in_matrix', len( full_ids_in_matrix ))
-    print('\t', full_ids_in_matrix[ : 2 ])
-    experiments_and_families = getExperimentsByFamily( full_ids_in_matrix, url_project, gpap_id, gpap_token )
+    # # Get all the experiments that have to processed from data-management
+    # experiments_in_group = getExperimentByGroup( group, url_project, host_project, token, prefix_hdfs, chrom, max_items_batch, is_playground )
+    # print('experiments_in_group', len( experiments_in_group ))
+    # print('\t', experiments_in_group[ : 2 ])
+    # full_ids_in_matrix = [ x for x in experiments_in_group if x[ 'RD_Connect_ID_Experiment' ] in experiments_in_matrix ]
+    # print('full_ids_in_matrix', len( full_ids_in_matrix ))
+    # print('\t', full_ids_in_matrix[ : 2 ])
+    # experiments_and_families = getExperimentsByFamily( full_ids_in_matrix, url_project, gpap_id, gpap_token )
 
-    # Relocate experiments with no family
-    none_detected = False
-    x = len( list( set( [ x[ 2 ] for x in experiments_and_families ] ) ) )
-    for ii in range( len( experiments_and_families ) ):
-        if experiments_and_families[ ii ][ 2 ] == '---':
-            none_detected = True
-            experiments_and_families[ ii ][ 2 ] = experiments_and_families[ ii ][ 0 ]
-    y = len( list( set( [ x[ 2 ] for x in experiments_and_families ] ) ) )
-    if none_detected:
-        warnings.warn( 'Provided experiment ids got no family assigned. RD-Connect ID used as family ID for those experiments. Original families were of {} while after update are of {}.'.format( x, y ) )
+    # # Relocate experiments with no family
+    # none_detected = False
+    # x = len( list( set( [ x[ 2 ] for x in experiments_and_families ] ) ) )
+    # for ii in range( len( experiments_and_families ) ):
+    #     if experiments_and_families[ ii ][ 2 ] == '---':
+    #         none_detected = True
+    #         experiments_and_families[ ii ][ 2 ] = experiments_and_families[ ii ][ 0 ]
+    # y = len( list( set( [ x[ 2 ] for x in experiments_and_families ] ) ) )
+    # if none_detected:
+    #     warnings.warn( 'Provided experiment ids got no family assigned. RD-Connect ID used as family ID for those experiments. Original families were of {} while after update are of {}.'.format( x, y ) )
 
-    batches = create_batches_by_family( experiments_and_families, 1000 )
-    lgr.debug( 'Created {} batches'.format( len( batches ) ) )
-    for ii, bat in enumerate(batches):
-        print('\tBatch {0}: {1} --> {2} - {3}'.format( ii, len( bat ), bat[0], bat[len(bat) - 1]))
+    # batches = create_batches_by_family( experiments_and_families, 1000 )
+    # lgr.debug( 'Created {} batches'.format( len( batches ) ) )
+    # for ii, bat in enumerate(batches):
+    #     print('\tBatch {0}: {1} --> {2} - {3}'.format( ii, len( bat ), bat[0], bat[len(bat) - 1]))
 
-    first = True
-    dm = dense_matrix_path
-    log_files = []
-    log_path = '{0}/log-chrm-{1}'.format( dm, chrom )
-    try:
-        for idx, batch in enumerate( batches ):
-            lgr.debug( "Flatting and filtering dense matrix {0} (sz: {1}) --> {2} - {3}".format( idx, len( batch ), batch[0], batch[len(batch) - 1] ) )
-            sam = hl.literal( [ x[ 0 ] for x in batch ], 'array<str>' )
-            print("1.", hl.len(sam), sam)
-            print("2.", sam.contains( sparse_matrix['s'] ))
-            small_matrix = sparse_matrix.filter_cols( sam.contains( sparse_matrix['s'] ) )
-            print("after filter - cols")
-            small_matrix = hl.experimental.densify( small_matrix )
-            print("after densify")
-            small_matrix = small_matrix.filter_rows( hl.agg.any( small_matrix.LGT.is_non_ref() ) )
-            print("after filter - rows")
-            #if first:
-            #    first = False
-            #else:
-            #    dm = utils.update_version( dm )
-            path = '{0}/chrom-{1}-mtx-{2}'.format( dm, chrom, idx )
-            lgr.info( 'Writing dense matrix {} to disk ({})'.format( idx, path ) )
-            small_matrix.write( path, overwrite = True )
-            lgr.debug( "Ending writing dense matrix" )
-            for ff in batch:
-                log_files.append( ( ff[ 0 ], chrom, path ) )
-    except Exception as ex:
-        save_table_log( sc, sq, log_files, log_path )
-        raise ex
+    # first = True
+    # dm = dense_matrix_path
+    # log_files = []
+    # log_path = '{0}/log-chrm-{1}'.format( dm, chrom )
+    # try:
+    #     for idx, batch in enumerate( batches ):
+    #         lgr.debug( "Flatting and filtering dense matrix {0} (sz: {1}) --> {2} - {3}".format( idx, len( batch ), batch[0], batch[len(batch) - 1] ) )
+    #         sam = hl.literal( [ x[ 0 ] for x in batch ], 'array<str>' )
+    #         print("1.", hl.len(sam), sam)
+    #         print("2.", sam.contains( sparse_matrix['s'] ))
+    #         small_matrix = sparse_matrix.filter_cols( sam.contains( sparse_matrix['s'] ) )
+    #         print("after filter - cols")
+    #         small_matrix = hl.experimental.densify( small_matrix )
+    #         print("after densify")
+    #         small_matrix = small_matrix.filter_rows( hl.agg.any( small_matrix.LGT.is_non_ref() ) )
+    #         print("after filter - rows")
+    #         #if first:
+    #         #    first = False
+    #         #else:
+    #         #    dm = utils.update_version( dm )
+    #         path = '{0}/chrom-{1}-mtx-{2}'.format( dm, chrom, idx )
+    #         lgr.info( 'Writing dense matrix {} to disk ({})'.format( idx, path ) )
+    #         small_matrix.write( path, overwrite = True )
+    #         lgr.debug( "Ending writing dense matrix" )
+    #         for ff in batch:
+    #             log_files.append( ( ff[ 0 ], chrom, path ) )
+    # except Exception as ex:
+    #     save_table_log( sc, sq, log_files, log_path )
+    #     raise ex
 
-    save_table_log( sc, sq, log_files, log_path )
+    # save_table_log( sc, sq, log_files, log_path )
 
 
 def getExperimentsByFamily( pids, url_project, id_gpap, token_gpap, sort_output = True ):

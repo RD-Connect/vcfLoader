@@ -161,8 +161,13 @@ def main(sqlContext, sc, configuration, chrom, nchroms, step, somaticFlag):
             max_items_batch = configuration[ 'combine' ][ 'sz_small_batch' ]
         is_playground = configuration[ 'elasticsearch' ][ 'main_project' ] == 'playground'
         print( "is_playground:", is_playground )
+        if 'gvcf_store_path' in configuration[ 'combine' ].keys():
+            gvcf_store_path = configuration[ 'combine' ][ 'gvcf_store_path' ]
+        else:
+            gvcf_store_path = None
+        print( "max_items_batch:", max_items_batch )
 
-        combine.create_family_groups(chrom, group, url_project, host_project, token, gpap_id,gpap_token,  prefix_hdfs, max_items_batch, is_playground)
+        combine.create_family_groups(chrom, group, url_project, host_project, token, gpap_id,gpap_token,  prefix_hdfs, max_items_batch, sparse_matrix_path, is_playground)
         
 
     if ("createDenseMatrix" in step):

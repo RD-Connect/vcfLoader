@@ -271,7 +271,21 @@ def create_batches_by_family( experiments, size = 1000 ):
     return rst
 
 
-def create_family_groups(chrom, group, url_project, host_project, token, gpap_id,gpap_token,  prefix_hdfs, max_items_batch, is_playground):
+def create_family_groups(chrom, group, url_project, host_project, token, gpap_id,gpap_token,  prefix_hdfs, max_items_batch, sparse_matrix_path, is_playground):
+    lgr = create_logger('create_family_groups', '')
+    chrom = "21"
+    lgr.debug('OVERWRITING chrom to chrom-21')
+
+    if sparse_matrix_path is None:
+        raise 'No information on "sparse_matrix_path" was provided.'
+    
+    path_matrix = '{0}/chrom-{1}'.format( sparse_matrix_path, chrom )
+    lgr.debug( 'READING from in {0}'.format( path_matrix ) )
+    sparse_matrix = hl.read_matrix_table( path_matrix )
+    
+    experiments_in_matrix = [ x.get( 's' ) for x in sparse_matrix.col.collect() ]
+    lgr.debug('Total of {0} experiments'.format( len( experiments_in_matrix ) ))
+
     # Get all the experiments that have to processed from data-management
     experiments_in_group = getExperimentByGroup( group, url_project, host_project, token, prefix_hdfs, chrom, max_items_batch, is_playground )
     print('experiments_in_group', len( experiments_in_group ))
@@ -325,7 +339,7 @@ def createDenseMatrix( sc, sq, url_project, host_project, prefix_hdfs, max_items
     lgr.debug( 'READING from in {0}'.format( path_matrix ) )
     sparse_matrix = hl.read_matrix_table( path_matrix )
     
-    experiments_in_matrix = [ x.get( 's' ) for x in sparse_matrix.col.collect() ]    
+    experiments_in_matrix = [ x.get( 's' ) for x in sparse_matrix.col.collect() ]
     lgr.debug( 'Total of {0} experiments'.format( len( experiments_in_matrix ) ) )
 
     # Get all the experiments that have to processed from data-management

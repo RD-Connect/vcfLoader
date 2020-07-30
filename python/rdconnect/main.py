@@ -162,7 +162,7 @@ def main(sqlContext, sc, configuration, chrom, nchroms, step, somaticFlag):
         is_playground = configuration[ 'elasticsearch' ][ 'main_project' ] == 'playground'
         print( "is_playground:", is_playground )
 
-        combine.create_family_groups(chrom, group, url_project, host_project, token, gpap_id,gpap_token,  prefix_hdfs, max_items_batch, is_playground):
+        combine.create_family_groups(chrom, group, url_project, host_project, token, gpap_id,gpap_token,  prefix_hdfs, max_items_batch, is_playground)
         
 
     if ("createDenseMatrix" in step):

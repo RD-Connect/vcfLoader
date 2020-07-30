@@ -274,7 +274,7 @@ def create_batches_by_family( experiments, size = 1000 ):
     return rst
 
 
-def create_family_groups(chrom, group, url_project, host_project, token, gpap_id,gpap_token,  prefix_hdfs, max_items_batch, sparse_matrix_path, dense_matrix_path, is_playground):
+def create_family_groups(sc, sq, chrom, group, url_project, host_project, token, gpap_id,gpap_token,  prefix_hdfs, max_items_batch, sparse_matrix_path, dense_matrix_path, is_playground):
     lgr = create_logger('create_family_groups', '')
     chrom = "21"
     lgr.debug('OVERWRITING chrom to chrom-21')

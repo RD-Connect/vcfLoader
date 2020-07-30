@@ -328,11 +328,12 @@ def create_family_groups(sc, sq, chrom, group, url_project, host_project, token,
 def load_table_log( sq, path ):
     #df = sc.read.format( 'csv' ).option( 'header', 'true' ).load( path )
     sparlse_log = sq.read.format( 'csv' ).option( 'header', 'true' ).load( path )
-    x1 = [ str(x) for x in sparlse_log.select( 'RD_Connect_ID' ).collect() ]
-    x2 = [ str(x) for x in sparlse_log.select( 'PhenoTips' ).collect() ]
-    x3 = [ str(x) for x in sparlse_log.select( 'Family' ).collect() ]
-    x4 = [ str(x) for x in sparlse_log.select( 'DMatrix' ).collect() ]
-    table = list( zip( x1, x2, x3, x4 ) )
+    table = [ (str(row.RD_Connect_ID), str(row.PhenoTips), str(row.Family), int(str(DMatrix).replace("mtx", ""))) for row in sparlse_log.collect() ]
+    # x1 = [ str(x) for x in sparlse_log.select( 'RD_Connect_ID' ).collect() ]
+    # x2 = [ str(x) for x in sparlse_log.select( 'PhenoTips' ).collect() ]
+    # x3 = [ str(x) for x in sparlse_log.select( 'Family' ).collect() ]
+    # x4 = [ str(x) for x in sparlse_log.select( 'DMatrix' ).collect() ]
+    # table = list( zip( x1, x2, x3, x4 ) )
     mapping = []
     for mtx in list(set([ x[3] for x in table ])):
         y = [ x for x in table if x[3] == mtx ]
@@ -350,9 +351,17 @@ def createDenseMatrix( sc, sq, url_project, host_project, prefix_hdfs, max_items
 
     mapping = load_table_log(sq, '{0}/mapping'.format(dense_matrix_path))
 
-    dm = dense_matrix_path
-    log_files = []
-    log_path = '{0}/log-chrm-{1}'.format( dm, chrom )
+
+    if sparse_matrix_path is None:
+        raise 'No information on "sparse_matrix_path" was provided.'
+    
+    path_matrix = '{0}/chrom-{1}'.format( sparse_matrix_path, chrom )
+    lgr.debug( 'READING from in {0}'.format( path_matrix ) )
+    sparse_matrix = hl.read_matrix_table( path_matrix )
+    
+    experiments_in_matrix = [ x.get( 's' ) for x in sparse_matrix.col.collect() ]
+    lgr.debug('Total of {0} experiments'.format( len( experiments_in_matrix ) ))
+
     try:
         for idx, batch in enumerate( mapping ):
             lgr.debug( "Flatting and filtering dense matrix {0} (sz: {1}) --> {2} - {3}".format( idx, len( batch ), batch[0], batch[len(batch) - 1] ) )
@@ -365,12 +374,10 @@ def createDenseMatrix( sc, sq, url_project, host_project, prefix_hdfs, max_items
             print("after densify")
             small_matrix = small_matrix.filter_rows( hl.agg.any( small_matrix.LGT.is_non_ref() ) )
             print("after filter - rows")
-            path = '{0}/chrom-{1}-mtx-{2}'.format( dm, chrom, idx )
+            path = '{0}/chrom-{1}-mtx-{2}'.format( dense_matrix_path, chrom, idx )
             lgr.info( 'Writing dense matrix {} to disk ({})'.format( idx, path ) )
             small_matrix.write( path, overwrite = True )
             lgr.debug( "Ending writing dense matrix" )
-            for ff in batch:
-                log_files.append( ( ff[ 0 ], chrom, path ) )
     except Exception as ex:
         raise ex
 

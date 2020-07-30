@@ -263,7 +263,7 @@ def create_batches_by_family( experiments, size = 1000 ):
         while cnt <= size and len( experiments ) > 0:
             fam = experiments[ 0 ][ 2 ]
             exp_fam = [ x for x in experiments if x[ 2 ] == fam ]
-            exp_fam = [ x.append('mtx' + str(mtx)) for z in exp_fam]
+            exp_fam = [ x.append('mtx' + str(mtx)) for x in exp_fam]
             batch += exp_fam
             cnt += len( exp_fam )
             experiments = [ x for x in experiments if x[ 2 ] != fam ]

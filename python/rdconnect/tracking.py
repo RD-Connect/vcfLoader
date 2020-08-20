@@ -88,7 +88,7 @@ def update_dm(initial_vcf, index_name, data_ip, data_url, data_token, field):
 		raise Exception("[ERROR]: (update_dm + {}) Invalid field to be updated in data data-management.".format(field))
 
 	#url = "https://platform.rd-connect.eu/datamanagement/api/statusbyexperiment/?experiment="
-	uri = "/datamanagement/api/statusbyexperiment/?experiment="
+	uri = "/datamanagement/api/statusbyexperiment/?forceupdate=true&experiment="
 	url = "https://" + data_ip + uri
 	headers = { 'accept': 'application/json', 'Content-Type': 'application/json', 'Authorization': 'Token ' + data_token, "Host": data_url }
 	data = "{\"" + field + "\":\"pass\"}"

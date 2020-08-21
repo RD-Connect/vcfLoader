@@ -42,7 +42,7 @@ def update_data_last_index(host, port, num_shards, num_replicas, user, pwd, data
 
 def update_dm_index(initial_vcf, index_name, data_ip, data_url, data_token):
 	#url = "https://platform.rd-connect.eu/datamanagement/api/statusbyexperiment/?experiment="
-	uri = "/datamanagement/api/statusbyexperiment/?experiment="
+	uri = "/datamanagement/api/statusbyexperiment/?forceupdate=true&experiment="
 	url = "https://" + data_ip + uri
 	headers = { 'accept': 'application/json', 'Content-Type': 'application/json', 'Authorization': 'Token ' + data_token, "Host": data_url }
 	data = "{\"dataset\":\"" + index_name + "\"}"

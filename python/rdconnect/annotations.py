@@ -34,15 +34,7 @@ def importInternalFreq(hl, originPath, destinationPath, nPartitions):
     print('[importInternalFreq] - originPath: {0}'.format(originPath))
     vcf = hl.import_vcf(originPath, force_bgz = True, array_elements_required = False, min_partitions = 2)
     vcf = hl.split_multi_hts(vcf)
-    vcf_2 = vcf.transmute_entries(sample = hl.struct(
-        sample = vcf.s,
-        ad = vcf.AD[1] / hl.sum(vcf.AD),
-        dp = vcf.DP,
-        gtInt = vcf.GT,
-        gt = hl.str(vcf.GT),
-        gq = vcf.GQ
-    ))
-    vcf_2 = vcf_2.annotate_rows(
+    vcf_2 = vcf.annotate_rows(
         samples_germline = hl.filter(lambda x: (x.dp > MIN_DP) & (x.gq > MIN_GQ), hl.agg.collect(vcf_2.sample))
     )
     vcf_2 = vcf_2.annotate_rows(
@@ -53,9 +45,7 @@ def importInternalFreq(hl, originPath, destinationPath, nPartitions):
         num = hl.sum(hl.map(lambda x: x.gtInt.unphased_diploid_gt_index(), vcf_2.samples_germline)),
         dem = hl.sum(hl.map(lambda x: 2, hl.filter(lambda x: x.dp > MIN_DP, vcf_2.samples_germline)))
     )
-    vcf_3 = vcf_2.drop('rsid','qual','filters','info', 'sample', 'samples_germline')\
-        .rows()
-    vcf_3.key_by(vcf_3.locus, vcf_3.alleles).distinct().write(destinationPath, overwrite = True)
+    vcf_2.write(destinationPath, overwrite = True)
     print('[importInternalFreq] - destinationPath: {0}'.format(destinationPath))
 
 
@@ -140,7 +130,8 @@ def importGermline(hl, originPath, sourcePath, destinationPath, nPartitions):
             somatic = hl.read_table(originPath)
             vcf = merge(hl,vcf,somatic)
         print ("[INFO]:   . Output VCF file will be saved to '{}'".format(destinationPath))
-        vcf.key_by(vcf.locus,vcf.alleles).distinct().write(destinationPath,overwrite=True)
+        #vcf.key_by(vcf.locus,vcf.alleles).distinct().write(destinationPath,overwrite=True)
+        vcf.write(destinationPath, overwrite=True)
         return True
     except ValueError:
         print (ValueError)
@@ -422,7 +413,7 @@ def annotateVEP(hl, variants, destinationPath, vepPath, nPartitions):
     print("Running vep")
     print("origin is ", variants, vepPath)
     print("destination is", destinationPath)
-    varAnnotated = hl.vep(variants,vepPath)
+    varAnnotated = hl.vep(variants, vepPath)
     varAnnotated = varAnnotated.annotate(effs=hl.cond(hl.is_defined(varAnnotated.vep.transcript_consequences),transcript_annotations(hl,varAnnotated.vep.transcript_consequences),intergenic_annotations(hl,varAnnotated.vep.intergenic_consequences)),
                                          rs = varAnnotated.vep.colocated_variants[0].id)
     varAnnotated.drop("vep") \

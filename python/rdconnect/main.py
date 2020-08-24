@@ -304,7 +304,7 @@ def main(sqlContext, sc, configuration, chrom, nchroms, step, somaticFlag):
     if ("annotateVEP" in step):
         print ("step annotate VEP (output: {})".format(utils.buildDestinationVEP(destination, fileName, somaticFlag)))
         print ("source file is " + current_dir)
-        variants = hl.read_table(current_dir)
+        variants = hl.methods.read_matrix_table(current_dir)
         annotations.annotateVEP(hl,variants, utils.buildDestinationVEP(destination, fileName, somaticFlag), configuration["vep"], number_partitions)
         current_dir = utils.buildDestinationVEP(destination, fileName, somaticFlag)
             

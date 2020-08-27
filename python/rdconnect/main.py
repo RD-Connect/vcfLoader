@@ -363,7 +363,7 @@ def main(sqlContext, sc, configuration, chrom, nchroms, step, somaticFlag):
     if ("transform" in step):
         print ("step transform (output: {})".format(utils.buildDestinationTransform(destination, somaticFlag)))
         print ("loading from " + utils.buildDestinationGnomADEx(destination, fileName, somaticFlag))
-        annotated = hl.read_table(utils.buildDestinationGnomADEx(destination, fileName, somaticFlag))
+        annotated = hl.read_matrix_table(utils.buildDestinationGnomADEx(destination, fileName, somaticFlag))
         transform.transform(annotated, utils.buildDestinationTransform(destination, somaticFlag), chrom)
 
     if "readDenseLog" in step:

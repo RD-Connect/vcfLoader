@@ -362,8 +362,8 @@ def main(sqlContext, sc, configuration, chrom, nchroms, step, somaticFlag):
     # Transforming step. It sets all fields to the corresponding ElasticSearch format
     if ("transform" in step):
         print ("step transform (output: {})".format(utils.buildDestinationTransform(destination, somaticFlag)))
-        print ("loading from " + utils.buildDestinationExAC(destination, fileName, somaticFlag))
-        annotated = hl.read_table(utils.buildDestinationExAC(destination, fileName, somaticFlag))
+        print ("loading from " + utils.buildDestinationGnomADEx(destination, fileName, somaticFlag))
+        annotated = hl.read_table(utils.buildDestinationGnomADEx(destination, fileName, somaticFlag))
         transform.transform(annotated, utils.buildDestinationTransform(destination, somaticFlag), chrom)
 
     if "readDenseLog" in step:

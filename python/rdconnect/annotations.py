@@ -414,13 +414,17 @@ def annotateVEP(hl, variants, destinationPath, vepPath, nPartitions):
     print("Running vep")
     print("origin is ", variants, vepPath)
     print("destination is", destinationPath)
+    print("2.", type(variants))
     varAnnotated = hl.vep(variants, vepPath)
+    print("3.", type(varAnnotated))
     # varAnnotated = varAnnotated.annotate(effs=hl.cond(hl.is_defined(varAnnotated.vep.transcript_consequences),transcript_annotations(hl,varAnnotated.vep.transcript_consequences),intergenic_annotations(hl,varAnnotated.vep.intergenic_consequences)),
     #                                      rs = varAnnotated.vep.colocated_variants[0].id)
     varAnnotated = varAnnotated.annotate_rows(effs=hl.cond(hl.is_defined(varAnnotated.vep.transcript_consequences),transcript_annotations(hl,varAnnotated.vep.transcript_consequences),intergenic_annotations(hl,varAnnotated.vep.intergenic_consequences)),
                                          rs = varAnnotated.vep.colocated_variants[0].id)
+    print("4.", type(varAnnotated))
     varAnnotated.drop("vep") \
                 .write(destinationPath, overwrite=True)
+    print("5.", type(varAnnotated))
 
 def mt_pred_annotations(hl, annotations):
     """ Annotations for dbNSFP

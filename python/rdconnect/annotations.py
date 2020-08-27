@@ -419,6 +419,7 @@ def annotateVEP(hl, variants, destinationPath, vepPath, nPartitions):
     #                                      rs = varAnnotated.vep.colocated_variants[0].id)
     varAnnotated = varAnnotated.annotate_rows(effs=hl.cond(hl.is_defined(varAnnotated.vep.transcript_consequences),transcript_annotations(hl,varAnnotated.vep.transcript_consequences),intergenic_annotations(hl,varAnnotated.vep.intergenic_consequences)),
                                          rs = varAnnotated.vep.colocated_variants[0].id)
+    print(varAnnotated.describe())
     varAnnotated.drop("vep") \
                 .write(destinationPath,overwrite=True)
 

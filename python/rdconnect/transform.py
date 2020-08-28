@@ -7,15 +7,7 @@ def transform(hl, dataset, destinationPath, chrom):
           :param String destinationPath: Path where the loaded annotation table will be put
           :param Int chrom: Chromosome number
     """
-    # vcf = dataset.transmute_entries(sample = hl.struct(
-    #         sample = dataset.s,
-    #         ad = dataset.AD[1] / hl.sum(dataset.AD),
-    #         dp = dataset.DP,
-    #         gtInt = dataset.GT,
-    #         gt = hl.str(dataset.GT),
-    #         gq = dataset.GQ
-    #     ))
-    vcf = dataset.drop('samples_germline').rows()
+    vcf = dataset.rows() # .drop('samples_germline').rows()
     vcf.key_by(vcf.locus, vcf.alleles).distinct() #.write(destinationPath, overwrite = True)
     print(vcf.describe())
     print('[in 1] ' + destinationPath)

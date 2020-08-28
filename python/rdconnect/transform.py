@@ -17,7 +17,7 @@ def transform(hl, dataset, destinationPath, chrom):
     #     ))
     vcf = dataset.drop('samples_germline').rows()
     vcf.key_by(vcf.locus, vcf.alleles).distinct() #.write(destinationPath, overwrite = True)
-    print(vcf.desribe())
+    print(vcf.describe())
     print('[in 1] ' + destinationPath)
     print('[in 2] ' + destinationPath + "/chrom=" + chrom)
     vcf.to_spark() \

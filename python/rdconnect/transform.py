@@ -15,7 +15,7 @@ def transform(hl, dataset, destinationPath, chrom):
     #         gt = hl.str(dataset.GT),
     #         gq = dataset.GQ
     #     ))
-    vcf = vcf.drop('samples_germline').rows()
+    vcf = dataset.drop('samples_germline').rows()
     vcf.key_by(vcf.locus, vcf.alleles).distinct() #.write(destinationPath, overwrite = True)
     print(vcf.desribe())
     print('[in 1] ' + destinationPath)

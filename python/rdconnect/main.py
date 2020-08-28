@@ -349,15 +349,15 @@ def main(sqlContext, sc, configuration, chrom, nchroms, step, somaticFlag):
         annotations.annotateGnomADEx(hl, variants, utils.buildFileName(configuration["exomesGnomad_path"], chrom), utils.buildDestinationGnomADEx(destination, fileName, somaticFlag))
         current_dir = utils.buildDestinationGnomADEx(destination, fileName, somaticFlag)
         
-    if ("annotateExAC" in step):
-        print("step annotate ExAC (output: {})".format(utils.buildDestinationExAC(destination, fileName, somaticFlag)))
-        if not current_dir.endswith(fileName):
-            current_dir = current_dir + "/" + fileName
-        print ("source file: {}".format(current_dir))
-        #variants= hl.read_table(destination+"/annotatedVEPdbnSFPCaddClinvarExGnomad/"+fileName)
-        variants = hl.read_table(current_dir)
-        annotations.annotateExAC(hl, variants,utils.buildFileName(configuration["ExAC_path"], chrom), utils.buildDestinationExAC(destination, fileName, somaticFlag))
-        #current_dir = utils.buildDestinationExAC(destination, fileName, somaticFlag)
+    # if ("annotateExAC" in step):
+    #     print("step annotate ExAC (output: {})".format(utils.buildDestinationExAC(destination, fileName, somaticFlag)))
+    #     if not current_dir.endswith(fileName):
+    #         current_dir = current_dir + "/" + fileName
+    #     print ("source file: {}".format(current_dir))
+    #     #variants= hl.read_table(destination+"/annotatedVEPdbnSFPCaddClinvarExGnomad/"+fileName)
+    #     variants = hl.read_table(current_dir)
+    #     annotations.annotateExAC(hl, variants,utils.buildFileName(configuration["ExAC_path"], chrom), utils.buildDestinationExAC(destination, fileName, somaticFlag))
+    #     #current_dir = utils.buildDestinationExAC(destination, fileName, somaticFlag)
         
     # Transforming step. It sets all fields to the corresponding ElasticSearch format
     if ("transform" in step):

@@ -623,18 +623,18 @@ def annotateGnomADEx(hl, variants, annotationPath, destinationPath):
         gnomad_filter=hl.cond(gnomad[variants.locus, variants.alleles].info.gnomAD_Ex_filterStats == 'Pass','PASS','non-PASS')
     ).write(destinationPath, overwrite=True)
     
-def annotateExAC(hl, variants, annotationPath, destinationPath):
-    """ Adds ExAC annotations to a dataset. 
-         :param HailContext hl: The Hail context
-         :param VariantDataset variants: The variants to annotate
-         :param string annotationPath: Path were the ExAC annotation vcf can be found
-         :param string destinationPath: Path were the new annotated dataset can be found
-    """
-    exac = hl.split_multi_hts(hl.read_matrix_table(annotationPath)) \
-             .rows() \
-             .key_by("locus","alleles")
-    variants.annotate(exac=hl.cond(hl.is_defined(exac[variants.locus, variants.alleles].info.ExAC_AF[exac[variants.locus, variants.alleles].a_index-1]),truncateAt(hl,exac[variants.locus, variants.alleles].info.ExAC_AF[exac[variants.locus, variants.alleles].a_index-1],"6"),0.0)) \
-            .write(destinationPath,overwrite=True)
+# def annotateExAC(hl, variants, annotationPath, destinationPath):
+#     """ Adds ExAC annotations to a dataset. 
+#          :param HailContext hl: The Hail context
+#          :param VariantDataset variants: The variants to annotate
+#          :param string annotationPath: Path were the ExAC annotation vcf can be found
+#          :param string destinationPath: Path were the new annotated dataset can be found
+#     """
+#     exac = hl.split_multi_hts(hl.read_matrix_table(annotationPath)) \
+#              .rows() \
+#              .key_by("locus","alleles")
+#     variants.annotate(exac=hl.cond(hl.is_defined(exac[variants.locus, variants.alleles].info.ExAC_AF[exac[variants.locus, variants.alleles].a_index-1]),truncateAt(hl,exac[variants.locus, variants.alleles].info.ExAC_AF[exac[variants.locus, variants.alleles].a_index-1],"6"),0.0)) \
+#             .write(destinationPath,overwrite=True)
 
 def CGIFilter(hl, filter_field):
     return (hl.case()

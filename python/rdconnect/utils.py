@@ -43,8 +43,8 @@ def version_bump( uri, increment = 'version' ):
     
     return uri.replace( old_version, new_version )
     
-def buildFileName(name,chrom):
-    return name.replace("chromosome",chrom)
+def buildFileName(name, chrom):
+    return name.replace("chromosome", chrom)
 
 def buildDestinationVEP(destination, fileName, somatic = False):
     if not somatic:

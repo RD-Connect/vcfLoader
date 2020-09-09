@@ -221,8 +221,10 @@ def main(sqlContext, sc, configuration, chrom, nchroms, step, somaticFlag):
         print ("source file is " + current_dir)
         try:
             nmatrix = configuration["combine"]["nmatrix"]
+            dense_matrix_path = configuration[ 'combine' ][ 'denseMatrix_path' ]
         except:
-            print ("[ERROR]: 'nmatrix' was not provided")
+            print ("[ERROR]: 'nmatrix' and/or 'denseMatrix_path' were not provided")
+        
         print ("nmatrix is " + nmatrix)
         if nmatrix == "all":
             mapping = combine.load_table_log(sqlContext, '{0}/mapping'.format(dense_matrix_path))

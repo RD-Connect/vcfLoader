@@ -223,7 +223,7 @@ def main(sqlContext, sc, configuration, chrom, nchroms, step, somaticFlag):
             nmatrix = configuration[ "combine" ][ "nmatrix" ]
             print ("nmatrix is " + nmatrix)
             dense_matrix_path = configuration[ 'combine' ][ 'denseMatrix_path' ]
-            print ("print ("nmatrix is " + nmatrix) is " + print ("nmatrix is " + nmatrix))
+            print ("nmatrix is " + nmatrix)
         except:
             raise Exception("[ERROR]: 'nmatrix' and/or 'denseMatrix_path' were not provided")
         

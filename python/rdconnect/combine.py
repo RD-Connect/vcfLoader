@@ -351,7 +351,6 @@ def createDenseMatrix( sc, sq, url_project, host_project, prefix_hdfs, max_items
 
     mapping = load_table_log(sq, '{0}/mapping'.format(dense_matrix_path))
 
-
     if sparse_matrix_path is None:
         raise 'No information on "sparse_matrix_path" was provided.'
     

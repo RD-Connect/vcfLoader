@@ -218,8 +218,26 @@ def main(sqlContext, sc, configuration, chrom, nchroms, step, somaticFlag):
 
     if "loadDenseMatrix" in step:
         print ( "step loadDenseMatrix" )
-        annotations.loadDenseMatrix( hl, current_dir, sourceFileName, destination + "/loaded/" + fileName, number_partitions )
-        current_dir = destination + "/loaded/" + "variants" + chrom + ".ht"
+        print ("source file is " + current_dir)
+        try:
+            nmatrix = configuration["combine"]["nmatrix"]
+        except:
+            print ("[ERROR]: 'nmatrix' was not provided")
+        print ("nmatrix is " + nmatrix)
+        if nmatrix == "all":
+            mapping = combine.load_table_log(sq, '{0}/mapping'.format(dense_matrix_path))
+            nmatrix = [ ii for ii in range(0, len(mapping)) ]
+
+        paths = [  for ii in nmatrix ]
+        print(nmatrix)
+        print(paths)
+        print(destination)
+
+        for ii in nmatrix:
+            in_file = sourceFileName.replace('nmatrix', ii).replace('chromosome', chrom)
+            out_file = "{0}/loaded/variants-chrom-{1}-mtx{2}.ht".format(destination, chrom, ii)
+            annotations.loadDenseMatrix(hl, in_file, out_file, number_partitions)
+        #current_dir = destination + "/loaded/" + "variants" + chrom + ".ht"
 
     if ("loadGermline" in step):
         print ("step loadGermline")
@@ -283,6 +301,26 @@ def main(sqlContext, sc, configuration, chrom, nchroms, step, somaticFlag):
         annotations.annotateCGI(hl,variants,utils.buildFileName(configuration["CGI_path"],chrom),destination+"/annotatedCGI/"+fileName)
         current_dir = destination + "/annotatedCGI/" + fileName
     
+    if("annotateFullDenseMatrix" in step):
+        print ("step annotate Full")
+        print ("source file is " + current_dir)
+        try:
+            nmatrix = configuration["combine"]["nmatrix"]
+            dense_matrix_path = configuration[ 'combine' ][ 'denseMatrix_path' ]
+        except:
+            print ("[ERROR]: 'nmatrix' and/or 'denseMatrix_path' were not provided")
+        print ("nmatrix is " + nmatrix)
+        if nmatrix == "all":
+            mapping = combine.load_table_log(sq, '{0}/mapping'.format(dense_matrix_path))
+            nmatrix = [ ii for ii in range(0, len(mapping)) ]
+
+        paths = [ '{0}/chrom-{1}-mtx-{2}'.format( dense_matrix_path, chrom, ii )' for ii in nmatrix ]
+        print(nmatrix)
+        print(paths)
+        print(destination)
+        
+
+
     if ("annotateFull" in step):
         print ("step annotate Full")
         print ("source file is " + current_dir)

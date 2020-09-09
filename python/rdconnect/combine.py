@@ -326,21 +326,15 @@ def create_family_groups(sc, sq, chrom, group, url_project, host_project, token,
 
 
 def load_table_log( sq, path ):
-    #df = sc.read.format( 'csv' ).option( 'header', 'true' ).load( path )
     sparlse_log = sq.read.format( 'csv' ).option( 'header', 'true' ).load( path )
     table = [ (str(row.RD_Connect_ID), str(row.PhenoTips), str(row.Family), int(str(row.DMatrix).replace("mtx", ""))) for row in sparlse_log.collect() ]
-    # x1 = [ str(x) for x in sparlse_log.select( 'RD_Connect_ID' ).collect() ]
-    # x2 = [ str(x) for x in sparlse_log.select( 'PhenoTips' ).collect() ]
-    # x3 = [ str(x) for x in sparlse_log.select( 'Family' ).collect() ]
-    # x4 = [ str(x) for x in sparlse_log.select( 'DMatrix' ).collect() ]
-    # table = list( zip( x1, x2, x3, x4 ) )
     mapping = []
     for mtx in list(set([ x[3] for x in table ])):
         y = [ x for x in table if x[3] == mtx ]
-        print("\t{} / {} : {} --> {}".format(mtx, len(y), y[0], y[len(y)- 1]))
+        #print("\t{} / {} : {} --> {}".format(mtx, len(y), y[0], y[len(y)- 1]))
         mapping.append(y)
-    print('table rows: {}'.format(len(table)))
-    print('mapping len: {}'.format(len(mapping)))
+    #print('table rows: {}'.format(len(table)))
+    #print('mapping len: {}'.format(len(mapping)))
     mapping.sort(key=lambda x: x[0][3])
     return mapping
 

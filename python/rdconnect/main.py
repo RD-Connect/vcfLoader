@@ -218,14 +218,16 @@ def main(sqlContext, sc, configuration, chrom, nchroms, step, somaticFlag):
 
     if "loadDenseMatrix" in step:
         print ( "step loadDenseMatrix" )
-        print ("source file is " + current_dir)
+        print ("source file is " + sourceFileName)
         try:
-            nmatrix = configuration["combine"]["nmatrix"]
+            nmatrix = configuration[ "combine" ][ "nmatrix" ]
+            print ("nmatrix is " + nmatrix)
             dense_matrix_path = configuration[ 'combine' ][ 'denseMatrix_path' ]
+            print ("print ("nmatrix is " + nmatrix) is " + print ("nmatrix is " + nmatrix))
         except:
-            print ("[ERROR]: 'nmatrix' and/or 'denseMatrix_path' were not provided")
+            raise Exception("[ERROR]: 'nmatrix' and/or 'denseMatrix_path' were not provided")
         
-        print ("nmatrix is " + nmatrix)
+        
         if nmatrix == "all":
             mapping = combine.load_table_log(sqlContext, '{0}/mapping'.format(dense_matrix_path))
             nmatrix = [ ii for ii in range(0, len(mapping)) ]
@@ -235,7 +237,7 @@ def main(sqlContext, sc, configuration, chrom, nchroms, step, somaticFlag):
 
         for ii in nmatrix:
             in_file = sourceFileName.replace('nmatrix', ii).replace('chromosome', chrom)
-            out_file = "{0}/loaded/variants-chrom-{1}-mtx{2}.ht".format(destination, chrom, ii)
+            out_file = "{0}/loaded/variants-chrom-{1}-mtx{2}.ht".format(destination, srt(chrom), str(ii))
             annotations.loadDenseMatrix(hl, in_file, out_file, number_partitions)
         #current_dir = destination + "/loaded/" + "variants" + chrom + ".ht"
 

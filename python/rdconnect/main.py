@@ -238,7 +238,10 @@ def main(sqlContext, sc, configuration, chrom, nchroms, step, somaticFlag):
         for ii in nmatrix:
             in_file = sourceFileName.replace('nmatrix', str(ii)).replace('chromosome', str(chrom))  
             out_file = "{0}/loaded/variants-chrom-{1}-mtx{2}.ht".format(destination, str(chrom), str(ii))
-            annotations.loadDenseMatrix(hl, in_file, out_file, number_partitions)
+            #annotations.loadDenseMatrix(hl, in_file, out_file, number_partitions)
+            print("        - ", ii)
+            print("                - ", in_file)
+            print("                - ", out_file)
         #current_dir = destination + "/loaded/" + "variants" + chrom + ".ht"
 
     if ("loadGermline" in step):

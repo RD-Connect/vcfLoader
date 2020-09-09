@@ -227,10 +227,8 @@ def main(sqlContext, sc, configuration, chrom, nchroms, step, somaticFlag):
         if nmatrix == "all":
             mapping = combine.load_table_log(sq, '{0}/mapping'.format(dense_matrix_path))
             nmatrix = [ ii for ii in range(0, len(mapping)) ]
-
-        paths = [  for ii in nmatrix ]
+        
         print(nmatrix)
-        print(paths)
         print(destination)
 
         for ii in nmatrix:

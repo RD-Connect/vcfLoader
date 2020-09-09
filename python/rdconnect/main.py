@@ -225,7 +225,7 @@ def main(sqlContext, sc, configuration, chrom, nchroms, step, somaticFlag):
             print ("[ERROR]: 'nmatrix' was not provided")
         print ("nmatrix is " + nmatrix)
         if nmatrix == "all":
-            mapping = combine.load_table_log(sq, '{0}/mapping'.format(dense_matrix_path))
+            mapping = combine.load_table_log(sqlContext, '{0}/mapping'.format(dense_matrix_path))
             nmatrix = [ ii for ii in range(0, len(mapping)) ]
 
         print(nmatrix)
@@ -309,7 +309,7 @@ def main(sqlContext, sc, configuration, chrom, nchroms, step, somaticFlag):
             print ("[ERROR]: 'nmatrix' and/or 'denseMatrix_path' were not provided")
         print ("nmatrix is " + nmatrix)
         if nmatrix == "all":
-            mapping = combine.load_table_log(sq, '{0}/mapping'.format(dense_matrix_path))
+            mapping = combine.load_table_log(sqlContext, '{0}/mapping'.format(dense_matrix_path))
             nmatrix = [ ii for ii in range(0, len(mapping)) ]
 
         paths = [ '{0}/chrom-{1}-mtx-{2}'.format( dense_matrix_path, chrom, ii ) for ii in nmatrix ]
@@ -564,195 +564,6 @@ def main(sqlContext, sc, configuration, chrom, nchroms, step, somaticFlag):
             dta = hl.read_table('hdfs://rdhdfs1:27000//test/rdconnect-ES6/1488/6.7.0/annotatedVEPdbnSFPCaddClinvar/variants{}.ht'.format(chrm))
             print('hdfs://rdhdfs1:27000/test/tmp/rdconn_genes_chrm{}.tsv'.format(chrm))
             dta['effs']['gene_name'].export('hdfs://rdhdfs1:27000/test/tmp/rdconn_genes_chrm{}.tsv'.format(chrm), delimiter='\t', missing='')
-
-    if "testingSparse" in step:
-        print("*" * 25)
-        print("testingSparse")
-        print("*" * 25)
-        
-
-        files = [{'RD_Connect_ID_Experiment': 'E999782', 'Phenotips_ID': 'P0009447', 'File': 'hdfs://rdhdfs1:27000/test/rdconnect/gVCF/cuni-macek/E999782/E999782.23.g.vcf.bgz'},
-        {'RD_Connect_ID_Experiment': 'E999765', 'Phenotips_ID': 'P0013526', 'File': 'hdfs://rdhdfs1:27000/test/rdconnect/gVCF/rumc-vissers/E999765/E999765.23.g.vcf.bgz'},
-        {'RD_Connect_ID_Experiment': 'E999618', 'Phenotips_ID': 'P0003070', 'File': 'hdfs://rdhdfs1:27000/test/rdconnect/gVCF/ucl-hanna/E999618/E999618.23.g.vcf.bgz'},
-        {'RD_Connect_ID_Experiment': 'E999513', 'Phenotips_ID': 'P0004410', 'File': 'hdfs://rdhdfs1:27000/test/rdconnect/gVCF/iier-posada/E999513/E999513.23.g.vcf.bgz'},
-        {'RD_Connect_ID_Experiment': 'E999327', 'Phenotips_ID': 'P0012327', 'File': 'hdfs://rdhdfs1:27000/test/rdconnect/gVCF/aous-renieri/E999327/E999327.23.g.vcf.bgz'},
-        {'RD_Connect_ID_Experiment': 'E999162', 'Phenotips_ID': 'P0010912', 'File': 'hdfs://rdhdfs1:27000/test/rdconnect/gVCF/ucl-hanna/E999162/E999162.23.g.vcf.bgz'},
-        {'RD_Connect_ID_Experiment': 'E999041', 'Phenotips_ID': 'P0007145', 'File': 'hdfs://rdhdfs1:27000/test/rdconnect/gVCF/chud-faivre/E999041/E999041.23.g.vcf.bgz'},
-        {'RD_Connect_ID_Experiment': 'E999006', 'Phenotips_ID': 'P0000957', 'File': 'hdfs://rdhdfs1:27000/test/rdconnect/gVCF/vib-timmerman/E999006/E999006.23.g.vcf.bgz'},
-        {'RD_Connect_ID_Experiment': 'E998348', 'Phenotips_ID': 'P0010944', 'File': 'hdfs://rdhdfs1:27000/test/rdconnect/gVCF/ucl-hanna/E998348/E998348.23.g.vcf.bgz'},
-        {'RD_Connect_ID_Experiment': 'E998255', 'Phenotips_ID': 'P0012726', 'File': 'hdfs://rdhdfs1:27000/test/rdconnect/gVCF/rumc-vissers/E998255/E998255.23.g.vcf.bgz'},
-        {'RD_Connect_ID_Experiment': 'E998239', 'Phenotips_ID': 'P0004351', 'File': 'hdfs://rdhdfs1:27000/test/rdconnect/gVCF/cheo-lochmuller/E998239/E998239.23.g.vcf.bgz'},
-        {'RD_Connect_ID_Experiment': 'E998171', 'Phenotips_ID': 'P0009113', 'File': 'hdfs://rdhdfs1:27000/test/rdconnect/gVCF/ukb-aretz/E998171/E998171.23.g.vcf.bgz'},
-        {'RD_Connect_ID_Experiment': 'E998109', 'Phenotips_ID': 'P0004130', 'File': 'hdfs://rdhdfs1:27000/test/rdconnect/gVCF/ucam-horvath/E998109/E998109.23.g.vcf.bgz'},
-        {'RD_Connect_ID_Experiment': 'E997932', 'Phenotips_ID': 'P0010362', 'File': 'hdfs://rdhdfs1:27000/test/rdconnect/gVCF/ucl-hanna/E997932/E997932.23.g.vcf.bgz'},
-        {'RD_Connect_ID_Experiment': 'E997832', 'Phenotips_ID': 'P0013722', 'File': 'hdfs://rdhdfs1:27000/test/rdconnect/gVCF/rumc-vissers/E997832/E997832.23.g.vcf.bgz'},
-        {'RD_Connect_ID_Experiment': 'E997774', 'Phenotips_ID': 'P0017962', 'File': 'hdfs://rdhdfs1:27000/test/rdconnect/gVCF/ingemm-lapunzina/E997774/E997774.23.g.vcf.bgz'},
-        {'RD_Connect_ID_Experiment': 'E997668', 'Phenotips_ID': 'P0009796', 'File': 'hdfs://rdhdfs1:27000/test/rdconnect/gVCF/icm-brice/E997668/E997668.23.g.vcf.bgz'},
-        {'RD_Connect_ID_Experiment': 'E997598', 'Phenotips_ID': 'P0011116', 'File': 'hdfs://rdhdfs1:27000/test/rdconnect/gVCF/ucl-hanna/E997598/E997598.23.g.vcf.bgz'},
-        {'RD_Connect_ID_Experiment': 'E997587', 'Phenotips_ID': 'P0013737', 'File': 'hdfs://rdhdfs1:27000/test/rdconnect/gVCF/rumc-vissers/E997587/E997587.23.g.vcf.bgz'},
-        {'RD_Connect_ID_Experiment': 'E997510', 'Phenotips_ID': 'P0010254', 'File': 'hdfs://rdhdfs1:27000/test/rdconnect/gVCF/ucl-hanna/E997510/E997510.23.g.vcf.bgz'},
-        {'RD_Connect_ID_Experiment': 'E997453', 'Phenotips_ID': 'P0004889', 'File': 'hdfs://rdhdfs1:27000/test/rdconnect/gVCF/iier-posada/E997453/E997453.23.g.vcf.bgz'},
-        {'RD_Connect_ID_Experiment': 'E997418', 'Phenotips_ID': 'P0013513', 'File': 'hdfs://rdhdfs1:27000/test/rdconnect/gVCF/rumc-vissers/E997418/E997418.23.g.vcf.bgz'},
-        {'RD_Connect_ID_Experiment': 'E997315', 'Phenotips_ID': 'P0003665', 'File': 'hdfs://rdhdfs1:27000/test/rdconnect/gVCF/ucl-muntoni/E997315/E997315.23.g.vcf.bgz'},
-        {'RD_Connect_ID_Experiment': 'E997149', 'Phenotips_ID': 'P0011345', 'File': 'hdfs://rdhdfs1:27000/test/rdconnect/gVCF/ucl-hanna/E997149/E997149.23.g.vcf.bgz'},
-        {'RD_Connect_ID_Experiment': 'E996991', 'Phenotips_ID': 'P0009087', 'File': 'hdfs://rdhdfs1:27000/test/rdconnect/gVCF/ukb-aretz/E996991/E996991.23.g.vcf.bgz'},
-        {'RD_Connect_ID_Experiment': 'E996880', 'Phenotips_ID': 'P0008250', 'File': 'hdfs://rdhdfs1:27000/test/rdconnect/gVCF/ucl-muntoni/E996880/E996880.23.g.vcf.bgz'},
-        {'RD_Connect_ID_Experiment': 'E996874', 'Phenotips_ID': 'P0004474', 'File': 'hdfs://rdhdfs1:27000/test/rdconnect/gVCF/cheo-lochmuller/E996874/E996874.23.g.vcf.bgz'},
-        {'RD_Connect_ID_Experiment': 'E996807', 'Phenotips_ID': 'P0006085', 'File': 'hdfs://rdhdfs1:27000/test/rdconnect/gVCF/hva-gimeno/E996807/E996807.23.g.vcf.bgz'},
-        {'RD_Connect_ID_Experiment': 'E996216', 'Phenotips_ID': 'P0005490', 'File': 'hdfs://rdhdfs1:27000/test/rdconnect/gVCF/hva-gimeno/E996216/E996216.23.g.vcf.bgz'},
-        {'RD_Connect_ID_Experiment': 'E996018', 'Phenotips_ID': 'P0010436', 'File': 'hdfs://rdhdfs1:27000/test/rdconnect/gVCF/ucl-hanna/E996018/E996018.23.g.vcf.bgz'},
-        {'RD_Connect_ID_Experiment': 'E995776', 'Phenotips_ID': 'P0004971', 'File': 'hdfs://rdhdfs1:27000/test/rdconnect/gVCF/igtp-matilla/E995776/E995776.23.g.vcf.bgz'},
-        {'RD_Connect_ID_Experiment': 'E995583', 'Phenotips_ID': 'P0004539', 'File': 'hdfs://rdhdfs1:27000/test/rdconnect/gVCF/cheo-lochmuller/E995583/E995583.23.g.vcf.bgz'},
-        {'RD_Connect_ID_Experiment': 'E995313', 'Phenotips_ID': 'P0013929', 'File': 'hdfs://rdhdfs1:27000/test/rdconnect/gVCF/rumc-vissers/E995313/E995313.23.g.vcf.bgz'},
-        {'RD_Connect_ID_Experiment': 'E995265', 'Phenotips_ID': 'P0006968', 'File': 'hdfs://rdhdfs1:27000/test/rdconnect/gVCF/ucam-horvath/E995265/E995265.23.g.vcf.bgz'},
-        {'RD_Connect_ID_Experiment': 'E995205', 'Phenotips_ID': 'P0000731', 'File': 'hdfs://rdhdfs1:27000/test/rdconnect/gVCF/unew-straub/E995205/E995205.23.g.vcf.bgz'},
-        {'RD_Connect_ID_Experiment': 'E995018', 'Phenotips_ID': 'P0001076', 'File': 'hdfs://rdhdfs1:27000/test/rdconnect/gVCF/icm-brice/E995018/E995018.23.g.vcf.bgz'},
-        {'RD_Connect_ID_Experiment': 'E994077', 'Phenotips_ID': 'P0001917', 'File': 'hdfs://rdhdfs1:27000/test/rdconnect/gVCF/ekut-schuele/E994077/E994077.23.g.vcf.bgz'},
-        {'RD_Connect_ID_Experiment': 'E993844', 'Phenotips_ID': 'P0011423', 'File': 'hdfs://rdhdfs1:27000/test/rdconnect/gVCF/ucl-hanna/E993844/E993844.23.g.vcf.bgz'},
-        {'RD_Connect_ID_Experiment': 'E993830', 'Phenotips_ID': 'P0015028', 'File': 'hdfs://rdhdfs1:27000/test/rdconnect/gVCF/rumc-vandewarrenburg/E993830/E993830.23.g.vcf.bgz'},
-        {'RD_Connect_ID_Experiment': 'E993822', 'Phenotips_ID': 'P0012724', 'File': 'hdfs://rdhdfs1:27000/test/rdconnect/gVCF/rumc-vissers/E993822/E993822.23.g.vcf.bgz'},
-        {'RD_Connect_ID_Experiment': 'E993739', 'Phenotips_ID': 'P0010588', 'File': 'hdfs://rdhdfs1:27000/test/rdconnect/gVCF/ucl-hanna/E993739/E993739.23.g.vcf.bgz'},
-        {'RD_Connect_ID_Experiment': 'E993569', 'Phenotips_ID': 'P0005401', 'File': 'hdfs://rdhdfs1:27000/test/rdconnect/gVCF/hu-ozgul/E993569/E993569.23.g.vcf.bgz'},
-        {'RD_Connect_ID_Experiment': 'E993495', 'Phenotips_ID': 'P0008595', 'File': 'hdfs://rdhdfs1:27000/test/rdconnect/gVCF/uklhd-schaefer/E993495/E993495.23.g.vcf.bgz'},
-        {'RD_Connect_ID_Experiment': 'E993414', 'Phenotips_ID': 'P0014007', 'File': 'hdfs://rdhdfs1:27000/test/rdconnect/gVCF/rumc-vissers/E993414/E993414.23.g.vcf.bgz'},
-        {'RD_Connect_ID_Experiment': 'E993323', 'Phenotips_ID': 'P0008638', 'File': 'hdfs://rdhdfs1:27000/test/rdconnect/gVCF/chud-faivre/E993323/E993323.23.g.vcf.bgz'},
-        {'RD_Connect_ID_Experiment': 'E993284', 'Phenotips_ID': 'P0008349', 'File': 'hdfs://rdhdfs1:27000/test/rdconnect/gVCF/unew-hambleton/E993284/E993284.23.g.vcf.bgz'},
-        {'RD_Connect_ID_Experiment': 'E993209', 'Phenotips_ID': 'P0006909', 'File': 'hdfs://rdhdfs1:27000/test/rdconnect/gVCF/cheo-lochmuller/E993209/E993209.23.g.vcf.bgz'},
-        {'RD_Connect_ID_Experiment': 'E993153', 'Phenotips_ID': 'P0014328', 'File': 'hdfs://rdhdfs1:27000/test/rdconnect/gVCF/rumc-vissers/E993153/E993153.23.g.vcf.bgz'},
-        {'RD_Connect_ID_Experiment': 'E992936', 'Phenotips_ID': 'P0017951', 'File': 'hdfs://rdhdfs1:27000/test/rdconnect/gVCF/ingemm-lapunzina/E992936/E992936.23.g.vcf.bgz'},
-        {'RD_Connect_ID_Experiment': 'E992774', 'Phenotips_ID': 'P0006450', 'File': 'hdfs://rdhdfs1:27000/test/rdconnect/gVCF/ucam-horvath/E992774/E992774.23.g.vcf.bgz'},
-        {'RD_Connect_ID_Experiment': 'E992768', 'Phenotips_ID': 'P0001662', 'File': 'hdfs://rdhdfs1:27000/test/rdconnect/gVCF/ekut-riess/E992768/E992768.23.g.vcf.bgz'},
-        {'RD_Connect_ID_Experiment': 'E992744', 'Phenotips_ID': 'P0000876', 'File': 'hdfs://rdhdfs1:27000/test/rdconnect/gVCF/uk-wirth/E992744/E992744.23.g.vcf.bgz'},
-        {'RD_Connect_ID_Experiment': 'E992587', 'Phenotips_ID': 'P0013331', 'File': 'hdfs://rdhdfs1:27000/test/rdconnect/gVCF/rumc-vissers/E992587/E992587.23.g.vcf.bgz'},
-        {'RD_Connect_ID_Experiment': 'E992566', 'Phenotips_ID': 'P0013440', 'File': 'hdfs://rdhdfs1:27000/test/rdconnect/gVCF/rumc-vissers/E992566/E992566.23.g.vcf.bgz'},
-        {'RD_Connect_ID_Experiment': 'E992529', 'Phenotips_ID': 'P0013667', 'File': 'hdfs://rdhdfs1:27000/test/rdconnect/gVCF/rumc-vissers/E992529/E992529.23.g.vcf.bgz'},
-        {'RD_Connect_ID_Experiment': 'E992527', 'Phenotips_ID': 'P0004958', 'File': 'hdfs://rdhdfs1:27000/test/rdconnect/gVCF/igtp-matilla/E992527/E992527.23.g.vcf.bgz'},
-        {'RD_Connect_ID_Experiment': 'E992421', 'Phenotips_ID': 'P0009791', 'File': 'hdfs://rdhdfs1:27000/test/rdconnect/gVCF/icm-brice/E992421/E992421.23.g.vcf.bgz'},
-        {'RD_Connect_ID_Experiment': 'E992303', 'Phenotips_ID': 'P0001929', 'File': 'hdfs://rdhdfs1:27000/test/rdconnect/gVCF/cheo-lochmuller/E992303/E992303.23.g.vcf.bgz'},
-        {'RD_Connect_ID_Experiment': 'E991811', 'Phenotips_ID': 'P0014418', 'File': 'hdfs://rdhdfs1:27000/test/rdconnect/gVCF/rumc-vissers/E991811/E991811.23.g.vcf.bgz'},
-        {'RD_Connect_ID_Experiment': 'E991767', 'Phenotips_ID': 'P0012486', 'File': 'hdfs://rdhdfs1:27000/test/rdconnect/gVCF/rumc-vissers/E991767/E991767.23.g.vcf.bgz'},
-        {'RD_Connect_ID_Experiment': 'E991716', 'Phenotips_ID': 'P0009122', 'File': 'hdfs://rdhdfs1:27000/test/rdconnect/gVCF/ukb-aretz/E991716/E991716.23.g.vcf.bgz'},
-        {'RD_Connect_ID_Experiment': 'E991709', 'Phenotips_ID': 'P0009771', 'File': 'hdfs://rdhdfs1:27000/test/rdconnect/gVCF/icm-brice/E991709/E991709.23.g.vcf.bgz'},
-        {'RD_Connect_ID_Experiment': 'E991701', 'Phenotips_ID': 'P0005549', 'File': 'hdfs://rdhdfs1:27000/test/rdconnect/gVCF/hu-ozgul/E991701/E991701.23.g.vcf.bgz'},
-        {'RD_Connect_ID_Experiment': 'E991614', 'Phenotips_ID': 'P0006081', 'File': 'hdfs://rdhdfs1:27000/test/rdconnect/gVCF/unew-hambleton/E991614/E991614.23.g.vcf.bgz'},
-        {'RD_Connect_ID_Experiment': 'E991368', 'Phenotips_ID': 'P0013522', 'File': 'hdfs://rdhdfs1:27000/test/rdconnect/gVCF/rumc-vissers/E991368/E991368.23.g.vcf.bgz'},
-        {'RD_Connect_ID_Experiment': 'E991333', 'Phenotips_ID': 'P0007488', 'File': 'hdfs://rdhdfs1:27000/test/rdconnect/gVCF/iier-posada/E991333/E991333.23.g.vcf.bgz'},
-        {'RD_Connect_ID_Experiment': 'E991327', 'Phenotips_ID': 'P0012739', 'File': 'hdfs://rdhdfs1:27000/test/rdconnect/gVCF/rumc-vissers/E991327/E991327.23.g.vcf.bgz'},
-        {'RD_Connect_ID_Experiment': 'E991298', 'Phenotips_ID': 'P0014085', 'File': 'hdfs://rdhdfs1:27000/test/rdconnect/gVCF/rumc-vissers/E991298/E991298.23.g.vcf.bgz'},
-        {'RD_Connect_ID_Experiment': 'E991204', 'Phenotips_ID': 'P0006711', 'File': 'hdfs://rdhdfs1:27000/test/rdconnect/gVCF/ucam-horvath/E991204/E991204.23.g.vcf.bgz'},
-        {'RD_Connect_ID_Experiment': 'E991120', 'Phenotips_ID': 'P0008291', 'File': 'hdfs://rdhdfs1:27000/test/rdconnect/gVCF/aous-renieri/E991120/E991120.23.g.vcf.bgz'},
-        {'RD_Connect_ID_Experiment': 'E991100', 'Phenotips_ID': 'P0009646', 'File': 'hdfs://rdhdfs1:27000/test/rdconnect/gVCF/icm-brice/E991100/E991100.23.g.vcf.bgz'},
-        {'RD_Connect_ID_Experiment': 'E990970', 'Phenotips_ID': 'P0012344', 'File': 'hdfs://rdhdfs1:27000/test/rdconnect/gVCF/aous-renieri/E990970/E990970.23.g.vcf.bgz'},
-        {'RD_Connect_ID_Experiment': 'E990745', 'Phenotips_ID': 'P0013013', 'File': 'hdfs://rdhdfs1:27000/test/rdconnect/gVCF/rumc-vissers/E990745/E990745.23.g.vcf.bgz'},
-        {'RD_Connect_ID_Experiment': 'E990716', 'Phenotips_ID': 'P0007122', 'File': 'hdfs://rdhdfs1:27000/test/rdconnect/gVCF/chud-faivre/E990716/E990716.23.g.vcf.bgz'},
-        {'RD_Connect_ID_Experiment': 'E990620', 'Phenotips_ID': 'P0003138', 'File': 'hdfs://rdhdfs1:27000/test/rdconnect/gVCF/uk-wirth/E990620/E990620.23.g.vcf.bgz'},
-        {'RD_Connect_ID_Experiment': 'E990434', 'Phenotips_ID': 'P0013954', 'File': 'hdfs://rdhdfs1:27000/test/rdconnect/gVCF/rumc-vissers/E990434/E990434.23.g.vcf.bgz'},
-        {'RD_Connect_ID_Experiment': 'E990209', 'Phenotips_ID': 'P0006513', 'File': 'hdfs://rdhdfs1:27000/test/rdconnect/gVCF/cheo-lochmuller/E990209/E990209.23.g.vcf.bgz'},
-        {'RD_Connect_ID_Experiment': 'E990011', 'Phenotips_ID': 'P0006118', 'File': 'hdfs://rdhdfs1:27000/test/rdconnect/gVCF/bhri-tejada/E990011/E990011.23.g.vcf.bgz'},
-        {'RD_Connect_ID_Experiment': 'E990006', 'Phenotips_ID': 'P0007938', 'File': 'hdfs://rdhdfs1:27000/test/rdconnect/gVCF/ucam-horvath/E990006/E990006.23.g.vcf.bgz'},
-        {'RD_Connect_ID_Experiment': 'E989963', 'Phenotips_ID': 'P0006837', 'File': 'hdfs://rdhdfs1:27000/test/rdconnect/gVCF/ucam-horvath/E989963/E989963.23.g.vcf.bgz'},
-        {'RD_Connect_ID_Experiment': 'E989849', 'Phenotips_ID': 'P0002996', 'File': 'hdfs://rdhdfs1:27000/test/rdconnect/gVCF/cheo-lochmuller/E989849/E989849.23.g.vcf.bgz'},
-        {'RD_Connect_ID_Experiment': 'E989831', 'Phenotips_ID': 'P0011150', 'File': 'hdfs://rdhdfs1:27000/test/rdconnect/gVCF/ucl-hanna/E989831/E989831.23.g.vcf.bgz'},
-        {'RD_Connect_ID_Experiment': 'E989776', 'Phenotips_ID': 'P0008054', 'File': 'hdfs://rdhdfs1:27000/test/rdconnect/gVCF/cheo-lochmuller/E989776/E989776.23.g.vcf.bgz'},
-        {'RD_Connect_ID_Experiment': 'E989407', 'Phenotips_ID': 'P0012522', 'File': 'hdfs://rdhdfs1:27000/test/rdconnect/gVCF/rumc-vissers/E989407/E989407.23.g.vcf.bgz'},
-        {'RD_Connect_ID_Experiment': 'E989137', 'Phenotips_ID': 'P0008979', 'File': 'hdfs://rdhdfs1:27000/test/rdconnect/gVCF/iier-posada/E989137/E989137.23.g.vcf.bgz'},
-        {'RD_Connect_ID_Experiment': 'E988781', 'Phenotips_ID': 'P0013271', 'File': 'hdfs://rdhdfs1:27000/test/rdconnect/gVCF/rumc-vissers/E988781/E988781.23.g.vcf.bgz'},
-        {'RD_Connect_ID_Experiment': 'E988744', 'Phenotips_ID': 'P0005918', 'File': 'hdfs://rdhdfs1:27000/test/rdconnect/gVCF/iier-posada/E988744/E988744.23.g.vcf.bgz'},
-        {'RD_Connect_ID_Experiment': 'E988736', 'Phenotips_ID': 'P0003198', 'File': 'hdfs://rdhdfs1:27000/test/rdconnect/gVCF/unife-ferlini/E988736/E988736.23.g.vcf.bgz'},
-        {'RD_Connect_ID_Experiment': 'E988472', 'Phenotips_ID': 'P0004342', 'File': 'hdfs://rdhdfs1:27000/test/rdconnect/gVCF/ekut-schuele/E988472/E988472.23.g.vcf.bgz'},
-        {'RD_Connect_ID_Experiment': 'E988441', 'Phenotips_ID': 'P0000040', 'File': 'hdfs://rdhdfs1:27000/test/rdconnect/gVCF/unew-straub/E988441/E988441.23.g.vcf.bgz'},
-        {'RD_Connect_ID_Experiment': 'E988358', 'Phenotips_ID': 'P0004891', 'File': 'hdfs://rdhdfs1:27000/test/rdconnect/gVCF/iier-posada/E988358/E988358.23.g.vcf.bgz'},
-        {'RD_Connect_ID_Experiment': 'E988343', 'Phenotips_ID': 'P0009165', 'File': 'hdfs://rdhdfs1:27000/test/rdconnect/gVCF/ukb-aretz/E988343/E988343.23.g.vcf.bgz'},
-        {'RD_Connect_ID_Experiment': 'E988307', 'Phenotips_ID': 'P0007696', 'File': 'hdfs://rdhdfs1:27000/test/rdconnect/gVCF/chud-faivre/E988307/E988307.23.g.vcf.bgz'},
-        {'RD_Connect_ID_Experiment': 'E988266', 'Phenotips_ID': 'P0009183', 'File': 'hdfs://rdhdfs1:27000/test/rdconnect/gVCF/ukb-aretz/E988266/E988266.23.g.vcf.bgz'},
-        {'RD_Connect_ID_Experiment': 'E988201', 'Phenotips_ID': 'P0004931', 'File': 'hdfs://rdhdfs1:27000/test/rdconnect/gVCF/ucam-horvath/E988201/E988201.23.g.vcf.bgz'},
-        {'RD_Connect_ID_Experiment': 'E988082', 'Phenotips_ID': 'P0012220', 'File': 'hdfs://rdhdfs1:27000/test/rdconnect/gVCF/tigem-nigro/E988082/E988082.23.g.vcf.bgz'},
-        {'RD_Connect_ID_Experiment': 'E987751', 'Phenotips_ID': 'P0000490', 'File': 'hdfs://rdhdfs1:27000/test/rdconnect/gVCF/ucl-hanna/E987751/E987751.23.g.vcf.bgz'},
-        {'RD_Connect_ID_Experiment': 'E987717', 'Phenotips_ID': 'P0012583', 'File': 'hdfs://rdhdfs1:27000/test/rdconnect/gVCF/rumc-vissers/E987717/E987717.23.g.vcf.bgz'},
-        {'RD_Connect_ID_Experiment': 'E987703', 'Phenotips_ID': 'P0012067', 'File': 'hdfs://rdhdfs1:27000/test/rdconnect/gVCF/aous-renieri/E987703/E987703.23.g.vcf.bgz'},
-        {'RD_Connect_ID_Experiment': 'E987682', 'Phenotips_ID': 'P0003660', 'File': 'hdfs://rdhdfs1:27000/test/rdconnect/gVCF/ucl-muntoni/E987682/E987682.23.g.vcf.bgz'}]
-
-
-        def getIntervals( chrom, max_pos, partitions ):
-            quantity = max_pos // partitions
-            intervals = []
-            for item in range( 1, partitions + 1 ):
-                start = (item - 1) * quantity
-                end = item * quantity
-                if item == len( range( 1, partitions + 1 ) ):
-                    end = max_pos
-                if start == 0:
-                    start = 1
-                intervals.append( hl.Interval( hl.Locus( str( chrom ), start ),hl.Locus( str( chrom ), end - 1 ), includes_end = True ) )
-            return intervals
-
-
-        def getIntervalByChrom( chrom, partitions ):
-            if chrom in ('23', 23):
-                chrom = 'MT'
-            if chrom in ('24', 24):
-                chrom = 'X'
-            if chrom in ('25', 25):
-                chrom = 'Y'
-            intervals = { # information from https://www.ncbi.nlm.nih.gov/grc/human/data?asm=GRCh37
-                "25": { "interval": getIntervals( chrom,  59373566, partitions ), 'reference_genome': 'GRCh37', 'array_elements_required': False }, # Y
-                 "Y": { "interval": getIntervals( chrom,  59373566, partitions ), 'reference_genome': 'GRCh37', 'array_elements_required': False }, # Y
-                "24": { "interval": getIntervals( chrom, 155270560, partitions ), 'reference_genome': 'GRCh37', 'array_elements_required': False }, # X
-                 "X": { "interval": getIntervals( chrom, 155270560, partitions ), 'reference_genome': 'GRCh37', 'array_elements_required': False }, # X
-                "23": { "interval": getIntervals( chrom,     16570, partitions ), 'reference_genome': 'GRCh37', 'array_elements_required': False }, # MT
-                "MT": { "interval": getIntervals( chrom,     16570, partitions ), 'reference_genome': 'GRCh37', 'array_elements_required': False }, # MT
-                "22": { "interval": getIntervals( chrom,  51304566, partitions ), 'reference_genome': 'GRCh37', 'array_elements_required': False },
-                "21": { "interval": getIntervals( chrom,  48129895, partitions ), 'reference_genome': 'GRCh37', 'array_elements_required': False },
-                "20": { "interval": getIntervals( chrom,  63025520, partitions ), 'reference_genome': 'GRCh37', 'array_elements_required': False },
-                "19": { "interval": getIntervals( chrom,  59128983, partitions ), 'reference_genome': 'GRCh37', 'array_elements_required': False },
-                "18": { "interval": getIntervals( chrom,  78077248, partitions ), 'reference_genome': 'GRCh37', 'array_elements_required': False },
-                "17": { "interval": getIntervals( chrom,  81195210, partitions ), 'reference_genome': 'GRCh37', 'array_elements_required': False },
-                "16": { "interval": getIntervals( chrom,  90354753, partitions ), 'reference_genome': 'GRCh37', 'array_elements_required': False },
-                "15": { "interval": getIntervals( chrom, 102531392, partitions ), 'reference_genome': 'GRCh37', 'array_elements_required': False },
-                "14": { "interval": getIntervals( chrom, 107349540, partitions ), 'reference_genome': 'GRCh37', 'array_elements_required': False },
-                "13": { "interval": getIntervals( chrom, 115169878, partitions ), 'reference_genome': 'GRCh37', 'array_elements_required': False },
-                "12": { "interval": getIntervals( chrom, 133851895, partitions ), 'reference_genome': 'GRCh37', 'array_elements_required': False },
-                "11": { "interval": getIntervals( chrom, 135006516, partitions ), 'reference_genome': 'GRCh37', 'array_elements_required': False },
-                "10": { "interval": getIntervals( chrom, 135534747, partitions ), 'reference_genome': 'GRCh37', 'array_elements_required': False },
-                 "9": { "interval": getIntervals( chrom, 141213431, partitions ), 'reference_genome': 'GRCh37', 'array_elements_required': False },
-                 "8": { "interval": getIntervals( chrom, 146364022, partitions ), 'reference_genome': 'GRCh37', 'array_elements_required': False },
-                 "7": { "interval": getIntervals( chrom, 159138663, partitions ), 'reference_genome': 'GRCh37', 'array_elements_required': False },
-                 "6": { "interval": getIntervals( chrom, 171115067, partitions ), 'reference_genome': 'GRCh37', 'array_elements_required': False },
-                 "5": { "interval": getIntervals( chrom, 180915260, partitions ), 'reference_genome': 'GRCh37', 'array_elements_required': False },
-                 "4": { "interval": getIntervals( chrom, 191154276, partitions ), 'reference_genome': 'GRCh37', 'array_elements_required': False },
-                 "3": { "interval": getIntervals( chrom, 198022430, partitions ), 'reference_genome': 'GRCh37', 'array_elements_required': False },
-                 "2": { "interval": getIntervals( chrom, 243199373, partitions ), 'reference_genome': 'GRCh37', 'array_elements_required': False },
-                 "1": { "interval": getIntervals( chrom, 249250621, partitions ), 'reference_genome': 'GRCh37', 'array_elements_required': False }
-            }
-            return intervals[ chrom ]
-
-        def transformFile( mt ):
-            return transform_gvcf(mt.annotate_rows(
-                info = mt.info.annotate( MQ_DP = hl.null( hl.tint32 ), VarDP = hl.null( hl.tint32 ), QUALapprox = hl.null( hl.tint32 ) )
-            ))
-
-        def importFiles( files ):
-            x = hl.import_vcfs(
-                files,
-                partitions = interval[ 'interval' ], 
-                reference_genome = interval[ 'reference_genome' ], 
-                array_elements_required = interval[ 'array_elements_required' ]
-            )
-            return x
-
-        experiments = files
-        interval = getIntervalByChrom( chrom, number_partitions )
-        for ii in interval['interval']:
-            print(ii)
-        vcfs = importFiles( [ x[ 'File' ] for x in experiments ] )
-        vcfs2 = [ transformFile( mt ) for mt in vcfs ]
-
-
-        comb = combine_gvcfs( vcfs2 )
-
-
-        destinationPath = "hdfs://rdhdfs1:27000/test/rdconnect-ES6/sparseMatrix/1737-9k/0.0.0/chrom-23"
-        comb.write( destinationPath, overwrite = True )
 
 
 if __name__ == "__main__":

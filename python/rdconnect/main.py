@@ -221,19 +221,13 @@ def main(sqlContext, sc, configuration, chrom, nchroms, step, somaticFlag):
         print ("source file is " + sourceFileName)
         try:
             nmatrix = configuration[ "combine" ][ "nmatrix" ]
-            print ("nmatrix is " + nmatrix)
             dense_matrix_path = configuration[ 'combine' ][ 'denseMatrix_path' ]
-            print ("dense_matrix_path is " + dense_matrix_path)
         except:
             raise Exception("[ERROR]: 'nmatrix' and/or 'denseMatrix_path' were not provided")
-        
         
         if nmatrix == "all":
             mapping = combine.load_table_log(sqlContext, '{0}/mapping'.format(dense_matrix_path))
             nmatrix = [ ii for ii in range(0, len(mapping)) ]
-
-        print(nmatrix)
-        print(destination)
 
         for ii in nmatrix:
             in_file = sourceFileName.replace('nmatrix', str(ii)).replace('chromosome', str(chrom))  
@@ -242,7 +236,8 @@ def main(sqlContext, sc, configuration, chrom, nchroms, step, somaticFlag):
             print("                - ", in_file)
             print("                - ", out_file)
             annotations.loadDenseMatrix(hl, in_file, out_file, number_partitions)
-        #current_dir = destination + "/loaded/" + "variants" + chrom + ".ht"
+        
+        current_dir = "{0}/loaded/".format(destination)
 
     if ("loadGermline" in step):
         print ("step loadGermline")
@@ -308,21 +303,70 @@ def main(sqlContext, sc, configuration, chrom, nchroms, step, somaticFlag):
     
     if("annotateFullDenseMatrix" in step):
         print ("step annotate Full")
-        print ("source file is " + current_dir)
+        print ("source file is " + sourceFileName)
+        print ("current_dir (1) is " + current_dir)
         try:
-            nmatrix = configuration["combine"]["nmatrix"]
+            nmatrix = configuration[ "combine" ][ "nmatrix" ]
             dense_matrix_path = configuration[ 'combine' ][ 'denseMatrix_path' ]
         except:
-            print ("[ERROR]: 'nmatrix' and/or 'denseMatrix_path' were not provided")
-        print ("nmatrix is " + nmatrix)
+            raise Exception("[ERROR]: 'nmatrix' and/or 'denseMatrix_path' were not provided")
+        
+        if current_dir is "":
+            current_dir = "/".join(sourceFileName.split("/")[-1])
+
+        print ("current_dir (1) is " + current_dir)
+        
         if nmatrix == "all":
             mapping = combine.load_table_log(sqlContext, '{0}/mapping'.format(dense_matrix_path))
             nmatrix = [ ii for ii in range(0, len(mapping)) ]
 
-        paths = [ '{0}/chrom-{1}-mtx-{2}'.format( dense_matrix_path, chrom, ii ) for ii in nmatrix ]
         print(nmatrix)
-        print(paths)
         print(destination)
+
+        for ii in nmatrix:
+            in_file = sourceFileName.replace('nmatrix', str(ii)).replace('chromosome', str(chrom))  
+            out_file = "{0}/loaded/variants-chrom-{1}-mtx{2}.ht".format(destination, str(chrom), str(ii))
+            print("        - ", ii)
+            print("                - ", in_file)
+            print("                - ", out_file)
+            annotations.loadDenseMatrix(hl, in_file, out_file, number_partitions)
+        
+        current_dir = "{0}/loaded/".format(destination)
+
+
+        for ii in nmatrix:
+            in_file = "{0}/variants-chrom-{1}-mtx{2}.ht".format(current_dir, str(chrom), str(ii))
+            fileName = "variants-chrom-{1}-mtx{2}.ht".format(str(chrom), str(ii))
+        
+            variants = hl.methods.read_matrix_table(fileName)
+            print(" VEP")
+            #annotations.annotateVEP(hl, variants, utils.buildDestinationVEP(destination, fileName, somaticFlag), configuration["vep"], number_partitions)
+            current_dir = utils.buildDestinationVEP(destination, fileName, somaticFlag)
+            print(current_dir)
+
+            # print(" dbNSFP")
+            # variants = hl.read_matrix_table(current_dir)
+            # annotations.annotateDbNSFP(hl, variants, utils.buildFileName(configuration["dnNSFP_path"], chrom), utils.buildDestinationNSFP(destination, fileName, somaticFlag))
+            # current_dir = utils.buildDestinationNSFP(destination, fileName, somaticFlag)
+                
+            # print(" dbCADD")
+            # variants = hl.read_matrix_table(current_dir)
+            # annotations.annotateCADD(hl, variants, utils.buildFileName(configuration["cadd_path"], chrom), utils.buildDestinationCADD(destination, fileName, somaticFlag))
+            # current_dir = utils.buildDestinationCADD(destination, fileName, somaticFlag)
+
+            # print(" ClinVar")
+            # variants = hl.read_matrix_table(current_dir)
+            # annotations.annotateClinvar(hl, variants, utils.buildFileName(configuration["clinvar_path"],""), utils.buildDestinationClinvar(destination, fileName, somaticFlag))
+            # current_dir = utils.buildDestinationClinvar(destination, fileName, somaticFlag)
+
+            # print(" gnomAD")
+            # variants = hl.read_matrix_table(current_dir)
+            # annotations.annotateGnomADEx(hl, variants, utils.buildFileName(configuration["exomesGnomad_path"], chrom), utils.buildDestinationGnomADEx(destination, fileName, somaticFlag))
+            # current_dir = utils.buildDestinationGnomADEx(destination, fileName, somaticFlag)
+
+
+
+
         
 
 

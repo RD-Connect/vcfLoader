@@ -51,47 +51,47 @@ def importInternalFreq(hl, originPath, destinationPath, nPartitions):
 
 def loadDenseMatrix( hl, sourcePath, destinationPath, nPartitions ):
     lgr = create_logger( 'loadDenseMatrix' )
-    lgr.debug( 'Argument "sourcePath" filled with "{}"'.format( sourcePath ) )
-    lgr.debug( 'Argument "destinationPath" filled with "{}"'.format( destinationPath ) )
-    lgr.debug( 'Argument "nPartitions" filled with "{}"'.format( nPartitions ) )
-    # try:
-    #     vcf = hl.read_matrix_table( sourcePath )#, array_elements_required = False, force_bgz = True, min_partitions = nPartitions )
-    #     x = [y.get('s') for y in vcf.col.collect()]
-    #     lgr.debug( 'Experiments in loaded VCF: {}'.format( len( x ) ) )
-    #     lgr.debug( 'First and last sample: {} // {}'.format( x[ 0 ], x[ len( x ) - 1 ] ) )
-    #     lgr.debug( 'Starting "transmute_entries"' )
-    #     vcf = vcf.transmute_entries(
-    #         sample = hl.struct(
-    #             sample = vcf.s,
-    #             ad = truncateAt( hl,vcf.LAD[ 1 ] / hl.sum( vcf.LAD ),"2" ),
-    #             dp = vcf.DP,
-    #             gtInt = vcf.LGT,
-    #             gt = hl.str( vcf.LGT ),
-    #             gq = vcf.GQ
-    #         )
-    #     )
-    #     lgr.debug( 'Starting "annotate_rows"' )
-    #     vcf = vcf.annotate_rows(
-    #         ref = vcf.alleles[ 0 ],
-    #         alt = vcf.alleles[ 1 ],
-    #         pos = vcf.locus.position,
-    #         indel = hl.cond(
-    #             ( hl.len( vcf.alleles[ 0 ] ) != ( hl.len( vcf.alleles[ 1 ] ) ) ) | ( hl.len( vcf.alleles[ 0 ] ) != 1 ) | ( hl.len( vcf.alleles[ 0 ] ) != 1 ), True, False 
-    #         ),
-    #         samples_germline = hl.filter(
-    #             lambda x: ( x.dp > MIN_DP ) & ( x.gq > MIN_GQ ), hl.agg.collect( vcf.sample )
-    #         )
-    #     )
-    #     lgr.debug( 'Output VCF file will be saved to "{}"'.format( destinationPath ) )
-    #     lgr.debug( 'Contents in "{}" will be overwritten'.format( destinationPath ) )
-    #     #vcf = vcf.rows()
-    #     #vcf = vcf.key_by( vcf.locus, vcf.alleles )
-    #     #vcf = vcf.distinct().write( destinationPath, overwrite = True )
-    #     vcf.write(destinationPath, overwrite=True)
-    # except Exception as ex:
-    #     lgr.debug( 'Unexpected error during the load of dense matrix "{}"'.format( sourcePath ) )
-    #     lgr.error( 'Unexpected error --> {}'.format( str( ex ) ) )
-    #     sys.exit( 2 )
+    #lgr.debug( 'Argument "sourcePath" filled with "{}"'.format( sourcePath ) )
+    #lgr.debug( 'Argument "destinationPath" filled with "{}"'.format( destinationPath ) )
+    #lgr.debug( 'Argument "nPartitions" filled with "{}"'.format( nPartitions ) )
+    try:
+        vcf = hl.read_matrix_table( sourcePath )#, array_elements_required = False, force_bgz = True, min_partitions = nPartitions )
+        x = [y.get('s') for y in vcf.col.collect()]
+        lgr.debug( 'Experiments in loaded VCF: {}'.format( len( x ) ) )
+        lgr.debug( 'First and last sample: {} // {}'.format( x[ 0 ], x[ len( x ) - 1 ] ) )
+        lgr.debug( 'Starting "transmute_entries"' )
+        vcf = vcf.transmute_entries(
+            sample = hl.struct(
+                sample = vcf.s,
+                ad = truncateAt( hl,vcf.LAD[ 1 ] / hl.sum( vcf.LAD ),"2" ),
+                dp = vcf.DP,
+                gtInt = vcf.LGT,
+                gt = hl.str( vcf.LGT ),
+                gq = vcf.GQ
+            )
+        )
+        lgr.debug( 'Starting "annotate_rows"' )
+        vcf = vcf.annotate_rows(
+            ref = vcf.alleles[ 0 ],
+            alt = vcf.alleles[ 1 ],
+            pos = vcf.locus.position,
+            indel = hl.cond(
+                ( hl.len( vcf.alleles[ 0 ] ) != ( hl.len( vcf.alleles[ 1 ] ) ) ) | ( hl.len( vcf.alleles[ 0 ] ) != 1 ) | ( hl.len( vcf.alleles[ 0 ] ) != 1 ), True, False 
+            ),
+            samples_germline = hl.filter(
+                lambda x: ( x.dp > MIN_DP ) & ( x.gq > MIN_GQ ), hl.agg.collect( vcf.sample )
+            )
+        )
+        lgr.debug( 'Output VCF file will be saved to "{}"'.format( destinationPath ) )
+        lgr.debug( 'Contents in "{}" will be overwritten'.format( destinationPath ) )
+        #vcf = vcf.rows()
+        #vcf = vcf.key_by( vcf.locus, vcf.alleles )
+        #vcf = vcf.distinct().write( destinationPath, overwrite = True )
+        vcf.write(destinationPath, overwrite=True)
+    except Exception as ex:
+        lgr.debug( 'Unexpected error during the load of dense matrix "{}"'.format( sourcePath ) )
+        lgr.error( 'Unexpected error --> {}'.format( str( ex ) ) )
+        sys.exit( 2 )
 
 
 def importGermline(hl, originPath, sourcePath, destinationPath, nPartitions):

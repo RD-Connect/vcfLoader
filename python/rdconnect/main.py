@@ -223,7 +223,7 @@ def main(sqlContext, sc, configuration, chrom, nchroms, step, somaticFlag):
             nmatrix = configuration[ "combine" ][ "nmatrix" ]
             print ("nmatrix is " + nmatrix)
             dense_matrix_path = configuration[ 'combine' ][ 'denseMatrix_path' ]
-            print ("nmatrix is " + nmatrix)
+            print ("dense_matrix_path is " + dense_matrix_path)
         except:
             raise Exception("[ERROR]: 'nmatrix' and/or 'denseMatrix_path' were not provided")
         
@@ -236,8 +236,8 @@ def main(sqlContext, sc, configuration, chrom, nchroms, step, somaticFlag):
         print(destination)
 
         for ii in nmatrix:
-            in_file = sourceFileName.replace('nmatrix', str(ii)).replace('chromosome', str(chrom))
-            out_file = "{0}/loaded/variants-chrom-{1}-mtx{2}.ht".format(destination, srt(chrom), str(ii))
+            in_file = sourceFileName.replace('nmatrix', str(ii)).replace('chromosome', str(chrom))  
+            out_file = "{0}/loaded/variants-chrom-{1}-mtx{2}.ht".format(destination, str(chrom), str(ii))
             annotations.loadDenseMatrix(hl, in_file, out_file, number_partitions)
         #current_dir = destination + "/loaded/" + "variants" + chrom + ".ht"
 

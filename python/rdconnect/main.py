@@ -231,7 +231,7 @@ def main(sqlContext, sc, configuration, chrom, nchroms, step, somaticFlag):
 
         for ii in nmatrix:
             in_file = sourceFileName.replace('nmatrix', str(ii)).replace('chromosome', str(chrom))  
-            out_file = "{0}/loaded/variants-chrom-{1}-mtx{2}.ht".format(destination, str(chrom), str(ii))
+            out_file = "{0}/loaded/variants-chrom-{1}-mtx-{2}.ht".format(destination, str(chrom), str(ii))
             print("        - ", ii)
             print("                - ", in_file)
             print("                - ", out_file)
@@ -331,6 +331,7 @@ def main(sqlContext, sc, configuration, chrom, nchroms, step, somaticFlag):
             variants = variants.key_rows_by( variants.locus, variants.alleles )
             print(" VEP")
             annotations.annotateVEP(hl, variants, utils.buildDestinationVEP(destination, fileName, somaticFlag), configuration["vep"], number_partitions)
+            print(" ended VEP")
             current_dir = utils.buildDestinationVEP(destination, fileName, somaticFlag)
             print(current_dir)
 

@@ -323,36 +323,35 @@ def main(sqlContext, sc, configuration, chrom, nchroms, step, somaticFlag):
         print(nmatrix)
         print(destination)
 
+        start_dir = current_dir
         for ii in nmatrix:
-            in_file = "{0}/variants-chrom-{1}-mtx{2}.ht".format(current_dir, str(chrom), str(ii))
+            in_file = "{0}/variants-chrom-{1}-mtx{2}.ht".format(start_dir, str(chrom), str(ii))
             fileName = "variants-chrom-{0}-mtx{1}.ht".format(str(chrom), str(ii))
         
             variants = hl.methods.read_matrix_table(in_file)
             variants = variants.key_rows_by( variants.locus, variants.alleles )
             print(" VEP")
             annotations.annotateVEP(hl, variants, utils.buildDestinationVEP(destination, fileName, somaticFlag), configuration["vep"], number_partitions)
-            print(" ended VEP")
             current_dir = utils.buildDestinationVEP(destination, fileName, somaticFlag)
-            print(current_dir)
-
-            # print(" dbNSFP")
-            # variants = hl.read_matrix_table(current_dir)
-            # annotations.annotateDbNSFP(hl, variants, utils.buildFileName(configuration["dnNSFP_path"], chrom), utils.buildDestinationNSFP(destination, fileName, somaticFlag))
-            # current_dir = utils.buildDestinationNSFP(destination, fileName, somaticFlag)
+            
+            print(" dbNSFP")
+            variants = hl.read_matrix_table(current_dir)
+            annotations.annotateDbNSFP(hl, variants, utils.buildFileName(configuration["dnNSFP_path"], chrom), utils.buildDestinationNSFP(destination, fileName, somaticFlag))
+            current_dir = utils.buildDestinationNSFP(destination, fileName, somaticFlag)
                 
-            # print(" dbCADD")
-            # variants = hl.read_matrix_table(current_dir)
-            # annotations.annotateCADD(hl, variants, utils.buildFileName(configuration["cadd_path"], chrom), utils.buildDestinationCADD(destination, fileName, somaticFlag))
-            # current_dir = utils.buildDestinationCADD(destination, fileName, somaticFlag)
+            print(" dbCADD")
+            variants = hl.read_matrix_table(current_dir)
+            annotations.annotateCADD(hl, variants, utils.buildFileName(configuration["cadd_path"], chrom), utils.buildDestinationCADD(destination, fileName, somaticFlag))
+            current_dir = utils.buildDestinationCADD(destination, fileName, somaticFlag)
 
-            # print(" ClinVar")
-            # variants = hl.read_matrix_table(current_dir)
-            # annotations.annotateClinvar(hl, variants, utils.buildFileName(configuration["clinvar_path"],""), utils.buildDestinationClinvar(destination, fileName, somaticFlag))
-            # current_dir = utils.buildDestinationClinvar(destination, fileName, somaticFlag)
+            print(" ClinVar")
+            variants = hl.read_matrix_table(current_dir)
+            annotations.annotateClinvar(hl, variants, utils.buildFileName(configuration["clinvar_path"],""), utils.buildDestinationClinvar(destination, fileName, somaticFlag))
+            current_dir = utils.buildDestinationClinvar(destination, fileName, somaticFlag)
 
-            # print(" gnomAD")
-            # variants = hl.read_matrix_table(current_dir)
-            # annotations.annotateGnomADEx(hl, variants, utils.buildFileName(configuration["exomesGnomad_path"], chrom), utils.buildDestinationGnomADEx(destination, fileName, somaticFlag))
+            print(" gnomAD")
+            variants = hl.read_matrix_table(current_dir)
+            annotations.annotateGnomADEx(hl, variants, utils.buildFileName(configuration["exomesGnomad_path"], chrom), utils.buildDestinationGnomADEx(destination, fileName, somaticFlag))
             # current_dir = utils.buildDestinationGnomADEx(destination, fileName, somaticFlag)
 
 

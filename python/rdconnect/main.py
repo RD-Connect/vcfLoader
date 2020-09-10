@@ -328,6 +328,7 @@ def main(sqlContext, sc, configuration, chrom, nchroms, step, somaticFlag):
             fileName = "variants-chrom-{0}-mtx{1}.ht".format(str(chrom), str(ii))
         
             variants = hl.methods.read_matrix_table(in_file)
+            variants = variants.key_rows_by( variants.locus, variants.alleles )
             print(" VEP")
             annotations.annotateVEP(hl, variants, utils.buildDestinationVEP(destination, fileName, somaticFlag), configuration["vep"], number_partitions)
             current_dir = utils.buildDestinationVEP(destination, fileName, somaticFlag)

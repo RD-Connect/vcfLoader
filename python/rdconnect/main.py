@@ -324,19 +324,8 @@ def main(sqlContext, sc, configuration, chrom, nchroms, step, somaticFlag):
         print(destination)
 
         for ii in nmatrix:
-            in_file = sourceFileName.replace('nmatrix', str(ii)).replace('chromosome', str(chrom))  
-            out_file = "{0}/loaded/variants-chrom-{1}-mtx{2}.ht".format(destination, str(chrom), str(ii))
-            print("        - ", ii)
-            print("                - ", in_file)
-            print("                - ", out_file)
-            annotations.loadDenseMatrix(hl, in_file, out_file, number_partitions)
-        
-        current_dir = "{0}/loaded/".format(destination)
-
-
-        for ii in nmatrix:
             in_file = "{0}/variants-chrom-{1}-mtx{2}.ht".format(current_dir, str(chrom), str(ii))
-            fileName = "variants-chrom-{1}-mtx{2}.ht".format(str(chrom), str(ii))
+            fileName = "variants-chrom-{0}-mtx{1}.ht".format(str(chrom), str(ii))
         
             variants = hl.methods.read_matrix_table(fileName)
             print(" VEP")

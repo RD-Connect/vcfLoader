@@ -330,7 +330,7 @@ def main(sqlContext, sc, configuration, chrom, nchroms, step, somaticFlag):
             print (" internalFreq")
             variants = hl.read_matrix_table(in_file)
             variants = variants.key_rows_by(variants.locus, variants.alleles)
-            annotations.annotateInternalFreq(hl, variants, configuration["intFreq"] +"/" + fileName, destination + "/annotateInternalFreq/" + fileName)
+            annotations.annotateInternalFreq(hl, variants, configuration["intFreq"] + "/variants" + str(chrom) + ".ht", destination + "/annotateInternalFreq/" + fileName)
             current_dir = destination + "/annotateInternalFreq/" + fileName
             
             # print(" VEP")

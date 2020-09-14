@@ -313,7 +313,7 @@ def main(sqlContext, sc, configuration, chrom, nchroms, step, somaticFlag):
         if current_dir is "":
             current_dir = "/".join(sourceFileName.split("/")[-1])
 
-        print ("current_dir (1) is " + current_dir)
+        print ("current_dir (2) is " + current_dir)
         
         if nmatrix == "all":
             mapping = combine.load_table_log(sqlContext, '{0}/mapping'.format(dense_matrix_path))
@@ -332,7 +332,7 @@ def main(sqlContext, sc, configuration, chrom, nchroms, step, somaticFlag):
             variants = variants.key_rows_by(variants.locus, variants.alleles)
             annotations.annotateInternalFreq(hl, variants, configuration["intFreq"] +"/" + fileName, destination + "/annotateInternalFreq/" + fileName)
             current_dir = destination + "/annotateInternalFreq/" + fileName
-        
+            
             # print(" VEP")
             # variants = hl.methods.read_matrix_table(current_dir)
             # annotations.annotateVEP(hl, variants, utils.buildDestinationVEP(destination, fileName, somaticFlag), configuration["vep"], number_partitions)

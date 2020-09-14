@@ -327,10 +327,15 @@ def main(sqlContext, sc, configuration, chrom, nchroms, step, somaticFlag):
         for ii in nmatrix:
             in_file = "{0}/variants-chrom-{1}-mtx{2}.ht".format(start_dir, str(chrom), str(ii))
             fileName = "variants-chrom-{0}-mtx{1}.ht".format(str(chrom), str(ii))
+
+            print (" internalFreq")
+            variants = hl.read_matrix_table(in_file)
+            variants = variants.key_rows_by(variants.locus, variants.alleles)
+            annotations.annotateInternalFreq(hl, variants, configuration["intFreq"] +"/" + fileName, destination + "/annotateInternalFreq/" + fileName)
+            current_dir = destination + "/annotateInternalFreq/" + fileName
         
-            variants = hl.methods.read_matrix_table(in_file)
-            variants = variants.key_rows_by( variants.locus, variants.alleles )
             print(" VEP")
+            variants = hl.methods.read_matrix_table(current_dir)
             annotations.annotateVEP(hl, variants, utils.buildDestinationVEP(destination, fileName, somaticFlag), configuration["vep"], number_partitions)
             current_dir = utils.buildDestinationVEP(destination, fileName, somaticFlag)
             
@@ -351,7 +356,7 @@ def main(sqlContext, sc, configuration, chrom, nchroms, step, somaticFlag):
 
             print(" gnomAD")
             variants = hl.read_matrix_table(current_dir)
-            annotations.annotateGnomADEx(hl, variants, utils.buildFileName(configuration["exomesGnomad_path"], chrom), utils.buildDestinationGnomADEx(destination, fileName, somaticFlag))
+                annotations.annotateGnomADEx(hl, variants, utils.buildFileName(configuration["exomesGnomad_path"], chrom), utils.buildDestinationGnomADEx(destination, fileName, somaticFlag))
             # current_dir = utils.buildDestinationGnomADEx(destination, fileName, somaticFlag)
 
 

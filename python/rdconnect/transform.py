@@ -24,6 +24,8 @@ def transformDenseMatrix(hl, dataset, destinationPath, nmtx, chrom):
     vcf = dataset.rows() # .drop('samples_germline').rows()
     vcf.key_by(vcf.locus, vcf.alleles).distinct() #.write(destinationPath, overwrite = True)
     print(vcf.describe())
+    print("*" * 100)
     vcf.to_spark() \
            .drop("locus.contig", "locus.position", "alleles") \
            .write.mode('overwrite').save(destinationPath + "/chrom-" + chrom, "-mtx-", nmtx)
+    print("[]" * 50)

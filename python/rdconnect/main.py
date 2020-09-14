@@ -471,9 +471,6 @@ def main(sqlContext, sc, configuration, chrom, nchroms, step, somaticFlag):
             mapping = combine.load_table_log(sqlContext, '{0}/mapping'.format(dense_matrix_path))
             nmatrix = [ ii for ii in range(0, len(mapping)) ]
 
-        print(nmatrix)
-        print(destination)
-
         start_dir = current_dir
         for ii in nmatrix:
             in_file = "{0}/variants-chrom-{1}-mtx{2}.ht".format(start_dir, str(chrom), str(ii))

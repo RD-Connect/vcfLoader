@@ -452,7 +452,7 @@ def main(sqlContext, sc, configuration, chrom, nchroms, step, somaticFlag):
 
 
 
-    if("transformDenseMatrix" in step):
+    if("transDenseMatrix" in step):
         print ("step transform dense matrix")
         print ("source file is " + sourceFileName)
         print ("current_dir (1) is " + current_dir)
@@ -483,7 +483,7 @@ def main(sqlContext, sc, configuration, chrom, nchroms, step, somaticFlag):
             transform.transformDenseMatrix(hl, variants, utils.buildDestinationTransform(destination, somaticFlag), ii, chrom)
 
 
-    if ("toElasticDenseMatrix" in step):
+    if ("pushDenseMatrix" in step):
         print ("step to elastic dense matrix")
         es_conf = {
             "es.net.http.auth.user": configuration["elasticsearch"]["user"],

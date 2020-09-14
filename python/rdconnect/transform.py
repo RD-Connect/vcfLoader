@@ -27,5 +27,5 @@ def transformDenseMatrix(hl, dataset, destinationPath, nmtx, chrom):
     print("*" * 100)
     vcf.to_spark() \
            .drop("locus.contig", "locus.position", "alleles") \
-           .write.mode('overwrite').save(destinationPath + "/chrom-" + chrom + "-mtx-" + nmtx)
+           .write.mode('overwrite').save(destinationPath + "/chrom-" + chrom + "-mtx-" + str(nmtx))
     print("[]" * 50)

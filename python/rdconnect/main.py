@@ -311,7 +311,7 @@ def main(sqlContext, sc, configuration, chrom, nchroms, step, somaticFlag):
             raise Exception("[ERROR]: 'nmatrix' and/or 'denseMatrix_path' were not provided")
         
         if current_dir is "":
-            current_dir = "/".join(sourceFileName.split("/")[-1])
+            current_dir = "/".join(sourceFileName.split("/")[:-1])
 
         print ("current_dir (2) is " + current_dir)
         

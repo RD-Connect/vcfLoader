@@ -284,14 +284,13 @@ def main(sqlContext, sc, configuration, chrom, nchroms, step, somaticFlag):
 
     if ("annotateInternalFreq" in step):
         print ("step annotate Internal Allele Frequency")
-        print ("source file is " + current_dir)
         print ("current intFreq file is " + configuration["intFreq"] +"/" + fileName)
-        if not current_dir.endswith(fileName):
-            current_dir = current_dir + "/" + fileName
-        print ("source file (bis): {}".format(current_dir))
-        variants = hl.read_table(current_dir)
-        annotations.annotateInternalFreq(hl, variants, configuration["intFreq"] +"/" + fileName, destination + "/annotateInternalFreq/" + fileName)
-        current_dir = destination + "/annotateInternalFreq/" + fileName
+        input_file = utils.buildFileName(configuration["origin_path"], chrom)
+        output_file = destination + "/annotateInternalFreq/" + fileName
+        
+        variants = hl.methods.read_matrix_table(input_file)
+        annotations.annotateInternalFreq(hl, variants, configuration["intFreq"] + "/" + fileName, output_file)
+        #current_dir = destination + "/annotateInternalFreq/" + fileName
 
     if ("annotateCGI" in step):
         print("step annotate CGI")
@@ -356,13 +355,11 @@ def main(sqlContext, sc, configuration, chrom, nchroms, step, somaticFlag):
 
             print(" gnomAD")
             variants = hl.read_matrix_table(current_dir)
-                annotations.annotateGnomADEx(hl, variants, utils.buildFileName(configuration["exomesGnomad_path"], chrom), utils.buildDestinationGnomADEx(destination, fileName, somaticFlag))
+            annotations.annotateGnomADEx(hl, variants, utils.buildFileName(configuration["exomesGnomad_path"], chrom), utils.buildDestinationGnomADEx(destination, fileName, somaticFlag))
             # current_dir = utils.buildDestinationGnomADEx(destination, fileName, somaticFlag)
 
 
 
-
-        
 
 
     if ("annotateFull" in step):

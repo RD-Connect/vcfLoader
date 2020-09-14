@@ -570,7 +570,7 @@ def annotateInternalFreq(hl, variants, annotationPath, destinationPath):
     #     .rows() \
     #     .key_by("locus","alleles")
     int_freq = hl.read_table(annotationPath).key_by("locus","alleles")
-    variants.annotate(
+    variants.annotate_rows(
         internalFreq = hl.cond(hl.is_defined(int_freq[variants.locus, variants.alleles].freqIntGermline), int_freq[variants.locus, variants.alleles].freqIntGermline, 0.0),
         internalFreqNum = hl.cond(hl.is_defined(int_freq[variants.locus, variants.alleles].num), int_freq[variants.locus, variants.alleles].num, 0.0),
         internalFreqDem = hl.cond(hl.is_defined(int_freq[variants.locus, variants.alleles].dem), int_freq[variants.locus, variants.alleles].dem, 0.0),

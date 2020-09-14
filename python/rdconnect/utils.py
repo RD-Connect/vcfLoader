@@ -93,3 +93,6 @@ def buildOriginToElastic(destination, chrom, somatic = False):
         return destination+"/variants/chrom="+chrom
     else:
         return destination+"/variants_somatic/chrom="+chrom
+
+def buildOriginToElasticDenseMatrix(destination, nmtx, chrom, somatic = False):
+    return destination+"/variants/chrom-" + chrom + "-mtx-", nmtx

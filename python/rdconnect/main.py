@@ -319,6 +319,9 @@ def main(sqlContext, sc, configuration, chrom, nchroms, step, somaticFlag):
             mapping = combine.load_table_log(sqlContext, '{0}/mapping'.format(dense_matrix_path))
             nmatrix = [ ii for ii in range(0, len(mapping)) ]
 
+        if not isinstance(nmatrix, list):
+            nmatrix = [nmatrix]
+
         print(nmatrix)
         print(destination)
 

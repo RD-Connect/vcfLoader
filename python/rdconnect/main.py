@@ -331,8 +331,8 @@ def main(sqlContext, sc, configuration, chrom, nchroms, step, somaticFlag):
             fileName = "variants-chrom-{0}-mtx{1}.ht".format(str(chrom), str(ii))
 
             print (" internalFreq")
-            variants = hl.read_matrix_table(in_file)    
-            variants = variants.key_rows_by(variants.locus, variants.alleles)
+            variants = hl.read_matrix_table(in_file)
+            #variants = variants.key_rows_by(variants.locus, variants.alleles)
             annotations.annotateInternalFreq(hl, variants, configuration["intFreq"] + "/variants" + str(chrom) + ".ht", destination + "/annotateInternalFreq/" + fileName)
             current_dir = destination + "/annotateInternalFreq/" + fileName
             

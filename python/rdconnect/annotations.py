@@ -576,6 +576,7 @@ def annotateInternalFreq(hl, variants, annotationPath, destinationPath):
         internalFreqDem = hl.cond(hl.is_defined(int_freq[variants.locus, variants.alleles].dem), int_freq[variants.locus, variants.alleles].dem, 0.0),
     )
     variants.write(destinationPath, overwrite = True)
+    print(variants.describe())
     print('[annotateInternalFreq] - destinationPath: {0}'.format(destinationPath))
 
 def annotateClinvar(hl, variants, annotationPath, destinationPath):

@@ -570,14 +570,20 @@ def annotateInternalFreq(hl, variants, annotationPath, destinationPath):
     #     .rows() \
     #     .key_by("locus","alleles")
     int_freq = hl.read_table(annotationPath).key_by("locus","alleles")
+    print("1 |  n", variants.describe())
     variants.annotate_rows(
         internalFreq = hl.cond(hl.is_defined(int_freq[variants.locus, variants.alleles].freqIntGermline), int_freq[variants.locus, variants.alleles].freqIntGermline, 0.0),
         internalFreqNum = hl.cond(hl.is_defined(int_freq[variants.locus, variants.alleles].num), int_freq[variants.locus, variants.alleles].num, 0.0),
         internalFreqDem = hl.cond(hl.is_defined(int_freq[variants.locus, variants.alleles].dem), int_freq[variants.locus, variants.alleles].dem, 0.0),
     )
+    print("2 |  n", variants.describe())
     variants.write(destinationPath, overwrite = True)
-    print(variants.describe())
     print('[annotateInternalFreq] - destinationPath: {0}'.format(destinationPath))
+
+
+    vcf = vcf.annotate_rows(freqIntGermline = hl.cond((hl.len(vcf.samples_germline) > 0) | (hl.len(hl.filter(lambda x: x.dp > MIN_DP,vcf.samples_germline)) > 0),
+                                            truncateAt(hl,hl.sum(hl.map(lambda x: x.gtInt.unphased_diploid_gt_index(),vcf.samples_germline))/hl.sum(hl.map(lambda x: 2,hl.filter(lambda x: x.dp > MIN_DP,vcf.samples_germline))),"6"), 0.0)) \
+                .drop("sample") # \
 
 def annotateClinvar(hl, variants, annotationPath, destinationPath):
     """ Adds Clinvar annotations to variants.

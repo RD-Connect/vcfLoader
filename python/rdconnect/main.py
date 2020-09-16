@@ -319,6 +319,9 @@ def main(sqlContext, sc, configuration, chrom, nchroms, step, somaticFlag):
             mapping = combine.load_table_log(sqlContext, '{0}/mapping'.format(dense_matrix_path))
             nmatrix = [ ii for ii in range(0, len(mapping)) ]
 
+        if not isinstance(nmatrix, list):
+            nmatrix = [nmatrix]
+
         print(nmatrix)
         print(destination)
 
@@ -328,13 +331,14 @@ def main(sqlContext, sc, configuration, chrom, nchroms, step, somaticFlag):
             fileName = "variants-chrom-{0}-mtx{1}.ht".format(str(chrom), str(ii))
 
             print (" internalFreq")
-            variants = hl.read_matrix_table(in_file)    
+            variants = hl.read_matrix_table(in_file)
             variants = variants.key_rows_by(variants.locus, variants.alleles)
             annotations.annotateInternalFreq(hl, variants, configuration["intFreq"] + "/variants" + str(chrom) + ".ht", destination + "/annotateInternalFreq/" + fileName)
             current_dir = destination + "/annotateInternalFreq/" + fileName
             
             print(" VEP")
             variants = hl.methods.read_matrix_table(current_dir)
+            variants = variants.key_rows_by(variants.locus, variants.alleles)
             annotations.annotateVEP(hl, variants, utils.buildDestinationVEP(destination, fileName, somaticFlag), configuration["vep"], number_partitions)
             current_dir = utils.buildDestinationVEP(destination, fileName, somaticFlag)
             

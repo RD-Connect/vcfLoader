@@ -525,13 +525,15 @@ def main(sqlContext, sc, configuration, chrom, nchroms, step, somaticFlag):
             if index.index_exists(host, port, idx_name, user, psw):
                 raise Exception('[ERROR]: Trying to perform a "pushDenseMatrix" to an existing index "{0}"'.replace(idx_name))
 
-            index.create_index_snv(host, port, idx_name, configuration["elasticsearch"]["type"], configuration["elasticsearch"]["num_shards"], configuration["elasticsearch"]["num_replicas"], user, pwd)
+            print("creating {0}".format(idx_name))
+            index.create_index_snv(host, port, idx_name, configuration["elasticsearch"]["type"], configuration["elasticsearch"]["num_shards"], configuration["elasticsearch"]["num_replicas"], user, psw)
 
+            print("pushing {0}".format(utils.buildOriginToElasticDenseMatrix(destination, ii, chrom, somaticFlag)))
             variants = sqlContext.read.load(utils.buildOriginToElasticDenseMatrix(destination, ii, chrom, somaticFlag))\
                                   .withColumn("chrom",lit(chrom))
             variants.printSchema()
             variants.write.format("org.elasticsearch.spark.sql").options(**es_conf).save(idx_name+"/"+configuration["elasticsearch"]["type"], mode='append')
-
+            print("END")
 
 
         

@@ -495,23 +495,13 @@ def main(sqlContext, sc, configuration, chrom, nchroms, step, somaticFlag):
         user = configuration["elasticsearch"]["user"]
         psw = configuration["elasticsearch"]["pwd"]
 
-        idx_name = configuration["elasticsearch"]["index_name"]
-        if not index.index_exists(host, port, idx_name, user, psw):
-            raise Exception('Trying to perform a "toElastic" operation without creating the index')
 
-
-        print ("source file is " + sourceFileName)
-        print ("current_dir (1) is " + current_dir)
         try:
             nmatrix = configuration[ "combine" ][ "nmatrix" ]
             dense_matrix_path = configuration[ 'combine' ][ 'denseMatrix_path' ]
         except:
             raise Exception("[ERROR]: 'nmatrix' and/or 'denseMatrix_path' were not provided")
         
-        if current_dir is "":
-            current_dir = "/".join(sourceFileName.split("/")[:-1])
-
-        print ("current_dir (loading from) (2) is " + current_dir)
         
         if nmatrix == "all":
             mapping = combine.load_table_log(sqlContext, '{0}/mapping'.format(dense_matrix_path))
@@ -520,9 +510,19 @@ def main(sqlContext, sc, configuration, chrom, nchroms, step, somaticFlag):
         print(nmatrix)
         print(destination)
 
+
+        idx_name_base = configuration["elasticsearch"]["index_name"]
+        if "nmatrix" not in idx_name_base:
+            raise Exception("[ERROR]: Provided index with no 'nmatrix' substring")
+
         start_dir = current_dir
         for ii in nmatrix:
-            # Getting annotated variants and adding the chromosome column
+            idx_name = idx_name_base.replace('nmatrix', str(ii))
+            if index.index_exists(host, port, idx_name, user, psw):
+                raise Exception('[ERROR]: Trying to perform a "pushDenseMatrix" to an existing index "{0}"'.replace(idx_name))
+
+            index.create_index_snv(host, port, idx_name, configuration["elasticsearch"]["type"], configuration["elasticsearch"]["num_shards"], configuration["elasticsearch"]["num_replicas"], user, pwd)
+
             variants = sqlContext.read.load(utils.buildOriginToElasticDenseMatrix(destination, ii, chrom, somaticFlag))\
                                   .withColumn("chrom",lit(chrom))
             variants.printSchema()

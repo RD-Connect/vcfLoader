@@ -226,6 +226,9 @@ def main(sqlContext, sc, configuration, chrom, nchroms, step, somaticFlag):
             mapping = combine.load_table_log(sqlContext, '{0}/mapping'.format(dense_matrix_path))
             nmatrix = [ ii for ii in range(0, len(mapping)) ]
 
+        if type(nmatrix) is not list:
+            nmatrix = [ nmatrix ]
+
         for ii in nmatrix:
             in_file = sourceFileName.replace('nmatrix', str(ii)).replace('chromosome', str(chrom))  
             out_file = "{0}/loaded/variants-chrom-{1}-mtx-{2}.ht".format(destination, str(chrom), str(ii))

@@ -475,6 +475,9 @@ def main(sqlContext, sc, configuration, chrom, nchroms, step, somaticFlag):
             mapping = combine.load_table_log(sqlContext, '{0}/mapping'.format(dense_matrix_path))
             nmatrix = [ ii for ii in range(0, len(mapping)) ]
 
+        if type(nmatrix) is not list:
+            nmatrix = [ nmatrix ]
+
         start_dir = current_dir
         for ii in nmatrix:
             in_file = "{0}/variants-chrom-{1}-mtx{2}.ht".format(start_dir, str(chrom), str(ii))
@@ -510,6 +513,9 @@ def main(sqlContext, sc, configuration, chrom, nchroms, step, somaticFlag):
         if nmatrix == "all":
             mapping = combine.load_table_log(sqlContext, '{0}/mapping'.format(dense_matrix_path))
             nmatrix = [ ii for ii in range(0, len(mapping)) ]
+
+        if type(nmatrix) is not list:
+            nmatrix = [ nmatrix ]
 
         print(nmatrix)
         print(destination)

@@ -63,10 +63,10 @@ def loadDenseMatrix( hl, sourcePath, destinationPath, nPartitions ):
         vcf = vcf.transmute_entries(
             sample = hl.struct(
                 sample = vcf.s,
-                ad = truncateAt( hl,vcf.LAD[ 1 ] / hl.sum( vcf.LAD ),"2" ),
+                ad = truncateAt( hl,vcf.AD[ 1 ] / hl.sum( vcf.AD ),"2" ),
                 dp = vcf.DP,
-                gtInt = vcf.LGT,
-                gt = hl.str( vcf.LGT ),
+                gtInt = vcf.GT,
+                gt = hl.str( vcf.GT ),
                 gq = vcf.GQ
             )
         )

@@ -365,7 +365,7 @@ def createDenseMatrix( sc, sq, url_project, host_project, prefix_hdfs, dense_mat
             small_matrix = hl.experimental.sparse_split_multi( small_matrix )
             small_matrix = hl.experimental.densify( small_matrix )
             print(small_matrix.describe())
-            small_matrix = small_matrix.filter_rows( hl.agg.any( small_matrix.LGT.is_non_ref() ) )
+            small_matrix = small_matrix.filter_rows( hl.agg.any( small_matrix.GT.is_non_ref() ) )
             path = '{0}/chrom-{1}-mtx-{2}'.format( dense_matrix_path, chrom, idx )
             lgr.info( 'Writing dense matrix {} to disk ({})'.format( idx, path ) )
             small_matrix.write( path, overwrite = True )

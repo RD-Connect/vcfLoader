@@ -193,12 +193,15 @@ def main(sqlContext, sc, configuration, chrom, nchroms, step, somaticFlag):
         print( "prefix_hdfs:", prefix_hdfs )
         is_playground = configuration[ 'elasticsearch' ][ 'main_project' ] == 'playground'
         print( "is_playground:", is_playground )
+        if 'max_items_batch' in configuration[ 'combine' ]:
+            max_items_batch = configuration[ 'combine' ][ 'sz_small_batch' ]
         if 'gvcf_store_path' in configuration[ 'combine' ].keys():
             gvcf_store_path = configuration[ 'combine' ][ 'gvcf_store_path' ]
         else:
             gvcf_store_path = None
+        print( "max_items_batch:", max_items_batch )
         print( "gvcf_store_path:", gvcf_store_path )
-        combine.createDenseMatrix( sc, sqlContext, url_project, host_project, prefix_hdfs, denseMatrix_path, gvcf_store_path, chrom, group, token, gpap_id, gpap_token, is_playground )
+        combine.createDenseMatrix( sc, sqlContext, url_project, host_project, prefix_hdfs, max_items_batch, denseMatrix_path, gvcf_store_path, chrom, group, token, gpap_id, gpap_token, is_playground )
 
 
     if ("createIndex" in step):

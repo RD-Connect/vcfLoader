@@ -340,13 +340,13 @@ def load_table_log( sq, path ):
 
 
 
-def createDenseMatrix( sc, sq, url_project, host_project, prefix_hdfs, dense_matrix_path, sparse_matrix_path, chrom, group, token, gpap_id, gpap_token, is_playground ):
+def createDenseMatrix( sc, sq, url_project, host_project, prefix_hdfs, max_items_batch, dense_matrix_path, sparse_matrix_path, chrom, group, token, gpap_id, gpap_token, is_playground ):
     lgr = create_logger( 'createDenseMatrix', '' )
 
     mapping = load_table_log(sq, '{0}/mapping'.format(dense_matrix_path))
 
     if sparse_matrix_path is None:
-        raise 'No information on "sparse_matrix_path" was provided.'
+        raise Exception('No information on "sparse_matrix_path" was provided.')
     
     path_matrix = '{0}/chrom-{1}'.format( sparse_matrix_path, chrom )
     lgr.debug( 'READING from in {0}'.format( path_matrix ) )

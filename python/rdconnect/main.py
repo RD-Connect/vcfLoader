@@ -327,8 +327,8 @@ def main(sqlContext, sc, configuration, chrom, nchroms, step, somaticFlag):
 
         start_dir = current_dir
         for ii in nmatrix:
-            in_file = "{0}/variants-chrom-{1}-mtx{2}.ht".format(start_dir, str(chrom), str(ii))
-            fileName = "variants-chrom-{0}-mtx{1}.ht".format(str(chrom), str(ii))
+            in_file = "{0}/variants-chrom-{1}-mtx-{2}.ht".format(start_dir, str(chrom), str(ii))
+            fileName = "variants-chrom-{0}-mtx-{1}.ht".format(str(chrom), str(ii))
 
             print (" internalFreq")
             variants = hl.read_matrix_table(in_file)

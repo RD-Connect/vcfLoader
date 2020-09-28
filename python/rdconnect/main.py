@@ -366,7 +366,7 @@ def main(sqlContext, sc, configuration, chrom, nchroms, step, somaticFlag):
 
 
 
-    if ("annotateFullBatch" in step):
+    if ("annotateFullSingleBatch" in step):
         print ("step annotate Full Batch")
         print ("source file is " + current_dir)
         

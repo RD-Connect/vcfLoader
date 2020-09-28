@@ -366,8 +366,8 @@ def main(sqlContext, sc, configuration, chrom, nchroms, step, somaticFlag):
 
 
 
-    if ("annotateFull" in step):
-        print ("step annotate Full")
+    if ("annotateFullBatch" in step):
+        print ("step annotate Full Batch")
         print ("source file is " + current_dir)
         
         variants = hl.methods.read_matrix_table(current_dir)

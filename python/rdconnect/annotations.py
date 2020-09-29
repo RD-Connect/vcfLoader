@@ -402,7 +402,7 @@ def intergenic_annotations(hl, annotations):
                transcript_biotype='',
                gene_coding=''),annotations)
 
-def annotateVEP(hl, variants, destinationPath, vepPath, nPartitions):
+def annotateVEP(hl, variants, destinationPath, vepPath, nPartitions, return_matrix=False):
     """ Adds VEP annotations to variants.
          :param HailContext hl: The Hail context
          :param VariantDataset variants: The variants to annotate 
@@ -418,8 +418,12 @@ def annotateVEP(hl, variants, destinationPath, vepPath, nPartitions):
     #                                      rs = varAnnotated.vep.colocated_variants[0].id)
     varAnnotated = varAnnotated.annotate_rows(effs=hl.cond(hl.is_defined(varAnnotated.vep.transcript_consequences),transcript_annotations(hl,varAnnotated.vep.transcript_consequences),intergenic_annotations(hl,varAnnotated.vep.intergenic_consequences)),
                                          rs = varAnnotated.vep.colocated_variants[0].id)
-    varAnnotated.drop("vep") \
-                .write(destinationPath, overwrite=True)
+    varAnnotated = varAnnotated.drop("vep")
+
+    if return_matrix:
+        return varAnnotated
+    else:
+        varAnnotated.write(destinationPath, overwrite=True)
 
 def mt_pred_annotations(hl, annotations):
     """ Annotations for dbNSFP
@@ -474,7 +478,7 @@ def removeDot(hl, n, precision):
     """
     return hl.cond(n.startswith('.'),0.0,truncateAt(hl,hl.float(n),precision))
 
-def annotateDbNSFP(hl, variants, dbnsfpPath, destinationPath):
+def annotateDbNSFP(hl, variants, dbnsfpPath, destinationPath, return_matrix=False):
     """ Adds dbNSFP annotations to variants.
          :param HailContext hl: The Hail context
          :param VariantDataset variants: The variants to annotate
@@ -483,7 +487,7 @@ def annotateDbNSFP(hl, variants, dbnsfpPath, destinationPath):
     """
     dbnsfp = hl.read_table(dbnsfpPath)
     # variants.annotate(
-    variants.annotate_rows(
+    variants = variants.annotate_rows(
         gp1_asn_af=hl.or_else(removeDot(hl,dbnsfp[variants.locus, variants.alleles].Gp1_ASN_AF1000,"6"), 0.0),
         gp1_eur_af=hl.or_else(removeDot(hl,dbnsfp[variants.locus, variants.alleles].Gp1_EUR_AF1000,"6"), 0.0),
         gp1_afr_af=hl.or_else(removeDot(hl,dbnsfp[variants.locus, variants.alleles].Gp1_AFR_AF1000,"6"), 0.0),
@@ -496,10 +500,14 @@ def annotateDbNSFP(hl, variants, dbnsfpPath, destinationPath):
         polyphen2_hvar_score=hl.or_else(hl.max(dbnsfp[variants.locus, variants.alleles].Polyphen2_HVAR_score.split(";").map(lambda x: removeDot(hl,x,"4"))),0.0),
         sift_pred=sift_pred_annotations(hl,dbnsfp[variants.locus, variants.alleles]),
         sift_score=hl.or_else(hl.max(dbnsfp[variants.locus, variants.alleles].SIFT_score.split(";").map(lambda x: removeDot(hl,x,"4"))),0.0),
-        cosmic_id=dbnsfp[variants.locus, variants.alleles].COSMIC_ID) \
-            .write(destinationPath, overwrite=True)
+        cosmic_id=dbnsfp[variants.locus, variants.alleles].COSMIC_ID)
 
-def annotateCADD(hl, variants, annotationPath, destinationPath):
+    if return_matrix:
+        return variants
+    else:
+        variants.write(destinationPath, overwrite=True)
+
+def annotateCADD(hl, variants, annotationPath, destinationPath, return_matrix=False):
     """ Adds CADD annotations to variants.
          :param HailContext hl: The Hail context
          :param VariantDataset variants: The variants to annotate
@@ -511,8 +519,12 @@ def annotateCADD(hl, variants, annotationPath, destinationPath):
              .key_by("locus","alleles")
     # variants.annotate(cadd_phred=cadd[variants.locus, variants.alleles].info.CADD13_PHRED[cadd[variants.locus, variants.alleles].a_index-1]) \
     #        .write(destinationPath,overwrite=True)
-    variants.annotate_rows(cadd_phred=cadd[variants.locus, variants.alleles].info.CADD13_PHRED[cadd[variants.locus, variants.alleles].a_index-1]) \
-            .write(destinationPath,overwrite=True)
+    variants = variants.annotate_rows(cadd_phred=cadd[variants.locus, variants.alleles].info.CADD13_PHRED[cadd[variants.locus, variants.alleles].a_index-1])
+
+    if return_matrix:
+        return variants
+    else:
+        variants.write(destinationPath, overwrite=True)
 
 def clinvar_filtering(hl, annotation, is_filter_field):
     """ Returns the clinvar annotations to apply
@@ -558,7 +570,7 @@ def clinvar_preprocess(hl, annotation, is_filter_field):
     preprocessed = hl.map(lambda y: hl.cond(y[0] == '_', y[1:], y), preprocessed)
     return clinvar_filtering(hl,preprocessed,is_filter_field)
 
-def annotateInternalFreq(hl, variants, annotationPath, destinationPath):
+def annotateInternalFreq(hl, variants, annotationPath, destinationPath, return_matrix=False):
     """ Adds Internal Allele Frequency annotations to variants.
          :param HailContext hl: The Hail context
          :param VariantDataset variants: The variants to annotate
@@ -575,10 +587,14 @@ def annotateInternalFreq(hl, variants, annotationPath, destinationPath):
         internalFreqNum = hl.cond(hl.is_defined(int_freq[variants.locus, variants.alleles].num), int_freq[variants.locus, variants.alleles].num, 0.0),
         internalFreqDem = hl.cond(hl.is_defined(int_freq[variants.locus, variants.alleles].dem), int_freq[variants.locus, variants.alleles].dem, 0.0),
     )
-    variants.write(destinationPath, overwrite = True)
-    print('[annotateInternalFreq] - destinationPath: {0}'.format(destinationPath))
+
+    if return_matrix:
+        return variants
+    else:
+        print('[annotateInternalFreq] - destinationPath: {0}'.format(destinationPath))
+        variants.write(destinationPath, overwrite = True)
     
-def annotateClinvar(hl, variants, annotationPath, destinationPath):
+def annotateClinvar(hl, variants, annotationPath, destinationPath, return_matrix=False):
     """ Adds Clinvar annotations to variants.
          :param HailContext hl: The Hail context
          :param VariantDataset variants: The variants to annotate
@@ -589,15 +605,19 @@ def annotateClinvar(hl, variants, annotationPath, destinationPath):
                 .rows() \
                 .key_by("locus","alleles")
     # variants.annotate(
-    variants.annotate_rows(
+    variants = variants.annotate_rows(
         clinvar_id=hl.cond(hl.is_defined(clinvar[variants.locus, variants.alleles].info.CLNSIG[clinvar[variants.locus, variants.alleles].a_index-1]),clinvar[variants.locus, variants.alleles].rsid,clinvar[variants.locus, variants.alleles].info.CLNSIGINCL[0].split(':')[0]),
         clinvar_clnsigconf=hl.delimit(clinvar[variants.locus, variants.alleles].info.CLNSIGCONF),
         clinvar_clnsig=hl.cond(hl.is_defined(clinvar[variants.locus, variants.alleles].info.CLNSIG[clinvar[variants.locus, variants.alleles].a_index-1]),hl.delimit(clinvar_preprocess(hl,clinvar[variants.locus, variants.alleles].info.CLNSIG,False),"|"), hl.delimit(clinvar_preprocess(hl,clinvar[variants.locus, variants.alleles].info.CLNSIGINCL,False),"|")),
         clinvar_filter=hl.cond(hl.is_defined(clinvar[variants.locus, variants.alleles].info.CLNSIG[clinvar[variants.locus, variants.alleles].a_index-1]),clinvar_preprocess(hl,clinvar[variants.locus, variants.alleles].info.CLNSIG,True), clinvar_preprocess(hl,clinvar[variants.locus, variants.alleles].info.CLNSIGINCL,True))
-    ) \
-            .write(destinationPath, overwrite=True)
+    )
+
+    if return_matrix:
+        return variants
+    else:
+        variants.write(destinationPath, overwrite=True)
     
-def annotateGnomADEx(hl, variants, annotationPath, destinationPath):
+def annotateGnomADEx(hl, variants, annotationPath, destinationPath, return_matrix=False):
     """ Adds gnomAD Ex annotations to a dataset. 
          :param HailContext hl: The Hail context
          :param VariantDataset variants: The variants to annotate
@@ -608,7 +628,7 @@ def annotateGnomADEx(hl, variants, annotationPath, destinationPath):
                .rows() \
                .key_by("locus","alleles")
     #variants.annotate(
-    variants.annotate_rows(
+    variants = variants.annotate_rows(
         gnomad_af=hl.cond(hl.is_defined(gnomad[variants.locus, variants.alleles].info.gnomAD_Ex_AF[gnomad[variants.locus, variants.alleles].a_index-1]),gnomad[variants.locus, variants.alleles].info.gnomAD_Ex_AF[gnomad[variants.locus, variants.alleles].a_index-1],0.0),
         gnomad_ac=hl.cond(hl.is_defined(gnomad[variants.locus, variants.alleles].info.gnomAD_Ex_AC[gnomad[variants.locus, variants.alleles].a_index-1]),gnomad[variants.locus, variants.alleles].info.gnomAD_Ex_AC[gnomad[variants.locus, variants.alleles].a_index-1],0.0),
         gnomad_an=hl.cond(hl.is_defined(gnomad[variants.locus, variants.alleles].info.gnomAD_Ex_AN),gnomad[variants.locus, variants.alleles].info.gnomAD_Ex_AN,0.0),
@@ -616,7 +636,11 @@ def annotateGnomADEx(hl, variants, annotationPath, destinationPath):
         gnomad_ac_popmax=hl.cond(hl.is_defined(gnomad[variants.locus, variants.alleles].info.gnomAD_Ex_AC_POPMAX[gnomad[variants.locus, variants.alleles].a_index-1]),gnomad[variants.locus, variants.alleles].info.gnomAD_Ex_AC_POPMAX[gnomad[variants.locus, variants.alleles].a_index-1],0.0),
         gnomad_an_popmax=hl.cond(hl.is_defined(gnomad[variants.locus, variants.alleles].info.gnomAD_Ex_AN_POPMAX[gnomad[variants.locus, variants.alleles].a_index-1]),gnomad[variants.locus, variants.alleles].info.gnomAD_Ex_AN_POPMAX[gnomad[variants.locus, variants.alleles].a_index-1],0.0),
         gnomad_filter=hl.cond(gnomad[variants.locus, variants.alleles].info.gnomAD_Ex_filterStats == 'Pass','PASS','non-PASS')
-    ).write(destinationPath, overwrite=True)
+    )
+    if return_matrix:
+        return variants
+    else:
+        variants.write(destinationPath, overwrite=True)
     
 # def annotateExAC(hl, variants, annotationPath, destinationPath):
 #     """ Adds ExAC annotations to a dataset. 
@@ -640,7 +664,7 @@ def CGIFilter(hl, filter_field):
             .or_missing())
 
     
-def annotateCGI(hl, variants, CGIPath, destinationPath):
+def annotateCGI(hl, variants, CGIPath, destinationPath, return_matrix=False):
     """ Adds CGI annotations to variants.
          :param HailContext hl: The Hail context
          :param VariantDataset variants: The variants to annotate
@@ -648,7 +672,7 @@ def annotateCGI(hl, variants, CGIPath, destinationPath):
          :param string destinationPath: Path were the new annotated dataset can be found
     """
     cgi = hl.read_table(CGIPath)
-    variants.annotate(
+    variants = variants.annotate(
         gene=cgi[variants.locus, variants.alleles].gene,
         transcript=cgi[variants.locus, variants.alleles].transcript,
         protein_change=cgi[variants.locus, variants.alleles].protein_change,
@@ -657,5 +681,8 @@ def annotateCGI(hl, variants, CGIPath, destinationPath):
         consequence=cgi[variants.locus, variants.alleles].consequence,
         known_oncogenic_source=cgi[variants.locus, variants.alleles].known_oncogenic_source,
         known_oncogenic_reference=cgi[variants.locus, variants.alleles].known_oncogenic_reference
-    ) \
-        .write(destinationPath,overwrite=True)
+    )
+    if return_matrix:
+        return variants
+    else:
+        variants.write(destinationPath,overwrite=True)
